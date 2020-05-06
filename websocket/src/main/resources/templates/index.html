@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width,maximum-scale=0.7,viewport-fit=cover,user-scalable=no">
+    <title th:text="${name}"></title>
+    <link rel="shortcut icon" href="tank/image/favicon.png">
+    <link rel="stylesheet" type="text/css" href="tank/css/style.css">
+</head>
+
+<body>
+<div id="wrapper">
+    <canvas id="canvas">不支持画布</canvas>
+    <input id="input" type="text" placeholder="请输入名字" class="input-name"/>
+    <button id="button1" class="connect" style="LEFT: 39.5%;">键盘控制</button>
+    <button id="button2" class="connect" style="LEFT: 50.5%;">触屏控制</button>
+    <div class="select-window" id="room-list" style="visibility: hidden;">
+    </div>
+</div>
+<script src="jquery.js"></script>
+<script src="sockjs.js"></script>
+<script src="stomp.js"></script>
+<script src="tank/js/resource.js"></script>
+<script src="tank/js/common.js"></script>
+<script src="tank/js/item.js"></script>
+<script src="tank/js/stage.js"></script>
+<script src="tank/js/game.js"></script>
+<script src="tank/js/menu.js"></script>
+<script src="tank/js/index.js"></script>
+</body>
+</html>
