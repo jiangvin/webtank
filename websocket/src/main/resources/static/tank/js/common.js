@@ -362,6 +362,9 @@ Common.inputMessageEvent = function (inputFocus) {
 Common.addMessage = function (context, color) {
     Resource.getGame().addMessage(context, color);
 };
+Common.updateStatus = function (status, message) {
+    Resource.getGame().updateStatus(status, message);
+};
 
 //stomp connect
 Common.getStompStatus = function () {
@@ -430,7 +433,7 @@ Common.getRequest = function (url, callBack) {
         callBack(result.data);
     });
 };
-Common.postRequest = function (url, callback, body, headers) {
+Common.postRequest = function (url, headers, body, callback) {
     $.ajax({
         url: url,
         type: 'post',

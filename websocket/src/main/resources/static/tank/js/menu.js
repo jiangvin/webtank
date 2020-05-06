@@ -17,7 +17,7 @@
 
         //开始初始化
         this.stage = game.createStage({
-            status : 1
+            status: 1
         });
 
         this.tankLogo = this.stage.createTank({
@@ -43,47 +43,47 @@
 
         //游戏名
         this.stage.createItem({
-            draw:function(context) {
+            draw: function (context) {
                 context.font = 'bold 55px Helvetica';
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
                 context.fillStyle = '#FFF';
-                context.fillText('Tank World',Common.width() / 2,40);
+                context.fillText('Tank World', Common.width() / 2, 40);
             }
         });
 
         //提示信息
         this.stage.createItem({
-            id:"info1",
-            draw:function(context) {
+            id: "info1",
+            draw: function (context) {
                 context.font = '24px Helvetica';
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
                 context.fillStyle = '#949494';
-                context.fillText('键盘: 上下左右/空格/回车控制游戏',Common.width() / 2,Common.height() * .6);
+                context.fillText('键盘: 上下左右/空格/回车控制游戏', Common.width() / 2, Common.height() * .6);
             }
         });
 
         this.stage.createItem({
-            id:"info2",
-            draw:function(context) {
+            id: "info2",
+            draw: function (context) {
                 context.font = '24px Helvetica';
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
                 context.fillStyle = '#949494';
-                context.fillText('触控: 触控屏幕控制游戏',Common.width() / 2,Common.height() * .6 + 30);
+                context.fillText('触控: 触控屏幕控制游戏', Common.width() / 2, Common.height() * .6 + 30);
             }
         });
 
         return this.stage;
     };
 
-    Menu.getTankLogo = function() {
+    Menu.getTankLogo = function () {
         return this.tankLogo;
     };
 
 //删除提示信息
-    Menu.deleteInfo = function() {
+    Menu.deleteInfo = function () {
         delete this.stage.items["info1"];
         delete this.stage.items["info2"];
     };
@@ -126,7 +126,7 @@
 
             const pageInfo = generatePageInfo(thisMenu);
             if (pageInfo.currentPage >= pageInfo.totalPage) {
-                Common.addMessage("这已经是最后一页","#FF0");
+                Common.addMessage("这已经是最后一页", "#FF0");
             } else {
                 thisMenu.roomStart += thisMenu.roomLimit;
             }
@@ -137,13 +137,13 @@
         const btnFront = document.createElement('button');
         btnFront.textContent = "上一页";
         btnFront.className = "right";
-        btnFront.onclick = function() {
+        btnFront.onclick = function () {
             if (!thisMenu.roomCount) {
                 return;
             }
 
             if (generatePageInfo(thisMenu).currentPage <= 1) {
-                Common.addMessage("这已经是第一页","#FF0");
+                Common.addMessage("这已经是第一页", "#FF0");
             } else {
                 thisMenu.roomStart -= thisMenu.roomLimit;
             }
@@ -162,7 +162,7 @@
 
     const queryRoomList = function (menu) {
         Common.getRequest('/user/getRooms?start=' + menu.roomStart + "&limit=" + menu.roomLimit, function (data) {
-            updatePageInfo(menu,data.roomCount);
+            updatePageInfo(menu, data.roomCount);
 
             //删除之前的元素
             const buttonChild = document.getElementById("button-label");
@@ -179,7 +179,7 @@
             data.roomList.forEach(function (room) {
                 let div = document.createElement('div');
                 div.className = "select-item";
-                selectWindow.insertBefore(div,buttonChild);
+                selectWindow.insertBefore(div, buttonChild);
 
                 const input = document.createElement('input');
                 input.type = 'radio';
@@ -193,7 +193,7 @@
                 div.appendChild(input);
 
                 const label = document.createElement('label');
-                label.setAttribute("for",input.id);
+                label.setAttribute("for", input.id);
                 label.className = "radio-label";
                 label.textContent = "房间名:" + room.roomId
                     + " 地图名:" + room.mapId
@@ -234,7 +234,7 @@
         });
     };
 
-    const updatePageInfo = function (menu,roomCount) {
+    const updatePageInfo = function (menu, roomCount) {
         if (roomCount) {
             menu.roomCount = roomCount;
         }
@@ -255,7 +255,7 @@
     };
 
     const generateWindowWidth = function (selectWindow) {
-        let width =  65000 / Common.width();
+        let width = 65000 / Common.width();
         if (width < 50) {
             width = 50;
         }
@@ -293,9 +293,9 @@
         div.appendChild(input);
         selectWindow.appendChild(div);
 
-        selectWindow.appendChild(createRoomSelect("地图:",data,"selectMap"));
-        selectWindow.appendChild(createRoomSelect("类型:",["PVP","PVE","EVE"],"selectType"));
-        document.getElementById("selectType").onchange = function() {
+        selectWindow.appendChild(createRoomSelect("地图:", data, "selectMap"));
+        selectWindow.appendChild(createRoomSelect("类型:", ["PVP", "PVE", "EVE"], "selectType"));
+        document.getElementById("selectType").onchange = function () {
             const selectGroup = $('#selectGroup');
             selectGroup.find('option').remove().end();
             switch ($('#selectType').val()) {
@@ -313,7 +313,7 @@
                     break;
             }
         };
-        selectWindow.appendChild(createRoomSelect("队伍:",["红队","蓝队","观看"],"selectGroup"));
+        selectWindow.appendChild(createRoomSelect("队伍:", ["红队", "蓝队", "观看"], "selectGroup"));
 
         const divButton = document.createElement('div');
         divButton.className = "select-item";
@@ -322,20 +322,20 @@
         const buttonCommit = document.createElement("button");
         buttonCommit.textContent = "确定";
         buttonCommit.className = "action";
-        buttonCommit.onclick = function() {
+        buttonCommit.onclick = function () {
             commitRoomToServer();
         };
         divButton.appendChild(buttonCommit);
         const buttonCancel = document.createElement("button");
         buttonCancel.textContent = "返回";
         buttonCancel.className = "action";
-        buttonCancel.onclick = function() {
+        buttonCancel.onclick = function () {
             Menu.showRoomList();
         };
         divButton.appendChild(buttonCancel);
     };
 
-    const createRoomSelect = function (typeText,options,selectId) {
+    const createRoomSelect = function (typeText, options, selectId) {
         const div = document.createElement('div');
         div.className = "select-item";
         const label = document.createElement('label');
@@ -352,12 +352,28 @@
     const commitRoomToServer = function () {
         const roomId = $('#input-room-name').val();
         if (roomId === "") {
-            Common.addMessage("房间号不能为空!","#F00");
+            Common.addMessage("房间号不能为空!", "#F00");
             return;
         }
 
-        Common.getRequest("/user/checkRoomName?name=" + roomId,function () {
-
+        Common.getRequest("/user/checkRoomName?name=" + roomId, function () {
+            const client = Common.getStompInfo();
+            const mapId = $('#selectMap').val();
+            const roomType = $('#selectType').val();
+            Common.postRequest("/user/createRoom",
+                {
+                    "name": client.username,
+                    "socketSessionId": client.socketSessionId
+                },
+                {
+                    "roomId": roomId,
+                    "mapId": mapId,
+                    "roomType": roomType
+                },
+                function () {
+                    Common.updateStatus(2, "房间创建中...");
+                }
+            )
         })
     }
 
