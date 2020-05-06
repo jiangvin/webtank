@@ -16,12 +16,12 @@
 			}
 
         	//检测名字是否重复
-			Common.getRequest('/user/checkName?name=' + name,function (data) {
+			Common.getRequest('/user/checkName?name=' + name,function () {
 				//设定是否为触控模式
 				Common.setTouch(e.currentTarget.id === "button2");
 
 				//开始连接
-				game.updateStatus(2,"等待连接中...");
+				Status.setStatus(Status.getStatusWaitUsers(),"等待连接中...");
 				Common.stompConnect(name,function () {
 					updateAfterConnect(name);
 				});
@@ -58,10 +58,11 @@
 
 			//注册事件
 			game.addMessageEvent("USERS", function () {
-				if (game.getStatus() !== 2) {
+				if (Status.getStatusValue() !== Status.getStatusWaitUsers()) {
 					return;
 				}
-				game.updateStatus(3,"等待同步数据...")
+
+				Status.setStatus(Status.getStatusWaitTanks(),"等待同步数据...");
 				Common.sendStompMessage(
 					{
 						"x": tankLogo.x,
@@ -72,10 +73,11 @@
 					}, "ADD_TANK");
 			});
 			game.addMessageEvent("TANKS", function () {
-				if (game.getStatus() !== 3) {
+				if (Status.getStatusValue() !== Status.getStatusWaitTanks()) {
 					return;
 				}
-				game.updateStatus(1);
+
+				Status.setStatus(Status.getStatusNormal());
 				Menu.getTankLogo().status = 1;
 				//显示房间列表
 				Menu.showRoomList();

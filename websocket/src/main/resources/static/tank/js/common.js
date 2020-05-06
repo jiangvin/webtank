@@ -362,9 +362,6 @@ Common.inputMessageEvent = function (inputFocus) {
 Common.addMessage = function (context, color) {
     Resource.getGame().addMessage(context, color);
 };
-Common.updateStatus = function (status, message) {
-    Resource.getGame().updateStatus(status, message);
-};
 
 //stomp connect
 Common.getStompStatus = function () {

@@ -378,7 +378,8 @@
                     "creatorTeamType": group,
                 },
                 function () {
-                    Common.updateStatus(2, "房间创建中...");
+                    document.getElementById('room-list').style.visibility = 'hidden';
+                    Status.setStatus(Status.getStatusPause(),"房间创建中...");
                 }
             )
         })

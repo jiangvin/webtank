@@ -1,4 +1,5 @@
 'use strict';
+
 /*
 * 小型游戏引擎
 */
@@ -6,16 +7,8 @@
 function Game() {
     const thisGame = this;
 
-    // 状态
-    // 0:关闭
-    // 1:正常 (大于1为自定义状态)
-    // 2:发送READY并等待USERS
-    // 3:发送ADD_TANK并等待TANKS消息
-    let _status = 1;
-    let _statusMessage = "暂停";  //当状态大于1时显示的提示字串
-
     //控制
-    const _control = {lastOrientation:-1, lastAction:-1};
+    const _control = {lastOrientation: -1, lastAction: -1};
 
     //Game的画布初始化，要放在前面
     const _canvas = Common.getCanvas();
@@ -70,34 +63,23 @@ function Game() {
         }
     };
 
-    //状态相关
-    this.updateStatus = function (status,statusMessage) {
-        _status = status;
-        if (statusMessage) {
-            _statusMessage = statusMessage;
-        }
-    };
-    this.getStatus = function () {
-        return _status;
-    };
-
     //控制相关
     this.controlEvent = function (event) {
         switch (event) {
             case "Up":
-                thisGame.controlUpdateToServer(0,1);
+                thisGame.controlUpdateToServer(0, 1);
                 break;
             case "Down":
-                thisGame.controlUpdateToServer(1,1);
+                thisGame.controlUpdateToServer(1, 1);
                 break;
             case "Left":
-                thisGame.controlUpdateToServer(2,1);
+                thisGame.controlUpdateToServer(2, 1);
                 break;
             case "Right":
-                thisGame.controlUpdateToServer(3,1);
+                thisGame.controlUpdateToServer(3, 1);
                 break;
             case "Stop":
-                thisGame.controlUpdateToServer(null,0);
+                thisGame.controlUpdateToServer(null, 0);
                 break;
             default:
                 break;
@@ -118,12 +100,12 @@ function Game() {
             return;
         }
 
-        _control.lastOrientation = orientation != null ? orientation :_control.lastOrientation;
+        _control.lastOrientation = orientation != null ? orientation : _control.lastOrientation;
         _control.lastAction = action != null ? action : _control.lastAction;
         Common.sendStompMessage({
             orientation: _control.lastOrientation,
             action: _control.lastAction
-        },"UPDATE_TANK_CONTROL");
+        }, "UPDATE_TANK_CONTROL");
     };
 
     //动画相关
@@ -134,12 +116,12 @@ function Game() {
 
         //开启运算
         _updateHandler = setInterval(function () {
-            switch (_status) {
-                case 0:
+            switch (Status.getStatusValue()) {
+                case Status.getStatusClose():
                     //游戏结束
                     thisGame.stop();
                     break;
-                case 1:
+                case Status.getStatusNormal():
                     //游戏正常运行
                     const stage = thisGame.currentStage();
                     stage.update();
@@ -198,11 +180,11 @@ function Game() {
         return stage;
     };
     this.currentStage = function () {
-      return _stages[_index];
+        return _stages[_index];
     };
 
     //消息类
-    this.addMessage = function (context,color) {
+    this.addMessage = function (context, color) {
         let message = {};
         message.date = new Date();
         message.lifetime = 300; //显示时间300帧，5秒
@@ -221,7 +203,7 @@ function Game() {
             }
             context.globalAlpha = (message.lifetime / 300);
             context.fillStyle = message.color;
-            context.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context,25,height);
+            context.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context, 25, height);
             height -= 18;
         });
 
@@ -234,7 +216,7 @@ function Game() {
     };
 
     //事件类
-    this.addTimeEvent = function (eventType,callBack,timeout,ignoreLog) {
+    this.addTimeEvent = function (eventType, callBack, timeout, ignoreLog) {
         let event = {};
         event.eventType = eventType;
         event.callback = callBack;
@@ -242,7 +224,7 @@ function Game() {
         event.ignoreLog = ignoreLog;
         _timeEvents.push(event);
     };
-    this.addMessageEvent = function (eventType,callBack) {
+    this.addMessageEvent = function (eventType, callBack) {
         //消息已存在
         const messageEvent = {};
         if (_messageEvents[eventType]) {
@@ -252,17 +234,17 @@ function Game() {
         _messageEvents[eventType] = messageEvent;
     };
     this.addConnectCheckEvent = function () {
-        const callBack = function() {
+        const callBack = function () {
             if (Common.getStompStatus() === true) {
                 thisGame.addTimeEvent("CONNECT_CHECK", callBack, 120, true);
             } else {
-                thisGame.updateStatus(99,"与服务器断开！");
+                Status.setStatus(Status.getStatusPause(), "与服务器断开！");
 
                 //TODO 断线重连
                 //5秒后关闭游戏
                 thisGame.addTimeEvent("CLOSE", function () {
-                    thisGame.updateStatus(0);
-                },60 * 5);
+                    Status.setStatus(Status.getStatusClose());
+                }, 60 * 5);
             }
         };
 
@@ -280,7 +262,7 @@ function Game() {
                 }
                 event.callback();
                 //删除事件
-                _timeEvents.splice(i,1);
+                _timeEvents.splice(i, 1);
                 --i;
             }
         }
@@ -293,7 +275,7 @@ function Game() {
         context.textAlign = 'right';
         context.textBaseline = 'bottom';
         context.fillStyle = '#AAA';
-        context.fillText('© Created by Vin (WX: Jiang_Vin)',Common.width() - 12,Common.height() - 5);
+        context.fillText('© Created by Vin (WX: Jiang_Vin)', Common.width() - 12, Common.height() - 5);
 
         //帧率信息
         context.textAlign = 'left';
@@ -303,20 +285,22 @@ function Game() {
         }
         context.fillText(text, 10, Common.height() - 5);
 
-        //如果暂停，显示暂停信息
-        if (_status !== 1) {
+        //是否显示蒙蔽
+        if (Status.getShowMask()) {
             //先盖一层蒙版
             context.globalAlpha = 0.5;
             context.fillStyle = '#000000';
             context.fillRect(0, 0, Common.width(), Common.height());
             context.globalAlpha = 1;
+        }
 
-            //再显示文字
+        //是否显示提示信息
+        if (Status.getMessage()) {
             context.font = 'bold 55px Helvetica';
             context.textAlign = 'center';
             context.textBaseline = 'middle';
             context.fillStyle = '#FFF';
-            context.fillText(_statusMessage,Common.width() / 2,Common.height() * .4);
+            context.fillText(Status.getMessage(), Common.width() / 2, Common.height() * .4);
         }
     };
     //触屏提示圆
@@ -331,7 +315,7 @@ function Game() {
         context.globalAlpha = 0.1;
         context.fillStyle = '#FFF';
         context.beginPath();
-        context.arc(touchInfo.centerX, touchInfo.centerY, touchInfo.radius,0,2 * Math.PI);
+        context.arc(touchInfo.centerX, touchInfo.centerY, touchInfo.radius, 0, 2 * Math.PI);
         context.closePath();
         context.fill();
 
@@ -340,21 +324,21 @@ function Game() {
 
         //内圆
         context.beginPath();
-        context.arc(x, y, touchInfo.radius / 4,0,2 * Math.PI);
+        context.arc(x, y, touchInfo.radius / 4, 0, 2 * Math.PI);
         context.closePath();
         context.fill();
 
         //右圆
         context.beginPath();
         context.arc(touchInfo.rightCenterX, touchInfo.rightCenterY,
-            touchInfo.rightRadius, 0,2 * Math.PI);
+            touchInfo.rightRadius, 0, 2 * Math.PI);
         context.closePath();
         context.fill();
 
         //喇叭
         context.beginPath();
         context.arc(touchInfo.hornCenterX, touchInfo.hornCenterY,
-            touchInfo.hornRadius, 0,2 * Math.PI);
+            touchInfo.hornRadius, 0, 2 * Math.PI);
         context.closePath();
         context.fill();
 
@@ -369,7 +353,7 @@ function Game() {
     };
 
     //初始化游戏引擎
-    this.init = function() {
+    this.init = function () {
         this.start();
     };
 }
