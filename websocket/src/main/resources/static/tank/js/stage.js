@@ -4,7 +4,6 @@ function Stage(params) {
     this.params = params||{};
     this.settings = {
         index:0,                        //布景索引
-        status:0,						//布景状态,0表示未激活/结束,1表示正常,之后为自定义暂停状态
         items:[],						//对象队列
         controlEvent:function(){}
     };
@@ -50,19 +49,9 @@ function Stage(params) {
         }
     };
 
-    //更新相关
-    this.canUpdate = function() {
-        return this.status === 1;
-    };
     this.update = function() {
-        if (!this.canUpdate()) {
-            return;
-        }
-
         for (let k in this.items) {
-            if (this.items[k].canUpdate()) {
-                this.items[k].update();
-            }
+            this.items[k].update();
         }
     };
 

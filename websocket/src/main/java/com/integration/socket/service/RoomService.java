@@ -57,7 +57,7 @@ public class RoomService {
         return roomMap.get(roomName);
     }
 
-    void create(RoomDto roomDto, UserBo creator) {
+    StageRoom create(RoomDto roomDto, UserBo creator) {
         if (roomNameExists(roomDto.getRoomId())) {
             throw new CustomException("房间名重复:" + roomDto.getRoomId());
         }
@@ -78,8 +78,8 @@ public class RoomService {
 
         log.info("room:{} will be created", roomDto);
         StageRoom stageRoom = new StageRoom(roomDto);
-        stageRoom.add(creator, roomDto.getCreatorTeamType());
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
+        return stageRoom;
     }
 }

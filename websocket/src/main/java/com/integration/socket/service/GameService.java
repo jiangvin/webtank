@@ -116,7 +116,13 @@ public class GameService {
             throw new CustomException("用户信息验证不通过!");
         }
 
-        roomService.create(roomDto, userBo);
+        StageRoom room = roomService.create(roomDto, userBo);
+
+        //remove from old stage
+        currentStage(userBo).remove(userBo.getUsername());
+
+        //add into new stage
+        room.add(userBo, roomDto.getCreatorTeamType());
     }
 
     @Scheduled(fixedDelay = 17)

@@ -27,7 +27,6 @@
             orientation: 3,
             scale: 1.5,
             timeout: 30,
-            status: 0,
             animationStatus: -0.05,
             animation: function () {
                 //logo animation

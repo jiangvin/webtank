@@ -78,7 +78,6 @@
 				}
 
 				Status.setStatus(Status.getStatusNormal());
-				Menu.getTankLogo().status = 1;
 				//显示房间列表
 				Menu.showRoomList();
 			});
