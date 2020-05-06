@@ -359,6 +359,10 @@ Common.inputMessageEvent = function (inputFocus) {
     }
 };
 
+Common.addMessage = function (context, color) {
+    Resource.getGame().addMessage(context, color);
+};
+
 //stomp connect
 Common.getStompStatus = function () {
     const stompClient = Resource.getStompClient();
@@ -382,7 +386,7 @@ Common.stompConnect = function (name, callback) {
     const socket = new SockJS('/websocket-simple?name=' + name);
     const stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
-        Resource.getGame().addMessage("网络连接中: " + frame, "#ffffff");
+        Common.addMessage("网络连接中: " + frame, "#ffffff");
 
         // 客户端订阅消息, 公共消息和私有消息
         stompClient.subscribe('/topic/send', function (response) {
@@ -412,25 +416,38 @@ Common.sendStompMessage = function (message, messageType, sendTo) {
             "sendTo": sendTo
         }));
 };
-Common.getStompInfo = function () {
-    const stompInfo = {};
 
-    return stompInfo;
-};
-
-//工具类
+//tools
 Common.distance = function (x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 };
 Common.getRequest = function (url, callBack) {
     $.getJSON(url, function (result) {
         if (!result.success) {
-            Resource.getGame().addMessage(result.message, "#ff0000");
+            Common.addMessage(result.message, "#ff0000");
             return;
         }
         callBack(result.data);
     });
 };
+Common.postRequest = function (url, callback, body, headers) {
+    $.ajax({
+        url: url,
+        type: 'post',
+        data: body,
+        headers: headers,
+        dataType: 'json',
+        success: function (result) {
+            if (!result.success) {
+                Common.addMessage(result.message, "#ff0000");
+                return;
+            }
+            callback(result.data);
+        }
+    });
+};
+
+//expand
 Date.prototype.format = function (fmt) {
     const o = {
         "M+": this.getMonth() + 1,               //月份

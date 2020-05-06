@@ -126,7 +126,7 @@
 
             const pageInfo = generatePageInfo(thisMenu);
             if (pageInfo.currentPage >= pageInfo.totalPage) {
-                Resource.getGame().addMessage("这已经是最后一页","#FF0");
+                Common.addMessage("这已经是最后一页","#FF0");
             } else {
                 thisMenu.roomStart += thisMenu.roomLimit;
             }
@@ -143,7 +143,7 @@
             }
 
             if (generatePageInfo(thisMenu).currentPage <= 1) {
-                Resource.getGame().addMessage("这已经是第一页","#FF0");
+                Common.addMessage("这已经是第一页","#FF0");
             } else {
                 thisMenu.roomStart -= thisMenu.roomLimit;
             }
@@ -352,7 +352,7 @@
     const commitRoomToServer = function () {
         const roomId = $('#input-room-name').val();
         if (roomId === "") {
-            Resource.getGame().addMessage("房间号不能为空!","#F00");
+            Common.addMessage("房间号不能为空!","#F00");
             return;
         }
 

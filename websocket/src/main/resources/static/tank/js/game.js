@@ -55,10 +55,10 @@ function Game() {
 
         switch (messageDto.messageType) {
             case "USER_MESSAGE":
-                thisGame.addMessage(messageDto.message, "#FFF");
+                Common.addMessage(messageDto.message, "#FFF");
                 break;
             case "SYSTEM_MESSAGE":
-                thisGame.addMessage(messageDto.message, "#FF0");
+                Common.addMessage(messageDto.message, "#FF0");
                 break;
             case "USERS":
                 _users = messageDto.message;

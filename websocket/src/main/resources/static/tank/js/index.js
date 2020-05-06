@@ -11,7 +11,7 @@
 
         	//检测是否输入名字
         	if (name === "") {
-        		game.addMessage("名字不能为空!","#ff0000");
+				Common.addMessage("名字不能为空!","#ff0000");
         		return;
 			}
 
