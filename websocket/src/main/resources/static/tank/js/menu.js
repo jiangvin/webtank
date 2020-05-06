@@ -25,13 +25,12 @@
             y: Common.height() * .45,
             speed: 1,
             orientation: 3,
-            scale: 2.0,
+            scale: 1.5,
             timeout: 30,
             status: 0,
-            animationStatus: -0.1,
+            animationStatus: -0.05,
             animation: function () {
-
-                //模拟弹射效果
+                //logo animation
                 this.scale += this.animationStatus;
                 if (this.timeout === 20 || this.timeout === 10) {
                     this.animationStatus = 0.05;
