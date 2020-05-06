@@ -1,6 +1,7 @@
 package com.integration.socket.stage;
 
 import com.integration.socket.model.RoomType;
+import com.integration.socket.model.TeamType;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
@@ -57,8 +58,9 @@ public class StageRoom extends BaseStage {
         userMap.remove(username);
     }
 
-    public void add(UserBo userBo) {
+    public void add(UserBo userBo, TeamType teamType) {
         userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
+        userBo.setTeamType(teamType);
     }
 }

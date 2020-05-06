@@ -1,7 +1,5 @@
 package com.integration.socket.model;
 
-import org.springframework.core.ParameterizedTypeReference;
-
 /**
  * @author 蒋文龙(Vin)
  * @description

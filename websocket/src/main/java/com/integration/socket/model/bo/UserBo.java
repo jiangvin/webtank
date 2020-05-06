@@ -1,5 +1,6 @@
 package com.integration.socket.model.bo;
 
+import com.integration.socket.model.TeamType;
 import lombok.Data;
 import lombok.NonNull;
 
@@ -16,10 +17,15 @@ public class UserBo {
     @NonNull private String username;
     @NonNull private String socketSessionId;
 
+    final private List<String> subscribeList = new ArrayList<>();
+
     /**
      * 用户当前所在的房间号
      */
     private String roomId;
 
-    final private List<String> subscribeList = new ArrayList<>();
+    /**
+     * 用户在房间号内的团队
+     */
+    private TeamType teamType;
 }

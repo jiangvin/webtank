@@ -1,6 +1,7 @@
 package com.integration.socket.model.dto;
 
 import com.integration.socket.model.RoomType;
+import com.integration.socket.model.TeamType;
 import com.integration.socket.stage.StageRoom;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class RoomDto {
     private String creator;
     private String mapId;
     private RoomType roomType;
+    private TeamType creatorTeamType;
     private Integer userCount;
 
     public static RoomDto convert(StageRoom stageRoom) {

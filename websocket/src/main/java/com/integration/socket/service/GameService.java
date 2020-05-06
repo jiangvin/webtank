@@ -87,6 +87,7 @@ public class GameService {
             return;
         }
 
+        log.info("room:{} will be removed", room.getRoomId());
         roomService.remove(room);
     }
 

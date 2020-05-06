@@ -300,16 +300,16 @@
             selectGroup.find('option').remove().end();
             switch ($('#selectType').val()) {
                 case "PVP":
-                    selectGroup.append('<option value="red">红队</option>');
-                    selectGroup.append('<option value="blue">蓝队</option>');
-                    selectGroup.append('<option value="view">观看</option>');
+                    selectGroup.append('<option value="RED">红队</option>');
+                    selectGroup.append('<option value="BLUE">蓝队</option>');
+                    selectGroup.append('<option value="VIEW">观看</option>');
                     break;
                 case "PVE":
-                    selectGroup.append('<option value="player">玩家</option>');
-                    selectGroup.append('<option value="view">观看</option>');
+                    selectGroup.append('<option value="RED">玩家</option>');
+                    selectGroup.append('<option value="VIEW">观看</option>');
                     break;
                 case "EVE":
-                    selectGroup.append('<option value="view">观看</option>');
+                    selectGroup.append('<option value="VIEW">观看</option>');
                     break;
             }
         };
@@ -360,6 +360,7 @@
             const client = Common.getStompInfo();
             const mapId = $('#selectMap').val();
             const roomType = $('#selectType').val();
+            const group = $('#selectGroup').val();
             Common.postRequest("/user/createRoom",
                 {
                     "name": client.username,
@@ -368,7 +369,8 @@
                 {
                     "roomId": roomId,
                     "mapId": mapId,
-                    "roomType": roomType
+                    "roomType": roomType,
+                    "creatorTeamType": group,
                 },
                 function () {
                     Common.updateStatus(2, "房间创建中...");

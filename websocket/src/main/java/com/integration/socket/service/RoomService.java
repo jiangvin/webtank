@@ -66,11 +66,19 @@ public class RoomService {
             throw new CustomException("用户正在其他房间中");
         }
 
+        if (roomDto.getRoomType() == null) {
+            throw new CustomException("房间类型不能为空");
+        }
+
+        if (roomDto.getCreatorTeamType() == null) {
+            throw new CustomException("创建者队伍不能为空");
+        }
+
         //TODO CHECK MAP
 
         log.info("room:{} will be created", roomDto);
         StageRoom stageRoom = new StageRoom(roomDto);
-        stageRoom.add(creator);
+        stageRoom.add(creator, roomDto.getCreatorTeamType());
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
         return true;
