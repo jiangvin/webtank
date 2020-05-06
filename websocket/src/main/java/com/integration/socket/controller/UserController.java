@@ -70,7 +70,8 @@ public class UserController {
                               @RequestHeader(value = "socketSessionId") String socketSessionId,
                               RoomDto roomDto) {
         roomDto.setCreator(name);
-        return gameService.createRoom(roomDto, socketSessionId);
+        gameService.createRoom(roomDto, socketSessionId);
+        return true;
     }
 
     @GetMapping("/getMaps")

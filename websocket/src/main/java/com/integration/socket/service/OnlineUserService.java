@@ -44,7 +44,7 @@ public class OnlineUserService {
         return UserReadyResult.ADD_USER;
     }
 
-    void addNewUserCache(UserBo userBo) {
+    public void addNewUserCache(UserBo userBo) {
         if (newUserCache.containsKey(userBo.getUsername())) {
             return;
         }
@@ -52,7 +52,7 @@ public class OnlineUserService {
         log.info("user:{} add into the cache(count:{})", userBo.getUsername(), newUserCache.size());
     }
 
-    void subscribeInUserCache(String username, String destination) {
+    public void subscribeInUserCache(String username, String destination) {
         if (!newUserCache.containsKey(username)) {
             return;
         }

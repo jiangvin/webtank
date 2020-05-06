@@ -56,14 +56,6 @@ public class GameService {
         menu = new StageMenu(messageService);
     }
 
-    public void subscribeInUserCache(String username, String destination) {
-        onlineUserService.subscribeInUserCache(username, destination);
-    }
-
-    public void addNewUserCache(UserBo userBo) {
-        onlineUserService.addNewUserCache(userBo);
-    }
-
     public void removeUser(String username) {
         UserBo userBo = onlineUserService.get(username);
         if (userBo == null) {
@@ -114,7 +106,7 @@ public class GameService {
         }
     }
 
-    public boolean createRoom(RoomDto roomDto, String sessionId) {
+    public void createRoom(RoomDto roomDto, String sessionId) {
         //check user
         UserBo userBo = onlineUserService.get(roomDto.getCreator());
         if (userBo == null) {
@@ -124,7 +116,7 @@ public class GameService {
             throw new CustomException("用户信息验证不通过!");
         }
 
-        return roomService.create(roomDto, userBo);
+        roomService.create(roomDto, userBo);
     }
 
     @Scheduled(fixedDelay = 17)

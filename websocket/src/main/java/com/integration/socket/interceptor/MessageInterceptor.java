@@ -2,6 +2,7 @@ package com.integration.socket.interceptor;
 
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.service.GameService;
+import com.integration.socket.service.OnlineUserService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -25,9 +26,12 @@ import java.security.Principal;
 public class MessageInterceptor implements ChannelInterceptor {
 
     private final GameService gameService;
+    private final OnlineUserService onlineUserService;
 
-    public MessageInterceptor(@Lazy GameService gameService) {
+    public MessageInterceptor(@Lazy GameService gameService,
+                              OnlineUserService onlineUserService) {
         this.gameService = gameService;
+        this.onlineUserService = onlineUserService;
     }
 
     @SneakyThrows
@@ -42,10 +46,10 @@ public class MessageInterceptor implements ChannelInterceptor {
 
         String username = principal.getName();
         if (StompCommand.CONNECT.equals(command)) {
-            gameService.addNewUserCache(new UserBo(username, accessor.getSessionId()));
+            onlineUserService.addNewUserCache(new UserBo(username, accessor.getSessionId()));
         } else if (StompCommand.SUBSCRIBE.equals(command)) {
             String destination = accessor.getDestination();
-            gameService.subscribeInUserCache(username, destination);
+            onlineUserService.subscribeInUserCache(username, destination);
         } else if (StompCommand.DISCONNECT.equals(command)) {
             gameService.removeUser(username);
         } else if (!StompCommand.SEND.equals(command)) {
