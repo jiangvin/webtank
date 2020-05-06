@@ -296,24 +296,10 @@
         selectWindow.appendChild(createRoomSelect("地图:", data, "selectMap"));
         selectWindow.appendChild(createRoomSelect("类型:", ["PVP", "PVE", "EVE"], "selectType"));
         document.getElementById("selectType").onchange = function () {
-            const selectGroup = $('#selectGroup');
-            selectGroup.find('option').remove().end();
-            switch ($('#selectType').val()) {
-                case "PVP":
-                    selectGroup.append('<option value="RED">红队</option>');
-                    selectGroup.append('<option value="BLUE">蓝队</option>');
-                    selectGroup.append('<option value="VIEW">观看</option>');
-                    break;
-                case "PVE":
-                    selectGroup.append('<option value="RED">玩家</option>');
-                    selectGroup.append('<option value="VIEW">观看</option>');
-                    break;
-                case "EVE":
-                    selectGroup.append('<option value="VIEW">观看</option>');
-                    break;
-            }
+            setSelectGroup();
         };
-        selectWindow.appendChild(createRoomSelect("队伍:", ["红队", "蓝队", "观看"], "selectGroup"));
+        selectWindow.appendChild(createRoomSelect("队伍:", [], "selectGroup"));
+        setSelectGroup();
 
         const divButton = document.createElement('div');
         divButton.className = "select-item";
@@ -333,6 +319,25 @@
             Menu.showRoomList();
         };
         divButton.appendChild(buttonCancel);
+    };
+
+    const setSelectGroup = function () {
+        const selectGroup = $('#selectGroup');
+        selectGroup.find('option').remove().end();
+        switch ($('#selectType').val()) {
+            case "PVP":
+                selectGroup.append('<option value="RED">红队</option>');
+                selectGroup.append('<option value="BLUE">蓝队</option>');
+                selectGroup.append('<option value="VIEW">观看</option>');
+                break;
+            case "PVE":
+                selectGroup.append('<option value="RED">玩家</option>');
+                selectGroup.append('<option value="VIEW">观看</option>');
+                break;
+            case "EVE":
+                selectGroup.append('<option value="VIEW">观看</option>');
+                break;
+        }
     };
 
     const createRoomSelect = function (typeText, options, selectId) {
