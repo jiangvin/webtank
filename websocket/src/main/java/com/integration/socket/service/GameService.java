@@ -5,10 +5,10 @@ import com.integration.socket.model.UserReadyResult;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
-import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.stage.BaseStage;
 import com.integration.socket.stage.StageMenu;
 import com.integration.socket.stage.StageRoom;
+import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,10 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author 蒋文龙(Vin)
@@ -43,17 +39,13 @@ public class GameService {
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private RoomService roomService;
+
     /**
      * 布景管理
      */
     private BaseStage menu;
-    private ConcurrentHashMap<String, BaseStage> roomMap = new ConcurrentHashMap<>();
-
-    /**
-     * 新增List来保证rooms的顺序
-     * 顺序 旧 -> 新
-     */
-    private List<StageRoom> roomList = new ArrayList<>();
 
     @PostConstruct
     private void init() {
@@ -94,12 +86,8 @@ public class GameService {
         if (room.getUserCount() != 0) {
             return;
         }
-        roomMap.remove(room.getRoomId());
-        roomList.remove(room);
-    }
 
-    public boolean roomNameExists(String roomName) {
-        return roomMap.containsKey(roomName);
+        roomService.remove(room);
     }
 
     public void receiveMessage(MessageDto messageDto, String sendFrom) {
@@ -125,28 +113,31 @@ public class GameService {
         }
     }
 
-    public RoomListDto getRoomListDto(int start, int limit) {
-        List<RoomDto> roomDtoList = new ArrayList<>();
-        for (StageRoom room : roomList.subList(start, Math.min(start + limit, roomList.size()))) {
-            roomDtoList.add(RoomDto.convert(room));
+    public boolean createRoom(RoomDto roomDto, String sessionId) {
+        //check user
+        UserBo userBo = onlineUserService.get(roomDto.getCreator());
+        if (userBo == null) {
+            throw new CustomException("用户不存在:" + roomDto.getCreator());
         }
-        return new RoomListDto(roomDtoList, roomList.size());
+        if (!userBo.getSocketSessionId().equals(sessionId)) {
+            throw new CustomException("用户信息验证不通过!");
+        }
+
+        return roomService.create(roomDto, userBo);
     }
 
     @Scheduled(fixedDelay = 17)
     public void update() {
         menu.update();
-        for (Map.Entry<String, BaseStage> kv : roomMap.entrySet()) {
-            kv.getValue().update();
-        }
+        roomService.update();
     }
 
     private BaseStage currentStage(UserBo userBo) {
         if (!StringUtils.isEmpty(userBo.getRoomId())) {
-            if (!roomMap.containsKey(userBo.getRoomId())) {
+            if (!roomService.roomNameExists(userBo.getRoomId())) {
                 log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUsername());
             }
-            return roomMap.get(userBo.getRoomId());
+            return roomService.get(userBo.getRoomId());
         } else {
             return menu;
         }

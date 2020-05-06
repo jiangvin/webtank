@@ -1,8 +1,12 @@
 package com.integration.socket.stage;
 
 import com.integration.socket.model.RoomType;
+import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.MessageDto;
+import com.integration.socket.model.dto.RoomDto;
 import lombok.Getter;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author 蒋文龙(Vin)
@@ -12,6 +16,13 @@ import lombok.Getter;
 
 
 public class StageRoom extends BaseStage {
+
+    public StageRoom(RoomDto roomDto) {
+        this.roomId = roomDto.getRoomId();
+        this.creator = roomDto.getCreator();
+        this.mapId = roomDto.getMapId();
+        this.roomType = roomDto.getRoomType();
+    }
 
     @Getter
     private String roomId;
@@ -25,8 +36,11 @@ public class StageRoom extends BaseStage {
     @Getter
     private RoomType roomType;
 
-    @Getter
-    private int userCount;
+    private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
+
+    public int getUserCount() {
+        return userMap.size();
+    }
 
     @Override
     public void processMessage(MessageDto messageDto, String sendFrom) {
@@ -40,6 +54,11 @@ public class StageRoom extends BaseStage {
 
     @Override
     public void remove(String username) {
+        userMap.remove(username);
+    }
 
+    public void add(UserBo userBo) {
+        userMap.put(userBo.getUsername(), userBo);
+        userBo.setRoomId(this.roomId);
     }
 }
