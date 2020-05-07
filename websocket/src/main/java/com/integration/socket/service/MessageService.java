@@ -30,7 +30,6 @@ public class MessageService {
     }
 
     public void sendMessage(MessageDto messageDto) {
-        messageDto.setCreateTime(System.currentTimeMillis());
         log.info("send message:{}", messageDto.toString());
 
         List<String> sendToList = messageDto.getSendToList();

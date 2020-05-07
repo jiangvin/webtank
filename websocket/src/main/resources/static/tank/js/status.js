@@ -7,7 +7,7 @@ function Status() {
 }
 
 Status.setStatus = function (value, message, showMask) {
-    if (showMask == null) {
+    if (showMask === undefined) {
         showMask = !!message;
     }
     this.value = value;

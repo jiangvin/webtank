@@ -1,5 +1,7 @@
 package com.integration.socket.controller;
 
+import com.integration.socket.model.MessageType;
+import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.service.GameService;
@@ -37,6 +39,11 @@ public class UserController {
 
     @Autowired
     private RoomService roomService;
+
+    @GetMapping("/ping")
+    public MessageDto ping() {
+        return new MessageDto("Hello World", MessageType.SYSTEM_MESSAGE, "Player");
+    }
 
     @GetMapping("/getUsers")
     public List<String> getUsers() {

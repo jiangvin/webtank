@@ -23,8 +23,6 @@ public class MessageDto {
 
     private List<String> sendToList;
 
-    private long createTime;
-
     public MessageDto(Object message, MessageType messageType) {
         init(message, messageType, null);
     }

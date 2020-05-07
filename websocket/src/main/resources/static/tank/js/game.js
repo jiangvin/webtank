@@ -42,9 +42,6 @@ function Game() {
 
     //网络连接
     this.receiveStompMessage = function (messageDto) {
-        //统计延迟
-        _netDelay = new Date().getTime() - messageDto.createTime;
-
         //处理消息事件
         if (_messageEvents[messageDto.messageType]) {
             console.log("process message event:" + messageDto.messageType);
@@ -249,6 +246,10 @@ function Game() {
     this.addConnectCheckEvent = function () {
         const callBack = function () {
             if (Common.getStompStatus() === true) {
+                const start = new Date().getTime();
+                Common.getRequest("/user/ping", function () {
+                    _netDelay = new Date().getTime() - start;
+                });
                 thisGame.addTimeEvent("CONNECT_CHECK", callBack, 120, true);
             } else {
                 Status.setStatus(Status.getStatusPause(), "与服务器断开！");
