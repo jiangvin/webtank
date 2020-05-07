@@ -17,6 +17,9 @@ function Game() {
     //帧率相关
     let _framesPerSecond = 60;
 
+    //延迟相关
+    let _netDelay = 0;
+
     //定时触发器类
     const _timeEvents = [];
     //消息触发器类
@@ -39,6 +42,9 @@ function Game() {
 
     //网络连接
     this.receiveStompMessage = function (messageDto) {
+        //统计延迟
+        _netDelay = new Date().getTime() - messageDto.createTime;
+
         //处理消息事件
         if (_messageEvents[messageDto.messageType]) {
             console.log("process message event:" + messageDto.messageType);
@@ -286,9 +292,12 @@ function Game() {
 
         //帧率信息
         context.textAlign = 'left';
-        let text = 'FPS: ' + _framesPerSecond;
+        let text = '帧率:' + _framesPerSecond;
+        if (_netDelay > 0) {
+            text += ' / 延迟:' + _netDelay + 'ms';
+        }
         if (_users.length > 0) {
-            text += ' / USER: ' + _users.length;
+            text += ' / 房间人数:' + _users.length;
         }
         context.fillText(text, 10, Common.height() - 5);
 
