@@ -98,7 +98,7 @@
      * 设定是否显示选择窗
      */
     Menu.showSelect = function (show) {
-        if (show !== null) {
+        if (show !== undefined) {
             this.showSelectWindow = show;
         }
         Menu.getSelect().style.visibility = this.showSelectWindow ? 'visible' : 'hidden';
@@ -140,10 +140,6 @@
         btnNext.className = "right";
         const thisMenu = this;
         btnNext.onclick = function () {
-            if (!thisMenu.roomCount) {
-                return;
-            }
-
             const pageInfo = generatePageInfo(thisMenu);
             if (pageInfo.currentPage >= pageInfo.totalPage) {
                 Common.addMessage("这已经是最后一页", "#FF0");
@@ -158,10 +154,6 @@
         btnFront.textContent = "上一页";
         btnFront.className = "right";
         btnFront.onclick = function () {
-            if (!thisMenu.roomCount) {
-                return;
-            }
-
             if (generatePageInfo(thisMenu).currentPage <= 1) {
                 Common.addMessage("这已经是第一页", "#FF0");
             } else {
@@ -393,7 +385,6 @@
 
             Common.postRequest("/user/createRoom",
                 {
-                    "name": client.username,
                     "socketSessionId": client.socketSessionId
                 },
                 {
@@ -401,12 +392,14 @@
                     "mapId": mapId,
                     "roomType": roomType,
                     "creatorTeamType": group,
+                    "creator": client.username
                 },
                 function () {
 
                 },
                 function () {
                     Common.runLastStage();
+                    Status.setStatus(Status.getStatusNormal());
                 }
             )
         })

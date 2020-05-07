@@ -381,7 +381,7 @@ Common.getStompStatus = function () {
 Common.getStompInfo = function () {
     const stompInfo = {};
     const url = Resource.getStompClient().ws._transport.url;
-    stompInfo.username = url.substring(url.lastIndexOf("=") + 1);
+    stompInfo.username = decodeURI(url.substring(url.lastIndexOf("=") + 1));
 
     //get socket session id
     const end = url.lastIndexOf("/");
@@ -390,7 +390,7 @@ Common.getStompInfo = function () {
     return stompInfo;
 };
 Common.stompConnect = function (name, callback) {
-    const socket = new SockJS('/websocket-simple?name=' + name);
+    const socket = new SockJS(encodeURI('/websocket-simple?name=' + name));
     const stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         Common.addMessage("网络连接中: " + frame, "#ffffff");
@@ -429,7 +429,7 @@ Common.distance = function (x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 };
 Common.getRequest = function (url, callBack) {
-    $.getJSON(url, function (result) {
+    $.getJSON(encodeURI(url), function (result) {
         if (!result.success) {
             Common.addMessage(result.message, "#ff0000");
             return;
@@ -439,7 +439,7 @@ Common.getRequest = function (url, callBack) {
 };
 Common.postRequest = function (url, headers, body, callbackSuccess, callBackFailed) {
     $.ajax({
-        url: url,
+        url: encodeURI(url),
         type: 'post',
         data: body,
         headers: headers,

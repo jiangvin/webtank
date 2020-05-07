@@ -66,10 +66,8 @@ public class UserController {
     }
 
     @PostMapping("/createRoom")
-    public boolean createRoom(@RequestHeader(value = "name") String name,
-                              @RequestHeader(value = "socketSessionId") String socketSessionId,
+    public boolean createRoom(@RequestHeader(value = "socketSessionId") String socketSessionId,
                               RoomDto roomDto) {
-        roomDto.setCreator(name);
         gameService.createRoom(roomDto, socketSessionId);
         return true;
     }

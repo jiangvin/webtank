@@ -109,10 +109,11 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        String message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
-        messageService.sendMessage(new MessageDto(message, MessageType.SYSTEM_MESSAGE));
         userMap.remove(username);
         tankMap.remove(username);
+
+        String message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
+        messageService.sendMessage(new MessageDto(message, MessageType.SYSTEM_MESSAGE));
     }
 
     public void add(UserBo userBo, TeamType teamType) {
