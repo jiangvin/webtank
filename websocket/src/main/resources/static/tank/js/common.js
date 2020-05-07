@@ -309,10 +309,9 @@ Common.inputBindMessageControl = function () {
     }
 
     _bindMessageControl = true;
+    Common.inputBindKeyboard();
 
-    if (Common.getTouch() !== true) {
-        Common.inputBindKeyboard();
-    } else {
+    if (Common.getTouch() === true) {
         Common.inputBindTouch();
     }
 };
