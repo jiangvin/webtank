@@ -1,7 +1,6 @@
 package com.integration.socket.service;
 
 import com.integration.socket.model.MessageType;
-import com.integration.socket.model.UserReadyResult;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
@@ -70,7 +69,7 @@ public class GameService {
 
         onlineUserService.remove(username);
         stage.remove(username);
-        sendUserStatusAndMessage(stage.getUserList(), username, true);
+        sendUserStatusAndMessage(username, true);
 
         //房间为空时删除房间
         if (!(stage instanceof StageRoom)) {
@@ -187,31 +186,20 @@ public class GameService {
     }
 
     private void processNewUserReady(MessageDto messageDto, String sendFrom) {
-        UserReadyResult result = onlineUserService.processNewUserReady(sendFrom);
-        menu.addTank(messageDto, sendFrom);
-        switch (result) {
-            case ADD_USER:
-                //第一次加入，广播所有用户玩家信息
-                sendUserStatusAndMessage(menu.getUserList(), sendFrom, false);
-                break;
-            case ALREADY_EXISTS:
-                //已经加入了，单独给用户再同步一次玩家信息
-                messageService.sendMessage(new MessageDto(menu.getUserList(), MessageType.USERS, sendFrom));
-                break;
-            default:
-                break;
+        if (onlineUserService.processNewUserReady(sendFrom)) {
+            sendUserStatusAndMessage(sendFrom, false);
         }
+        menu.addTank(messageDto, sendFrom);
         messageService.sendReady(sendFrom);
     }
 
-    private void sendUserStatusAndMessage(List<String> users, String username, boolean isLeave) {
+    private void sendUserStatusAndMessage(String username, boolean isLeave) {
         //没人了，不用更新状态
         if (onlineUserService.getUserList().isEmpty()) {
             log.info("no user in service, no need to send message");
             return;
         }
 
-        messageService.sendMessage(new MessageDto(users, MessageType.USERS, users));
         if (isLeave) {
             messageService.sendMessage(new MessageDto(String.format("%s 离开了! 当前总人数: %d",
                                                                     username,

@@ -69,9 +69,10 @@ public class StageMenu extends BaseStage {
 
     @Override
     public void remove(String username) {
-        if (!removeTank(username)) {
+        if (!removeTank(username) || getUserList().isEmpty()) {
             return;
         }
+        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
         messageService.sendMessage(new MessageDto(username, MessageType.REMOVE_TANK));
     }
 
@@ -93,6 +94,7 @@ public class StageMenu extends BaseStage {
 
         if (tankMap.containsKey(tankDto.getId())) {
             //单独发送同步消息
+            messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, sendFrom));
             messageService.sendMessage(new MessageDto(getTankList(), MessageType.TANKS, sendFrom));
             return;
         }
@@ -101,6 +103,7 @@ public class StageMenu extends BaseStage {
         tankMap.put(tankBo.getTankId(), tankBo);
 
         //收到单位，即将向所有人同步单位信息
+        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
         MessageDto sendBack = new MessageDto(getTankList(), MessageType.TANKS, getUserList());
         messageService.sendMessage(sendBack);
     }
