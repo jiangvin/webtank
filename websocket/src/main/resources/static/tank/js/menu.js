@@ -19,7 +19,13 @@
         //开始初始化
         this.stage = game.createStage();
 
+        const getRandomTankImage = function() {
+            const id = new Date().getTime() % 9 + 1;
+            return Resource.getImage("tank0" + id);
+        };
+
         this.tankLogo = this.stage.createTank({
+            image: getRandomTankImage(),
             x: Common.width() / 2,
             y: Common.height() * .45,
             speed: 1,

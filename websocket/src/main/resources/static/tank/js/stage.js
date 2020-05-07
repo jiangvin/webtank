@@ -1,13 +1,12 @@
-
-
 function Stage(params) {
-    this.params = params||{};
+    this.params = params || {};
     this.settings = {
-        index:0,                        //布景索引
-        items:[],						//对象队列
-        controlEvent:function(){}
+        index: 0,                        //布景索引
+        items: [],						//对象队列
+        controlEvent: function () {
+        }
     };
-    Common.extend(this,this.settings,this.params);
+    Common.extend(this, this.settings, this.params);
 
     this.receiveStompMessage = function (messageDto) {
         const thisStage = this;
@@ -23,9 +22,9 @@ function Stage(params) {
                         thisStage.items[tank.id].action = tank.action;
                     } else {
                         thisStage.createTank({
-                            id:tank.id,
-                            x:tank.x,
-                            y:tank.y,
+                            id: tank.id,
+                            x: tank.x,
+                            y: tank.y,
                             orientation: tank.orientation,
                             action: tank.action,
                             speed: tank.speed,
@@ -43,19 +42,19 @@ function Stage(params) {
         }
     };
 
-    this.draw = function(context) {
+    this.draw = function (context) {
         for (let k in this.items) {
             this.items[k].draw(context);
         }
     };
 
-    this.update = function() {
+    this.update = function () {
         for (let k in this.items) {
             this.items[k].update();
         }
     };
 
-    this.createItem = function(options) {
+    this.createItem = function (options) {
         const item = new Item(options);
         item.stage = this;
         this.items[item.id] = item;

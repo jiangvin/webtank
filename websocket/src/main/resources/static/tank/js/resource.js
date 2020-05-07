@@ -14,16 +14,28 @@
 
         this.images = [];
 
-        //加载初始资源
+
+        //load all tank images
+        for (let i = 1; i <= 12; ++i) {
+            let id;
+            if (i < 10) {
+                id = "tank0" + i;
+            } else {
+                id = "tank" + i;
+            }
+            loadTankImage(id, this.images);
+        }
+        return this.images;
+    };
+
+    const loadTankImage = function (imageId, images) {
         const img = document.createElement('img');
-        img.src = 'tank/image/tank01.png';
+        img.src = 'tank/image/' + imageId + '.png';
         img.widthPics = 4;
         img.heightPics = 1;
         img.displayWidth = img.width / img.widthPics;
         img.displayHeight = img.height / img.heightPics;
-        this.images['tank01'] = img;
-
-        return this.images;
+        images[imageId] = img;
     };
 
     Resource.getImage = function (id, widthPics, heightPics) {
