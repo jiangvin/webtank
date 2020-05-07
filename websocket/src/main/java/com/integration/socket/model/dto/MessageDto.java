@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -18,16 +21,22 @@ public class MessageDto {
 
     private Object message;
 
-    private MessageType messageType = MessageType.USER_MESSAGE;
+    private MessageType messageType = MessageType.SYSTEM_MESSAGE;
 
-    private String sendTo;
-
-    public MessageDto(Object message) {
-        this.message = message;
-    }
+    private List<String> sendToList;
 
     public MessageDto(Object message, MessageType messageType) {
         this.message = message;
         this.messageType = messageType;
+    }
+
+    public MessageDto(Object message, MessageType messageType, String sendTo) {
+        this.message = message;
+        this.messageType = messageType;
+        this.sendToList = Collections.singletonList(sendTo);
+    }
+
+    public boolean sendToAll() {
+        return sendToList == null || sendToList.isEmpty();
     }
 }

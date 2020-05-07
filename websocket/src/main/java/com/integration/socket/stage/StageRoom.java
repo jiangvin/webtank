@@ -31,16 +31,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StageRoom extends BaseStage {
 
     public StageRoom(RoomDto roomDto, MessageService messageService) {
+        super(messageService);
         this.roomId = roomDto.getRoomId();
         this.creator = roomDto.getCreator();
         this.mapId = roomDto.getMapId();
         this.roomType = roomDto.getRoomType();
-        this.messageService = messageService;
     }
 
-    private MessageService messageService;
-
     private ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
+
+    private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
 
     @Getter
     private String roomId;
@@ -54,10 +54,17 @@ public class StageRoom extends BaseStage {
     @Getter
     private RoomType roomType;
 
-    private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
-
     public int getUserCount() {
         return userMap.size();
+    }
+
+    @Override
+    public List<String> getUserList() {
+        List<String> users = new ArrayList<>();
+        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
+            users.add(kv.getKey());
+        }
+        return users;
     }
 
     @Override
@@ -98,6 +105,12 @@ public class StageRoom extends BaseStage {
 
     @Override
     public void remove(String username) {
+        if (!userMap.containsKey(username)) {
+            return;
+        }
+
+        String message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
+        messageService.sendMessage(new MessageDto(message, MessageType.SYSTEM_MESSAGE));
         userMap.remove(username);
         tankMap.remove(username);
     }
@@ -148,7 +161,7 @@ public class StageRoom extends BaseStage {
         }
 
         TankDto response = TankDto.convert(updateBo);
-        MessageDto sendBack = new MessageDto(Collections.singletonList(response), MessageType.TANKS);
+        MessageDto sendBack = new MessageDto(Collections.singletonList(response), MessageType.TANKS, getUserList());
         messageService.sendMessage(sendBack);
     }
 

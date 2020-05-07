@@ -1,6 +1,8 @@
 package com.integration.socket.service;
 
+import com.integration.socket.model.MessageType;
 import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.stage.StageRoom;
@@ -84,6 +86,7 @@ public class RoomService {
         StageRoom stageRoom = new StageRoom(roomDto, messageService);
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
+        messageService.sendMessage(new MessageDto(String.format("%s 创建了房间 %s", creator.getUsername(), roomDto.getRoomId()), MessageType.SYSTEM_MESSAGE));
         return stageRoom;
     }
 }

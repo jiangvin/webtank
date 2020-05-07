@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 
 /**
  * @author 蒋文龙(Vin)
@@ -62,13 +63,14 @@ public class GameService {
             return;
         }
 
-        onlineUserService.remove(username);
-        messageService.sendUserStatusAndMessage(onlineUserService.getUserList(), username, true);
         BaseStage stage = currentStage(userBo);
         if (stage == null) {
             return;
         }
+
+        onlineUserService.remove(username);
         stage.remove(username);
+        sendUserStatusAndMessage(stage.getUserList(), username, true);
 
         //房间为空时删除房间
         if (!(stage instanceof StageRoom)) {
@@ -98,11 +100,32 @@ public class GameService {
         log.info("receive:{} from user:{}", messageDto.toString(), sendFrom);
         switch (messageDto.getMessageType()) {
             case USER_MESSAGE:
-                messageService.processUserMessage(messageDto, sendFrom);
+                processUserMessage(messageDto, sendFrom);
                 break;
             default:
                 currentStage(userBo).processMessage(messageDto, sendFrom);
                 break;
+        }
+    }
+
+    private void processUserMessage(MessageDto messageDto, String sendFrom) {
+        if (messageDto.sendToAll()) {
+            messageDto.setMessage(String.format("%s: %s", sendFrom, messageDto.getMessage()));
+            messageService.sendMessage(messageDto);
+        } else {
+            //先给发送方回复一份
+            String messageToSendFrom = String.format("%s → %s: %s", sendFrom, messageDto.getSendToList().toString(), messageDto.getMessage());
+            messageService.sendMessage(new MessageDto(messageToSendFrom, messageDto.getMessageType(), sendFrom));
+
+            //再给所有接送者发送一份
+            for (String sendTo : messageDto.getSendToList()) {
+                if (sendFrom.equals(sendTo)) {
+                    continue;
+                }
+
+                String sendMessage = String.format("%s → %s: %s", sendFrom, sendTo, messageDto.getMessage());
+                messageService.sendMessage(new MessageDto(sendMessage, messageDto.getMessageType(), sendTo));
+            }
         }
     }
 
@@ -144,8 +167,19 @@ public class GameService {
 
     private UserBo userCheckAndGetSendFrom(MessageDto messageDto, String sendFrom) {
         //检查接收方
-        if (!StringUtils.isEmpty(messageDto.getSendTo()) && !onlineUserService.exists(messageDto.getSendTo())) {
-            return null;
+        if (!messageDto.sendToAll()) {
+            List<String> sendToList = messageDto.getSendToList();
+            for (int i = 0; i < sendToList.size(); ++i) {
+                if (!onlineUserService.exists(sendToList.get(i))) {
+                    sendToList.remove(i);
+                    --i;
+                }
+            }
+
+            //所有接收方都不符合规范，不发送
+            if (sendToList.isEmpty()) {
+                return null;
+            }
         }
 
         //检查发送方
@@ -154,19 +188,40 @@ public class GameService {
 
     private void processNewUserReady(MessageDto messageDto, String sendFrom) {
         UserReadyResult result = onlineUserService.processNewUserReady(sendFrom);
+        menu.addTank(messageDto, sendFrom);
         switch (result) {
             case ADD_USER:
                 //第一次加入，广播所有用户玩家信息
-                messageService.sendUserStatusAndMessage(onlineUserService.getUserList(), sendFrom, false);
+                sendUserStatusAndMessage(menu.getUserList(), sendFrom, false);
                 break;
             case ALREADY_EXISTS:
                 //已经加入了，单独给用户再同步一次玩家信息
-                messageService.sendMessage(new MessageDto(onlineUserService.getUserList(), MessageType.USERS, sendFrom));
+                messageService.sendMessage(new MessageDto(menu.getUserList(), MessageType.USERS, sendFrom));
                 break;
             default:
                 break;
         }
-        menu.addTank(messageDto, sendFrom);
         messageService.sendReady(sendFrom);
+    }
+
+    private void sendUserStatusAndMessage(List<String> users, String username, boolean isLeave) {
+        //没人了，不用更新状态
+        if (onlineUserService.getUserList().isEmpty()) {
+            log.info("no user in service, no need to send message");
+            return;
+        }
+
+        messageService.sendMessage(new MessageDto(users, MessageType.USERS, users));
+        if (isLeave) {
+            messageService.sendMessage(new MessageDto(String.format("%s 离开了! 当前总人数: %d",
+                                                                    username,
+                                                                    onlineUserService.getUserList().size()),
+                                                      MessageType.SYSTEM_MESSAGE));
+        } else {
+            messageService.sendMessage(new MessageDto(String.format("%s 加入了! 当前总人数: %d",
+                                                                    username,
+                                                                    onlineUserService.getUserList().size()),
+                                                      MessageType.SYSTEM_MESSAGE));
+        }
     }
 }

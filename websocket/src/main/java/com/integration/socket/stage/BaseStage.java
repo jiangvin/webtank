@@ -1,6 +1,9 @@
 package com.integration.socket.stage;
 
 import com.integration.socket.model.dto.MessageDto;
+import com.integration.socket.service.MessageService;
+
+import java.util.List;
 
 /**
  * @author 蒋文龙(Vin)
@@ -8,6 +11,12 @@ import com.integration.socket.model.dto.MessageDto;
  * @date 2020/5/3
  */
 public abstract class BaseStage {
+
+    MessageService messageService;
+
+    BaseStage(MessageService messageService) {
+        this.messageService = messageService;
+    }
 
     /**
      * 处理消息入口
@@ -27,4 +36,10 @@ public abstract class BaseStage {
      * @param username 离开的用户名
      */
     public abstract void remove(String username);
+
+    /**
+     * 获取用户列表
+     * @return 用户列表
+     */
+    public abstract List<String> getUserList();
 }
