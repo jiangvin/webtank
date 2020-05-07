@@ -1,7 +1,6 @@
 package com.integration.socket.model.dto;
 
 import com.integration.socket.model.MessageType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +14,6 @@ import java.util.List;
  */
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class MessageDto {
 
@@ -25,18 +23,27 @@ public class MessageDto {
 
     private List<String> sendToList;
 
+    private long createTime;
+
     public MessageDto(Object message, MessageType messageType) {
-        this.message = message;
-        this.messageType = messageType;
+        init(message, messageType, null);
     }
 
     public MessageDto(Object message, MessageType messageType, String sendTo) {
-        this.message = message;
-        this.messageType = messageType;
-        this.sendToList = Collections.singletonList(sendTo);
+        init(message, messageType, Collections.singletonList(sendTo));
+    }
+
+    public MessageDto(Object message, MessageType messageType, List<String> sendToList) {
+        init(message, messageType, sendToList);
     }
 
     public boolean sendToAll() {
         return sendToList == null || sendToList.isEmpty();
+    }
+
+    private void init(Object message, MessageType messageType, List<String> sendToList) {
+        this.message = message;
+        this.messageType = messageType;
+        this.sendToList = sendToList;
     }
 }
