@@ -112,6 +112,10 @@ public class StageRoom extends BaseStage {
         userMap.remove(username);
         tankMap.remove(username);
 
+        if (getUserCount() == 0) {
+            return;
+        }
+        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
         String message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
         messageService.sendMessage(new MessageDto(message, MessageType.SYSTEM_MESSAGE));
     }
@@ -120,6 +124,8 @@ public class StageRoom extends BaseStage {
         userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
         userBo.setTeamType(teamType);
+
+        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
         addNewTank(userBo.getUsername());
 
         //通知前端数据传输完毕
@@ -135,7 +141,8 @@ public class StageRoom extends BaseStage {
 
         tankMap.put(tankBo.getTankId(), tankBo);
 
-        //收到单位，即将向所有人同步单位信息
+        //即将向所有人同步信息
+
         MessageDto sendBack = new MessageDto(getTankList(), MessageType.TANKS, username);
         messageService.sendMessage(sendBack);
     }
