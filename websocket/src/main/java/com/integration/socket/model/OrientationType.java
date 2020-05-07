@@ -12,7 +12,7 @@ public enum OrientationType {
     RIGHT(3),
     UNKNOWN(-1);
 
-    private int value;
+    private final int value;
 
     OrientationType(int value) {
         this.value = value;

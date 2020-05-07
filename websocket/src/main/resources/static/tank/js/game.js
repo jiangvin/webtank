@@ -53,8 +53,8 @@ function Game() {
             case "SYSTEM_MESSAGE":
                 Common.addMessage(messageDto.message, "#FF0");
                 break;
-            case "DATA_READY":
-                dataReady();
+            case "SERVER_READY":
+                serverReady();
                 break;
             case "USERS":
                 _users = messageDto.message;
@@ -236,6 +236,10 @@ function Game() {
         messageEvent.callback = callBack;
         _messageEvents[eventType] = messageEvent;
     };
+
+    /**
+     * 每两秒确认一次连接是否失效
+     */
     this.addConnectCheckEvent = function () {
         const callBack = function () {
             if (Common.getStompStatus() === true) {
@@ -381,7 +385,7 @@ function Game() {
         this.start();
     };
 
-    const dataReady = function () {
+    const serverReady = function () {
         if (Status.getStatusValue() !== Status.getStatusPause()) {
             return;
         }

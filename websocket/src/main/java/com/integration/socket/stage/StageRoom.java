@@ -109,7 +109,7 @@ public class StageRoom extends BaseStage {
         addNewTank(userBo.getUsername());
 
         //通知前端数据传输完毕
-        messageService.sendDataReady(userBo.getUsername());
+        messageService.sendReady(userBo.getUsername());
     }
 
     private void addNewTank(String username) {

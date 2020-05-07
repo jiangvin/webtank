@@ -34,8 +34,8 @@ public class MessageService {
         sendMessage(messageDto, null);
     }
 
-    public void sendDataReady(@NonNull String username) {
-        sendMessage(new MessageDto(null, MessageType.DATA_READY, username));
+    public void sendReady(@NonNull String username) {
+        sendMessage(new MessageDto(null, MessageType.SERVER_READY, username));
     }
 
     public void sendMessage(MessageDto messageDto, String sendFrom) {

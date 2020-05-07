@@ -38,11 +38,3 @@ Status.getStatusPause = function () {
 Status.getStatusClose = function () {
     return "close";
 };
-
-Status.getStatusWaitUsers = function () {
-    return "waitUsers";
-};
-
-Status.getStatusWaitTanks = function () {
-    return "waitTanks"
-};

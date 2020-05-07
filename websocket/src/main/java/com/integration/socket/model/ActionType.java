@@ -16,7 +16,7 @@ public enum ActionType {
         this.value = value;
     }
 
-    public int getValue() {
+    public final int getValue() {
         return this.value;
     }
 

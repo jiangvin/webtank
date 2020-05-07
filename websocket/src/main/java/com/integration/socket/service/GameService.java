@@ -45,7 +45,7 @@ public class GameService {
     /**
      * 布景管理
      */
-    private BaseStage menu;
+    private StageMenu menu;
 
     @PostConstruct
     private void init() {
@@ -85,8 +85,8 @@ public class GameService {
 
     public void receiveMessage(MessageDto messageDto, String sendFrom) {
         //新用户加入时处理，不需要检查用户是否存在
-        if (messageDto.getMessageType() == MessageType.READY) {
-            processNewUserReady(sendFrom);
+        if (messageDto.getMessageType() == MessageType.CLIENT_READY) {
+            processNewUserReady(messageDto, sendFrom);
             return;
         }
 
@@ -152,19 +152,21 @@ public class GameService {
         return onlineUserService.get(sendFrom);
     }
 
-    private void processNewUserReady(String username) {
-        UserReadyResult result = onlineUserService.processNewUserReady(username);
+    private void processNewUserReady(MessageDto messageDto, String sendFrom) {
+        UserReadyResult result = onlineUserService.processNewUserReady(sendFrom);
         switch (result) {
             case ADD_USER:
                 //第一次加入，广播所有用户玩家信息
-                messageService.sendUserStatusAndMessage(onlineUserService.getUserList(), username, false);
+                messageService.sendUserStatusAndMessage(onlineUserService.getUserList(), sendFrom, false);
                 break;
             case ALREADY_EXISTS:
                 //已经加入了，单独给用户再同步一次玩家信息
-                messageService.sendMessage(new MessageDto(onlineUserService.getUserList(), MessageType.USERS, username));
+                messageService.sendMessage(new MessageDto(onlineUserService.getUserList(), MessageType.USERS, sendFrom));
                 break;
             default:
                 break;
         }
+        menu.addTank(messageDto, sendFrom);
+        messageService.sendReady(sendFrom);
     }
 }

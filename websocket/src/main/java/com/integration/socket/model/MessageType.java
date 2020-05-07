@@ -20,7 +20,7 @@ public enum MessageType {
     /**
      * 数据传输完毕，通知前端可以解除暂停
      */
-    DATA_READY,
+    SERVER_READY,
     /**
      * 所有用户id列表
      */
@@ -39,12 +39,7 @@ public enum MessageType {
      * 客户端 -> 服务器
      * 用户准备完毕
      */
-    READY,
-
-    /**
-     * 用户新增tank，只在menu页使用
-     */
-    ADD_TANK,
+    CLIENT_READY,
 
     /**
      * 同步状态，为了避免客户端作弊，只传递状态

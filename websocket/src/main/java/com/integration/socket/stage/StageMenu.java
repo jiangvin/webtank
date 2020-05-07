@@ -35,9 +35,6 @@ public class StageMenu extends BaseStage {
     @Override
     public void processMessage(MessageDto messageDto, String sendFrom) {
         switch (messageDto.getMessageType()) {
-            case ADD_TANK:
-                processAddTank(messageDto, sendFrom);
-                break;
             case UPDATE_TANK_CONTROL:
                 processTankControl(messageDto, sendFrom);
                 break;
@@ -79,7 +76,7 @@ public class StageMenu extends BaseStage {
         messageService.sendMessage(new MessageDto(username, MessageType.REMOVE_TANK));
     }
 
-    private void processAddTank(MessageDto messageDto, String sendFrom) {
+    public void addTank(MessageDto messageDto, String sendFrom) {
         TankDto tankDto = ObjectUtil.readValue(messageDto.getMessage(), TankDto.class);
         if (tankDto == null) {
             return;
