@@ -2,6 +2,7 @@ package com.integration.socket.service;
 
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.dto.MessageDto;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,10 @@ public class MessageService {
 
     public void sendMessage(MessageDto messageDto) {
         sendMessage(messageDto, null);
+    }
+
+    public void sendDataReady(@NonNull String username) {
+        sendMessage(new MessageDto(null, MessageType.DATA_READY, username));
     }
 
     public void sendMessage(MessageDto messageDto, String sendFrom) {

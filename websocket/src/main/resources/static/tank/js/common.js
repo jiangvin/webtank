@@ -363,6 +363,13 @@ Common.addMessage = function (context, color) {
     Resource.getGame().addMessage(context, color);
 };
 
+Common.runNextStage = function () {
+    Resource.getGame().runNextStage();
+};
+Common.runLastStage = function () {
+    Resource.getGame().runLastStage();
+};
+
 //stomp connect
 Common.getStompStatus = function () {
     const stompClient = Resource.getStompClient();
@@ -430,7 +437,7 @@ Common.getRequest = function (url, callBack) {
         callBack(result.data);
     });
 };
-Common.postRequest = function (url, headers, body, callback) {
+Common.postRequest = function (url, headers, body, callbackSuccess, callBackFailed) {
     $.ajax({
         url: url,
         type: 'post',
@@ -440,9 +447,14 @@ Common.postRequest = function (url, headers, body, callback) {
         success: function (result) {
             if (!result.success) {
                 Common.addMessage(result.message, "#ff0000");
+                if (callBackFailed) {
+                    callBackFailed();
+                }
                 return;
             }
-            callback(result.data);
+            if (callbackSuccess) {
+                callbackSuccess(result.data);
+            }
         }
     });
 };

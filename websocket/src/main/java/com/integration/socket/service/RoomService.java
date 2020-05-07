@@ -6,6 +6,7 @@ import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.stage.StageRoom;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -23,6 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class RoomService {
     private ConcurrentHashMap<String, StageRoom> roomMap = new ConcurrentHashMap<>();
+
+    @Autowired
+    private MessageService messageService;
 
     /**
      * 新增List来保证rooms的顺序
@@ -77,7 +81,7 @@ public class RoomService {
         //TODO CHECK MAP
 
         log.info("room:{} will be created", roomDto);
-        StageRoom stageRoom = new StageRoom(roomDto);
+        StageRoom stageRoom = new StageRoom(roomDto, messageService);
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
         return stageRoom;

@@ -16,9 +16,7 @@
         }
 
         //开始初始化
-        this.stage = game.createStage({
-            status: 1
-        });
+        this.stage = game.createStage();
 
         this.tankLogo = this.stage.createTank({
             x: Common.width() / 2,
@@ -365,6 +363,12 @@
             const mapId = $('#selectMap').val();
             const roomType = $('#selectType').val();
             const group = $('#selectGroup').val();
+
+            document.getElementById('room-list').style.visibility = 'hidden';
+            Room.getOrCreateRoom();
+            Common.runNextStage();
+            Status.setStatus(Status.getStatusPause(), "房间创建中...");
+
             Common.postRequest("/user/createRoom",
                 {
                     "name": client.username,
@@ -377,8 +381,11 @@
                     "creatorTeamType": group,
                 },
                 function () {
-                    document.getElementById('room-list').style.visibility = 'hidden';
-                    Status.setStatus(Status.getStatusPause(),"房间创建中...");
+
+                },
+                function () {
+                    document.getElementById('room-list').style.visibility = 'visible';
+                    Common.runLastStage();
                 }
             )
         })

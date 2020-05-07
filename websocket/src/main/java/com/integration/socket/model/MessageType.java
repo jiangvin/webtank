@@ -18,6 +18,10 @@ public enum MessageType {
      */
     SYSTEM_MESSAGE,
     /**
+     * 数据传输完毕，通知前端可以解除暂停
+     */
+    DATA_READY,
+    /**
      * 所有用户id列表
      */
     USERS,

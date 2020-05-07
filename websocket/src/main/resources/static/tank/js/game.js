@@ -30,7 +30,7 @@ function Game() {
 
     //布景相关
     const _stages = [];
-    const _index = 0;
+    let _index = 0;
 
     //渲染控制
     let _drawHandler;
@@ -52,6 +52,9 @@ function Game() {
                 break;
             case "SYSTEM_MESSAGE":
                 Common.addMessage(messageDto.message, "#FF0");
+                break;
+            case "DATA_READY":
+                dataReady();
                 break;
             case "USERS":
                 _users = messageDto.message;
@@ -352,8 +355,28 @@ function Game() {
             size, size);
     };
 
+    this.runNextStage = function () {
+        if (_index >= _stages.length) {
+            return;
+        }
+        ++_index;
+    };
+    this.runLastStage = function () {
+        if (_index <= 0) {
+            return;
+        }
+        --_index;
+    };
+
     //初始化游戏引擎
     this.init = function () {
         this.start();
     };
+
+    const dataReady = function () {
+        if (Status.getStatusValue() !== Status.getStatusPause()) {
+            return;
+        }
+        Status.setStatus(Status.getStatusNormal());
+    }
 }
