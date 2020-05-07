@@ -8,6 +8,7 @@
         this.roomLimit = null;
         this.roomCount = null;
         this.pageInfo = null;
+        this.showSelectWindow = null;
     }
 
     Menu.getOrCreateMenu = function (game) {
@@ -79,16 +80,32 @@
         return this.tankLogo;
     };
 
-//删除提示信息
+    /**
+     * 连接成功后删除操作提示信息
+     */
     Menu.deleteInfo = function () {
         delete this.stage.items["info1"];
         delete this.stage.items["info2"];
     };
 
+    /**
+     * 设定是否显示选择窗
+     */
+    Menu.showSelect = function (show) {
+        if (show !== null) {
+            this.showSelectWindow = show;
+        }
+        Menu.getSelect().style.visibility = this.showSelectWindow ? 'visible' : 'hidden';
+    };
+
+    Menu.getSelect = function () {
+        return document.getElementById('room-list');
+    };
+
     Menu.showRoomList = function () {
         this.roomStart = 0;
         this.roomLimit = 5;
-        const selectWindow = document.getElementById("room-list");
+        const selectWindow = Menu.getSelect();
         generateWindowWidth(selectWindow);
 
         //添加末端的按钮
@@ -153,7 +170,7 @@
         this.pageInfo.className = "right";
         div.appendChild(this.pageInfo);
 
-        document.getElementById('room-list').style.visibility = 'visible';
+        Menu.showSelect(true);
         queryRoomList(this);
     };
 
@@ -163,7 +180,7 @@
 
             //删除之前的元素
             const buttonChild = document.getElementById("button-label");
-            const selectWindow = document.getElementById("room-list");
+            const selectWindow = Menu.getSelect();
             for (let i = 0; i < selectWindow.childNodes.length; ++i) {
                 const child = selectWindow.childNodes[i];
                 if (child.nodeType === 1 && child.id !== "button-label") {
@@ -266,7 +283,7 @@
 
     const createRoom = function (data) {
         //删除原本的所有DIV元素
-        const selectWindow = document.getElementById("room-list");
+        const selectWindow = Menu.getSelect();
         for (let i = 0; i < selectWindow.childNodes.length; ++i) {
             const child = selectWindow.childNodes[i];
             if (child.nodeType === 1) {
@@ -364,7 +381,6 @@
             const roomType = $('#selectType').val();
             const group = $('#selectGroup').val();
 
-            document.getElementById('room-list').style.visibility = 'hidden';
             Room.getOrCreateRoom();
             Common.runNextStage();
             Status.setStatus(Status.getStatusPause(), "房间创建中...");
@@ -384,7 +400,6 @@
 
                 },
                 function () {
-                    document.getElementById('room-list').style.visibility = 'visible';
                     Common.runLastStage();
                 }
             )

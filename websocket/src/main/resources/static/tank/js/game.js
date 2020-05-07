@@ -360,12 +360,20 @@ function Game() {
             return;
         }
         ++_index;
+
+        //因为选择框在场景以外，所以切换场景要强制隐藏
+        Menu.getSelect().style.visibility = 'hidden';
     };
     this.runLastStage = function () {
         if (_index <= 0) {
             return;
         }
         --_index;
+
+        //菜单特别处理
+        if (_index === 0) {
+            Menu.showSelect();
+        }
     };
 
     //初始化游戏引擎
