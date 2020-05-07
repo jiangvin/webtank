@@ -191,59 +191,46 @@
             data.roomList.forEach(function (room) {
                 let div = document.createElement('div');
                 div.className = "select-item";
+                div.setAttribute("roomType",room.roomType);
                 selectWindow.insertBefore(div, buttonChild);
 
                 const input = document.createElement('input');
                 input.type = 'radio';
                 input.id = room.roomId;
                 input.name = "drone";
-                //第一个元素被选中
-                if (selectFlag === false) {
-                    input.checked = true;
-                    selectFlag = true;
-                }
                 div.appendChild(input);
+                input.onchange = function (e) {
+                    selectRoomChange(e);
+                };
 
                 const label = document.createElement('label');
                 label.setAttribute("for", input.id);
                 label.className = "radio-label";
                 label.textContent = "房间名:" + room.roomId
                     + " 地图名:" + room.mapId
-                    + "," + room.roomType
-                    + " 创建者:" + room.creator
+                    + "[" + room.roomType
+                    + "] 创建者:" + room.creator
                     + " 人数:" + room.userCount;
                 div.appendChild(label);
 
-
-                const select = document.createElement('select');
-                select.id = room.roomId + "_";
-                const optView = document.createElement('option');
-                optView.text = "观看";
-                optView.value = "0";
-                select.add(optView);
-                switch (room.roomType) {
-                    case "PVP":
-                        const optRed = document.createElement('option');
-                        optRed.text = "红队";
-                        optRed.value = "1";
-                        select.add(optRed);
-                        const optBlue = document.createElement('option');
-                        optBlue.text = "蓝队";
-                        optBlue.value = "2";
-                        select.add(optBlue);
-                        break;
-                    case "PVE":
-                        const optPlayer = document.createElement('option');
-                        optPlayer.text = "玩家";
-                        optPlayer.value = "1";
-                        select.add(optPlayer);
-                        break;
-                    default:
-                        break;
+                //第一个元素被选中
+                if (selectFlag === false) {
+                    input.checked = true;
+                    selectFlag = true;
+                    const select = Resource.getSelect([]);
+                    select.id = "selectGroup";
+                    select.style.float = "right";
+                    div.appendChild(select);
+                    setSelectGroup(room.roomType);
                 }
-                div.appendChild(select);
             });
         });
+    };
+
+    const selectRoomChange = function (e) {
+        const div = e.currentTarget.parentElement;
+        div.append(document.getElementById("selectGroup"));
+        setSelectGroup(div.getAttribute("roomType"));
     };
 
     const updatePageInfo = function (menu, roomCount) {
@@ -308,10 +295,10 @@
         selectWindow.appendChild(createRoomSelect("地图:", data, "selectMap"));
         selectWindow.appendChild(createRoomSelect("类型:", ["PVP", "PVE", "EVE"], "selectType"));
         document.getElementById("selectType").onchange = function () {
-            setSelectGroup();
+            setSelectGroup($('#selectType').val());
         };
         selectWindow.appendChild(createRoomSelect("队伍:", [], "selectGroup"));
-        setSelectGroup();
+        setSelectGroup($('#selectType').val());
 
         const divButton = document.createElement('div');
         divButton.className = "select-item";
@@ -321,7 +308,7 @@
         buttonCommit.textContent = "确定";
         buttonCommit.className = "action";
         buttonCommit.onclick = function () {
-            commitRoomToServer();
+            createRoomToServer();
         };
         divButton.appendChild(buttonCommit);
         const buttonCancel = document.createElement("button");
@@ -333,10 +320,10 @@
         divButton.appendChild(buttonCancel);
     };
 
-    const setSelectGroup = function () {
+    const setSelectGroup = function (selectType) {
         const selectGroup = $('#selectGroup');
         selectGroup.find('option').remove().end();
-        switch ($('#selectType').val()) {
+        switch (selectType) {
             case "PVP":
                 selectGroup.append('<option value="RED">红队</option>');
                 selectGroup.append('<option value="BLUE">蓝队</option>');
@@ -366,7 +353,7 @@
         return div;
     };
 
-    const commitRoomToServer = function () {
+    const createRoomToServer = function () {
         const roomId = $('#input-room-name').val();
         if (roomId === "") {
             Common.addMessage("房间号不能为空!", "#F00");
@@ -403,6 +390,10 @@
                 }
             )
         })
+    }
+    
+    const joinRoomToServer = function () {
+        
     }
 
 }
