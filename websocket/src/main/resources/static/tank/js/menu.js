@@ -56,7 +56,7 @@
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
                 context.fillStyle = '#FFF';
-                context.fillText('Tank World', Common.width() / 2, 40);
+                context.fillText('坦克大战', Common.width() / 2, 40);
             }
         });
 
