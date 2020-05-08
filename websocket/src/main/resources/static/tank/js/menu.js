@@ -169,6 +169,10 @@
     };
 
     const queryRoomList = function (menu) {
+
+        /**
+         * @param room {{roomId,mapId,roomType,creator,userCount}}
+         */
         Common.getRequest('/user/getRooms?start=' + menu.roomStart + "&limit=" + menu.roomLimit, function (data) {
             updatePageInfo(menu, data.roomCount);
 
@@ -385,7 +389,7 @@
         const selectGroup = $('#selectGroup').val();
         const roomId = menu.selectRoomId;
         if (!roomId) {
-            Common.addMessage("当前没有房间！","#f00");
+            Common.addMessage("当前没有房间！", "#f00");
             return;
         }
 
