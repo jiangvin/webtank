@@ -133,6 +133,10 @@ Common.bindKeyboard = function () {
             case "ArrowRight":
                 event = "Right";
                 break;
+            case " ":
+            case "Spacebar":
+                event = "FIRE";
+                break;
             default:
                 break;
         }
@@ -167,7 +171,13 @@ Common.bindTouch = function () {
         let x = touchPoint.x;
         let y = touchPoint.y;
 
-        const distance = Common.distance(x, y, _touchControl.centerX, _touchControl.centerY);
+        let distance = Common.distance(x, y, _touchControl.rightCenterX, _touchControl.rightCenterY);
+        if (distance < _touchControl.rightRadius) {
+            Resource.getGame().controlEvent("FIRE");
+            return;
+        }
+
+        distance = Common.distance(x, y, _touchControl.centerX, _touchControl.centerY);
         if (distance > _touchControl.radius) {
             //超过外圆，不做任何操作
             return;

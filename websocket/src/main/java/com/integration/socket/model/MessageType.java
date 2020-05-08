@@ -47,6 +47,10 @@ public enum MessageType {
      */
     UPDATE_TANK_CONTROL,
     /**
+     * 同步开火状态
+     */
+    UPDATE_TANK_FIRE,
+    /**
      * 创建房间
      */
     CREATE_ROOM,

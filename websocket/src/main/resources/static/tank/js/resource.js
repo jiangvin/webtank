@@ -84,7 +84,7 @@
         if (!this.id) {
             this.id = 1;
         }
-        return "generatedId=" + this.id++;
+        return "generatedClientId=" + this.id++;
     };
 
     Resource.getSelect = function (options) {

@@ -15,12 +15,8 @@ public class TankDto {
     private Double x;
     private Double y;
     private String typeId;
-
-    /**
-     * 客户端最少传输资料，朝向和状态（在玩家控制时传输）
-     */
-    private int orientation;
-    private int action;
+    private Integer orientation;
+    private Integer action;
 
     public static TankDto convert(TankBo tankBo) {
         TankDto tankDto = new TankDto();
