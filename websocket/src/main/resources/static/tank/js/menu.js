@@ -7,8 +7,12 @@
         this.roomStart = null;
         this.roomLimit = null;
         this.roomCount = null;
-        this.pageInfo = null;
+
+        this.pageInfo = null;          //当前页数和总页数
         this.showSelectWindow = null;
+
+        this.roomList = [];            //房间列表
+        this.selectRoomId = null;      //加入时选中的房间号;
     }
 
     Menu.getOrCreateMenu = function (game) {
@@ -109,6 +113,8 @@
     };
 
     Menu.showRoomList = function () {
+        const thisMenu = this;
+
         this.roomStart = 0;
         this.roomLimit = 5;
         const selectWindow = Menu.getSelect();
@@ -123,6 +129,9 @@
         const btnJoin = document.createElement('button');
         btnJoin.textContent = "加入房间";
         btnJoin.className = "action";
+        btnJoin.onclick = function () {
+            joinRoom(thisMenu);
+        };
         div.appendChild(btnJoin);
 
         const btnCreate = document.createElement('button');
@@ -138,7 +147,6 @@
         const btnNext = document.createElement('button');
         btnNext.textContent = "下一页";
         btnNext.className = "right";
-        const thisMenu = this;
         btnNext.onclick = function () {
             const pageInfo = generatePageInfo(thisMenu);
             if (pageInfo.currentPage >= pageInfo.totalPage) {
@@ -187,8 +195,11 @@
                 }
             }
 
+            menu.roomList = [];
             let selectFlag = false;
             data.roomList.forEach(function (room) {
+                menu.roomList[room.roomId] = room;
+
                 let div = document.createElement('div');
                 div.className = "select-item";
                 div.setAttribute("roomType", room.roomType);
@@ -200,7 +211,7 @@
                 input.name = "drone";
                 div.appendChild(input);
                 input.onchange = function (e) {
-                    selectRoomChange(e);
+                    selectRoomChange(e, menu);
                 };
 
                 const label = document.createElement('label');
@@ -215,6 +226,7 @@
 
                 //第一个元素被选中
                 if (selectFlag === false) {
+                    menu.selectRoomId = room.roomId;
                     input.checked = true;
                     selectFlag = true;
                     const select = Resource.getSelect([]);
@@ -227,7 +239,8 @@
         });
     };
 
-    const selectRoomChange = function (e) {
+    const selectRoomChange = function (e, menu) {
+        menu.selectRoomId = e.currentTarget.id;
         const div = e.currentTarget.parentElement;
         div.append(document.getElementById("selectGroup"));
         setSelectGroup(div.getAttribute("roomType"));
@@ -380,6 +393,19 @@
         });
     };
 
-    const joinRoomToServer = function () {
+    const joinRoom = function (menu) {
+        const selectGroup = $('#selectGroup').val();
+        const roomId = menu.selectRoomId;
+
+        Room.getOrCreateRoom();
+        Common.runNextStage();
+        Status.setStatus(Status.getStatusPause(), "房间创建中...");
+        Common.sendStompMessage({
+            "roomId": roomId,
+            "joinTeamType": selectGroup
+        }, "JOIN_ROOM");
+        Common.addConnectTimeoutEvent(function () {
+            Common.runLastStage();
+        });
     }
 }

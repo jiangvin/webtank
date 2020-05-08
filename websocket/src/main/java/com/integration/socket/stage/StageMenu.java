@@ -106,6 +106,8 @@ public class StageMenu extends BaseStage {
         messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
         MessageDto sendBack = new MessageDto(getTankList(), MessageType.TANKS, getUserList());
         messageService.sendMessage(sendBack);
+
+        messageService.sendReady(sendFrom);
     }
 
     private List<TankDto> getTankList() {

@@ -36,7 +36,7 @@ public class RoomService {
      */
     private List<StageRoom> roomList = new ArrayList<>();
 
-    public void remove(StageRoom room) {
+    void remove(StageRoom room) {
         roomMap.remove(room.getRoomId());
         roomList.remove(room);
     }

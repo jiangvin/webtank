@@ -115,8 +115,17 @@ public class StageRoom extends BaseStage {
         if (getUserCount() == 0) {
             return;
         }
+        sendStatusAndMessage(username, true);
+    }
+
+    private void sendStatusAndMessage(String username, boolean leave) {
         messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
-        String message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
+        String message;
+        if (leave) {
+            message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
+        } else {
+            message = String.format("%s 加入了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
+        }
         messageService.sendMessage(new MessageDto(message, MessageType.SYSTEM_MESSAGE));
     }
 
@@ -125,7 +134,7 @@ public class StageRoom extends BaseStage {
         userBo.setRoomId(this.roomId);
         userBo.setTeamType(teamType);
 
-        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
+        sendStatusAndMessage(userBo.getUsername(), false);
         addNewTank(userBo.getUsername());
 
         //通知前端数据传输完毕

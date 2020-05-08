@@ -105,6 +105,8 @@ public class GameService {
             case CREATE_ROOM:
                 createRoom(messageDto, sendFrom);
                 break;
+            case JOIN_ROOM:
+                joinRoom(messageDto, sendFrom);
             default:
                 currentStage(userBo).processMessage(messageDto, sendFrom);
                 break;
@@ -154,6 +156,30 @@ public class GameService {
         room.add(userBo, roomDto.getJoinTeamType());
     }
 
+    private void joinRoom(MessageDto messageDto, String sendFrom) {
+        RoomDto roomDto = ObjectUtil.readValue(messageDto.getMessage(), RoomDto.class);
+        if (roomDto == null) {
+            return;
+        }
+
+        //check user
+        UserBo userBo = onlineUserService.get(sendFrom);
+        if (userBo == null) {
+            throw new CustomException("用户不存在:" + sendFrom);
+        }
+
+        //check room
+        if (!roomService.roomNameExists(roomDto.getRoomId())) {
+            throw new CustomException("房间不存在:" + roomDto.getRoomId());
+        }
+
+        //remove from old stage
+        currentStage(userBo).remove(userBo.getUsername());
+
+        //add into new stage
+        roomService.get(roomDto.getRoomId()).add(userBo, roomDto.getJoinTeamType());
+    }
+
     @Scheduled(fixedDelay = 17)
     public void update() {
         menu.update();
@@ -197,7 +223,6 @@ public class GameService {
             sendUserStatusAndMessage(sendFrom, false);
         }
         menu.addTank(messageDto, sendFrom);
-        messageService.sendReady(sendFrom);
     }
 
     private void sendUserStatusAndMessage(String username, boolean isLeave) {

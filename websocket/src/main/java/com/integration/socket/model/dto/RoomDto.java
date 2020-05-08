@@ -3,7 +3,6 @@ package com.integration.socket.model.dto;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
 import com.integration.socket.stage.StageRoom;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +13,6 @@ import lombok.NoArgsConstructor;
  */
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class RoomDto {
     private String roomId;
