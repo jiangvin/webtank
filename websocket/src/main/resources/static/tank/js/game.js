@@ -345,7 +345,7 @@ function Game() {
         context.closePath();
         context.fill();
 
-        //右圆
+        //子弹
         context.beginPath();
         context.arc(touchInfo.rightCenterX, touchInfo.rightCenterY,
             touchInfo.rightRadius, 0, 2 * Math.PI);
@@ -359,14 +359,24 @@ function Game() {
         context.closePath();
         context.fill();
 
-        context.globalAlpha = 1;
-        const image = Resource.getImage("horn");
-        const size = touchInfo.hornRadius * 2;
+        //图层
+        context.globalAlpha = 0.5;
+        let image = Resource.getImage("ammo-icon");
+        let size = touchInfo.rightRadius * 1.5;
+        context.drawImage(image,
+            0, 0,
+            image.width, image.height,
+            touchInfo.rightCenterX - size / 2, touchInfo.rightCenterY - size / 2,
+            size, size);
+
+        image = Resource.getImage("horn-icon");
+        size = touchInfo.hornRadius * 2;
         context.drawImage(image,
             0, 0,
             image.width, image.height,
             touchInfo.hornCenterX - size / 2, touchInfo.hornCenterY - size / 2,
             size, size);
+        context.globalAlpha = 1;
     };
 
     this.runNextStage = function () {

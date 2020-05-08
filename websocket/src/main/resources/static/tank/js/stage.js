@@ -20,6 +20,7 @@ function Stage(params) {
                         thisStage.items[tank.id].y = tank.y;
                         thisStage.items[tank.id].orientation = tank.orientation;
                         thisStage.items[tank.id].action = tank.action;
+                        thisStage.items[tank.id].typeId = tank.typeId;
                     } else {
                         thisStage.createTank({
                             id: tank.id,
@@ -27,7 +28,7 @@ function Stage(params) {
                             y: tank.y,
                             orientation: tank.orientation,
                             action: tank.action,
-                            speed: tank.speed,
+                            typeId: tank.typeId,
                             showId: true
                         });
                     }
@@ -56,19 +57,21 @@ function Stage(params) {
 
     this.createItem = function (options) {
         const item = new Item(options);
-        item.stage = this;
         this.items[item.id] = item;
         return item;
     };
-    this.updateItemId = function (item, newId) {
+    this.updateItemId = function (item, newId, showId) {
         //删除旧id
         if (item.id && this.items[item.id]) {
             delete this.items[item.id];
         }
 
         //增加新id,默认新id要显示出来
+        if (showId === undefined) {
+            showId = true;
+        }
         item.id = newId;
-        item.showId = true;
+        item.showId = showId;
         this.items[newId] = item;
     };
 
@@ -76,12 +79,7 @@ function Stage(params) {
         if (!options.image) {
             options.image = Resource.getImage("tank01");
         }
-        if (options.status == null) {
-            options.status = 1;
-        }
-        options.draw = function (context) {
-            this.drawImage(context);
-        };
+
         options.update = function () {
             this.updateAnimation();
 
@@ -89,18 +87,24 @@ function Stage(params) {
                 return;
             }
 
+            const tankType = Resource.getTankType(this.typeId);
+            let speed = 0;
+            if (tankType) {
+                speed = tankType.speed;
+            }
+
             switch (this.orientation) {
                 case 0:
-                    this.y -= this.speed;
+                    this.y -= speed;
                     break;
                 case 1:
-                    this.y += this.speed;
+                    this.y += speed;
                     break;
                 case 2:
-                    this.x -= this.speed;
+                    this.x -= speed;
                     break;
                 case 3:
-                    this.x += this.speed;
+                    this.x += speed;
                     break;
             }
         };

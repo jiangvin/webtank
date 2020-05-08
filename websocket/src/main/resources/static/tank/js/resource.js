@@ -3,8 +3,11 @@
     function Resource() {
         this.game = null;
         this.images = null;
+
+        //id生成器
         this.id = null;
         this.stompClient = null;
+        this.tankTypes = null;
     }
 
     Resource.getImages = function () {
@@ -12,7 +15,7 @@
             return this.images;
         }
 
-        this.images = [];
+        this.images = new Map();
 
 
         //load all tank images
@@ -23,24 +26,25 @@
             } else {
                 id = "tank" + i;
             }
-            loadTankImage(id, this.images);
+            loadOrientationImage(id, this.images);
         }
+        loadOrientationImage("ammo", this.images);
         return this.images;
     };
 
-    const loadTankImage = function (imageId, images) {
+    const loadOrientationImage = function (imageId, images) {
         const img = document.createElement('img');
         img.src = 'tank/image/' + imageId + '.png';
         img.widthPics = 4;
         img.heightPics = 1;
         img.displayWidth = img.width / img.widthPics;
         img.displayHeight = img.height / img.heightPics;
-        images[imageId] = img;
+        images.set(imageId, img);
     };
 
     Resource.getImage = function (id, widthPics, heightPics) {
         const images = Resource.getImages();
-        if (!images[id]) {
+        if (!images.has(id)) {
             widthPics = widthPics ? widthPics : 1;
             heightPics = heightPics ? heightPics : 1;
             const img = document.createElement('img');
@@ -49,9 +53,9 @@
             img.heightPics = heightPics;
             img.displayWidth = img.width / img.widthPics;
             img.displayHeight = img.height / img.heightPics;
-            images[id] = img;
+            images.set(id, img);
         }
-        return images[id];
+        return images.get(id);
     };
 
     Resource.getGame = function () {
@@ -100,4 +104,19 @@
     Resource.getStompClient = function () {
         return this.stompClient;
     };
+
+    Resource.setTankTypes = function (dataList) {
+        const types = new Map();
+        /**
+         * @param data {{typeId,speed,ammoSpeed}}
+         */
+        dataList.forEach(function (data) {
+            types.set(data.typeId, data);
+        });
+        this.tankTypes = types;
+    };
+
+    Resource.getTankType = function (id) {
+        return this.tankTypes.get(id);
+    }
 }

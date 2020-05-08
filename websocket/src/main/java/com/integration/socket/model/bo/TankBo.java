@@ -19,7 +19,7 @@ public class TankBo {
     private ActionType actionType = ActionType.STOP;
     private double x;
     private double y;
-    private double speed;
+    private TankTypeBo type;
 
     public static TankBo convert(TankDto tankDto) {
         TankBo tankBo = new TankBo();
@@ -29,7 +29,14 @@ public class TankBo {
         tankBo.setActionType(ActionType.convert(tankDto.getAction()));
         tankBo.setX(tankDto.getX());
         tankBo.setY(tankDto.getY());
-        tankBo.setSpeed(tankDto.getSpeed());
+        tankBo.setType(TankTypeBo.getTankType(tankDto.getTypeId()));
         return tankBo;
+    }
+
+    public double getSpeed() {
+        if (type != null) {
+            return type.getSpeed();
+        }
+        return 1.0;
     }
 }

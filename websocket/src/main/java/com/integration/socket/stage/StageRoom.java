@@ -4,6 +4,7 @@ import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.RoomType;
+import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.TeamType;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
@@ -144,7 +145,7 @@ public class StageRoom extends BaseStage {
     private void addNewTank(String username) {
         TankBo tankBo = new TankBo();
         tankBo.setTankId(username);
-        tankBo.setSpeed(1.0);
+        tankBo.setType(TankTypeBo.getTankType("tank01"));
         tankBo.setX(100.0);
         tankBo.setY(100.0);
 

@@ -32,21 +32,8 @@
             image: getRandomTankImage(),
             x: Common.width() / 2,
             y: Common.height() * .45,
-            speed: 1,
             orientation: 3,
-            scale: 1.5,
-            timeout: 30,
-            animationStatus: -0.05,
-            animation: function () {
-                //logo animation
-                this.scale += this.animationStatus;
-                if (this.timeout === 20 || this.timeout === 10) {
-                    this.animationStatus = 0.05;
-                }
-                if (this.timeout === 5 || this.timeout === 15) {
-                    this.animationStatus = -0.05;
-                }
-            }
+            scale: 1.5
         });
 
         //游戏名
@@ -56,7 +43,7 @@
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
                 context.fillStyle = '#FFF';
-                context.fillText('Tank World', Common.width() / 2, 40);
+                context.fillText('坦克大战', Common.width() / 2, 40);
             }
         });
 
@@ -181,6 +168,10 @@
     };
 
     const queryRoomList = function (menu) {
+
+        /**
+         * @param room {{roomId,mapId,roomType,creator,userCount}}
+         */
         Common.getRequest('/user/getRooms?start=' + menu.roomStart + "&limit=" + menu.roomLimit, function (data) {
             updatePageInfo(menu, data.roomCount);
 
@@ -396,10 +387,14 @@
     const joinRoom = function (menu) {
         const selectGroup = $('#selectGroup').val();
         const roomId = menu.selectRoomId;
+        if (!roomId) {
+            Common.addMessage("当前没有房间！", "#f00");
+            return;
+        }
 
         Room.getOrCreateRoom();
         Common.runNextStage();
-        Status.setStatus(Status.getStatusPause(), "房间创建中...");
+        Status.setStatus(Status.getStatusPause(), "加入房间中...");
         Common.sendStompMessage({
             "roomId": roomId,
             "joinTeamType": selectGroup
