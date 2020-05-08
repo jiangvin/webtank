@@ -1,8 +1,11 @@
 package com.integration.socket.controller;
 
+import com.integration.socket.model.MessageType;
+import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.service.GameService;
 import com.integration.socket.service.OnlineUserService;
+import com.integration.socket.service.RoomService;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,14 @@ public class UserController {
     @Autowired
     private GameService gameService;
 
+    @Autowired
+    private RoomService roomService;
+
+    @GetMapping("/ping")
+    public MessageDto ping() {
+        return new MessageDto("Hello World", MessageType.SYSTEM_MESSAGE, "Player");
+    }
+
     @GetMapping("/getUsers")
     public List<String> getUsers() {
         return onlineUserService.getUserList();
@@ -47,19 +58,19 @@ public class UserController {
     @GetMapping("/getRooms")
     public RoomListDto getRooms(@RequestParam(value = "start", defaultValue = "0") int start,
                                 @RequestParam(value = "limit", defaultValue = "5") int limit) {
-        return gameService.getRoomListDto(start, limit);
+        return roomService.getRoomListDto(start, limit);
+    }
+
+    @GetMapping("/checkRoomName")
+    public boolean checkRoomName(@RequestParam(value = "name") String name) {
+        if (roomService.roomNameExists(name)) {
+            throw new CustomException("输入的房间号重复: " + name);
+        }
+        return true;
     }
 
     @GetMapping("/getMaps")
     public List<String> getMaps() {
         return Collections.singletonList("default");
-    }
-
-    @GetMapping("/checkRoomName")
-    public boolean checkRoomName(@RequestParam(value = "name") String name) {
-        if (gameService.roomNameExists(name)) {
-            throw new CustomException("输入的房间号重复: " + name);
-        }
-        return true;
     }
 }

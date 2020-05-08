@@ -35,6 +35,10 @@ public class ObjectUtil {
     }
 
     public static <T> T readValue(Object object, Class<T> valueType) {
+        if (object == null) {
+            return null;
+        }
+
         if (object instanceof Map) {
             return readValue((Map)object, valueType);
         } else if (object instanceof String) {

@@ -24,20 +24,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class StageMenu extends BaseStage {
-    private MessageService messageService;
 
     private ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
     public StageMenu(MessageService messageService) {
-        this.messageService = messageService;
+        super(messageService);
     }
 
     @Override
     public void processMessage(MessageDto messageDto, String sendFrom) {
         switch (messageDto.getMessageType()) {
-            case ADD_TANK:
-                processAddTank(messageDto, sendFrom);
-                break;
             case UPDATE_TANK_CONTROL:
                 processTankControl(messageDto, sendFrom);
                 break;
@@ -73,13 +69,23 @@ public class StageMenu extends BaseStage {
 
     @Override
     public void remove(String username) {
-        if (!removeTank(username)) {
+        if (!removeTank(username) || getUserList().isEmpty()) {
             return;
         }
+        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
         messageService.sendMessage(new MessageDto(username, MessageType.REMOVE_TANK));
     }
 
-    private void processAddTank(MessageDto messageDto, String sendFrom) {
+    @Override
+    public List<String> getUserList() {
+        List<String> users = new ArrayList<>();
+        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
+            users.add(kv.getKey());
+        }
+        return users;
+    }
+
+    public void addTank(MessageDto messageDto, String sendFrom) {
         TankDto tankDto = ObjectUtil.readValue(messageDto.getMessage(), TankDto.class);
         if (tankDto == null) {
             return;
@@ -87,14 +93,21 @@ public class StageMenu extends BaseStage {
         tankDto.setId(sendFrom);
 
         if (tankMap.containsKey(tankDto.getId())) {
+            //单独发送同步消息
+            messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, sendFrom));
+            messageService.sendMessage(new MessageDto(getTankList(), MessageType.TANKS, sendFrom));
             return;
         }
+
         TankBo tankBo = TankBo.convert(tankDto);
         tankMap.put(tankBo.getTankId(), tankBo);
 
         //收到单位，即将向所有人同步单位信息
-        MessageDto sendBack = new MessageDto(getTankList(), MessageType.TANKS);
+        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
+        MessageDto sendBack = new MessageDto(getTankList(), MessageType.TANKS, getUserList());
         messageService.sendMessage(sendBack);
+
+        messageService.sendReady(sendFrom);
     }
 
     private List<TankDto> getTankList() {
@@ -119,7 +132,7 @@ public class StageMenu extends BaseStage {
         }
 
         TankDto response = TankDto.convert(updateBo);
-        MessageDto sendBack = new MessageDto(Collections.singletonList(response), MessageType.TANKS);
+        MessageDto sendBack = new MessageDto(Collections.singletonList(response), MessageType.TANKS, getUserList());
         messageService.sendMessage(sendBack);
     }
 

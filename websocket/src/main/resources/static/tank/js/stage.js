@@ -1,14 +1,12 @@
-
-
 function Stage(params) {
-    this.params = params||{};
+    this.params = params || {};
     this.settings = {
-        index:0,                        //布景索引
-        status:0,						//布景状态,0表示未激活/结束,1表示正常,之后为自定义暂停状态
-        items:[],						//对象队列
-        controlEvent:function(){}
+        index: 0,                        //布景索引
+        items: [],						//对象队列
+        controlEvent: function () {
+        }
     };
-    Common.extend(this,this.settings,this.params);
+    Common.extend(this, this.settings, this.params);
 
     this.receiveStompMessage = function (messageDto) {
         const thisStage = this;
@@ -24,9 +22,9 @@ function Stage(params) {
                         thisStage.items[tank.id].action = tank.action;
                     } else {
                         thisStage.createTank({
-                            id:tank.id,
-                            x:tank.x,
-                            y:tank.y,
+                            id: tank.id,
+                            x: tank.x,
+                            y: tank.y,
                             orientation: tank.orientation,
                             action: tank.action,
                             speed: tank.speed,
@@ -44,29 +42,19 @@ function Stage(params) {
         }
     };
 
-    this.draw = function(context) {
+    this.draw = function (context) {
         for (let k in this.items) {
             this.items[k].draw(context);
         }
     };
 
-    //更新相关
-    this.canUpdate = function() {
-        return this.status === 1;
-    };
-    this.update = function() {
-        if (!this.canUpdate()) {
-            return;
-        }
-
+    this.update = function () {
         for (let k in this.items) {
-            if (this.items[k].canUpdate()) {
-                this.items[k].update();
-            }
+            this.items[k].update();
         }
     };
 
-    this.createItem = function(options) {
+    this.createItem = function (options) {
         const item = new Item(options);
         item.stage = this;
         this.items[item.id] = item;

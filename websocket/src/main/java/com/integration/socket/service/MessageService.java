@@ -2,10 +2,10 @@ package com.integration.socket.service;
 
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.dto.MessageDto;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -30,63 +30,25 @@ public class MessageService {
     }
 
     public void sendMessage(MessageDto messageDto) {
-        sendMessage(messageDto, null);
-    }
+        log.info("send message:{}", messageDto.toString());
 
-    public void sendMessage(MessageDto messageDto, String sendFrom) {
-        log.info("send message:{} from:{}", messageDto.toString(), sendFrom);
+        List<String> sendToList = messageDto.getSendToList();
 
-        String sendTo = messageDto.getSendTo();
-        if (StringUtils.isEmpty(sendTo)) {
-            //发送给所有人
+        if (messageDto.sendToAll()) {
             simpMessagingTemplate.convertAndSend(
                 TOPIC_PATH,
                 messageDto);
         } else {
-            //发送给指定用户
-            simpMessagingTemplate.convertAndSendToUser(
-                sendTo,
-                QUEUE_PATH,
-                messageDto);
-
-            //补发给发送者一份
-            if (StringUtils.isEmpty(sendFrom) || sendFrom.equals(sendTo)) {
-                return;
+            for (String sendTo : sendToList) {
+                simpMessagingTemplate.convertAndSendToUser(
+                    sendTo,
+                    QUEUE_PATH,
+                    messageDto);
             }
-            simpMessagingTemplate.convertAndSendToUser(
-                sendFrom,
-                QUEUE_PATH,
-                messageDto);
         }
     }
 
-    void processUserMessage(MessageDto messageDto, String sendFrom) {
-        if (StringUtils.isEmpty(messageDto.getSendTo())) {
-            messageDto.setMessage(String.format("%s: %s", sendFrom, messageDto.getMessage()));
-        } else {
-            messageDto.setMessage(String.format("%s → %s: %s", sendFrom, messageDto.getSendTo(), messageDto.getMessage()));
-        }
-        sendMessage(messageDto);
-    }
-
-    void sendUserStatusAndMessage(List<String> users, String username, boolean isLeave) {
-        //没人了，不用更新状态
-        if (users.isEmpty()) {
-            log.info("no user in service, no need to send message");
-            return;
-        }
-
-        sendMessage(new MessageDto(users, MessageType.USERS));
-        if (isLeave) {
-            sendMessage(new MessageDto(String.format("%s 离开了! 当前人数: %d",
-                                                     username,
-                                                     users.size()),
-                                       MessageType.SYSTEM_MESSAGE));
-        } else {
-            sendMessage(new MessageDto(String.format("%s 加入了! 当前人数: %d",
-                                                     username,
-                                                     users.size()),
-                                       MessageType.SYSTEM_MESSAGE));
-        }
+    public void sendReady(@NonNull String username) {
+        sendMessage(new MessageDto(null, MessageType.SERVER_READY, username));
     }
 }

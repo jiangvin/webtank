@@ -12,11 +12,16 @@ public enum MessageType {
      */
     USER_MESSAGE,
 
+
     /**
      * 单向发送
      * 服务器 -> 客户端
      */
     SYSTEM_MESSAGE,
+    /**
+     * 数据传输完毕，通知前端可以解除暂停
+     */
+    SERVER_READY,
     /**
      * 所有用户id列表
      */
@@ -30,20 +35,23 @@ public enum MessageType {
      */
     REMOVE_TANK,
 
+
     /**
      * 单向发送
      * 客户端 -> 服务器
      * 用户准备完毕
      */
-    READY,
-
-    /**
-     * 用户新增tank，只在menu页使用
-     */
-    ADD_TANK,
-
+    CLIENT_READY,
     /**
      * 同步状态，为了避免客户端作弊，只传递状态
      */
     UPDATE_TANK_CONTROL,
+    /**
+     * 创建房间
+     */
+    CREATE_ROOM,
+    /**
+     * 加入房间
+     */
+    JOIN_ROOM,
 }

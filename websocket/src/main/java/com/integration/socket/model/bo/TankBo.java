@@ -15,8 +15,8 @@ import lombok.Data;
 public class TankBo {
     private String tankId;
     private String userId;
-    private OrientationType orientationType;
-    private ActionType actionType;
+    private OrientationType orientationType = OrientationType.UP;
+    private ActionType actionType = ActionType.STOP;
     private double x;
     private double y;
     private double speed;

@@ -1,6 +1,7 @@
-const Common = function() {};
+const Common = function () {
+};
 
-Common.extend = function(target, settings, params) {
+Common.extend = function (target, settings, params) {
     params = params || {};
     for (let i in settings) {
         target[i] = params[i] || settings[i];
@@ -9,7 +10,7 @@ Common.extend = function(target, settings, params) {
 };
 
 let _canvas;
-Common.getCanvas = function() {
+Common.getCanvas = function () {
     if (!_canvas) {
         _canvas = document.getElementById("canvas");
 
@@ -28,12 +29,12 @@ Common.width = function () {
 Common.height = function () {
     return Common.getCanvas().height;
 };
-Common.windowChange = function() {
+Common.windowChange = function () {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
     let style = "";
-    if(width >= height) { // 横屏
+    if (width >= height) { // 横屏
         style += "width:" + width + "px;";  // 注意旋转后的宽高切换
         style += "height:" + height + "px;";
         style += "-webkit-transform: rotate(0); transform: rotate(0);";
@@ -41,8 +42,7 @@ Common.windowChange = function() {
         style += "transform-origin: 0 0;";
         _canvas.width = width;
         _canvas.height = height;
-    }
-    else { // 竖屏
+    } else { // 竖屏
         style += "width:" + height + "px;";
         style += "height:" + width + "px;";
         style += "-webkit-transform: rotate(90deg); transform: rotate(90deg);";
@@ -52,14 +52,14 @@ Common.windowChange = function() {
         _canvas.width = height;
         _canvas.height = width;
     }
-    let wrapper =  document.getElementById("wrapper");
+    let wrapper = document.getElementById("wrapper");
     wrapper.style.cssText = style;
     Common.generateTouchInfo(height > width);
 };
 
 //操控相关
 let _touchControl = {"touch": null};
-Common.generateTouchInfo = function(portrait) {
+Common.generateTouchInfo = function (portrait) {
     let centerX = Common.width() / 4 / 2;
     let centerY = Common.height() / 2 / 2;
     let radius = centerX > centerY ? centerY : centerX;
@@ -92,29 +92,29 @@ Common.generateTouchInfo = function(portrait) {
 
     _touchControl.portrait = portrait;
 };
-Common.setTouch = function(touch) {
+Common.setTouch = function (touch) {
     if (_touchControl.touch !== null) {
         return;
     }
     _touchControl.touch = touch;
     const input = $('#input');
     if (_touchControl.touch) {
-        input.attr("placeholder","请输入信息,再次点击喇叭发送");
+        input.attr("placeholder", "请输入信息,点击喇叭发送");
         Common.bindTouch();
     } else {
-        input.attr("placeholder","请输入信息,回车发送");
+        input.attr("placeholder", "请输入信息,回车发送");
         Common.bindKeyboard();
     }
 
 };
-Common.getTouchInfo = function() {
+Common.getTouchInfo = function () {
     return _touchControl;
 };
-Common.getTouch = function() {
+Common.getTouch = function () {
     return _touchControl.touch;
 };
-Common.bindKeyboard = function() {
-    window.addEventListener("keydown",function(e) {
+Common.bindKeyboard = function () {
+    window.addEventListener("keydown", function (e) {
         let event = null;
         switch (e.key) {
             case "Up":
@@ -140,7 +140,7 @@ Common.bindKeyboard = function() {
             Resource.getGame().controlEvent(event);
         }
     });
-    window.addEventListener('keyup',function(e) {
+    window.addEventListener('keyup', function (e) {
         let event = null;
         switch (e.key) {
             case "ArrowUp":
@@ -161,13 +161,13 @@ Common.bindKeyboard = function() {
         }
     });
 };
-Common.bindTouch = function() {
-    window.addEventListener('touchstart', function(e) {
-        const touchPoint = Common.getTouchPoint(e.touches[0]);
+Common.bindTouch = function () {
+    window.addEventListener('touchstart', function (e) {
+        const touchPoint = Common.getTouchPoint(e.touches[e.touches.length - 1]);
         let x = touchPoint.x;
         let y = touchPoint.y;
 
-        const distance = Common.distance(x,y,_touchControl.centerX,_touchControl.centerY);
+        const distance = Common.distance(x, y, _touchControl.centerX, _touchControl.centerY);
         if (distance > _touchControl.radius) {
             //超过外圆，不做任何操作
             return;
@@ -177,7 +177,7 @@ Common.bindTouch = function() {
         _touchControl.touchY = y;
         Resource.getGame().controlEvent(Common.getEventFromTouch());
     });
-    window.addEventListener('touchend', function(e) {
+    window.addEventListener('touchend', function (e) {
         //所有手指都离开屏幕才算坦克停止
         if (e.touches.length === 0) {
             _touchControl.touchX = null;
@@ -185,12 +185,16 @@ Common.bindTouch = function() {
             Resource.getGame().controlEvent("Stop");
         }
     });
-    window.addEventListener('touchmove', function(e) {
+    window.addEventListener('touchmove', function (e) {
+        //only support one point move
+        if (e.touches.length > 1) {
+            return;
+        }
         const touchPoint = Common.getTouchPoint(e.touches[0]);
         let x = touchPoint.x;
         let y = touchPoint.y;
 
-        const distance = Common.distance(x,y,_touchControl.centerX,_touchControl.centerY);
+        const distance = Common.distance(x, y, _touchControl.centerX, _touchControl.centerY);
         const radius = _touchControl.radius;
         if (distance <= radius) {
             _touchControl.touchX = x;
@@ -228,7 +232,7 @@ Common.bindTouch = function() {
         Resource.getGame().controlEvent(Common.getEventFromTouch());
     });
 };
-Common.getEventFromTouch = function() {
+Common.getEventFromTouch = function () {
     let xLength = Math.abs(_touchControl.touchX - _touchControl.centerX);
     let yLength = Math.abs(_touchControl.touchY - _touchControl.centerY);
     if (xLength > yLength) {
@@ -245,7 +249,7 @@ Common.getEventFromTouch = function() {
         }
     }
 };
-Common.getTouchPoint = function(eventPoint) {
+Common.getTouchPoint = function (eventPoint) {
     let x = eventPoint.clientX;
     let y = eventPoint.clientY;
 
@@ -263,7 +267,7 @@ Common.getTouchPoint = function(eventPoint) {
 };
 
 let _context;
-Common.getContext = function() {
+Common.getContext = function () {
     if (!_context) {
         const canvas = this.getCanvas();
         _context = canvas.getContext('2d');
@@ -272,17 +276,17 @@ Common.getContext = function() {
 };
 
 //按钮
-Common.buttonBind = function(callback) {
+Common.buttonBind = function (callback) {
     //先删除之前的事件
     Common.buttonUnbind();
-    $('#button1').bind('click',callback);
-    $('#button2').bind('click',callback);
+    $('#button1').bind('click', callback);
+    $('#button2').bind('click', callback);
 };
-Common.buttonUnbind = function() {
+Common.buttonUnbind = function () {
     $('#button1').unbind('click');
     $('#button2').unbind('click');
 };
-Common.buttonEnable = function(enable) {
+Common.buttonEnable = function (enable) {
     document.getElementById('button1').style.visibility = enable ? 'visible' : 'hidden';
     document.getElementById('button2').style.visibility = enable ? 'visible' : 'hidden';
 };
@@ -290,46 +294,45 @@ Common.buttonEnable = function(enable) {
 //输入框
 let _bindMessageControl;
 let _inputEnable = true;
-Common.inputText = function() {
+Common.inputText = function () {
     return $('#input').val();
 };
-Common.inputEnable = function(enable) {
+Common.inputEnable = function (enable) {
     _inputEnable = enable;
     document.getElementById('input').style.visibility = _inputEnable ? 'visible' : 'hidden';
 };
-Common.inputResize = function() {
+Common.inputResize = function () {
     const input = $('#input');
     input.val("");
     input.removeClass("input-name");
     input.addClass("input-message");
 };
-Common.inputBindMessageControl = function() {
+Common.inputBindMessageControl = function () {
     if (_bindMessageControl) {
         return;
     }
 
     _bindMessageControl = true;
+    Common.inputBindKeyboard();
 
-    if (Common.getTouch() !== true) {
-        Common.inputBindKeyboard();
-    } else {
+    if (Common.getTouch() === true) {
         Common.inputBindTouch();
     }
 };
-Common.inputBindKeyboard = function() {
-    window.addEventListener("keydown",function (e) {
+Common.inputBindKeyboard = function () {
+    window.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
             Common.inputMessageEvent(true);
         }
     });
 };
-Common.inputBindTouch = function() {
-    window.addEventListener('touchstart', function(e) {
+Common.inputBindTouch = function () {
+    window.addEventListener('touchstart', function (e) {
         const touchPoint = Common.getTouchPoint(e.touches[0]);
         let x = touchPoint.x;
         let y = touchPoint.y;
 
-        const distance = Common.distance(x,y,_touchControl.hornCenterX,_touchControl.hornCenterY);
+        const distance = Common.distance(x, y, _touchControl.hornCenterX, _touchControl.hornCenterY);
         if (distance > _touchControl.hornRadius) {
             //超过外圆，不做任何操作
             return;
@@ -337,7 +340,7 @@ Common.inputBindTouch = function() {
         Common.inputMessageEvent();
     });
 };
-Common.inputMessageEvent = function(inputFocus) {
+Common.inputMessageEvent = function (inputFocus) {
     const input = $('#input');
     if (_inputEnable) {
         //关闭输入框
@@ -359,19 +362,30 @@ Common.inputMessageEvent = function(inputFocus) {
     }
 };
 
-//网络通信
-Common.getStompStatus = function() {
+//stomp connect
+Common.getStompStatus = function () {
     const stompClient = Resource.getStompClient();
-  if (!stompClient) {
-      return false;
-  }
-  return stompClient.connected;
+    if (!stompClient) {
+        return false;
+    }
+    return stompClient.connected;
 };
-Common.stompConnect = function(name, callback) {
-    const socket = new SockJS('/websocket-simple?name=' + name);
+Common.getStompInfo = function () {
+    const stompInfo = {};
+    const url = Resource.getStompClient().ws._transport.url;
+    stompInfo.username = decodeURI(url.substring(url.lastIndexOf("=") + 1));
+
+    //get socket session id
+    const end = url.lastIndexOf("/");
+    const start = url.substring(0, end).lastIndexOf("/");
+    stompInfo.socketSessionId = url.substring(start + 1, end);
+    return stompInfo;
+};
+Common.stompConnect = function (name, callback) {
+    const socket = new SockJS(encodeURI('/websocket-simple?name=' + name));
     const stompClient = Stomp.over(socket);
-    stompClient.connect({}, function(frame) {
-        Resource.getGame().addMessage("网络连接中: " + frame,"#ffffff");
+    stompClient.connect({}, function (frame) {
+        Common.addMessage("网络连接中: " + frame, "#ffffff");
 
         // 客户端订阅消息, 公共消息和私有消息
         stompClient.subscribe('/topic/send', function (response) {
@@ -384,7 +398,7 @@ Common.stompConnect = function(name, callback) {
         callback();
     });
 };
-Common.sendStompMessage = function(message, messageType, sendTo) {
+Common.sendStompMessage = function (message, messageType, sendTo) {
     const stompClient = Resource.getStompClient();
     if (!stompClient) {
         return;
@@ -396,31 +410,52 @@ Common.sendStompMessage = function(message, messageType, sendTo) {
 
     stompClient.send("/send", {},
         JSON.stringify({
-          "message": message,
-          "messageType": messageType,
+            "message": message,
+            "messageType": messageType,
             "sendTo": sendTo
         }));
 };
-Common.getStompInfo = function() {
-    const stompInfo = {};
 
-    return stompInfo;
+//game tools
+Common.addConnectTimeoutEvent = function (callback) {
+    Resource.getGame().addTimeEvent("TIMEOUT_CALLBACK", function () {
+        if (Status.getStatusValue() !== Status.getStatusPause()) {
+            return;
+        }
+
+        Common.addMessage("与服务器连接超时...", "#F00");
+        Status.setStatus(Status.getStatusNormal());
+        if (callback !== undefined) {
+            callback();
+        }
+    }, 300);
+};
+Common.addMessage = function (context, color) {
+    Resource.getGame().addMessage(context, color);
+};
+Common.runNextStage = function () {
+    Resource.getGame().runNextStage();
+};
+Common.runLastStage = function () {
+    Resource.getGame().runLastStage();
 };
 
-//工具类
-Common.distance = function(x1,y1,x2,y2) {
-    return Math.sqrt(Math.pow(x1 - x2,2) + Math.pow(y1 - y2, 2));
+//general tools
+Common.distance = function (x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 };
-Common.getRequest = function(url,callBack) {
-    $.getJSON(url, function(result) {
+Common.getRequest = function (url, callBack) {
+    $.getJSON(encodeURI(url), function (result) {
         if (!result.success) {
-            Resource.getGame().addMessage(result.message, "#ff0000");
+            Common.addMessage(result.message, "#ff0000");
             return;
         }
         callBack(result.data);
     });
 };
-Date.prototype.format = function(fmt) {
+
+//expand
+Date.prototype.format = function (fmt) {
     const o = {
         "M+": this.getMonth() + 1,               //月份
         "d+": this.getDate(),                    //日
@@ -430,12 +465,12 @@ Date.prototype.format = function(fmt) {
         "q+": Math.floor((this.getMonth() + 3) / 3), //季度
         "S": this.getMilliseconds()             //毫秒
     };
-    if(/(y+)/.test(fmt)) {
-        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
+    if (/(y+)/.test(fmt)) {
+        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
     }
-    for(let k in o) {
-        if(new RegExp("("+ k +")").test(fmt)){
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length===1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+    for (let k in o) {
+        if (new RegExp("(" + k + ")").test(fmt)) {
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
         }
     }
     return fmt;

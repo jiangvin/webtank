@@ -1,7 +1,5 @@
 package com.integration.socket.model;
 
-import org.springframework.core.ParameterizedTypeReference;
-
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -14,7 +12,7 @@ public enum OrientationType {
     RIGHT(3),
     UNKNOWN(-1);
 
-    private int value;
+    private final int value;
 
     OrientationType(int value) {
         this.value = value;
