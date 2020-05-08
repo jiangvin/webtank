@@ -66,6 +66,7 @@
                         "orientation": tankLogo.orientation,
                         "action": tankLogo.action
                     }, "CLIENT_READY");
+                Common.addConnectTimeoutEvent();
             }, 50);
 
             game.addMessageEvent("SERVER_READY", function () {

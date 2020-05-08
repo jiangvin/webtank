@@ -8,6 +8,7 @@ import com.integration.socket.stage.BaseStage;
 import com.integration.socket.stage.StageMenu;
 import com.integration.socket.stage.StageRoom;
 import com.integration.util.model.CustomException;
+import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -101,6 +102,9 @@ public class GameService {
             case USER_MESSAGE:
                 processUserMessage(messageDto, sendFrom);
                 break;
+            case CREATE_ROOM:
+                createRoom(messageDto, sendFrom);
+                break;
             default:
                 currentStage(userBo).processMessage(messageDto, sendFrom);
                 break;
@@ -128,14 +132,17 @@ public class GameService {
         }
     }
 
-    public void createRoom(RoomDto roomDto, String sessionId) {
+    private void createRoom(MessageDto messageDto, String sendFrom) {
+        RoomDto roomDto = ObjectUtil.readValue(messageDto.getMessage(), RoomDto.class);
+        if (roomDto == null) {
+            return;
+        }
+        roomDto.setCreator(sendFrom);
+
         //check user
         UserBo userBo = onlineUserService.get(roomDto.getCreator());
         if (userBo == null) {
             throw new CustomException("用户不存在:" + roomDto.getCreator());
-        }
-        if (!userBo.getSocketSessionId().equals(sessionId)) {
-            throw new CustomException("用户信息验证不通过!");
         }
 
         StageRoom room = roomService.create(roomDto, userBo);
@@ -144,7 +151,7 @@ public class GameService {
         currentStage(userBo).remove(userBo.getUsername());
 
         //add into new stage
-        room.add(userBo, roomDto.getCreatorTeamType());
+        room.add(userBo, roomDto.getJoinTeamType());
     }
 
     @Scheduled(fixedDelay = 17)

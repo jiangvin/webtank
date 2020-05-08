@@ -12,6 +12,7 @@ public enum MessageType {
      */
     USER_MESSAGE,
 
+
     /**
      * 单向发送
      * 服务器 -> 客户端
@@ -34,15 +35,23 @@ public enum MessageType {
      */
     REMOVE_TANK,
 
+
     /**
      * 单向发送
      * 客户端 -> 服务器
      * 用户准备完毕
      */
     CLIENT_READY,
-
     /**
      * 同步状态，为了避免客户端作弊，只传递状态
      */
     UPDATE_TANK_CONTROL,
+    /**
+     * 创建房间
+     */
+    CREATE_ROOM,
+    /**
+     * 加入房间
+     */
+    JOIN_ROOM,
 }

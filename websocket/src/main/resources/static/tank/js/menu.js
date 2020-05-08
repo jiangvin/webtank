@@ -19,7 +19,7 @@
         //开始初始化
         this.stage = game.createStage();
 
-        const getRandomTankImage = function() {
+        const getRandomTankImage = function () {
             const id = new Date().getTime() % 9 + 1;
             return Resource.getImage("tank0" + id);
         };
@@ -191,7 +191,7 @@
             data.roomList.forEach(function (room) {
                 let div = document.createElement('div');
                 div.className = "select-item";
-                div.setAttribute("roomType",room.roomType);
+                div.setAttribute("roomType", room.roomType);
                 selectWindow.insertBefore(div, buttonChild);
 
                 const input = document.createElement('input');
@@ -361,7 +361,6 @@
         }
 
         Common.getRequest("/user/checkRoomName?name=" + roomId, function () {
-            const client = Common.getStompInfo();
             const mapId = $('#selectMap').val();
             const roomType = $('#selectType').val();
             const group = $('#selectGroup').val();
@@ -369,31 +368,18 @@
             Room.getOrCreateRoom();
             Common.runNextStage();
             Status.setStatus(Status.getStatusPause(), "房间创建中...");
+            Common.sendStompMessage({
+                "roomId": roomId,
+                "mapId": mapId,
+                "roomType": roomType,
+                "joinTeamType": group
+            }, "CREATE_ROOM");
+            Common.addConnectTimeoutEvent(function () {
+                Common.runLastStage();
+            });
+        });
+    };
 
-            Common.postRequest("/user/createRoom",
-                {
-                    "socketSessionId": client.socketSessionId
-                },
-                {
-                    "roomId": roomId,
-                    "mapId": mapId,
-                    "roomType": roomType,
-                    "creatorTeamType": group,
-                    "creator": client.username
-                },
-                function () {
-
-                },
-                function () {
-                    Common.runLastStage();
-                    Status.setStatus(Status.getStatusNormal());
-                }
-            )
-        })
-    }
-    
     const joinRoomToServer = function () {
-        
     }
-
 }

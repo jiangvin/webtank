@@ -76,8 +76,8 @@ public class RoomService {
             throw new CustomException("房间类型不能为空");
         }
 
-        if (roomDto.getCreatorTeamType() == null) {
-            throw new CustomException("创建者队伍不能为空");
+        if (roomDto.getJoinTeamType() == null) {
+            throw new CustomException("队伍不能为空");
         }
 
         //TODO CHECK MAP

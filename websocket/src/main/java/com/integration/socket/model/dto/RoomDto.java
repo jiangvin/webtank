@@ -21,7 +21,7 @@ public class RoomDto {
     private String creator;
     private String mapId;
     private RoomType roomType;
-    private TeamType creatorTeamType;
+    private TeamType joinTeamType;
     private Integer userCount;
 
     public static RoomDto convert(StageRoom stageRoom) {

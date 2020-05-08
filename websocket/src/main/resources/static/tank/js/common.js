@@ -362,17 +362,6 @@ Common.inputMessageEvent = function (inputFocus) {
     }
 };
 
-Common.addMessage = function (context, color) {
-    Resource.getGame().addMessage(context, color);
-};
-
-Common.runNextStage = function () {
-    Resource.getGame().runNextStage();
-};
-Common.runLastStage = function () {
-    Resource.getGame().runLastStage();
-};
-
 //stomp connect
 Common.getStompStatus = function () {
     const stompClient = Resource.getStompClient();
@@ -427,7 +416,31 @@ Common.sendStompMessage = function (message, messageType, sendTo) {
         }));
 };
 
-//tools
+//game tools
+Common.addConnectTimeoutEvent = function (callback) {
+    Resource.getGame().addTimeEvent("TIMEOUT_CALLBACK", function () {
+        if (Status.getStatusValue() !== Status.getStatusPause()) {
+            return;
+        }
+
+        Common.addMessage("与服务器连接超时...", "#F00");
+        Status.setStatus(Status.getStatusNormal());
+        if (callback !== undefined) {
+            callback();
+        }
+    }, 300);
+};
+Common.addMessage = function (context, color) {
+    Resource.getGame().addMessage(context, color);
+};
+Common.runNextStage = function () {
+    Resource.getGame().runNextStage();
+};
+Common.runLastStage = function () {
+    Resource.getGame().runLastStage();
+};
+
+//general tools
 Common.distance = function (x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 };
@@ -438,27 +451,6 @@ Common.getRequest = function (url, callBack) {
             return;
         }
         callBack(result.data);
-    });
-};
-Common.postRequest = function (url, headers, body, callbackSuccess, callBackFailed) {
-    $.ajax({
-        url: encodeURI(url),
-        type: 'post',
-        data: body,
-        headers: headers,
-        dataType: 'json',
-        success: function (result) {
-            if (!result.success) {
-                Common.addMessage(result.message, "#ff0000");
-                if (callBackFailed) {
-                    callBackFailed();
-                }
-                return;
-            }
-            if (callbackSuccess) {
-                callbackSuccess(result.data);
-            }
-        }
     });
 };
 
