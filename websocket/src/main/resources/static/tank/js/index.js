@@ -23,73 +23,77 @@
                 stageMenu.updateItemId(Menu.getTankLogo(), name, false);
 
                 Common.stompConnect(name, function () {
-                    updateAfterConnect(name,isTouch);
+                    updateAfterConnect(name, isTouch);
                 });
             });
         });
 
         //其他函数定义
-        const updateAfterConnect = function (name,isTouch) {
-            const tankLogo = Menu.getTankLogo();
+        const updateAfterConnect = function (name, isTouch) {
+            //ge tankTypes
 
-            //注册事件
-            game.addTimeEvent("CLIENT_READY", function () {
-                Common.sendStompMessage(
-                    {
-                        "x": tankLogo.x,
-                        "y": tankLogo.y,
-                        "speed": tankLogo.speed,
-                        "orientation": tankLogo.orientation,
-                        "action": tankLogo.action
-                    }, "CLIENT_READY");
-                Common.addConnectTimeoutEvent();
-            }, 50);
+            Common.getRequest("/user/getTankTypes", function (data) {
+                Resource.setTankTypes(data);
 
-            game.addMessageEvent("SERVER_READY", function () {
-                if (Status.getStatusValue() !== Status.getStatusPause()) {
-                    return;
-                }
+                const tankLogo = Menu.getTankLogo();
+                //注册事件
+                game.addTimeEvent("CLIENT_READY", function () {
+                    Common.sendStompMessage(
+                        {
+                            "x": tankLogo.x,
+                            "y": tankLogo.y,
+                            "orientation": tankLogo.orientation,
+                            "action": tankLogo.action
+                        }, "CLIENT_READY");
+                    Common.addConnectTimeoutEvent();
+                }, 50);
 
-                Common.setTouch(isTouch);
-                game.addConnectCheckEvent();
-
-                //隐藏输入框和按钮
-                Common.inputEnable(false);
-                Common.buttonEnable(false);
-
-                //删除提示文字
-                Menu.deleteInfo();
-
-                //重设输入框的属性和事件
-                Common.inputResize();
-                Common.inputBindMessageControl();
-
-                //新增文字描述来取代按钮和输入框
-                stageMenu.createItem({
-                    draw: function (context) {
-                        context.font = '30px Arial';
-                        context.textAlign = 'center';
-                        context.textBaseline = 'middle';
-                        context.fillStyle = '#5E6C77';
-                        context.fillText('你的名字: ' + name, Common.width() / 2, 85);
+                game.addMessageEvent("SERVER_READY", function () {
+                    if (Status.getStatusValue() !== Status.getStatusPause()) {
+                        return;
                     }
+
+                    Common.setTouch(isTouch);
+                    game.addConnectCheckEvent();
+
+                    //隐藏输入框和按钮
+                    Common.inputEnable(false);
+                    Common.buttonEnable(false);
+
+                    //删除提示文字
+                    Menu.deleteInfo();
+
+                    //重设输入框的属性和事件
+                    Common.inputResize();
+                    Common.inputBindMessageControl();
+
+                    //新增文字描述来取代按钮和输入框
+                    stageMenu.createItem({
+                        draw: function (context) {
+                            context.font = '30px Arial';
+                            context.textAlign = 'center';
+                            context.textBaseline = 'middle';
+                            context.fillStyle = '#5E6C77';
+                            context.fillText('你的名字: ' + name, Common.width() / 2, 85);
+                        }
+                    });
+
+                    //增加tank logo 动画
+                    tankLogo.showId = true;
+                    tankLogo.timeout = 30;
+                    tankLogo.animationStatus = -0.05;
+                    tankLogo.animation = function () {
+                        this.scale += this.animationStatus;
+                        if (this.timeout === 20 || this.timeout === 10) {
+                            this.animationStatus = 0.05;
+                        }
+                        if (this.timeout === 5 || this.timeout === 15) {
+                            this.animationStatus = -0.05;
+                        }
+                    };
+
+                    Menu.showRoomList();
                 });
-
-                //增加tank logo 动画
-                tankLogo.showId = true;
-                tankLogo.timeout = 30;
-                tankLogo.animationStatus = -0.05;
-                tankLogo.animation = function() {
-                    this.scale += this.animationStatus;
-                    if (this.timeout === 20 || this.timeout === 10) {
-                        this.animationStatus = 0.05;
-                    }
-                    if (this.timeout === 5 || this.timeout === 15) {
-                        this.animationStatus = -0.05;
-                    }
-                };
-
-                Menu.showRoomList();
             });
         }
     })();

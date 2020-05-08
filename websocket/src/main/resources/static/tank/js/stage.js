@@ -27,7 +27,7 @@ function Stage(params) {
                             y: tank.y,
                             orientation: tank.orientation,
                             action: tank.action,
-                            speed: tank.speed,
+                            tankTypeId: tank.typeId,
                             showId: true
                         });
                     }
@@ -56,7 +56,6 @@ function Stage(params) {
 
     this.createItem = function (options) {
         const item = new Item(options);
-        item.stage = this;
         this.items[item.id] = item;
         return item;
     };
@@ -94,16 +93,16 @@ function Stage(params) {
 
             switch (this.orientation) {
                 case 0:
-                    this.y -= this.speed;
+                    this.y -= this.speed();
                     break;
                 case 1:
-                    this.y += this.speed;
+                    this.y += this.speed();
                     break;
                 case 2:
-                    this.x -= this.speed;
+                    this.x -= this.speed();
                     break;
                 case 3:
-                    this.x += this.speed;
+                    this.x += this.speed();
                     break;
             }
         };

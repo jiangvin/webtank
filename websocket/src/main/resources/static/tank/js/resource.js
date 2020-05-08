@@ -5,6 +5,7 @@
         this.images = null;
         this.id = null;
         this.stompClient = null;
+        this.tankTypes = null;
     }
 
     Resource.getImages = function () {
@@ -100,4 +101,19 @@
     Resource.getStompClient = function () {
         return this.stompClient;
     };
+
+    Resource.setTankTypes = function (dataList) {
+        const types = new Map();
+        /**
+         * @param data {{typeId,speed,ammoSpeed}}
+         */
+        dataList.forEach(function (data) {
+            types.set(data.typeId, data);
+        });
+        this.tankTypes = types;
+    };
+
+    Resource.getTankType = function (id) {
+        this.tankTypes.get(id);
+    }
 }

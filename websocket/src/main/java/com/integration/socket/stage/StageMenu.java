@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StageMenu extends BaseStage {
 
+    private static final String MENU_DEFAULT_TYPE = "tank01";
+
     private ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
     public StageMenu(MessageService messageService) {
@@ -91,6 +93,7 @@ public class StageMenu extends BaseStage {
             return;
         }
         tankDto.setId(sendFrom);
+        tankDto.setTypeId(MENU_DEFAULT_TYPE);
 
         if (tankMap.containsKey(tankDto.getId())) {
             //单独发送同步消息

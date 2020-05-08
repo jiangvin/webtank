@@ -32,7 +32,6 @@
             image: getRandomTankImage(),
             x: Common.width() / 2,
             y: Common.height() * .45,
-            speed: 1,
             orientation: 3,
             scale: 1.5
         });
