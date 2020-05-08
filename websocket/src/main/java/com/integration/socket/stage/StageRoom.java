@@ -4,9 +4,9 @@ import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.RoomType;
-import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.TeamType;
 import com.integration.socket.model.bo.TankBo;
+import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
@@ -74,9 +74,15 @@ public class StageRoom extends BaseStage {
             case UPDATE_TANK_CONTROL:
                 processTankControl(messageDto, sendFrom);
                 break;
+            case UPDATE_TANK_FIRE:
+                processTankFire(sendFrom);
             default:
                 break;
         }
+    }
+
+    private void processTankFire(String sendFrom) {
+        //TODO - FIRE
     }
 
     @Override
@@ -111,8 +117,11 @@ public class StageRoom extends BaseStage {
         }
 
         userMap.remove(username);
-        tankMap.remove(username);
 
+        if (tankMap.containsKey(username)) {
+            tankMap.remove(username);
+            messageService.sendMessage(new MessageDto(username, MessageType.REMOVE_TANK, getUserList()));
+        }
         if (getUserCount() == 0) {
             return;
         }
