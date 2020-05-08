@@ -30,8 +30,8 @@ Common.height = function () {
     return Common.getCanvas().height;
 };
 Common.windowChange = function () {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = document.documentElement.clientWidth;
+    const height = document.documentElement.clientHeight;
 
     let style = "";
     if (width >= height) { // 横屏
