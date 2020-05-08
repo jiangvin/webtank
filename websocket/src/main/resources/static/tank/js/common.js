@@ -99,7 +99,7 @@ Common.setTouch = function (touch) {
     _touchControl.touch = touch;
     const input = $('#input');
     if (_touchControl.touch) {
-        input.attr("placeholder", "请输入信息,再次点击喇叭发送");
+        input.attr("placeholder", "请输入信息,点击喇叭发送");
         Common.bindTouch();
     } else {
         input.attr("placeholder", "请输入信息,回车发送");
@@ -163,7 +163,7 @@ Common.bindKeyboard = function () {
 };
 Common.bindTouch = function () {
     window.addEventListener('touchstart', function (e) {
-        const touchPoint = Common.getTouchPoint(e.touches[0]);
+        const touchPoint = Common.getTouchPoint(e.touches[e.touches.length - 1]);
         let x = touchPoint.x;
         let y = touchPoint.y;
 
@@ -186,6 +186,10 @@ Common.bindTouch = function () {
         }
     });
     window.addEventListener('touchmove', function (e) {
+        //only support one point move
+        if (e.touches.length > 1) {
+            return;
+        }
         const touchPoint = Common.getTouchPoint(e.touches[0]);
         let x = touchPoint.x;
         let y = touchPoint.y;
