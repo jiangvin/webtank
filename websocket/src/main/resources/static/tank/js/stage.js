@@ -60,15 +60,18 @@ function Stage(params) {
         this.items[item.id] = item;
         return item;
     };
-    this.updateItemId = function (item, newId) {
+    this.updateItemId = function (item, newId, showId) {
         //删除旧id
         if (item.id && this.items[item.id]) {
             delete this.items[item.id];
         }
 
         //增加新id,默认新id要显示出来
+        if (showId === undefined) {
+            showId = true;
+        }
         item.id = newId;
-        item.showId = true;
+        item.showId = showId;
         this.items[newId] = item;
     };
 

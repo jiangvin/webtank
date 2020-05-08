@@ -34,19 +34,7 @@
             y: Common.height() * .45,
             speed: 1,
             orientation: 3,
-            scale: 1.5,
-            timeout: 30,
-            animationStatus: -0.05,
-            animation: function () {
-                //logo animation
-                this.scale += this.animationStatus;
-                if (this.timeout === 20 || this.timeout === 10) {
-                    this.animationStatus = 0.05;
-                }
-                if (this.timeout === 5 || this.timeout === 15) {
-                    this.animationStatus = -0.05;
-                }
-            }
+            scale: 1.5
         });
 
         //游戏名
@@ -396,10 +384,14 @@
     const joinRoom = function (menu) {
         const selectGroup = $('#selectGroup').val();
         const roomId = menu.selectRoomId;
+        if (!roomId) {
+            Common.addMessage("当前没有房间！","#f00");
+            return;
+        }
 
         Room.getOrCreateRoom();
         Common.runNextStage();
-        Status.setStatus(Status.getStatusPause(), "房间创建中...");
+        Status.setStatus(Status.getStatusPause(), "加入房间中...");
         Common.sendStompMessage({
             "roomId": roomId,
             "joinTeamType": selectGroup
