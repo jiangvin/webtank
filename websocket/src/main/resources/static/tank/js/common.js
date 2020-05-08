@@ -67,7 +67,7 @@ Common.generateTouchInfo = function (portrait) {
 
     let rightCenterX = centerX * 7;
     let rightCenterY = centerY;
-    let rightRadius = radius * .7;
+    let rightRadius = radius * .5;
 
     if (centerX - radius < 20) {
         rightCenterX -= 20;
@@ -82,13 +82,13 @@ Common.generateTouchInfo = function (portrait) {
     _touchControl.centerY = centerY;
     _touchControl.radius = radius;
 
-    _touchControl.rightCenterX = rightCenterX;
-    _touchControl.rightCenterY = rightCenterY;
+    _touchControl.rightCenterX = rightCenterX - rightRadius * .4;
+    _touchControl.rightCenterY = rightCenterY + rightRadius * .6;
     _touchControl.rightRadius = rightRadius;
 
     _touchControl.hornCenterX = rightCenterX + rightRadius;
-    _touchControl.hornCenterY = rightCenterY - rightRadius * .95;
-    _touchControl.hornRadius = radius / 4;
+    _touchControl.hornCenterY = rightCenterY - rightRadius * .8;
+    _touchControl.hornRadius = rightRadius * .7;
 
     _touchControl.portrait = portrait;
 };
