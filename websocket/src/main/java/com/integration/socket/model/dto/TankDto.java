@@ -14,7 +14,7 @@ public class TankDto {
     private String id;
     private Double x;
     private Double y;
-    private Double speed;
+    private String typeId;
 
     /**
      * 客户端最少传输资料，朝向和状态（在玩家控制时传输）
@@ -27,7 +27,7 @@ public class TankDto {
         tankDto.setId(tankBo.getTankId());
         tankDto.setX(tankBo.getX());
         tankDto.setY(tankBo.getY());
-        tankDto.setSpeed(tankBo.getSpeed());
+        tankDto.setTypeId(tankBo.getType().getTypeId());
         tankDto.setOrientation(tankBo.getOrientationType().getValue());
         tankDto.setAction(tankBo.getActionType().getValue());
         return tankDto;

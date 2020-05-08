@@ -1,9 +1,10 @@
 package com.integration.socket.controller;
 
 import com.integration.socket.model.MessageType;
+import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomListDto;
-import com.integration.socket.service.GameService;
+import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.service.OnlineUserService;
 import com.integration.socket.service.RoomService;
 import com.integration.util.model.CustomException;
@@ -30,9 +31,6 @@ public class UserController {
 
     @Autowired
     private OnlineUserService onlineUserService;
-
-    @Autowired
-    private GameService gameService;
 
     @Autowired
     private RoomService roomService;
@@ -72,5 +70,10 @@ public class UserController {
     @GetMapping("/getMaps")
     public List<String> getMaps() {
         return Collections.singletonList("default");
+    }
+
+    @GetMapping("/getTankTypes")
+    public List<TankTypeDto> getTankTypes() {
+        return TankTypeBo.getTypeList();
     }
 }
