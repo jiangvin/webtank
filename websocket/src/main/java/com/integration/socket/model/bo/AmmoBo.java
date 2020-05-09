@@ -17,5 +17,6 @@ public class AmmoBo {
     private int lifeTime;
     private double x;
     private double y;
+    private double speed;
     OrientationType orientationType;
 }

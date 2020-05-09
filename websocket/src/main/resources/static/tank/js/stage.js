@@ -15,48 +15,41 @@ function Stage(params) {
         const thisStage = this;
         switch (messageDto.messageType) {
             case "TANKS":
-                const tanks = messageDto.message;
-                /**
-                 * @param tank {{typeId}}
-                 */
-                tanks.forEach(function (tank) {
-                    if (thisStage.items.has(tank.id)) {
-                        //已存在
-                        thisStage.items.get(tank.id).x = tank.x;
-                        thisStage.items.get(tank.id).y = tank.y;
-                        thisStage.items.get(tank.id).orientation = tank.orientation;
-                        thisStage.items.get(tank.id).action = tank.action;
-                        thisStage.items.get(tank.id).speed = tank.speed;
-                    } else {
-                        let tankImage;
-                        if (tank.typeId === "tankMenu") {
-                            tankImage = Common.getRandomTankImage();
-                        } else {
-                            tankImage = Resource.getImage(tank.typeId);
-                        }
-                        thisStage.createTank({
-                            id: tank.id,
-                            x: tank.x,
-                            y: tank.y,
-                            orientation: tank.orientation,
-                            action: tank.action,
-                            showId: true,
-                            speed: tank.speed,
-                            image: tankImage
-                        });
-                    }
-                });
+                createOrUpdateTanks(thisStage, messageDto.message);
                 break;
             case "REMOVE_TANK":
                 this.removeItem(messageDto.message);
                 break;
+            case "AMMO":
+                createOrUpdateAmmoList(thisStage, messageDto.message);
+                break;
+            case "REMOVE_AMMO":
+                this.removeItem(messageDto.message);
+                break;
+
         }
     };
 
     this.draw = function (context) {
+        const itemsWithZ = [];
         this.items.forEach(function (item) {
-            item.draw(context);
+            if (item.z === 0) {
+                item.draw(context);
+            } else {
+                if (!itemsWithZ[item.z]) {
+                    itemsWithZ[item.z] = [];
+                }
+                const newIndex = itemsWithZ[item.z].length;
+                itemsWithZ[item.z][newIndex] = item;
+            }
         });
+
+        //draw item with z
+        itemsWithZ.forEach(function (items) {
+            items.forEach(function (item) {
+                item.draw(context);
+            })
+        })
     };
 
     this.update = function () {
@@ -91,32 +84,97 @@ function Stage(params) {
     };
 
     this.createTank = function (options) {
-        if (!options.image) {
-            options.image = Resource.getImage("tank01");
+        const item = this.createItem(options);
+        item.z = 2;
+        item.update = function () {
+            generalUpdateEvent(item);
+        };
+        return item;
+    };
+    this.createAmmo = function (options) {
+        const item = this.createItem(options);
+        item.action = 1;
+        item.z = 3;
+        item.image = Resource.getImage("ammo");
+        item.update = function () {
+            generalUpdateEvent(item);
+        };
+        return item;
+    };
+
+    const generalUpdateEvent = function (item) {
+        item.updateAnimation();
+
+        if (item.action === 0) {
+            return;
         }
 
-        options.update = function () {
-            this.updateAnimation();
-
-            if (this.action === 0) {
-                return;
-            }
-
-            switch (this.orientation) {
-                case 0:
-                    this.y -= this.speed;
-                    break;
-                case 1:
-                    this.y += this.speed;
-                    break;
-                case 2:
-                    this.x -= this.speed;
-                    break;
-                case 3:
-                    this.x += this.speed;
-                    break;
-            }
-        };
-        return this.createItem(options);
+        switch (item.orientation) {
+            case 0:
+                item.y -= item.speed;
+                break;
+            case 1:
+                item.y += item.speed;
+                break;
+            case 2:
+                item.x -= item.speed;
+                break;
+            case 3:
+                item.x += item.speed;
+                break;
+        }
     };
+
+    const generalUpdateAttribute = function (thisStage,newAttr) {
+        thisStage.items.get(newAttr.id).x = newAttr.x;
+        thisStage.items.get(newAttr.id).y = newAttr.y;
+        thisStage.items.get(newAttr.id).orientation = newAttr.orientation;
+        thisStage.items.get(newAttr.id).speed = newAttr.speed;
+        thisStage.items.get(newAttr.id).action = newAttr.action;
+    };
+
+    const createOrUpdateTanks = function (thisStage, tanks) {
+        /**
+         * @param tank {{typeId}}
+         */
+        tanks.forEach(function (tank) {
+            if (thisStage.items.has(tank.id)) {
+                //已存在
+                generalUpdateAttribute(thisStage,tank);
+            } else {
+                let tankImage;
+                if (tank.typeId === "tankMenu") {
+                    tankImage = Common.getRandomTankImage();
+                } else {
+                    tankImage = Resource.getImage(tank.typeId);
+                }
+                thisStage.createTank({
+                    id: tank.id,
+                    x: tank.x,
+                    y: tank.y,
+                    orientation: tank.orientation,
+                    action: tank.action,
+                    showId: true,
+                    speed: tank.speed,
+                    image: tankImage
+                });
+            }
+        });
+    };
+    const createOrUpdateAmmoList = function (thisStage, ammoList) {
+        ammoList.forEach(function (ammo) {
+            if (thisStage.items.has(ammo.id)) {
+                //已存在
+                generalUpdateAttribute(thisStage,ammo);
+            } else {
+                thisStage.createAmmo({
+                    id: ammo.id,
+                    x: ammo.x,
+                    y: ammo.y,
+                    orientation: ammo.orientation,
+                    speed: ammo.speed
+                });
+            }
+        });
+    }
 }

@@ -57,6 +57,7 @@ public class TankBo {
             type.getAmmoLifeTime(),
             this.x,
             this.y,
+            this.getType().getAmmoSpeed(),
             this.orientationType);
         this.ammoList.add(newAmmo);
         return newAmmo;

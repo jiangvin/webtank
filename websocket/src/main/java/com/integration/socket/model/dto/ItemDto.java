@@ -1,5 +1,6 @@
 package com.integration.socket.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.integration.socket.model.bo.AmmoBo;
 import com.integration.socket.model.bo.TankBo;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.Data;
  * @date 2020/5/1
  */
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 public class ItemDto {
     private String id;
@@ -38,6 +40,7 @@ public class ItemDto {
         ammoDto.setX(ammoBo.getX());
         ammoDto.setY(ammoBo.getY());
         ammoDto.setOrientation(ammoBo.getOrientationType().getValue());
+        ammoDto.setSpeed(ammoBo.getSpeed());
         return ammoDto;
     }
 }
