@@ -433,7 +433,7 @@ Common.addConnectTimeoutEvent = function (callback) {
             return;
         }
 
-        Common.addMessage("与服务器连接超时...", "#F00");
+        Common.addMessage("与服务器连接超时！", "#F00");
         Status.setStatus(Status.getStatusNormal());
         if (callback !== undefined) {
             callback();
@@ -448,6 +448,10 @@ Common.runNextStage = function () {
 };
 Common.runLastStage = function () {
     Resource.getGame().runLastStage();
+};
+Common.getRandomTankImage = function () {
+    const id = Math.floor(Math.random() * 9) + 1;
+    return Resource.getImage("tank0" + id);
 };
 
 //general tools

@@ -73,9 +73,9 @@
                         context.fillText('你的名字: ' + name, Common.width() / 2, 85);
                     }
                 });
+                tankLogo.showId = true;
 
                 //增加tank logo 动画
-                tankLogo.showId = true;
                 tankLogo.timeout = 30;
                 tankLogo.animationStatus = -0.05;
                 tankLogo.animation = function () {

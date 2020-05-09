@@ -3,6 +3,8 @@ function Stage(params) {
     this.settings = {
         index: 0,                        //布景索引
         items: new Map(),				 //对象队列
+
+        //处理控制事件
         controlEvent: function () {
         }
 
@@ -14,6 +16,9 @@ function Stage(params) {
         switch (messageDto.messageType) {
             case "TANKS":
                 const tanks = messageDto.message;
+                /**
+                 * @param tank {{typeId}}
+                 */
                 tanks.forEach(function (tank) {
                     if (thisStage.items.has(tank.id)) {
                         //已存在
@@ -21,33 +26,36 @@ function Stage(params) {
                         thisStage.items.get(tank.id).y = tank.y;
                         thisStage.items.get(tank.id).orientation = tank.orientation;
                         thisStage.items.get(tank.id).action = tank.action;
-                        thisStage.items.get(tank.id).typeId = tank.typeId;
                         thisStage.items.get(tank.id).speed = tank.speed;
                     } else {
+                        let tankImage;
+                        if (tank.typeId === "tankMenu") {
+                            tankImage = Common.getRandomTankImage();
+                        } else {
+                            tankImage = Resource.getImage(tank.typeId);
+                        }
                         thisStage.createTank({
                             id: tank.id,
                             x: tank.x,
                             y: tank.y,
                             orientation: tank.orientation,
                             action: tank.action,
-                            typeId: tank.typeId,
-                            showId: true
+                            showId: true,
+                            speed: tank.speed,
+                            image: tankImage
                         });
                     }
                 });
                 break;
             case "REMOVE_TANK":
-                const tankId = messageDto.message;
-                if (thisStage.items.has(tankId)) {
-                    thisStage.items.delete(tankId);
-                }
+                this.removeItem(messageDto.message);
                 break;
         }
     };
 
     this.draw = function (context) {
         this.items.forEach(function (item) {
-           item.draw(context);
+            item.draw(context);
         });
     };
 
@@ -59,8 +67,13 @@ function Stage(params) {
 
     this.createItem = function (options) {
         const item = new Item(options);
-        this.items.set(item.id,item);
+        this.items.set(item.id, item);
         return item;
+    };
+    this.removeItem = function (id) {
+        if (this.items.has(id)) {
+            this.items.delete(id);
+        }
     };
     this.updateItemId = function (item, newId, showId) {
         //删除旧id
@@ -74,7 +87,7 @@ function Stage(params) {
         }
         item.id = newId;
         item.showId = showId;
-        this.items.set(newId,item);
+        this.items.set(newId, item);
     };
 
     this.createTank = function (options) {

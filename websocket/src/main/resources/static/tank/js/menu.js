@@ -12,7 +12,7 @@
         this.showSelectWindow = null;
 
         this.roomList = [];            //房间列表
-        this.selectRoomId = null;      //加入时选中的房间号;
+        this.selectRoomId = null;      //加入时选中的房间号
     }
 
     Menu.getOrCreateMenu = function (game) {
@@ -23,14 +23,8 @@
         //开始初始化
         this.stage = game.createStage();
 
-        const getRandomTankImage = function () {
-            const id = new Date().getTime() % 9 + 1;
-            return Resource.getImage("tank0" + id);
-        };
-
-
         this.tankLogo = this.stage.createTank({
-            image: getRandomTankImage(),
+            image: Common.getRandomTankImage(),
             x: Common.width() / 2,
             y: Common.height() * .45,
             orientation: 3,
