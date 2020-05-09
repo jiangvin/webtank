@@ -28,6 +28,7 @@
             return Resource.getImage("tank0" + id);
         };
 
+
         this.tankLogo = this.stage.createTank({
             image: getRandomTankImage(),
             x: Common.width() / 2,
@@ -58,7 +59,6 @@
                 context.fillText('键盘: 上下左右/空格/回车控制游戏', Common.width() / 2, Common.height() * .6);
             }
         });
-
         this.stage.createItem({
             id: "info2",
             draw: function (context) {
@@ -81,8 +81,8 @@
      * 连接成功后删除操作提示信息
      */
     Menu.deleteInfo = function () {
-        delete this.stage.items["info1"];
-        delete this.stage.items["info2"];
+        this.stage.items.delete("info1");
+        this.stage.items.delete("info2");
     };
 
     /**

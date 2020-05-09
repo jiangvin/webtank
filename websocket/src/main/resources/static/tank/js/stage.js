@@ -2,9 +2,10 @@ function Stage(params) {
     this.params = params || {};
     this.settings = {
         index: 0,                        //布景索引
-        items: [],						//对象队列
+        items: new Map(),				 //对象队列
         controlEvent: function () {
         }
+
     };
     Common.extend(this, this.settings, this.params);
 
@@ -14,14 +15,14 @@ function Stage(params) {
             case "TANKS":
                 const tanks = messageDto.message;
                 tanks.forEach(function (tank) {
-                    if (thisStage.items[tank.id]) {
+                    if (thisStage.items.has(tank.id)) {
                         //已存在
-                        thisStage.items[tank.id].x = tank.x;
-                        thisStage.items[tank.id].y = tank.y;
-                        thisStage.items[tank.id].orientation = tank.orientation;
-                        thisStage.items[tank.id].action = tank.action;
-                        thisStage.items[tank.id].typeId = tank.typeId;
-                        thisStage.items[tank.id].speed = tank.speed;
+                        thisStage.items.get(tank.id).x = tank.x;
+                        thisStage.items.get(tank.id).y = tank.y;
+                        thisStage.items.get(tank.id).orientation = tank.orientation;
+                        thisStage.items.get(tank.id).action = tank.action;
+                        thisStage.items.get(tank.id).typeId = tank.typeId;
+                        thisStage.items.get(tank.id).speed = tank.speed;
                     } else {
                         thisStage.createTank({
                             id: tank.id,
@@ -37,34 +38,34 @@ function Stage(params) {
                 break;
             case "REMOVE_TANK":
                 const tankId = messageDto.message;
-                if (thisStage.items[tankId]) {
-                    delete thisStage.items[tankId];
+                if (thisStage.items.has(tankId)) {
+                    thisStage.items.delete(tankId);
                 }
                 break;
         }
     };
 
     this.draw = function (context) {
-        for (let k in this.items) {
-            this.items[k].draw(context);
-        }
+        this.items.forEach(function (item) {
+           item.draw(context);
+        });
     };
 
     this.update = function () {
-        for (let k in this.items) {
-            this.items[k].update();
-        }
+        this.items.forEach(function (item) {
+            item.update();
+        });
     };
 
     this.createItem = function (options) {
         const item = new Item(options);
-        this.items[item.id] = item;
+        this.items.set(item.id,item);
         return item;
     };
     this.updateItemId = function (item, newId, showId) {
         //删除旧id
-        if (item.id && this.items[item.id]) {
-            delete this.items[item.id];
+        if (item.id && this.items.has(item.id)) {
+            this.items.delete(item.id);
         }
 
         //增加新id,默认新id要显示出来
@@ -73,7 +74,7 @@ function Stage(params) {
         }
         item.id = newId;
         item.showId = showId;
-        this.items[newId] = item;
+        this.items.set(newId,item);
     };
 
     this.createTank = function (options) {
