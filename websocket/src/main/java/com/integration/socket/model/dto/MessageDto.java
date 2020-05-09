@@ -35,10 +35,6 @@ public class MessageDto {
         init(message, messageType, sendToList);
     }
 
-    public boolean sendToAll() {
-        return sendToList == null || sendToList.isEmpty();
-    }
-
     private void init(Object message, MessageType messageType, List<String> sendToList) {
         this.message = message;
         this.messageType = messageType;

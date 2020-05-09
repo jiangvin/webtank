@@ -40,8 +40,6 @@ public class StageRoom extends BaseStage {
         this.roomType = roomDto.getRoomType();
     }
 
-    private ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
-
     private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
 
     @Getter

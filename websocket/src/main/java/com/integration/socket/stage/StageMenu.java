@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author 蒋文龙(Vin)
@@ -27,8 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StageMenu extends BaseStage {
 
     private static final String MENU_DEFAULT_TYPE = "tankMenu";
-
-    private ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
     public StageMenu(MessageService messageService) {
         super(messageService);
@@ -121,11 +118,8 @@ public class StageMenu extends BaseStage {
 
     @Override
     public void remove(String username) {
-        if (!removeTank(username) || getUserList().isEmpty()) {
-            return;
-        }
+        removeTankFromTankId(username);
         messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
-        messageService.sendMessage(new MessageDto(username, MessageType.REMOVE_TANK));
     }
 
     @Override
@@ -185,8 +179,7 @@ public class StageMenu extends BaseStage {
         }
 
         ItemDto response = ItemDto.convert(updateBo);
-        MessageDto sendBack = new MessageDto(Collections.singletonList(response), MessageType.TANKS, getUserList());
-        messageService.sendMessage(sendBack);
+        sendRoomMessage(Collections.singletonList(response), MessageType.TANKS);
     }
 
     private TankBo updateTankControl(ItemDto tankDto) {
@@ -205,13 +198,5 @@ public class StageMenu extends BaseStage {
             tankBo.setActionType(actionType);
         }
         return tankBo;
-    }
-
-    private boolean removeTank(String tankId) {
-        if (!tankMap.containsKey(tankId)) {
-            return false;
-        }
-        tankMap.remove(tankId);
-        return true;
     }
 }
