@@ -3,7 +3,11 @@ package com.integration.socket.model.bo;
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.dto.TankDto;
+import com.integration.socket.util.CommonUtil;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author 蒋文龙(Vin)
@@ -19,7 +23,10 @@ public class TankBo {
     private ActionType actionType = ActionType.STOP;
     private double x;
     private double y;
+
     private TankTypeBo type;
+    private List<AmmoBo> ammoList = new ArrayList<>();
+    private int reloadTime;
 
     public static TankBo convert(TankDto tankDto) {
         TankBo tankBo = new TankBo();
@@ -33,10 +40,25 @@ public class TankBo {
         return tankBo;
     }
 
-    public double getSpeed() {
-        if (type != null) {
-            return type.getSpeed();
+    public AmmoBo fire() {
+        int maxCount = type.getAmmoCount();
+        if (ammoList.size() >= maxCount) {
+            return null;
         }
-        return 1.0;
+
+        if (reloadTime != 0) {
+            return null;
+        }
+
+        //fire
+        reloadTime = type.getAmmoReloadTime();
+        AmmoBo newAmmo = new AmmoBo(
+            CommonUtil.getId(),
+            type.getAmmoLifeTime(),
+            this.x,
+            this.y,
+            this.orientationType);
+        this.ammoList.add(newAmmo);
+        return newAmmo;
     }
 }

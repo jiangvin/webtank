@@ -48,19 +48,20 @@ public class StageMenu extends BaseStage {
     public void update() {
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
+            double speed = tankBo.getType().getSpeed();
             if (tankBo.getActionType() == ActionType.RUN) {
                 switch (tankBo.getOrientationType()) {
                     case UP:
-                        tankBo.setY(tankBo.getY() - tankBo.getSpeed());
+                        tankBo.setY(tankBo.getY() - speed);
                         break;
                     case DOWN:
-                        tankBo.setY(tankBo.getY() + tankBo.getSpeed());
+                        tankBo.setY(tankBo.getY() + speed);
                         break;
                     case LEFT:
-                        tankBo.setX(tankBo.getX() - tankBo.getSpeed());
+                        tankBo.setX(tankBo.getX() - speed);
                         break;
                     case RIGHT:
-                        tankBo.setX(tankBo.getX() + tankBo.getSpeed());
+                        tankBo.setX(tankBo.getX() + speed);
                         break;
                     default:
                         break;

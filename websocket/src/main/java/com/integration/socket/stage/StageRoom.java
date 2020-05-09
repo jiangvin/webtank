@@ -5,6 +5,7 @@ import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
+import com.integration.socket.model.bo.AmmoBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.bo.UserBo;
@@ -82,7 +83,17 @@ public class StageRoom extends BaseStage {
     }
 
     private void processTankFire(String sendFrom) {
-        //TODO - FIRE
+        if (!tankMap.containsKey(sendFrom)) {
+            return;
+        }
+
+        TankBo tankBo = tankMap.get(sendFrom);
+        AmmoBo ammo = tankBo.fire();
+        if (ammo == null) {
+            return;
+        }
+
+        //TODO - TANK FIRE
     }
 
     @Override
@@ -90,18 +101,47 @@ public class StageRoom extends BaseStage {
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             if (tankBo.getActionType() == ActionType.RUN) {
+                double tankSpeed = tankBo.getType().getSpeed();
                 switch (tankBo.getOrientationType()) {
                     case UP:
-                        tankBo.setY(tankBo.getY() - tankBo.getSpeed());
+                        tankBo.setY(tankBo.getY() - tankSpeed);
                         break;
                     case DOWN:
-                        tankBo.setY(tankBo.getY() + tankBo.getSpeed());
+                        tankBo.setY(tankBo.getY() + tankSpeed);
                         break;
                     case LEFT:
-                        tankBo.setX(tankBo.getX() - tankBo.getSpeed());
+                        tankBo.setX(tankBo.getX() - tankSpeed);
                         break;
                     case RIGHT:
-                        tankBo.setX(tankBo.getX() + tankBo.getSpeed());
+                        tankBo.setX(tankBo.getX() + tankSpeed);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            for (int i = 0; i < tankBo.getAmmoList().size(); ++i) {
+                AmmoBo ammo = tankBo.getAmmoList().get(i);
+                if (ammo.getLifeTime() == 0) {
+                    tankBo.getAmmoList().remove(i);
+                    --i;
+                    return;
+                }
+                ammo.setLifeTime(ammo.getLifeTime() - 1);
+
+                double ammoSpeed = tankBo.getType().getAmmoSpeed();
+                switch (ammo.getOrientationType()) {
+                    case UP:
+                        ammo.setY(ammo.getY() - ammoSpeed);
+                        break;
+                    case DOWN:
+                        ammo.setY(ammo.getY() + ammoSpeed);
+                        break;
+                    case LEFT:
+                        ammo.setX(ammo.getX() - ammoSpeed);
+                        break;
+                    case RIGHT:
+                        ammo.setX(ammo.getX() + ammoSpeed);
                         break;
                     default:
                         break;
