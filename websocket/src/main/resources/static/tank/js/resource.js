@@ -25,16 +25,19 @@
             } else {
                 id = "tank" + i;
             }
-            loadOrientationImage(id, this.images);
+            loadAnimationImage(id, this.images, 4);
         }
-        loadOrientationImage("ammo", this.images);
+
+        //others
+        loadAnimationImage("ammo", this.images, 4);
+        loadAnimationImage("bomb", this.images, 6);
         return this.images;
     };
 
-    const loadOrientationImage = function (imageId, images) {
+    const loadAnimationImage = function (imageId, images, widthPics) {
         const img = document.createElement('img');
         img.src = 'tank/image/' + imageId + '.png';
-        img.widthPics = 4;
+        img.widthPics = widthPics;
         img.heightPics = 1;
         img.displayWidth = img.width / img.widthPics;
         img.displayHeight = img.height / img.heightPics;

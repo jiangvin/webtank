@@ -76,17 +76,17 @@
                 tankLogo.showId = true;
 
                 //增加tank logo 动画
-                tankLogo.timeout = 30;
-                tankLogo.animationStatus = -0.05;
-                tankLogo.animation = function () {
-                    this.scale += this.animationStatus;
-                    if (this.timeout === 20 || this.timeout === 10) {
-                        this.animationStatus = 0.05;
-                    }
-                    if (this.timeout === 5 || this.timeout === 15) {
-                        this.animationStatus = -0.05;
-                    }
-                };
+                tankLogo.play = new Play(30, 1,
+                    function () {
+                        tankLogo.scale += this.animationScale;
+                        if (this.frames === 20 || this.frames === 10) {
+                            this.animationScale = 0.05;
+                        }
+                        if (this.frames === 5 || this.frames === 15) {
+                            this.animationScale = -0.05;
+                        }
+                    });
+                tankLogo.play.animationScale = -0.05;
 
                 //显示房间列表
                 Menu.showRoomList();

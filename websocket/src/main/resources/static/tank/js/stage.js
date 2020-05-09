@@ -24,7 +24,7 @@ function Stage(params) {
                 createOrUpdateAmmoList(thisStage, messageDto.message);
                 break;
             case "REMOVE_AMMO":
-                this.removeItem(messageDto.message);
+                this.removeAmmo(messageDto.message);
                 break;
 
         }
@@ -94,16 +94,45 @@ function Stage(params) {
     this.createAmmo = function (options) {
         const item = this.createItem(options);
         item.action = 1;
-        item.z = 3;
+        item.z = 1;
         item.image = Resource.getImage("ammo");
         item.update = function () {
             generalUpdateEvent(item);
         };
         return item;
     };
+    this.removeAmmo = function (ammoData) {
+        if (!this.items.has(ammoData.id)) {
+            return;
+        }
+        generalUpdateAttribute(this, ammoData);
+        const ammoItem = this.items.get(ammoData.id);
+        itemBomb(this, ammoItem, 0.5);
+    };
+
+    const itemBomb = function (thisStage, item, bombScale) {
+        if (bombScale === undefined) {
+            bombScale = 1;
+        }
+
+        item.action = 0;
+        item.orientation = 0;
+        item.scale = bombScale;
+        item.image = Resource.getImage("bomb");
+        item.play = new Play(
+            6,
+            3,
+            function () {
+                item.orientation = 6 - this.frames;
+            }, function () {
+                thisStage.removeItem(item.id);
+            });
+    };
 
     const generalUpdateEvent = function (item) {
-        item.updateAnimation();
+        if (item.play) {
+            item.play.update();
+        }
 
         if (item.action === 0) {
             return;
@@ -125,7 +154,7 @@ function Stage(params) {
         }
     };
 
-    const generalUpdateAttribute = function (thisStage,newAttr) {
+    const generalUpdateAttribute = function (thisStage, newAttr) {
         thisStage.items.get(newAttr.id).x = newAttr.x;
         thisStage.items.get(newAttr.id).y = newAttr.y;
         thisStage.items.get(newAttr.id).orientation = newAttr.orientation;
@@ -140,7 +169,7 @@ function Stage(params) {
         tanks.forEach(function (tank) {
             if (thisStage.items.has(tank.id)) {
                 //已存在
-                generalUpdateAttribute(thisStage,tank);
+                generalUpdateAttribute(thisStage, tank);
             } else {
                 let tankImage;
                 if (tank.typeId === "tankMenu") {
@@ -165,7 +194,7 @@ function Stage(params) {
         ammoList.forEach(function (ammo) {
             if (thisStage.items.has(ammo.id)) {
                 //已存在
-                generalUpdateAttribute(thisStage,ammo);
+                generalUpdateAttribute(thisStage, ammo);
             } else {
                 thisStage.createAmmo({
                     id: ammo.id,
