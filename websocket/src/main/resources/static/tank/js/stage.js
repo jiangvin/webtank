@@ -18,13 +18,13 @@ function Stage(params) {
                 createOrUpdateTanks(thisStage, messageDto.message);
                 break;
             case "REMOVE_TANK":
-                this.removeItem(messageDto.message);
+                this.itemBomb(messageDto.message);
                 break;
             case "AMMO":
                 createOrUpdateAmmoList(thisStage, messageDto.message);
                 break;
             case "REMOVE_AMMO":
-                this.removeAmmo(messageDto.message);
+                this.itemBomb(messageDto.message,0.5);
                 break;
 
         }
@@ -101,24 +101,22 @@ function Stage(params) {
         };
         return item;
     };
-    this.removeAmmo = function (ammoData) {
-        if (!this.items.has(ammoData.id)) {
-            return;
-        }
-        generalUpdateAttribute(this, ammoData);
-        const ammoItem = this.items.get(ammoData.id);
-        itemBomb(this, ammoItem, 0.5);
-    };
-
-    const itemBomb = function (thisStage, item, bombScale) {
+    this.itemBomb = function (data,bombScale) {
         if (bombScale === undefined) {
             bombScale = 1;
         }
 
+        if (!this.items.has(data.id)) {
+            return;
+        }
+
+        generalUpdateAttribute(this, data);
+        const item = this.items.get(data.id);
         item.action = 0;
         item.orientation = 0;
         item.scale = bombScale;
         item.image = Resource.getImage("bomb");
+        const thisStage = this;
         item.play = new Play(
             6,
             3,

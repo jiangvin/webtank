@@ -3,6 +3,7 @@ package com.integration.socket.stage;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.bo.AmmoBo;
 import com.integration.socket.model.bo.TankBo;
+import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.service.MessageService;
 
@@ -79,6 +80,6 @@ public abstract class BaseStage {
 
         TankBo tank = tankMap.get(tankId);
         tankMap.remove(tank.getTankId());
-        sendRoomMessage(tank.getTankId(), MessageType.REMOVE_TANK);
+        sendRoomMessage(ItemDto.convert(tank), MessageType.REMOVE_TANK);
     }
 }

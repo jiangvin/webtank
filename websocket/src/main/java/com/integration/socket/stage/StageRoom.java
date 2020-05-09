@@ -129,11 +129,7 @@ public class StageRoom extends BaseStage {
         }
 
         userMap.remove(username);
-
-        if (tankMap.containsKey(username)) {
-            tankMap.remove(username);
-            sendRoomMessage(username, MessageType.REMOVE_TANK);
-        }
+        removeTankFromUserId(username);
         if (getUserCount() == 0) {
             return;
         }
