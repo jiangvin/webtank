@@ -119,36 +119,6 @@ public class StageRoom extends BaseStage {
                         break;
                 }
             }
-
-            for (int i = 0; i < tankBo.getAmmoList().size(); ++i) {
-                AmmoBo ammo = tankBo.getAmmoList().get(i);
-                if (ammo.getLifeTime() == 0) {
-                    tankBo.getAmmoList().remove(i);
-                    --i;
-
-                    sendRoomMessage(ammo.getId(), MessageType.REMOVE_AMMO);
-                    return;
-                }
-                ammo.setLifeTime(ammo.getLifeTime() - 1);
-
-                double ammoSpeed = tankBo.getType().getAmmoSpeed();
-                switch (ammo.getOrientationType()) {
-                    case UP:
-                        ammo.setY(ammo.getY() - ammoSpeed);
-                        break;
-                    case DOWN:
-                        ammo.setY(ammo.getY() + ammoSpeed);
-                        break;
-                    case LEFT:
-                        ammo.setX(ammo.getX() - ammoSpeed);
-                        break;
-                    case RIGHT:
-                        ammo.setX(ammo.getX() + ammoSpeed);
-                        break;
-                    default:
-                        break;
-                }
-            }
         }
     }
 

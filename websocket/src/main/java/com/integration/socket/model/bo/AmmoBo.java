@@ -1,6 +1,7 @@
 package com.integration.socket.model.bo;
 
 import com.integration.socket.model.OrientationType;
+import com.integration.socket.model.TeamType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -14,6 +15,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class AmmoBo {
     private String id;
+    private String tankId;
+    private TeamType teamType;
     private int lifeTime;
     private double x;
     private double y;

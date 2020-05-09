@@ -2,12 +2,10 @@ package com.integration.socket.model.bo;
 
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.OrientationType;
+import com.integration.socket.model.TeamType;
 import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.util.CommonUtil;
 import lombok.Data;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author 蒋文龙(Vin)
@@ -21,12 +19,12 @@ public class TankBo {
     private String userId;
     private OrientationType orientationType = OrientationType.UP;
     private ActionType actionType = ActionType.STOP;
+    private TeamType teamType;
     private double x;
     private double y;
-
     private TankTypeBo type;
-    private List<AmmoBo> ammoList = new ArrayList<>();
     private int reloadTime;
+    private int ammoCount;
 
     public static TankBo convert(ItemDto tankDto) {
         TankBo tankBo = new TankBo();
@@ -37,12 +35,12 @@ public class TankBo {
         tankBo.setX(tankDto.getX());
         tankBo.setY(tankDto.getY());
         tankBo.setType(TankTypeBo.getTankType(tankDto.getTypeId()));
+        tankBo.setAmmoCount(tankBo.getType().getAmmoMaxCount());
         return tankBo;
     }
 
     public AmmoBo fire() {
-        int maxCount = type.getAmmoCount();
-        if (ammoList.size() >= maxCount) {
+        if (ammoCount <= 0) {
             return null;
         }
 
@@ -50,16 +48,22 @@ public class TankBo {
             return null;
         }
 
-        //fire
+        //重置重新填装
+        --ammoCount;
         reloadTime = type.getAmmoReloadTime();
-        AmmoBo newAmmo = new AmmoBo(
-            CommonUtil.getId(),
-            type.getAmmoLifeTime(),
-            this.x,
-            this.y,
-            this.getType().getAmmoSpeed(),
-            this.orientationType);
-        this.ammoList.add(newAmmo);
-        return newAmmo;
+
+        return new AmmoBo(
+                   CommonUtil.getId(),
+                   this.tankId,
+                   this.teamType,
+                   type.getAmmoMaxLifeTime(),
+                   this.x,
+                   this.y,
+                   this.getType().getAmmoSpeed(),
+                   this.orientationType);
+    }
+
+    public void addAmmoCount() {
+        ++ammoCount;
     }
 }

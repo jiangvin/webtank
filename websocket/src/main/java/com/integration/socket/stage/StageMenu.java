@@ -55,6 +55,7 @@ public class StageMenu extends BaseStage {
         if (ammo == null) {
             return;
         }
+        ammoBoList.add(ammo);
 
         sendRoomMessage(Collections.singletonList(ItemDto.convert(ammo)), MessageType.AMMO);
     }
@@ -82,36 +83,39 @@ public class StageMenu extends BaseStage {
                         break;
                 }
             }
+        }
 
-            //更新子弹设定
-            for (int i = 0; i < tankBo.getAmmoList().size(); ++i) {
-                AmmoBo ammo = tankBo.getAmmoList().get(i);
-                if (ammo.getLifeTime() == 0) {
-                    tankBo.getAmmoList().remove(i);
-                    --i;
+        //更新子弹设定
+        for (int i = 0; i < ammoBoList.size(); ++i) {
+            AmmoBo ammo = ammoBoList.get(i);
+            if (ammo.getLifeTime() == 0) {
+                ammoBoList.remove(i);
+                --i;
 
-                    sendRoomMessage(ammo.getId(), MessageType.REMOVE_AMMO);
-                    return;
+                if (tankMap.containsKey(ammo.getTankId())) {
+                    tankMap.get(ammo.getTankId()).addAmmoCount();
                 }
-                ammo.setLifeTime(ammo.getLifeTime() - 1);
 
-                double ammoSpeed = tankBo.getType().getAmmoSpeed();
-                switch (ammo.getOrientationType()) {
-                    case UP:
-                        ammo.setY(ammo.getY() - ammoSpeed);
-                        break;
-                    case DOWN:
-                        ammo.setY(ammo.getY() + ammoSpeed);
-                        break;
-                    case LEFT:
-                        ammo.setX(ammo.getX() - ammoSpeed);
-                        break;
-                    case RIGHT:
-                        ammo.setX(ammo.getX() + ammoSpeed);
-                        break;
-                    default:
-                        break;
-                }
+                sendRoomMessage(ItemDto.convert(ammo), MessageType.REMOVE_AMMO);
+                continue;
+            }
+            ammo.setLifeTime(ammo.getLifeTime() - 1);
+
+            switch (ammo.getOrientationType()) {
+                case UP:
+                    ammo.setY(ammo.getY() - ammo.getSpeed());
+                    break;
+                case DOWN:
+                    ammo.setY(ammo.getY() + ammo.getSpeed());
+                    break;
+                case LEFT:
+                    ammo.setX(ammo.getX() - ammo.getSpeed());
+                    break;
+                case RIGHT:
+                    ammo.setX(ammo.getX() + ammo.getSpeed());
+                    break;
+                default:
+                    break;
             }
         }
     }

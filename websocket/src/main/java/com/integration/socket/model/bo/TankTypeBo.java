@@ -21,9 +21,9 @@ public class TankTypeBo {
     private String typeId;
     private double speed;
 
-    private int ammoCount;
+    private int ammoMaxCount;
     private double ammoSpeed;
-    private int ammoLifeTime;
+    private int ammoMaxLifeTime;
     private int ammoReloadTime;
     private boolean brokenIron;
 

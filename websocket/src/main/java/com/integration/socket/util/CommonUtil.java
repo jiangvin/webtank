@@ -6,7 +6,7 @@ package com.integration.socket.util;
  * @date 2020/5/9
  */
 public class CommonUtil {
-    private static int id = 0;
+    private static long id = 0;
 
     public static String getId() {
         return "generatedServerId=" + id++;

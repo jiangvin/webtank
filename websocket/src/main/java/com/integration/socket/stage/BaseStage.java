@@ -22,6 +22,8 @@ public abstract class BaseStage {
 
     ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
+    List<AmmoBo> ammoBoList = new ArrayList<>();
+
     BaseStage(MessageService messageService) {
         this.messageService = messageService;
     }
@@ -76,9 +78,6 @@ public abstract class BaseStage {
         }
 
         TankBo tank = tankMap.get(tankId);
-        for (AmmoBo ammo : tank.getAmmoList()) {
-            sendRoomMessage(ammo.getId(), MessageType.REMOVE_AMMO);
-        }
         tankMap.remove(tank.getTankId());
         sendRoomMessage(tank.getTankId(), MessageType.REMOVE_TANK);
     }
