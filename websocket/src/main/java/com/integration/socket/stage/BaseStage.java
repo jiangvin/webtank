@@ -1,5 +1,6 @@
 package com.integration.socket.stage;
 
+import com.integration.socket.model.MessageType;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.service.MessageService;
 
@@ -42,4 +43,11 @@ public abstract class BaseStage {
      * @return 用户列表
      */
     public abstract List<String> getUserList();
+
+    /**
+     * 给房间所有用户发送消息
+     */
+    void sendRoomMessage(Object object, MessageType messageType) {
+        messageService.sendMessage(new MessageDto(object, messageType, getUserList()));
+    }
 }

@@ -51,6 +51,18 @@ public class TankTypeBo {
     private static void initTypeMap() {
         tankTypeMap = new ConcurrentHashMap<>(16);
 
+        //menu
+        tankTypeMap.put("tankMenu", new TankTypeBo(
+                            "tankMenu",
+                            1.0,
+                            1,
+                            5.0,
+                            60,
+                            0,
+                            false,
+                            null,
+                            null));
+
         //player
         tankTypeMap.put("tank01", new TankTypeBo(
                             "tank01",

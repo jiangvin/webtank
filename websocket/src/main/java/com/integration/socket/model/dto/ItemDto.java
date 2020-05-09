@@ -1,5 +1,6 @@
 package com.integration.socket.model.dto;
 
+import com.integration.socket.model.bo.AmmoBo;
 import com.integration.socket.model.bo.TankBo;
 import lombok.Data;
 
@@ -29,5 +30,14 @@ public class ItemDto {
         tankDto.setAction(tankBo.getActionType().getValue());
         tankDto.setSpeed(tankBo.getType().getSpeed());
         return tankDto;
+    }
+
+    public static ItemDto convert(AmmoBo ammoBo) {
+        ItemDto ammoDto = new ItemDto();
+        ammoDto.setId(ammoBo.getId());
+        ammoDto.setX(ammoBo.getX());
+        ammoDto.setY(ammoBo.getY());
+        ammoDto.setOrientation(ammoBo.getOrientationType().getValue());
+        return ammoDto;
     }
 }

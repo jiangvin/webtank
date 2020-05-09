@@ -77,6 +77,7 @@ public class StageRoom extends BaseStage {
                 break;
             case UPDATE_TANK_FIRE:
                 processTankFire(sendFrom);
+                break;
             default:
                 break;
         }
@@ -93,7 +94,8 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        //TODO - TANK FIRE
+        //同步消息
+        sendRoomMessage(Collections.singletonList(ItemDto.convert(ammo)), MessageType.AMMO);
     }
 
     @Override
@@ -125,6 +127,8 @@ public class StageRoom extends BaseStage {
                 if (ammo.getLifeTime() == 0) {
                     tankBo.getAmmoList().remove(i);
                     --i;
+
+                    sendRoomMessage(ammo.getId(), MessageType.REMOVE_AMMO);
                     return;
                 }
                 ammo.setLifeTime(ammo.getLifeTime() - 1);
@@ -160,7 +164,7 @@ public class StageRoom extends BaseStage {
 
         if (tankMap.containsKey(username)) {
             tankMap.remove(username);
-            messageService.sendMessage(new MessageDto(username, MessageType.REMOVE_TANK, getUserList()));
+            sendRoomMessage(username, MessageType.REMOVE_TANK);
         }
         if (getUserCount() == 0) {
             return;
@@ -169,7 +173,7 @@ public class StageRoom extends BaseStage {
     }
 
     private void sendStatusAndMessage(String username, boolean leave) {
-        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
+        sendRoomMessage(getUserList(), MessageType.USERS);
         String message;
         if (leave) {
             message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
@@ -201,9 +205,7 @@ public class StageRoom extends BaseStage {
         tankMap.put(tankBo.getTankId(), tankBo);
 
         //即将向所有人同步信息
-
-        MessageDto sendBack = new MessageDto(getTankList(), MessageType.TANKS, username);
-        messageService.sendMessage(sendBack);
+        sendRoomMessage(getTankList(), MessageType.TANKS);
     }
 
     private List<ItemDto> getTankList() {
@@ -228,8 +230,7 @@ public class StageRoom extends BaseStage {
         }
 
         ItemDto response = ItemDto.convert(updateBo);
-        MessageDto sendBack = new MessageDto(Collections.singletonList(response), MessageType.TANKS, getUserList());
-        messageService.sendMessage(sendBack);
+        sendRoomMessage(Collections.singletonList(response), MessageType.TANKS);
     }
 
     private TankBo updateTankControl(ItemDto tankDto) {
