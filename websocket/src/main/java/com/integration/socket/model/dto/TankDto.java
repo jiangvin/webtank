@@ -17,6 +17,7 @@ public class TankDto {
     private String typeId;
     private Integer orientation;
     private Integer action;
+    private Double speed;
 
     public static TankDto convert(TankBo tankBo) {
         TankDto tankDto = new TankDto();
@@ -26,6 +27,7 @@ public class TankDto {
         tankDto.setTypeId(tankBo.getType().getTypeId());
         tankDto.setOrientation(tankBo.getOrientationType().getValue());
         tankDto.setAction(tankBo.getActionType().getValue());
+        tankDto.setSpeed(tankBo.getType().getSpeed());
         return tankDto;
     }
 }

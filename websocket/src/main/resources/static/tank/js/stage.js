@@ -21,6 +21,7 @@ function Stage(params) {
                         thisStage.items[tank.id].orientation = tank.orientation;
                         thisStage.items[tank.id].action = tank.action;
                         thisStage.items[tank.id].typeId = tank.typeId;
+                        thisStage.items[tank.id].speed = tank.speed;
                     } else {
                         thisStage.createTank({
                             id: tank.id,
@@ -87,24 +88,18 @@ function Stage(params) {
                 return;
             }
 
-            const tankType = Resource.getTankType(this.typeId);
-            let speed = 0;
-            if (tankType) {
-                speed = tankType.speed;
-            }
-
             switch (this.orientation) {
                 case 0:
-                    this.y -= speed;
+                    this.y -= this.speed;
                     break;
                 case 1:
-                    this.y += speed;
+                    this.y += this.speed;
                     break;
                 case 2:
-                    this.x -= speed;
+                    this.x -= this.speed;
                     break;
                 case 3:
-                    this.x += speed;
+                    this.x += this.speed;
                     break;
             }
         };

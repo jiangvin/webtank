@@ -9,6 +9,7 @@ function Item(params) {
         y: 0,					//位置坐标:纵坐标
 
         typeId: "",			    //类型id
+        speed: 0,
         action: 0,              //动作,0是停,1是走
         orientation: 0,			//当前定位方向,0-3 上下左右
 

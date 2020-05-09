@@ -23,11 +23,7 @@
 
                 //开始连接
                 Common.stompConnect(name, function () {
-                    //获取Tank类型列表
-                    Common.getRequest("/user/getTankTypes", function (typeList) {
-                        Resource.setTankTypes(typeList);
-                        updateAfterConnect(name, isTouch);
-                    });
+                    updateAfterConnect(name, isTouch);
                 });
             });
         });

@@ -1,15 +1,11 @@
 package com.integration.socket.model.bo;
 
-import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.util.model.CustomException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -43,15 +39,6 @@ public class TankTypeBo {
             throw new CustomException(String.format("tank type:%s can not be found! ", id));
         }
         return map.get(id);
-    }
-
-    public static List<TankTypeDto> getTypeList() {
-        ConcurrentHashMap<String, TankTypeBo> map = getTypeMap();
-        List<TankTypeDto> typeList = new ArrayList<>();
-        for (Map.Entry<String, TankTypeBo> kv : map.entrySet()) {
-            typeList.add(TankTypeDto.convert(kv.getValue()));
-        }
-        return typeList;
     }
 
     private static ConcurrentHashMap<String, TankTypeBo> getTypeMap() {
