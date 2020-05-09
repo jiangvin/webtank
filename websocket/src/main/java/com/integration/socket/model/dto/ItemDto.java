@@ -10,7 +10,7 @@ import lombok.Data;
  */
 
 @Data
-public class TankDto {
+public class ItemDto {
     private String id;
     private Double x;
     private Double y;
@@ -19,8 +19,8 @@ public class TankDto {
     private Integer action;
     private Double speed;
 
-    public static TankDto convert(TankBo tankBo) {
-        TankDto tankDto = new TankDto();
+    public static ItemDto convert(TankBo tankBo) {
+        ItemDto tankDto = new ItemDto();
         tankDto.setId(tankBo.getTankId());
         tankDto.setX(tankBo.getX());
         tankDto.setY(tankBo.getY());

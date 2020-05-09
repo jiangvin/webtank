@@ -5,7 +5,7 @@ import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.dto.MessageDto;
-import com.integration.socket.model.dto.TankDto;
+import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +89,7 @@ public class StageMenu extends BaseStage {
     }
 
     public void addTank(MessageDto messageDto, String sendFrom) {
-        TankDto tankDto = ObjectUtil.readValue(messageDto.getMessage(), TankDto.class);
+        ItemDto tankDto = ObjectUtil.readValue(messageDto.getMessage(), ItemDto.class);
         if (tankDto == null) {
             return;
         }
@@ -114,16 +114,16 @@ public class StageMenu extends BaseStage {
         messageService.sendReady(sendFrom);
     }
 
-    private List<TankDto> getTankList() {
-        List<TankDto> tankDtoList = new ArrayList<>();
+    private List<ItemDto> getTankList() {
+        List<ItemDto> tankDtoList = new ArrayList<>();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            tankDtoList.add(TankDto.convert(kv.getValue()));
+            tankDtoList.add(ItemDto.convert(kv.getValue()));
         }
         return tankDtoList;
     }
 
     private void processTankControl(MessageDto messageDto, String sendFrom) {
-        TankDto request = ObjectUtil.readValue(messageDto.getMessage(), TankDto.class);
+        ItemDto request = ObjectUtil.readValue(messageDto.getMessage(), ItemDto.class);
         if (request == null) {
             return;
         }
@@ -135,12 +135,12 @@ public class StageMenu extends BaseStage {
             return;
         }
 
-        TankDto response = TankDto.convert(updateBo);
+        ItemDto response = ItemDto.convert(updateBo);
         MessageDto sendBack = new MessageDto(Collections.singletonList(response), MessageType.TANKS, getUserList());
         messageService.sendMessage(sendBack);
     }
 
-    private TankBo updateTankControl(TankDto tankDto) {
+    private TankBo updateTankControl(ItemDto tankDto) {
         if (!tankMap.containsKey(tankDto.getId())) {
             return null;
         }

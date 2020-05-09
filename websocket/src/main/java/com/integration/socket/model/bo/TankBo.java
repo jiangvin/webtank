@@ -2,7 +2,7 @@ package com.integration.socket.model.bo;
 
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.OrientationType;
-import com.integration.socket.model.dto.TankDto;
+import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.util.CommonUtil;
 import lombok.Data;
 
@@ -28,7 +28,7 @@ public class TankBo {
     private List<AmmoBo> ammoList = new ArrayList<>();
     private int reloadTime;
 
-    public static TankBo convert(TankDto tankDto) {
+    public static TankBo convert(ItemDto tankDto) {
         TankBo tankBo = new TankBo();
         tankBo.setTankId(tankDto.getId());
         tankBo.setUserId(tankDto.getId());

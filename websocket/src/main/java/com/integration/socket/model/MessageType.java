@@ -27,14 +27,17 @@ public enum MessageType {
      */
     USERS,
     /**
-     * tank状态列表
+     * 同步tank信息
      */
     TANKS,
     /**
      * 删除
      */
     REMOVE_TANK,
-
+    /**
+     * 同步ammo信息
+     */
+    AMMO,
 
     /**
      * 单向发送
