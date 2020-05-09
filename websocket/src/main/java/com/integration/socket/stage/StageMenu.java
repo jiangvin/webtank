@@ -3,9 +3,10 @@ package com.integration.socket.stage;
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
+import com.integration.socket.model.bo.AmmoBo;
 import com.integration.socket.model.bo.TankBo;
+import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.model.dto.MessageDto;
-import com.integration.socket.model.dto.TankDto;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author 蒋文龙(Vin)
@@ -25,9 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StageMenu extends BaseStage {
 
-    private static final String MENU_DEFAULT_TYPE = "tank01";
-
-    private ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
+    private static final String MENU_DEFAULT_TYPE = "tankMenu";
 
     public StageMenu(MessageService messageService) {
         super(messageService);
@@ -39,9 +37,27 @@ public class StageMenu extends BaseStage {
             case UPDATE_TANK_CONTROL:
                 processTankControl(messageDto, sendFrom);
                 break;
+            case UPDATE_TANK_FIRE:
+                processTankFire(sendFrom);
+                break;
             default:
                 break;
         }
+    }
+
+    private void processTankFire(String sendFrom) {
+        if (!tankMap.containsKey(sendFrom)) {
+            return;
+        }
+
+        TankBo tankBo = tankMap.get(sendFrom);
+        AmmoBo ammo = tankBo.fire();
+        if (ammo == null) {
+            return;
+        }
+        ammoBoList.add(ammo);
+
+        sendRoomMessage(Collections.singletonList(ItemDto.convert(ammo)), MessageType.AMMO);
     }
 
     @Override
@@ -49,33 +65,65 @@ public class StageMenu extends BaseStage {
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             if (tankBo.getActionType() == ActionType.RUN) {
+                double tankSpeed = tankBo.getType().getSpeed();
                 switch (tankBo.getOrientationType()) {
                     case UP:
-                        tankBo.setY(tankBo.getY() - tankBo.getSpeed());
+                        tankBo.setY(tankBo.getY() - tankSpeed);
                         break;
                     case DOWN:
-                        tankBo.setY(tankBo.getY() + tankBo.getSpeed());
+                        tankBo.setY(tankBo.getY() + tankSpeed);
                         break;
                     case LEFT:
-                        tankBo.setX(tankBo.getX() - tankBo.getSpeed());
+                        tankBo.setX(tankBo.getX() - tankSpeed);
                         break;
                     case RIGHT:
-                        tankBo.setX(tankBo.getX() + tankBo.getSpeed());
+                        tankBo.setX(tankBo.getX() + tankSpeed);
                         break;
                     default:
                         break;
                 }
             }
         }
+
+        //更新子弹设定
+        for (int i = 0; i < ammoBoList.size(); ++i) {
+            AmmoBo ammo = ammoBoList.get(i);
+            if (ammo.getLifeTime() == 0) {
+                ammoBoList.remove(i);
+                --i;
+
+                if (tankMap.containsKey(ammo.getTankId())) {
+                    tankMap.get(ammo.getTankId()).addAmmoCount();
+                }
+
+                sendRoomMessage(ItemDto.convert(ammo), MessageType.REMOVE_AMMO);
+                continue;
+            }
+            ammo.setLifeTime(ammo.getLifeTime() - 1);
+
+            switch (ammo.getOrientationType()) {
+                case UP:
+                    ammo.setY(ammo.getY() - ammo.getSpeed());
+                    break;
+                case DOWN:
+                    ammo.setY(ammo.getY() + ammo.getSpeed());
+                    break;
+                case LEFT:
+                    ammo.setX(ammo.getX() - ammo.getSpeed());
+                    break;
+                case RIGHT:
+                    ammo.setX(ammo.getX() + ammo.getSpeed());
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     @Override
     public void remove(String username) {
-        if (!removeTank(username) || getUserList().isEmpty()) {
-            return;
-        }
+        removeTankFromTankId(username);
         messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
-        messageService.sendMessage(new MessageDto(username, MessageType.REMOVE_TANK));
     }
 
     @Override
@@ -88,7 +136,7 @@ public class StageMenu extends BaseStage {
     }
 
     public void addTank(MessageDto messageDto, String sendFrom) {
-        TankDto tankDto = ObjectUtil.readValue(messageDto.getMessage(), TankDto.class);
+        ItemDto tankDto = ObjectUtil.readValue(messageDto.getMessage(), ItemDto.class);
         if (tankDto == null) {
             return;
         }
@@ -113,16 +161,16 @@ public class StageMenu extends BaseStage {
         messageService.sendReady(sendFrom);
     }
 
-    private List<TankDto> getTankList() {
-        List<TankDto> tankDtoList = new ArrayList<>();
+    private List<ItemDto> getTankList() {
+        List<ItemDto> tankDtoList = new ArrayList<>();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            tankDtoList.add(TankDto.convert(kv.getValue()));
+            tankDtoList.add(ItemDto.convert(kv.getValue()));
         }
         return tankDtoList;
     }
 
     private void processTankControl(MessageDto messageDto, String sendFrom) {
-        TankDto request = ObjectUtil.readValue(messageDto.getMessage(), TankDto.class);
+        ItemDto request = ObjectUtil.readValue(messageDto.getMessage(), ItemDto.class);
         if (request == null) {
             return;
         }
@@ -134,12 +182,11 @@ public class StageMenu extends BaseStage {
             return;
         }
 
-        TankDto response = TankDto.convert(updateBo);
-        MessageDto sendBack = new MessageDto(Collections.singletonList(response), MessageType.TANKS, getUserList());
-        messageService.sendMessage(sendBack);
+        ItemDto response = ItemDto.convert(updateBo);
+        sendRoomMessage(Collections.singletonList(response), MessageType.TANKS);
     }
 
-    private TankBo updateTankControl(TankDto tankDto) {
+    private TankBo updateTankControl(ItemDto tankDto) {
         if (!tankMap.containsKey(tankDto.getId())) {
             return null;
         }
@@ -155,13 +202,5 @@ public class StageMenu extends BaseStage {
             tankBo.setActionType(actionType);
         }
         return tankBo;
-    }
-
-    private boolean removeTank(String tankId) {
-        if (!tankMap.containsKey(tankId)) {
-            return false;
-        }
-        tankMap.remove(tankId);
-        return true;
     }
 }

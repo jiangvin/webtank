@@ -87,6 +87,9 @@ function Game() {
             case "Stop":
                 thisGame.controlUpdateToServer(null, 0);
                 break;
+            case "FIRE":
+                Common.sendStompMessage(null, "UPDATE_TANK_FIRE");
+                break;
             default:
                 break;
         }

@@ -2,7 +2,9 @@ package com.integration.socket.model.bo;
 
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.OrientationType;
-import com.integration.socket.model.dto.TankDto;
+import com.integration.socket.model.TeamType;
+import com.integration.socket.model.dto.ItemDto;
+import com.integration.socket.util.CommonUtil;
 import lombok.Data;
 
 /**
@@ -17,11 +19,14 @@ public class TankBo {
     private String userId;
     private OrientationType orientationType = OrientationType.UP;
     private ActionType actionType = ActionType.STOP;
+    private TeamType teamType;
     private double x;
     private double y;
     private TankTypeBo type;
+    private int reloadTime;
+    private int ammoCount;
 
-    public static TankBo convert(TankDto tankDto) {
+    public static TankBo convert(ItemDto tankDto) {
         TankBo tankBo = new TankBo();
         tankBo.setTankId(tankDto.getId());
         tankBo.setUserId(tankDto.getId());
@@ -30,13 +35,35 @@ public class TankBo {
         tankBo.setX(tankDto.getX());
         tankBo.setY(tankDto.getY());
         tankBo.setType(TankTypeBo.getTankType(tankDto.getTypeId()));
+        tankBo.setAmmoCount(tankBo.getType().getAmmoMaxCount());
         return tankBo;
     }
 
-    public double getSpeed() {
-        if (type != null) {
-            return type.getSpeed();
+    public AmmoBo fire() {
+        if (ammoCount <= 0) {
+            return null;
         }
-        return 1.0;
+
+        if (reloadTime != 0) {
+            return null;
+        }
+
+        //重置重新填装
+        --ammoCount;
+        reloadTime = type.getAmmoReloadTime();
+
+        return new AmmoBo(
+                   CommonUtil.getId(),
+                   this.tankId,
+                   this.teamType,
+                   type.getAmmoMaxLifeTime(),
+                   this.x,
+                   this.y,
+                   this.getType().getAmmoSpeed(),
+                   this.orientationType);
+    }
+
+    public void addAmmoCount() {
+        ++ammoCount;
     }
 }

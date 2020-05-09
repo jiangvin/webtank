@@ -4,13 +4,14 @@ import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.RoomType;
-import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.TeamType;
+import com.integration.socket.model.bo.AmmoBo;
 import com.integration.socket.model.bo.TankBo;
+import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
-import com.integration.socket.model.dto.TankDto;
+import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
 import lombok.Getter;
@@ -38,8 +39,6 @@ public class StageRoom extends BaseStage {
         this.mapId = roomDto.getMapId();
         this.roomType = roomDto.getRoomType();
     }
-
-    private ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
 
@@ -74,9 +73,27 @@ public class StageRoom extends BaseStage {
             case UPDATE_TANK_CONTROL:
                 processTankControl(messageDto, sendFrom);
                 break;
+            case UPDATE_TANK_FIRE:
+                processTankFire(sendFrom);
+                break;
             default:
                 break;
         }
+    }
+
+    private void processTankFire(String sendFrom) {
+        if (!tankMap.containsKey(sendFrom)) {
+            return;
+        }
+
+        TankBo tankBo = tankMap.get(sendFrom);
+        AmmoBo ammo = tankBo.fire();
+        if (ammo == null) {
+            return;
+        }
+
+        //同步消息
+        sendRoomMessage(Collections.singletonList(ItemDto.convert(ammo)), MessageType.AMMO);
     }
 
     @Override
@@ -84,18 +101,19 @@ public class StageRoom extends BaseStage {
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             if (tankBo.getActionType() == ActionType.RUN) {
+                double tankSpeed = tankBo.getType().getSpeed();
                 switch (tankBo.getOrientationType()) {
                     case UP:
-                        tankBo.setY(tankBo.getY() - tankBo.getSpeed());
+                        tankBo.setY(tankBo.getY() - tankSpeed);
                         break;
                     case DOWN:
-                        tankBo.setY(tankBo.getY() + tankBo.getSpeed());
+                        tankBo.setY(tankBo.getY() + tankSpeed);
                         break;
                     case LEFT:
-                        tankBo.setX(tankBo.getX() - tankBo.getSpeed());
+                        tankBo.setX(tankBo.getX() - tankSpeed);
                         break;
                     case RIGHT:
-                        tankBo.setX(tankBo.getX() + tankBo.getSpeed());
+                        tankBo.setX(tankBo.getX() + tankSpeed);
                         break;
                     default:
                         break;
@@ -111,8 +129,7 @@ public class StageRoom extends BaseStage {
         }
 
         userMap.remove(username);
-        tankMap.remove(username);
-
+        removeTankFromUserId(username);
         if (getUserCount() == 0) {
             return;
         }
@@ -120,7 +137,7 @@ public class StageRoom extends BaseStage {
     }
 
     private void sendStatusAndMessage(String username, boolean leave) {
-        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
+        sendRoomMessage(getUserList(), MessageType.USERS);
         String message;
         if (leave) {
             message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
@@ -152,21 +169,19 @@ public class StageRoom extends BaseStage {
         tankMap.put(tankBo.getTankId(), tankBo);
 
         //即将向所有人同步信息
-
-        MessageDto sendBack = new MessageDto(getTankList(), MessageType.TANKS, username);
-        messageService.sendMessage(sendBack);
+        sendRoomMessage(getTankList(), MessageType.TANKS);
     }
 
-    private List<TankDto> getTankList() {
-        List<TankDto> tankDtoList = new ArrayList<>();
+    private List<ItemDto> getTankList() {
+        List<ItemDto> tankDtoList = new ArrayList<>();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            tankDtoList.add(TankDto.convert(kv.getValue()));
+            tankDtoList.add(ItemDto.convert(kv.getValue()));
         }
         return tankDtoList;
     }
 
     private void processTankControl(MessageDto messageDto, String sendFrom) {
-        TankDto request = ObjectUtil.readValue(messageDto.getMessage(), TankDto.class);
+        ItemDto request = ObjectUtil.readValue(messageDto.getMessage(), ItemDto.class);
         if (request == null) {
             return;
         }
@@ -178,12 +193,11 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        TankDto response = TankDto.convert(updateBo);
-        MessageDto sendBack = new MessageDto(Collections.singletonList(response), MessageType.TANKS, getUserList());
-        messageService.sendMessage(sendBack);
+        ItemDto response = ItemDto.convert(updateBo);
+        sendRoomMessage(Collections.singletonList(response), MessageType.TANKS);
     }
 
-    private TankBo updateTankControl(TankDto tankDto) {
+    private TankBo updateTankControl(ItemDto tankDto) {
         if (!tankMap.containsKey(tankDto.getId())) {
             return null;
         }

@@ -1,10 +1,8 @@
 package com.integration.socket.controller;
 
 import com.integration.socket.model.MessageType;
-import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomListDto;
-import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.service.OnlineUserService;
 import com.integration.socket.service.RoomService;
 import com.integration.util.model.CustomException;
@@ -72,8 +70,4 @@ public class UserController {
         return Collections.singletonList("default");
     }
 
-    @GetMapping("/getTankTypes")
-    public List<TankTypeDto> getTankTypes() {
-        return TankTypeBo.getTypeList();
-    }
 }

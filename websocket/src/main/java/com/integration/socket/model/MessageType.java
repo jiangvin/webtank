@@ -27,13 +27,21 @@ public enum MessageType {
      */
     USERS,
     /**
-     * tank状态列表
+     * 同步tank信息
      */
     TANKS,
     /**
-     * 删除
+     * 删除TANK
      */
     REMOVE_TANK,
+    /**
+     * 同步ammo信息
+     */
+    AMMO,
+    /**
+     * 删除AMMO
+     */
+    REMOVE_AMMO,
 
 
     /**
@@ -46,6 +54,10 @@ public enum MessageType {
      * 同步状态，为了避免客户端作弊，只传递状态
      */
     UPDATE_TANK_CONTROL,
+    /**
+     * 同步开火状态
+     */
+    UPDATE_TANK_FIRE,
     /**
      * 创建房间
      */

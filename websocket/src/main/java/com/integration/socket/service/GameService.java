@@ -114,7 +114,12 @@ public class GameService {
     }
 
     private void processUserMessage(MessageDto messageDto, String sendFrom) {
-        if (messageDto.sendToAll()) {
+        List<String> sendToList = messageDto.getSendToList();
+        if (sendToList != null && sendToList.isEmpty()) {
+            return;
+        }
+
+        if (sendToList == null) {
             messageDto.setMessage(String.format("%s: %s", sendFrom, messageDto.getMessage()));
             messageService.sendMessage(messageDto);
         } else {
@@ -199,8 +204,8 @@ public class GameService {
 
     private UserBo userCheckAndGetSendFrom(MessageDto messageDto, String sendFrom) {
         //检查接收方
-        if (!messageDto.sendToAll()) {
-            List<String> sendToList = messageDto.getSendToList();
+        List<String> sendToList = messageDto.getSendToList();
+        if (sendToList != null) {
             for (int i = 0; i < sendToList.size(); ++i) {
                 if (!onlineUserService.exists(sendToList.get(i))) {
                     sendToList.remove(i);

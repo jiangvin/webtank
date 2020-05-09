@@ -7,7 +7,6 @@
         //id生成器
         this.id = null;
         this.stompClient = null;
-        this.tankTypes = null;
     }
 
     Resource.getImages = function () {
@@ -26,16 +25,19 @@
             } else {
                 id = "tank" + i;
             }
-            loadOrientationImage(id, this.images);
+            loadAnimationImage(id, this.images, 4);
         }
-        loadOrientationImage("ammo", this.images);
+
+        //others
+        loadAnimationImage("ammo", this.images, 4);
+        loadAnimationImage("bomb", this.images, 6);
         return this.images;
     };
 
-    const loadOrientationImage = function (imageId, images) {
+    const loadAnimationImage = function (imageId, images, widthPics) {
         const img = document.createElement('img');
         img.src = 'tank/image/' + imageId + '.png';
-        img.widthPics = 4;
+        img.widthPics = widthPics;
         img.heightPics = 1;
         img.displayWidth = img.width / img.widthPics;
         img.displayHeight = img.height / img.heightPics;
@@ -84,7 +86,7 @@
         if (!this.id) {
             this.id = 1;
         }
-        return "generatedId=" + this.id++;
+        return "generatedClientId=" + this.id++;
     };
 
     Resource.getSelect = function (options) {
@@ -104,19 +106,4 @@
     Resource.getStompClient = function () {
         return this.stompClient;
     };
-
-    Resource.setTankTypes = function (dataList) {
-        const types = new Map();
-        /**
-         * @param data {{typeId,speed,ammoSpeed}}
-         */
-        dataList.forEach(function (data) {
-            types.set(data.typeId, data);
-        });
-        this.tankTypes = types;
-    };
-
-    Resource.getTankType = function (id) {
-        return this.tankTypes.get(id);
-    }
 }

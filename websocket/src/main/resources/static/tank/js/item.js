@@ -7,34 +7,21 @@ function Item(params) {
         scale: 1.0,             //图片放大的倍数
         x: 0,					//位置坐标:横坐标
         y: 0,					//位置坐标:纵坐标
+        z: 0,                   //位置坐标:大值覆盖小值，不允许小于0
 
-        typeId: "",			    //类型id
+        speed: 0,
         action: 0,              //动作,0是停,1是走
         orientation: 0,			//当前定位方向,0-3 上下左右
 
-        //以下为动画相关
-        frames: 1,				//速度等级,内部计算器times多少帧变化一次
-        animationStatus: 0,	    //刷新画布计数(用于循环动画状态判断)
-        timeout: 0,				//倒计时(用于过程动画状态判断)
-        animation: null,
+        //动画相关
+        play: null,
+
         update: function () {   //更新参数信息
-            this.updateAnimation();
         },
         draw: function (context) {
             drawId(this, context);
             drawImage(this, context);
         },
-        updateAnimation: function () {
-            if (!this.timeout || !this.animation) {
-                return;
-            }
-
-            if (this.timeout-- % this.frames) {
-                return;
-            }
-
-            this.animation();
-        }
     };
     Common.extend(this, this.settings, this.params);
 

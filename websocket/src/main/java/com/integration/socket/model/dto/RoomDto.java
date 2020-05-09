@@ -1,5 +1,6 @@
 package com.integration.socket.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
 import com.integration.socket.stage.StageRoom;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
  * @date 2020/5/4
  */
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @NoArgsConstructor
 public class RoomDto {

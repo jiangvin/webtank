@@ -1,9 +1,16 @@
 package com.integration.socket.stage;
 
+import com.integration.socket.model.MessageType;
+import com.integration.socket.model.bo.AmmoBo;
+import com.integration.socket.model.bo.TankBo;
+import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.service.MessageService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author 蒋文龙(Vin)
@@ -13,6 +20,10 @@ import java.util.List;
 public abstract class BaseStage {
 
     MessageService messageService;
+
+    ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
+
+    List<AmmoBo> ammoBoList = new ArrayList<>();
 
     BaseStage(MessageService messageService) {
         this.messageService = messageService;
@@ -41,5 +52,34 @@ public abstract class BaseStage {
      * 获取用户列表
      * @return 用户列表
      */
-    public abstract List<String> getUserList();
+    abstract List<String> getUserList();
+
+    /**
+     * 给房间所有用户发送消息
+     */
+    void sendRoomMessage(Object object, MessageType messageType) {
+        messageService.sendMessage(new MessageDto(object, messageType, getUserList()));
+    }
+
+    void removeTankFromUserId(String userId) {
+        List<String> removeTankIds = new ArrayList<>();
+        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
+            if (kv.getValue().getUserId().equals(userId)) {
+                removeTankIds.add(kv.getKey());
+            }
+        }
+        for (String tankId : removeTankIds) {
+            removeTankFromTankId(tankId);
+        }
+    }
+
+    void removeTankFromTankId(String tankId) {
+        if (!tankMap.containsKey(tankId)) {
+            return;
+        }
+
+        TankBo tank = tankMap.get(tankId);
+        tankMap.remove(tank.getTankId());
+        sendRoomMessage(ItemDto.convert(tank), MessageType.REMOVE_TANK);
+    }
 }

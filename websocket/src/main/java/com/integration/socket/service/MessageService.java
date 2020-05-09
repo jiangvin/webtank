@@ -30,11 +30,14 @@ public class MessageService {
     }
 
     public void sendMessage(MessageDto messageDto) {
+        List<String> sendToList = messageDto.getSendToList();
+        if (sendToList != null && sendToList.isEmpty()) {
+            return;
+        }
+
         log.info("send message:{}", messageDto.toString());
 
-        List<String> sendToList = messageDto.getSendToList();
-
-        if (messageDto.sendToAll()) {
+        if (sendToList == null) {
             simpMessagingTemplate.convertAndSend(
                 TOPIC_PATH,
                 messageDto);

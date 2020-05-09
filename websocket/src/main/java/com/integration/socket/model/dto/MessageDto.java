@@ -1,5 +1,6 @@
 package com.integration.socket.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.integration.socket.model.MessageType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.List;
  * @date 2020/4/23
  */
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @NoArgsConstructor
 public class MessageDto {
@@ -33,10 +35,6 @@ public class MessageDto {
 
     public MessageDto(Object message, MessageType messageType, List<String> sendToList) {
         init(message, messageType, sendToList);
-    }
-
-    public boolean sendToAll() {
-        return sendToList == null || sendToList.isEmpty();
     }
 
     private void init(Object message, MessageType messageType, List<String> sendToList) {

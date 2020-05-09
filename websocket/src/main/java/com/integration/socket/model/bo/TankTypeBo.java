@@ -1,15 +1,11 @@
 package com.integration.socket.model.bo;
 
-import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.util.model.CustomException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -25,9 +21,9 @@ public class TankTypeBo {
     private String typeId;
     private double speed;
 
-    private int ammoCount;
+    private int ammoMaxCount;
     private double ammoSpeed;
-    private int ammoLifeTime;
+    private int ammoMaxLifeTime;
     private int ammoReloadTime;
     private boolean brokenIron;
 
@@ -45,15 +41,6 @@ public class TankTypeBo {
         return map.get(id);
     }
 
-    public static List<TankTypeDto> getTypeList() {
-        ConcurrentHashMap<String, TankTypeBo> map = getTypeMap();
-        List<TankTypeDto> typeList = new ArrayList<>();
-        for (Map.Entry<String, TankTypeBo> kv : map.entrySet()) {
-            typeList.add(TankTypeDto.convert(kv.getValue()));
-        }
-        return typeList;
-    }
-
     private static ConcurrentHashMap<String, TankTypeBo> getTypeMap() {
         if (tankTypeMap == null) {
             initTypeMap();
@@ -63,6 +50,18 @@ public class TankTypeBo {
 
     private static void initTypeMap() {
         tankTypeMap = new ConcurrentHashMap<>(16);
+
+        //menu
+        tankTypeMap.put("tankMenu", new TankTypeBo(
+                            "tankMenu",
+                            1.0,
+                            1,
+                            5.0,
+                            60,
+                            0,
+                            false,
+                            null,
+                            null));
 
         //player
         tankTypeMap.put("tank01", new TankTypeBo(

@@ -30,8 +30,8 @@ Common.height = function () {
     return Common.getCanvas().height;
 };
 Common.windowChange = function () {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = document.documentElement.clientWidth;
+    const height = document.documentElement.clientHeight;
 
     let style = "";
     if (width >= height) { // 横屏
@@ -133,6 +133,10 @@ Common.bindKeyboard = function () {
             case "ArrowRight":
                 event = "Right";
                 break;
+            case " ":
+            case "Spacebar":
+                event = "FIRE";
+                break;
             default:
                 break;
         }
@@ -167,7 +171,13 @@ Common.bindTouch = function () {
         let x = touchPoint.x;
         let y = touchPoint.y;
 
-        const distance = Common.distance(x, y, _touchControl.centerX, _touchControl.centerY);
+        let distance = Common.distance(x, y, _touchControl.rightCenterX, _touchControl.rightCenterY);
+        if (distance < _touchControl.rightRadius) {
+            Resource.getGame().controlEvent("FIRE");
+            return;
+        }
+
+        distance = Common.distance(x, y, _touchControl.centerX, _touchControl.centerY);
         if (distance > _touchControl.radius) {
             //超过外圆，不做任何操作
             return;
@@ -423,7 +433,7 @@ Common.addConnectTimeoutEvent = function (callback) {
             return;
         }
 
-        Common.addMessage("与服务器连接超时...", "#F00");
+        Common.addMessage("与服务器连接超时！", "#F00");
         Status.setStatus(Status.getStatusNormal());
         if (callback !== undefined) {
             callback();
@@ -438,6 +448,10 @@ Common.runNextStage = function () {
 };
 Common.runLastStage = function () {
     Resource.getGame().runLastStage();
+};
+Common.getRandomTankImage = function () {
+    const id = Math.floor(Math.random() * 9) + 1;
+    return Resource.getImage("tank0" + id);
 };
 
 //general tools
