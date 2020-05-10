@@ -185,7 +185,7 @@ public class GameService {
         roomService.get(roomDto.getRoomId()).add(userBo, roomDto.getJoinTeamType());
     }
 
-    @Scheduled(fixedDelay = 17)
+    @Scheduled(fixedRate = 17)
     public void update() {
         menu.update();
         roomService.update();

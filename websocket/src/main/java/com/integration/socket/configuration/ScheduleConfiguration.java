@@ -18,6 +18,6 @@ import java.util.concurrent.Executors;
 public class ScheduleConfiguration implements SchedulingConfigurer {
     @Override
     public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
-        scheduledTaskRegistrar.setScheduler(Executors.newScheduledThreadPool(1));
+        scheduledTaskRegistrar.setScheduler(Executors.newScheduledThreadPool(4));
     }
 }

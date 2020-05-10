@@ -11,11 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author 蒋文龙(Vin)
@@ -44,33 +41,27 @@ public class MapService {
 
     private static final String MAP_CONTENT = "map_content";
 
+    private static final String URL_PREFIX = "http://localhost/tank/map/";
+
     public MapBo loadMap(@NonNull String mapId) {
         if (!DEFAULT.equals(mapId)) {
             throw new CustomException("找不到地图资源!");
         }
 
-        URL resource = this.getClass().getClassLoader().getResource("static/tank/map/" + DEFAULT + ".txt");
-        if (resource == null) {
-            throw new CustomException("找不到地图资源!");
-        }
-        return readFile(resource.getPath());
+        return readFile(mapId);
     }
 
-    private MapBo readFile(String filePath) {
+    private MapBo readFile(String mapId) {
         MapBo mapBo = new MapBo();
         int lineIndex = 0;
         try {
-            File file = new File(filePath);
-            if (!file.exists() || !file.isFile()) {
-                throw new CustomException("找不到地图资源!");
-            }
-            @Cleanup InputStreamReader read = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8);
-            @Cleanup BufferedReader bufferedReader = new BufferedReader(read);
+            URL url = new URL(URL_PREFIX + mapId + ".txt");
+            @Cleanup BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
             String line;
             int readMapLineNumber = -1;
             int mapWidth = 0;
             int mapHeight = 0;
-            while ((line = bufferedReader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 ++lineIndex;
                 if (line.startsWith("#") || StringUtils.isEmpty(line)) {
                     continue;
