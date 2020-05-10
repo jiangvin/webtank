@@ -1,7 +1,7 @@
 function Item(params) {
     this.params = params || {};
     this.settings = {
-        id: Resource.getId(),
+        id: "",
         showId: false,          //是否显示id
         image: null,            //相应图片
         scale: 1.0,             //图片放大的倍数
@@ -17,6 +17,9 @@ function Item(params) {
         play: null,
 
         update: function () {   //更新参数信息
+            if (this.play) {
+                this.play.update();
+            }
         },
         draw: function (context) {
             drawId(this, context);
@@ -24,6 +27,9 @@ function Item(params) {
         },
     };
     Common.extend(this, this.settings, this.params);
+    if (this.id === "") {
+        this.id = Resource.getId();
+    }
 
     const drawId = function (item, context) {
         if (!item.showId) {

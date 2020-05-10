@@ -34,6 +34,8 @@
         loadAnimationImage("brick", this.images, 2);
         loadAnimationImage("iron",this.images,2);
         loadAnimationImage("river",this.images,2);
+        loadAnimationImage("red_king",this.images,2);
+        loadAnimationImage("blue_king",this.images,2);
         return this.images;
     };
 

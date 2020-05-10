@@ -367,7 +367,7 @@ function Game() {
 
         //图层
         context.globalAlpha = 0.5;
-        let image = Resource.getImage("ammo-icon");
+        let image = Resource.getImage("ammo_icon");
         let size = touchInfo.rightRadius * 1.5;
         context.drawImage(image,
             0, 0,
@@ -375,7 +375,7 @@ function Game() {
             touchInfo.rightCenterX - size / 2, touchInfo.rightCenterY - size / 2,
             size, size);
 
-        image = Resource.getImage("horn-icon");
+        image = Resource.getImage("horn_icon");
         size = touchInfo.hornRadius * 2;
         context.drawImage(image,
             0, 0,

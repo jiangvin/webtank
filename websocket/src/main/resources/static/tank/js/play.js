@@ -16,16 +16,16 @@ function Play(frames, timePerFrame, updateEvent, endEvent) {
 
     //动画的更新函数
     this.update = function () {
-        if (!this.updateEvent) {
+        if (this.frames < 0 || !this.updateEvent) {
             return;
         }
 
         //结束
-        if (this.frames <= 0) {
+        if (this.frames === 0) {
+            this.frames = -1;
             if (this.endEvent) {
                 this.endEvent();
             }
-            this.updateEvent = null;
             return;
         }
 

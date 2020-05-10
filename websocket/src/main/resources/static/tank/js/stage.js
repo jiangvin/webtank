@@ -38,25 +38,9 @@ function Stage(params) {
     };
 
     this.draw = function (context) {
-        const itemsWithZ = [];
         this.items.forEach(function (item) {
-            if (item.z === 0) {
-                item.draw(context);
-            } else {
-                if (!itemsWithZ[item.z]) {
-                    itemsWithZ[item.z] = [];
-                }
-                const newIndex = itemsWithZ[item.z].length;
-                itemsWithZ[item.z][newIndex] = item;
-            }
+            item.draw(context);
         });
-
-        //draw item with z
-        itemsWithZ.forEach(function (items) {
-            items.forEach(function (item) {
-                item.draw(context);
-            })
-        })
     };
 
     this.update = function () {
@@ -68,8 +52,31 @@ function Stage(params) {
     this.createItem = function (options) {
         const item = new Item(options);
         this.items.set(item.id, item);
+        this.sortItems();
         return item;
     };
+
+    this.sortItems = function () {
+        let array = Array.from(this.items);
+        array.sort(function (a,b) {
+            const item1 = a[1];
+            const item2 = b[1];
+            if (item1.z !== item2.z) {
+                return item1.z - item2.z;
+            }
+
+            if (item1.y !== item2.y) {
+                return item1.y - item2.y;
+            }
+
+            return item1.x - item2.x;
+        });
+
+        this.items = new Map(array.map(function (data) {
+            return [data[0],data[1]];
+        }));
+    };
+
     this.removeItem = function (id) {
         if (this.items.has(id)) {
             this.items.delete(id);
@@ -88,6 +95,7 @@ function Stage(params) {
         item.id = newId;
         item.showId = showId;
         this.items.set(newId, item);
+        this.sortItems();
     };
 
     this.createTank = function (options) {
@@ -122,6 +130,7 @@ function Stage(params) {
         item.action = 0;
         item.orientation = 0;
         item.scale = bombScale;
+        item.z = 10;
         item.image = Resource.getImage("bomb");
         const thisStage = this;
         item.play = new Play(
