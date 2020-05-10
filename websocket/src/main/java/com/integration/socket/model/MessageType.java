@@ -19,6 +19,10 @@ public enum MessageType {
      */
     SYSTEM_MESSAGE,
     /**
+     * 错误信息
+     */
+    ERROR_MESSAGE,
+    /**
      * 数据传输完毕，通知前端可以解除暂停
      */
     SERVER_READY,

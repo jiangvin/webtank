@@ -56,6 +56,9 @@ function Game() {
             case "SYSTEM_MESSAGE":
                 Common.addMessage(messageDto.message, "#FF0");
                 break;
+            case "ERROR_MESSAGE":
+                Common.addMessage(messageDto.message, "#F00");
+                break;
             case "SERVER_READY":
                 serverReady();
                 break;

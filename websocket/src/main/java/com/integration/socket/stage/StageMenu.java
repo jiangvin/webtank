@@ -62,6 +62,7 @@ public class StageMenu extends BaseStage {
 
     @Override
     public void update() {
+        //更新坦克
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             if (tankBo.getActionType() == ActionType.RUN) {
@@ -85,7 +86,7 @@ public class StageMenu extends BaseStage {
             }
         }
 
-        //更新子弹设定
+        //更新子弹
         for (int i = 0; i < ammoBoList.size(); ++i) {
             AmmoBo ammo = ammoBoList.get(i);
             if (ammo.getLifeTime() == 0) {
