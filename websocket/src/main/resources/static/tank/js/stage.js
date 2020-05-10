@@ -24,10 +24,17 @@ function Stage(params) {
                 createOrUpdateAmmoList(thisStage, messageDto.message);
                 break;
             case "REMOVE_AMMO":
-                this.itemBomb(messageDto.message,0.5);
+                this.itemBomb(messageDto.message, 0.5);
                 break;
-
+            default:
+                this.receiveStompMessageExtension(messageDto);
+                break;
         }
+    };
+
+    //拓展函数
+    this.receiveStompMessageExtension = function () {
+
     };
 
     this.draw = function (context) {
@@ -85,7 +92,7 @@ function Stage(params) {
 
     this.createTank = function (options) {
         const item = this.createItem(options);
-        item.z = 2;
+        item.z = 3;
         item.update = function () {
             generalUpdateEvent(item);
         };
@@ -94,14 +101,14 @@ function Stage(params) {
     this.createAmmo = function (options) {
         const item = this.createItem(options);
         item.action = 1;
-        item.z = 1;
+        item.z = 2;
         item.image = Resource.getImage("ammo");
         item.update = function () {
             generalUpdateEvent(item);
         };
         return item;
     };
-    this.itemBomb = function (data,bombScale) {
+    this.itemBomb = function (data, bombScale) {
         if (bombScale === undefined) {
             bombScale = 1;
         }
