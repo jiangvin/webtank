@@ -19,6 +19,8 @@ public class CommonUtil {
 
     public static Point getPointFromKey(String key) {
         String[] infos = key.split("_");
-        return new Point(Integer.parseInt(infos[0]), Integer.parseInt(infos[1]));
+        return new Point(
+                   Integer.parseInt(infos[0]) * UNIT_SIZE + UNIT_SIZE / 2,
+                   Integer.parseInt(infos[1]) * UNIT_SIZE + UNIT_SIZE / 2);
     }
 }

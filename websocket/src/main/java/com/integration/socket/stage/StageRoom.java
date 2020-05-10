@@ -1,28 +1,26 @@
 package com.integration.socket.stage;
 
 import com.integration.socket.model.ActionType;
-import com.integration.socket.model.dto.MapDto;
 import com.integration.socket.model.MessageType;
-import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
-import com.integration.socket.model.bo.AmmoBo;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.ItemDto;
-import com.integration.socket.model.dto.MessageDto;
+import com.integration.socket.model.dto.MapDto;
 import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.service.MessageService;
-import com.integration.util.object.ObjectUtil;
+import com.integration.socket.util.CommonUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -59,6 +57,8 @@ public class StageRoom extends BaseStage {
     @Getter
     private RoomType roomType;
 
+    private Random random = new Random();
+
     public int getUserCount() {
         return userMap.size();
     }
@@ -70,35 +70,6 @@ public class StageRoom extends BaseStage {
             users.add(kv.getKey());
         }
         return users;
-    }
-
-    @Override
-    public void processMessage(MessageDto messageDto, String sendFrom) {
-        switch (messageDto.getMessageType()) {
-            case UPDATE_TANK_CONTROL:
-                processTankControl(messageDto, sendFrom);
-                break;
-            case UPDATE_TANK_FIRE:
-                processTankFire(sendFrom);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void processTankFire(String sendFrom) {
-        if (!tankMap.containsKey(sendFrom)) {
-            return;
-        }
-
-        TankBo tankBo = tankMap.get(sendFrom);
-        AmmoBo ammo = tankBo.fire();
-        if (ammo == null) {
-            return;
-        }
-
-        //同步消息
-        sendRoomMessage(Collections.singletonList(ItemDto.convert(ammo)), MessageType.AMMO);
     }
 
     @Override
@@ -142,14 +113,14 @@ public class StageRoom extends BaseStage {
     }
 
     private void sendStatusAndMessage(String username, boolean leave) {
-        sendRoomMessage(getUserList(), MessageType.USERS);
+        sendMessageToRoom(getUserList(), MessageType.USERS);
         String message;
         if (leave) {
             message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
         } else {
             message = String.format("%s 加入了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
         }
-        messageService.sendMessage(new MessageDto(message, MessageType.SYSTEM_MESSAGE));
+        sendMessageToRoom(message, MessageType.SYSTEM_MESSAGE);
     }
 
     public void add(UserBo userBo, TeamType teamType) {
@@ -159,15 +130,12 @@ public class StageRoom extends BaseStage {
         sendStatusAndMessage(userBo.getUsername(), false);
 
         //发送场景信息
-        messageService.sendMessage(new MessageDto(
-                                       MapDto.convert(mapBo),
-                                       MessageType.MAP,
-                                       userBo.getUsername()));
+        sendMessageToUser(MapDto.convert(mapBo), MessageType.MAP, userBo.getUsername());
 
-//        addNewTank(userBo);
+        addNewTank(userBo);
 
         //通知前端数据传输完毕
-        messageService.sendReady(userBo.getUsername());
+        sendReady(userBo.getUsername());
     }
 
     private void addNewTank(UserBo userBo) {
@@ -180,13 +148,15 @@ public class StageRoom extends BaseStage {
         tankBo.setUserId(userBo.getUsername());
         tankBo.setTeamType(userBo.getTeamType());
         tankBo.setType(TankTypeBo.getTankType("tank01"));
-        tankBo.setX(100.0);
-        tankBo.setY(100.0);
+
+        Point startPoint = getTankPoint(tankBo.getTeamType());
+        tankBo.setX(startPoint.getX());
+        tankBo.setY(startPoint.getY());
 
         tankMap.put(tankBo.getTankId(), tankBo);
 
         //即将向所有人同步信息
-        sendRoomMessage(getTankList(), MessageType.TANKS);
+        sendMessageToRoom(getTankList(), MessageType.TANKS);
     }
 
     private List<ItemDto> getTankList() {
@@ -197,38 +167,15 @@ public class StageRoom extends BaseStage {
         return tankDtoList;
     }
 
-    private void processTankControl(MessageDto messageDto, String sendFrom) {
-        ItemDto request = ObjectUtil.readValue(messageDto.getMessage(), ItemDto.class);
-        if (request == null) {
-            return;
+    private Point getTankPoint(TeamType teamType) {
+        String posStr;
+        if (teamType == TeamType.RED) {
+            posStr = mapBo.getPlayerStartPoints().get(random.nextInt(
+                                                          mapBo.getPlayerStartPoints().size()));
+        } else {
+            posStr = mapBo.getComputerStartPoints().get(random.nextInt(
+                                                            mapBo.getComputerStartPoints().size()));
         }
-        request.setId(sendFrom);
-
-        TankBo updateBo = updateTankControl(request);
-        if (updateBo == null) {
-            log.warn("can not update tank:{}, ignore it...", sendFrom);
-            return;
-        }
-
-        ItemDto response = ItemDto.convert(updateBo);
-        sendRoomMessage(Collections.singletonList(response), MessageType.TANKS);
-    }
-
-    private TankBo updateTankControl(ItemDto tankDto) {
-        if (!tankMap.containsKey(tankDto.getId())) {
-            return null;
-        }
-
-        TankBo tankBo = tankMap.get(tankDto.getId());
-        //状态只同步朝向和移动命令
-        OrientationType orientationType = OrientationType.convert(tankDto.getOrientation());
-        if (orientationType != OrientationType.UNKNOWN) {
-            tankBo.setOrientationType(orientationType);
-        }
-        ActionType actionType = ActionType.convert(tankDto.getAction());
-        if (actionType != ActionType.UNKNOWN) {
-            tankBo.setActionType(actionType);
-        }
-        return tankBo;
+        return CommonUtil.getPointFromKey(posStr);
     }
 }

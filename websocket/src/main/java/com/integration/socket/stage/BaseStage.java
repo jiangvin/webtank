@@ -1,13 +1,18 @@
 package com.integration.socket.stage;
 
+import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
+import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.bo.AmmoBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.service.MessageService;
+import com.integration.util.object.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,9 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @description
  * @date 2020/5/3
  */
+
+@Slf4j
 public abstract class BaseStage {
 
-    MessageService messageService;
+    private MessageService messageService;
 
     ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
@@ -34,7 +41,68 @@ public abstract class BaseStage {
      * @param messageDto
      * @param sendFrom
      */
-    public abstract void processMessage(MessageDto messageDto, String sendFrom);
+    public void processMessage(MessageDto messageDto, String sendFrom) {
+        switch (messageDto.getMessageType()) {
+            case UPDATE_TANK_CONTROL:
+                processTankControl(messageDto, sendFrom);
+                break;
+            case UPDATE_TANK_FIRE:
+                processTankFire(sendFrom);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void processTankFire(String sendFrom) {
+        if (!tankMap.containsKey(sendFrom)) {
+            return;
+        }
+
+        TankBo tankBo = tankMap.get(sendFrom);
+        AmmoBo ammo = tankBo.fire();
+        if (ammo == null) {
+            return;
+        }
+        ammoBoList.add(ammo);
+
+        sendMessageToRoom(Collections.singletonList(ItemDto.convert(ammo)), MessageType.AMMO);
+    }
+
+    private void processTankControl(MessageDto messageDto, String sendFrom) {
+        ItemDto request = ObjectUtil.readValue(messageDto.getMessage(), ItemDto.class);
+        if (request == null) {
+            return;
+        }
+        request.setId(sendFrom);
+
+        TankBo updateBo = updateTankControl(request);
+        if (updateBo == null) {
+            log.warn("can not update tank:{}, ignore it...", sendFrom);
+            return;
+        }
+
+        ItemDto response = ItemDto.convert(updateBo);
+        sendMessageToRoom(Collections.singletonList(response), MessageType.TANKS);
+    }
+
+    private TankBo updateTankControl(ItemDto tankDto) {
+        if (!tankMap.containsKey(tankDto.getId())) {
+            return null;
+        }
+
+        TankBo tankBo = tankMap.get(tankDto.getId());
+        //状态只同步朝向和移动命令
+        OrientationType orientationType = OrientationType.convert(tankDto.getOrientation());
+        if (orientationType != OrientationType.UNKNOWN) {
+            tankBo.setOrientationType(orientationType);
+        }
+        ActionType actionType = ActionType.convert(tankDto.getAction());
+        if (actionType != ActionType.UNKNOWN) {
+            tankBo.setActionType(actionType);
+        }
+        return tankBo;
+    }
 
     /**
      * 每一帧的更新数据 （17ms 一帧，模拟1秒60帧刷新模式）
@@ -55,10 +123,24 @@ public abstract class BaseStage {
     abstract List<String> getUserList();
 
     /**
+     * 获取房间号
+     * @return 房间号
+     */
+    public abstract String getRoomId();
+
+    /**
      * 给房间所有用户发送消息
      */
-    void sendRoomMessage(Object object, MessageType messageType) {
-        messageService.sendMessage(new MessageDto(object, messageType, getUserList()));
+    void sendMessageToRoom(Object object, MessageType messageType) {
+        messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId()));
+    }
+
+    void sendMessageToUser(Object object, MessageType messageType, String username) {
+        messageService.sendMessage(new MessageDto(object, messageType, username, getRoomId()));
+    }
+
+    void sendReady(String username) {
+        messageService.sendReady(username, getRoomId());
     }
 
     void removeTankFromUserId(String userId) {
@@ -80,6 +162,6 @@ public abstract class BaseStage {
 
         TankBo tank = tankMap.get(tankId);
         tankMap.remove(tank.getTankId());
-        sendRoomMessage(ItemDto.convert(tank), MessageType.REMOVE_TANK);
+        sendMessageToRoom(ItemDto.convert(tank), MessageType.REMOVE_TANK);
     }
 }

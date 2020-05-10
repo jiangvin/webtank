@@ -57,7 +57,7 @@ public class MessageService {
         }
     }
 
-    public void sendReady(@NonNull String username) {
-        sendMessage(new MessageDto(null, MessageType.SERVER_READY, username));
+    public void sendReady(@NonNull String username, String roomId) {
+        sendMessage(new MessageDto(null, MessageType.SERVER_READY, username, roomId));
     }
 }
