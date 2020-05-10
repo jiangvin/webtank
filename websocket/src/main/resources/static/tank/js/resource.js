@@ -31,6 +31,9 @@
         //others
         loadAnimationImage("ammo", this.images, 4);
         loadAnimationImage("bomb", this.images, 6);
+        loadAnimationImage("brick", this.images, 2);
+        loadAnimationImage("iron",this.images,2);
+        loadAnimationImage("river",this.images,2);
         return this.images;
     };
 
