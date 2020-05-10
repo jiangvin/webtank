@@ -6,12 +6,13 @@ import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
 import com.integration.socket.model.bo.AmmoBo;
+import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
-import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
 import lombok.Getter;
@@ -32,15 +33,18 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StageRoom extends BaseStage {
 
-    public StageRoom(RoomDto roomDto, MessageService messageService) {
+    public StageRoom(RoomDto roomDto, MapBo mapBo, MessageService messageService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
         this.creator = roomDto.getCreator();
         this.mapId = roomDto.getMapId();
         this.roomType = roomDto.getRoomType();
+        this.mapBo = mapBo;
     }
 
     private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
+
+    private MapBo mapBo;
 
     @Getter
     private String roomId;
@@ -151,17 +155,22 @@ public class StageRoom extends BaseStage {
         userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
         userBo.setTeamType(teamType);
-
         sendStatusAndMessage(userBo.getUsername(), false);
-        addNewTank(userBo.getUsername());
+
+        addNewTank(userBo);
 
         //通知前端数据传输完毕
         messageService.sendReady(userBo.getUsername());
     }
 
-    private void addNewTank(String username) {
+    private void addNewTank(UserBo userBo) {
+        if (userBo.getTeamType() == TeamType.VIEW) {
+            return;
+        }
+
         TankBo tankBo = new TankBo();
-        tankBo.setTankId(username);
+        tankBo.setTankId(userBo.getUsername());
+        tankBo.setTeamType(userBo.getTeamType());
         tankBo.setType(TankTypeBo.getTankType("tank01"));
         tankBo.setX(100.0);
         tankBo.setY(100.0);
