@@ -4,6 +4,7 @@ import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
+import com.integration.socket.model.bo.AmmoBo;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.TankTypeBo;
@@ -74,6 +75,7 @@ public class StageRoom extends BaseStage {
 
     @Override
     public void update() {
+        //更新坦克
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             if (tankBo.getActionType() == ActionType.RUN) {
@@ -94,6 +96,40 @@ public class StageRoom extends BaseStage {
                     default:
                         break;
                 }
+            }
+        }
+
+        //更新子弹
+        for (int i = 0; i < ammoBoList.size(); ++i) {
+            AmmoBo ammo = ammoBoList.get(i);
+            if (ammo.getLifeTime() == 0) {
+                ammoBoList.remove(i);
+                --i;
+
+                if (tankMap.containsKey(ammo.getTankId())) {
+                    tankMap.get(ammo.getTankId()).addAmmoCount();
+                }
+
+                sendMessageToRoom(ItemDto.convert(ammo), MessageType.REMOVE_AMMO);
+                continue;
+            }
+            ammo.setLifeTime(ammo.getLifeTime() - 1);
+
+            switch (ammo.getOrientationType()) {
+                case UP:
+                    ammo.setY(ammo.getY() - ammo.getSpeed());
+                    break;
+                case DOWN:
+                    ammo.setY(ammo.getY() + ammo.getSpeed());
+                    break;
+                case LEFT:
+                    ammo.setX(ammo.getX() - ammo.getSpeed());
+                    break;
+                case RIGHT:
+                    ammo.setX(ammo.getX() + ammo.getSpeed());
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -148,6 +184,7 @@ public class StageRoom extends BaseStage {
         tankBo.setUserId(userBo.getUsername());
         tankBo.setTeamType(userBo.getTeamType());
         tankBo.setType(TankTypeBo.getTankType("tank01"));
+        tankBo.setAmmoCount(tankBo.getType().getAmmoMaxCount());
 
         Point startPoint = getTankPoint(tankBo.getTeamType());
         tankBo.setX(startPoint.getX());

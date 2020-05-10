@@ -4,7 +4,7 @@ function Stage(params) {
 
     this.params = params || {};
     this.settings = {
-        index: 0,                        //布景索引
+        id: null,                        //布景id
         items: new Map(),				 //对象队列
 
         //处理控制事件
@@ -16,7 +16,19 @@ function Stage(params) {
         }
     };
     Common.extend(this, this.settings, this.params);
+
     this.receiveStompMessage = function (messageDto) {
+        //id校验，确保消息正确
+        if (!this.id) {
+            if (messageDto.roomId) {
+                return;
+            }
+        } else {
+            if (!messageDto.roomId || this.id !== messageDto.roomId) {
+                return;
+            }
+        }
+
         switch (messageDto.messageType) {
             case "TANKS":
                 createOrUpdateTanks(thisStage, messageDto.message);

@@ -10,7 +10,7 @@
         }
 
         //init room
-        this.stage = Resource.getGame().createStage();
+        this.stage = Resource.getGame().createStage({id:roomInfo.roomId});
         const thisRoom = this;
         const thisStage = thisRoom.stage;
 

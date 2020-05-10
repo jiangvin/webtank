@@ -187,7 +187,6 @@ function Game() {
     //布景相关
     this.createStage = function (options) {
         const stage = new Stage(options);
-        stage.index = _stages.length;
         _stages.push(stage);
         return stage;
     };
