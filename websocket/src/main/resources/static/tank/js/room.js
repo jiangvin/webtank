@@ -46,10 +46,10 @@
             drawTips(room.stage, "玩家生命:" + room.roomInfo.playerLife,
                 10, 24, "red_team_life");
             drawTips(room.stage, "电脑生命:" + room.roomInfo.computerLife,
-                10, 40, "red_team_life");
+                10, 40, "blue_team_life");
         } else {
             drawTips(room.stage, "红队生命:" + room.roomInfo.playerLife,
-                10, 24, "blue_team_life");
+                10, 24, "red_team_life");
             drawTips(room.stage, "蓝队生命:" + room.roomInfo.computerLife,
                 10, 40, "blue_team_life");
         }
@@ -115,6 +115,7 @@
 
         stage.createItem({
             id: id,
+            z: 8,
             draw: function (context) {
                 context.font = '14px Helvetica';
                 context.textAlign = 'left';

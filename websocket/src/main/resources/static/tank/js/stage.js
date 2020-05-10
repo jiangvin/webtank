@@ -57,10 +57,13 @@ function Stage(params) {
     };
 
     this.sortItems = function () {
-        let array = Array.from(this.items);
-        array.sort(function (a,b) {
-            const item1 = a[1];
-            const item2 = b[1];
+        //支援ES5的兼容写法
+        const array = [];
+        this.items.forEach(function (item) {
+            array[array.length] = item;
+        });
+
+        array.sort(function (item1,item2) {
             if (item1.z !== item2.z) {
                 return item1.z - item2.z;
             }
@@ -72,9 +75,11 @@ function Stage(params) {
             return item1.x - item2.x;
         });
 
-        this.items = new Map(array.map(function (data) {
-            return [data[0],data[1]];
-        }));
+        this.items = new Map();
+        const map = this.items;
+        array.forEach(function (item) {
+            map.set(item.id,item);
+        })
     };
 
     this.removeItem = function (id) {
