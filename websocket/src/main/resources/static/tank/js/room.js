@@ -15,6 +15,20 @@
         const thisStage = thisRoom.stage;
 
         thisRoom.roomInfo = roomInfo;
+
+        //重写draw函数,绘制背景
+        this.stage.draw = function (context) {
+            if (thisRoom.roomInfo.width && thisRoom.roomInfo.height) {
+                context.fillStyle = context.createPattern(Resource.getImage("background"),"repeat");
+                context.fillRect(0,0,
+                    thisRoom.roomInfo.width,
+                    thisRoom.roomInfo.height);
+            }
+
+            this.items.forEach(function (item) {
+                item.draw(context);
+            });
+        };
         this.stage.receiveStompMessageExtension = function (messageDto) {
             switch (messageDto.messageType) {
                 case "MAP":
@@ -120,7 +134,7 @@
                 context.font = '14px Helvetica';
                 context.textAlign = 'left';
                 context.textBaseline = 'top';
-                context.fillStyle = '#AAA';
+                context.fillStyle = '#ffffff';
                 context.fillText(tips, x, y);
             }
         });

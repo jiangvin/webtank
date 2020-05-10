@@ -294,7 +294,7 @@ function Game() {
         context.font = '14px Helvetica';
         context.textAlign = 'right';
         context.textBaseline = 'bottom';
-        context.fillStyle = '#AAA';
+        context.fillStyle = '#ffffff';
         context.fillText('© Created by Vin (WX: Jiang_Vin)', Common.width() - 12, Common.height() - 5);
 
         //帧率信息
