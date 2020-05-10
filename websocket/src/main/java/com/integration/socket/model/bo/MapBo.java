@@ -20,6 +20,10 @@ public class MapBo {
 
     private int computerStartCount = 0;
 
+    private int width;
+
+    private int height;
+
     private ConcurrentHashMap<String, Integer> computerLife = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<String, MapUnitType> unitMap = new ConcurrentHashMap<>();
@@ -29,6 +33,10 @@ public class MapBo {
     private List<String> computerStartPoints = new ArrayList<>();
 
     public void checkSelf() {
+        if (width == 0 || height == 0) {
+            throw new CustomException("宽高不能为空");
+        }
+
         if (playerLife == 0) {
             throw new CustomException("玩家生命不能为0");
         }

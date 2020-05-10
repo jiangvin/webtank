@@ -16,12 +16,16 @@ import java.util.Map;
 
 @Data
 public class MapDto {
+    private Integer width;
+    private Integer height;
     private Integer playerLife;
     private Integer computerLife;
     private List<ItemDto> itemList;
 
     public static MapDto convert(MapBo mapBo) {
         MapDto mapDto = new MapDto();
+        mapDto.setWidth(mapBo.getWidth());
+        mapDto.setHeight(mapBo.getHeight());
         mapDto.setPlayerLife(mapBo.getPlayerLife());
 
         int computerLife = 0;

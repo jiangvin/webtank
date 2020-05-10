@@ -2,6 +2,7 @@ package com.integration.socket.service;
 
 import com.integration.socket.model.MapUnitType;
 import com.integration.socket.model.bo.MapBo;
+import com.integration.socket.util.CommonUtil;
 import com.integration.util.model.CustomException;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
@@ -81,6 +82,8 @@ public class MapService {
                             String[] infos = kv.value.split("x");
                             mapWidth = Integer.parseInt(infos[0]);
                             mapHeight = Integer.parseInt(infos[1]);
+                            mapBo.setWidth(mapWidth * CommonUtil.UNIT_SIZE);
+                            mapBo.setHeight(mapHeight * CommonUtil.UNIT_SIZE);
                             break;
                         case PLAYERS:
                             mapBo.setPlayerLife(Integer.parseInt(kv.value));
