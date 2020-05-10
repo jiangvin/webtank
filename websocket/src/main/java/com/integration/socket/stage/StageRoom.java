@@ -157,10 +157,15 @@ public class StageRoom extends BaseStage {
         userBo.setTeamType(teamType);
         sendStatusAndMessage(userBo.getUsername(), false);
 
+        sendRoomData(userBo);
         addNewTank(userBo);
 
         //通知前端数据传输完毕
         messageService.sendReady(userBo.getUsername());
+    }
+
+    private void sendRoomData(UserBo userBo) {
+
     }
 
     private void addNewTank(UserBo userBo) {

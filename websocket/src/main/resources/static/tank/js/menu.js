@@ -11,7 +11,7 @@
         this.pageInfo = null;          //当前页数和总页数
         this.showSelectWindow = null;
 
-        this.roomList = [];            //房间列表
+        this.roomMap = null;           //房间列表
         this.selectRoomId = null;      //加入时选中的房间号
     }
 
@@ -165,6 +165,7 @@
 
         /**
          * @param room {{roomId,mapId,roomType,creator,userCount}}
+         * @param data {{roomList,roomCount}}
          */
         Common.getRequest('/user/getRooms?start=' + menu.roomStart + "&limit=" + menu.roomLimit, function (data) {
             updatePageInfo(menu, data.roomCount);
@@ -180,10 +181,14 @@
                 }
             }
 
-            menu.roomList = [];
+            if (!menu.roomMap) {
+                menu.roomMap = new Map();
+            } else {
+                menu.roomMap.clear();
+            }
             let selectFlag = false;
             data.roomList.forEach(function (room) {
-                menu.roomList[room.roomId] = room;
+                menu.roomMap.set(room.roomId, room);
 
                 let div = document.createElement('div');
                 div.className = "select-item";
@@ -204,7 +209,7 @@
                 label.className = "radio-label";
                 label.textContent = "房间名:" + room.roomId
                     + " 地图名:" + room.mapId
-                    + "[" + room.roomType
+                    + " [" + room.roomType
                     + "] 创建者:" + room.creator
                     + " 人数:" + room.userCount;
                 div.appendChild(label);
@@ -363,7 +368,11 @@
             const roomType = $('#selectType').val();
             const group = $('#selectGroup').val();
 
-            Room.getOrCreateRoom();
+            Room.getOrCreateRoom({
+                "roomId": roomId,
+                "roomType": roomType,
+                "mapId": mapId
+            });
             Common.runNextStage();
             Status.setStatus(Status.getStatusPause(), "房间创建中...");
             Common.sendStompMessage({
@@ -386,7 +395,12 @@
             return;
         }
 
-        Room.getOrCreateRoom();
+        const data = menu.roomMap.get(roomId);
+        Room.getOrCreateRoom({
+            "roomId": roomId,
+            "mapId": data.mapId,
+            "roomType": data.roomType
+        });
         Common.runNextStage();
         Status.setStatus(Status.getStatusPause(), "加入房间中...");
         Common.sendStompMessage({
