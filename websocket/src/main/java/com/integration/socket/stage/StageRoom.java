@@ -1,6 +1,7 @@
 package com.integration.socket.stage;
 
 import com.integration.socket.model.ActionType;
+import com.integration.socket.model.dto.MapDto;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.RoomType;
@@ -157,15 +158,16 @@ public class StageRoom extends BaseStage {
         userBo.setTeamType(teamType);
         sendStatusAndMessage(userBo.getUsername(), false);
 
-        sendRoomData(userBo);
-        addNewTank(userBo);
+        //发送场景信息
+        messageService.sendMessage(new MessageDto(
+                                       MapDto.convert(mapBo),
+                                       MessageType.MAP,
+                                       userBo.getUsername()));
+
+//        addNewTank(userBo);
 
         //通知前端数据传输完毕
         messageService.sendReady(userBo.getUsername());
-    }
-
-    private void sendRoomData(UserBo userBo) {
-
     }
 
     private void addNewTank(UserBo userBo) {
@@ -175,6 +177,7 @@ public class StageRoom extends BaseStage {
 
         TankBo tankBo = new TankBo();
         tankBo.setTankId(userBo.getUsername());
+        tankBo.setUserId(userBo.getUsername());
         tankBo.setTeamType(userBo.getTeamType());
         tankBo.setType(TankTypeBo.getTankType("tank01"));
         tankBo.setX(100.0);

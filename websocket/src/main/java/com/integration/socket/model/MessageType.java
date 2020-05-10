@@ -46,6 +46,14 @@ public enum MessageType {
      * 删除AMMO
      */
     REMOVE_AMMO,
+    /**
+     * 同步地图信息
+     */
+    MAP,
+    /**
+     * 删除地图信息
+     */
+    REMOVE_MAP,
 
 
     /**

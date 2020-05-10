@@ -23,6 +23,8 @@ public class MessageService {
 
     private static final String QUEUE_PATH = "/queue/send";
 
+    private static final int MAX_LOG_LENGTH = 128;
+
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     public MessageService(SimpMessagingTemplate simpMessagingTemplate) {
@@ -35,7 +37,11 @@ public class MessageService {
             return;
         }
 
-        log.info("send message:{}", messageDto.toString());
+        String msg = messageDto.toString();
+        if (msg.length() > MAX_LOG_LENGTH) {
+            msg = msg.substring(0, MAX_LOG_LENGTH) + "...";
+        }
+        log.info("send message:{}", msg);
 
         if (sendToList == null) {
             simpMessagingTemplate.convertAndSend(
