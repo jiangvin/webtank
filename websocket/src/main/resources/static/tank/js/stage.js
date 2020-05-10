@@ -1,4 +1,7 @@
 function Stage(params) {
+
+    const thisStage = this;
+
     this.params = params || {};
     this.settings = {
         index: 0,                        //布景索引
@@ -6,22 +9,25 @@ function Stage(params) {
 
         //处理控制事件
         controlEvent: function () {
-        }
+        },
 
+        //拓展函数
+        receiveStompMessageExtension: function () {
+        }
     };
     Common.extend(this, this.settings, this.params);
-
     this.receiveStompMessage = function (messageDto) {
-        const thisStage = this;
         switch (messageDto.messageType) {
             case "TANKS":
                 createOrUpdateTanks(thisStage, messageDto.message);
+                this.sortItems();
                 break;
             case "REMOVE_TANK":
                 this.itemBomb(messageDto.message);
                 break;
             case "AMMO":
                 createOrUpdateAmmoList(thisStage, messageDto.message);
+                this.sortItems();
                 break;
             case "REMOVE_AMMO":
                 this.itemBomb(messageDto.message, 0.5);
@@ -30,11 +36,6 @@ function Stage(params) {
                 this.receiveStompMessageExtension(messageDto);
                 break;
         }
-    };
-
-    //拓展函数
-    this.receiveStompMessageExtension = function () {
-
     };
 
     this.draw = function (context) {
@@ -52,7 +53,6 @@ function Stage(params) {
     this.createItem = function (options) {
         const item = new Item(options);
         this.items.set(item.id, item);
-        this.sortItems();
         return item;
     };
 
@@ -100,7 +100,6 @@ function Stage(params) {
         item.id = newId;
         item.showId = showId;
         this.items.set(newId, item);
-        this.sortItems();
     };
 
     this.createTank = function (options) {

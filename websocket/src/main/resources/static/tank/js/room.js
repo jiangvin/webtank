@@ -33,6 +33,7 @@
             switch (messageDto.messageType) {
                 case "MAP":
                     loadMap(thisRoom, messageDto.message);
+                    thisStage.sortItems();
                     break;
                 default:
                     break;
