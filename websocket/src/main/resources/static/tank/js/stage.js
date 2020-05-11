@@ -59,9 +59,13 @@ function Stage(params) {
             return;
         }
 
-        context.fillStyle = context.createPattern(this.backgroundImage, "repeat");
+        //TODO - 平铺背景
         const start = this.convertToScreenPoint({x: 0, y: 0});
-        context.fillRect(start.x, start.y, this.size.width, this.size.height);
+        context.drawImage(this.backgroundImage,
+            0, 0,
+            this.backgroundImage.width, this.backgroundImage.height,
+            start.x, start.y,
+            this.size.width, this.size.height);
     };
 
     //真实坐标转换屏幕坐标
