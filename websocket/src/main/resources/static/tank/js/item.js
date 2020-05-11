@@ -1,9 +1,11 @@
 function Item(params) {
     this.params = params || {};
     this.settings = {
+        stage: null,
         id: "",
         showId: false,          //是否显示id
         image: null,            //相应图片
+        teamId: 0,                //团队信息
         scale: 1.0,             //图片放大的倍数
         x: 0,					//位置坐标:横坐标
         y: 0,					//位置坐标:纵坐标
@@ -24,6 +26,7 @@ function Item(params) {
         draw: function (context) {
             drawId(this, context);
             drawImage(this, context);
+            drawTeam(this, context);
         },
     };
     Common.extend(this, this.settings, this.params);
@@ -39,7 +42,7 @@ function Item(params) {
         context.font = '14px Helvetica';
         context.textAlign = 'center';
         context.textBaseline = 'bottom';
-        context.fillStyle = '#FFF';
+        context.fillStyle = getColor(item);
 
         const x = item.x;
         const y = item.y - (item.image.height / item.image.heightPics) * item.scale / 2 - 5;
@@ -55,5 +58,30 @@ function Item(params) {
             item.image.width / item.image.widthPics, item.image.height / item.image.heightPics,
             item.x - displayWidth / 2, item.y - displayHeight / 2,
             displayWidth, displayHeight);
+    };
+
+    const drawTeam = function (item, context) {
+        if (!item.stage.showTeam || item.teamId <= 0 || item.teamId > 2) {
+            return;
+        }
+
+        context.strokeStyle = getColor(item);
+        const size = Resource.getUnitSize();
+        context.strokeRect(item.x - size / 2, item.y - size / 2, size, size);
+    };
+
+    const getColor = function (item) {
+        if (!item.stage.showTeam) {
+            return "#FFF";
+        }
+
+        switch (item.teamId) {
+            case 1:
+                return '#F00';
+            case 2:
+                return '#00F';
+            default:
+                return "#FFF";
+        }
     };
 }

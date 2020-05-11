@@ -111,4 +111,8 @@
     Resource.getStompClient = function () {
         return this.stompClient;
     };
+
+    Resource.getUnitSize = function () {
+        return 36;
+    }
 }

@@ -13,6 +13,10 @@
         this.stage = Resource.getGame().createStage({id: roomInfo.roomId});
         this.roomInfo = roomInfo;
 
+        if (this.roomInfo.roomType !== "PVE") {
+            this.stage.showTeam = true;
+        }
+
         const thisRoom = this;
         const thisStage = thisRoom.stage;
 
@@ -76,8 +80,6 @@
 
     };
 
-    const _unitSize = 36;
-
     const createOrUpdateMapItem = function (stage, data) {
         let item;
         if (stage.items.has(data.id)) {
@@ -93,29 +95,34 @@
         item.x = position.x;
         item.y = position.y;
 
-        //调整z值和动画
+        //调整z值
+        if (typeId === "grass") {
+            item.z = 2;
+        } else if (typeId === "river") {
+            item.z = -4;
+        }
+
+        //播放动画
         switch (typeId) {
-            case "grass":
-                item.z = 5;
-                break;
             case "river":
             case "red_king":
             case "blue_king":
-                const thisItem = item;
                 item.play = new Play(1, 30,
                     function () {
-                        thisItem.orientation = (thisItem.orientation + 1) % 2;
+                        item.orientation = (item.orientation + 1) % 2;
                     }, function () {
                         this.frames = 1;
-                    })
+                    });
+                break;
         }
     };
 
     const getPositionFromId = function (id) {
         const position = {};
         const infos = id.split("_");
-        position.x = parseInt(infos[0]) * _unitSize + _unitSize / 2;
-        position.y = parseInt(infos[1]) * _unitSize + _unitSize / 2;
+        const size = Resource.getUnitSize();
+        position.x = parseInt(infos[0]) * size + size / 2;
+        position.y = parseInt(infos[1]) * size + size / 2;
         return position;
     };
 

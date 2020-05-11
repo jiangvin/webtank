@@ -4,6 +4,7 @@ function Stage(params) {
 
     this.params = params || {};
     this.settings = {
+        showTeam: false,                 //显示团队标志
         id: null,                        //布景id
         items: new Map(),				 //对象队列
 
@@ -64,6 +65,7 @@ function Stage(params) {
 
     this.createItem = function (options) {
         const item = new Item(options);
+        item.stage = this;
         this.items.set(item.id, item);
         return item;
     };
@@ -116,7 +118,6 @@ function Stage(params) {
 
     this.createTank = function (options) {
         const item = this.createItem(options);
-        item.z = 3;
         item.update = function () {
             generalUpdateEvent(item);
         };
@@ -125,7 +126,7 @@ function Stage(params) {
     this.createAmmo = function (options) {
         const item = this.createItem(options);
         item.action = 1;
-        item.z = 2;
+        item.z = -2;
         item.image = Resource.getImage("ammo");
         item.update = function () {
             generalUpdateEvent(item);
@@ -215,7 +216,8 @@ function Stage(params) {
                     action: tank.action,
                     showId: true,
                     speed: tank.speed,
-                    image: tankImage
+                    image: tankImage,
+                    teamId: tank.teamId
                 });
             }
         });

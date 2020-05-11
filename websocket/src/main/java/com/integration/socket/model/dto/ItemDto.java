@@ -21,6 +21,7 @@ public class ItemDto {
     private Integer orientation;
     private Integer action;
     private Double speed;
+    private Integer teamId;
 
     public static ItemDto convert(TankBo tankBo) {
         ItemDto tankDto = new ItemDto();
@@ -31,6 +32,9 @@ public class ItemDto {
         tankDto.setOrientation(tankBo.getOrientationType().getValue());
         tankDto.setAction(tankBo.getActionType().getValue());
         tankDto.setSpeed(tankBo.getType().getSpeed());
+        if (tankBo.getTeamType() != null) {
+            tankDto.setTeamId(tankBo.getTeamType().getValue());
+        }
         return tankDto;
     }
 
