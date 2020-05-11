@@ -2,6 +2,7 @@ package com.integration.socket.stage;
 
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
+import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
 import com.integration.socket.model.bo.AmmoBo;
@@ -207,12 +208,33 @@ public class StageRoom extends BaseStage {
     private Point getTankPoint(TeamType teamType) {
         String posStr;
         if (teamType == TeamType.RED) {
-            posStr = mapBo.getPlayerStartPoints().get(random.nextInt(
-                                                          mapBo.getPlayerStartPoints().size()));
+            posStr = mapBo.getPlayerStartPoints().get(random.nextInt(mapBo.getPlayerStartPoints().size()));
         } else {
-            posStr = mapBo.getComputerStartPoints().get(random.nextInt(
-                                                            mapBo.getComputerStartPoints().size()));
+            posStr = mapBo.getComputerStartPoints().get(random.nextInt(mapBo.getComputerStartPoints().size()));
         }
         return CommonUtil.getPointFromKey(posStr);
+    }
+
+    @Override
+    TankBo updateTankControl(ItemDto tankDto) {
+        if (!tankMap.containsKey(tankDto.getId())) {
+            return null;
+        }
+
+
+        TankBo tankBo = tankMap.get(tankDto.getId());
+
+        //只更新缓存状态
+        OrientationType orientationType = OrientationType.convert(tankDto.getOrientation());
+        if (orientationType != OrientationType.UNKNOWN) {
+            tankBo.setControlOrientation(orientationType);
+        }
+        ActionType actionType = ActionType.convert(tankDto.getAction());
+        if (actionType != ActionType.UNKNOWN) {
+            tankBo.setControlAction(actionType);
+        }
+
+        //返回空，不需要及时同步给客户端
+        return null;
     }
 }

@@ -2,6 +2,7 @@ package com.integration.socket.stage;
 
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
+import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.bo.AmmoBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.dto.ItemDto;
@@ -141,5 +142,24 @@ public class StageMenu extends BaseStage {
             tankDtoList.add(ItemDto.convert(kv.getValue()));
         }
         return tankDtoList;
+    }
+
+    @Override
+    TankBo updateTankControl(ItemDto tankDto) {
+        if (!tankMap.containsKey(tankDto.getId())) {
+            return null;
+        }
+
+        TankBo tankBo = tankMap.get(tankDto.getId());
+        //状态只同步朝向和移动命令
+        OrientationType orientationType = OrientationType.convert(tankDto.getOrientation());
+        if (orientationType != OrientationType.UNKNOWN) {
+            tankBo.setOrientationType(orientationType);
+        }
+        ActionType actionType = ActionType.convert(tankDto.getAction());
+        if (actionType != ActionType.UNKNOWN) {
+            tankBo.setActionType(actionType);
+        }
+        return tankBo;
     }
 }

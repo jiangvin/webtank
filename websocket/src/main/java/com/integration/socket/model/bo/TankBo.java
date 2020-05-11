@@ -26,6 +26,12 @@ public class TankBo {
     private int reloadTime;
     private int ammoCount;
 
+    /**
+     * 控制缓存
+     */
+    private OrientationType controlOrientation = OrientationType.UP;
+    private ActionType controlAction = ActionType.STOP;
+
     public static TankBo convert(ItemDto tankDto) {
         TankBo tankBo = new TankBo();
         tankBo.setTankId(tankDto.getId());
