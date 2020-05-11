@@ -4,12 +4,12 @@ function Stage(params) {
 
     this.params = params || {};
     this.settings = {
-        showTeam: false,                 //显示团队标志
-        id: null,                        //布景id
-        items: new Map(),				 //对象队列
-        view: {x: 0, y: 0},              //视野
-        size: {width: 0, height: 0},     //场景大小
-        backgroundImage: null,           //背景图
+        showTeam: false,                    //显示团队标志
+        id: null,                           //布景id
+        items: new Map(),				    //对象队列
+        view: {x: 0, y: 0, center: null},   //视野
+        size: {width: 0, height: 0},        //场景大小
+        backgroundImage: null,              //背景图
 
         //处理控制事件
         controlEvent: function () {
@@ -61,8 +61,7 @@ function Stage(params) {
 
         context.fillStyle = context.createPattern(this.backgroundImage, "repeat");
         const start = this.convertToScreenPoint({x: 0, y: 0});
-        const end = this.convertToScreenPoint({x: this.size.width, y: this.size.height});
-        context.fillRect(start.x, start.y, end.x, end.y);
+        context.fillRect(start.x, start.y, this.size.width, this.size.height);
     };
 
     //真实坐标转换屏幕坐标
@@ -80,10 +79,52 @@ function Stage(params) {
         });
     };
 
+    this.updateView = function () {
+        if (!this.size.width || !this.size.height) {
+            return;
+        }
+
+        let updateX = false;
+        let updateY = false;
+        if (this.size.width < Common.width()) {
+            updateX = true;
+            this.view.x = (this.size.width - Common.width()) / 2;
+        }
+        if (this.size.height < Common.height()) {
+            updateY = true;
+            this.view.y = (this.size.height - Common.height()) / 2;
+        }
+
+        if ((updateX && updateY) || !this.view.center) {
+            return;
+        }
+
+        if (!updateX) {
+            this.view.x = this.view.center.x - Common.width() / 2;
+            if (this.view.x < 0) {
+                this.view.x = 0;
+            }
+            if (this.view.x > this.size.width - Common.width()) {
+                this.view.x = this.size.width - Common.width()
+            }
+        }
+
+        if (!updateY) {
+            this.view.y = this.view.center.y - Common.height() / 2;
+            if (this.view.y < 0) {
+                this.view.y = 0;
+            }
+            if (this.view.y > this.size.height - Common.height()) {
+                this.view.y = this.size.height - Common.height()
+            }
+        }
+    };
+
     this.update = function () {
         this.items.forEach(function (item) {
             item.update();
         });
+        this.updateView();
     };
 
     this.createItem = function (options) {
@@ -144,6 +185,14 @@ function Stage(params) {
         item.update = function () {
             generalUpdateEvent(item);
         };
+
+        //set center
+        if (!this.view.center && Resource.getUsername()) {
+            if (item.id === Resource.getUsername()) {
+                this.view.center = item;
+            }
+        }
+
         return item;
     };
     this.createAmmo = function (options) {
@@ -180,6 +229,11 @@ function Stage(params) {
             }, function () {
                 thisStage.removeItem(item.id);
             });
+
+        //remove center
+        if (item === this.view.center) {
+            this.view.center = null;
+        }
     };
 
     const generalUpdateEvent = function (item) {

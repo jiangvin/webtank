@@ -180,17 +180,6 @@ Common.getStompStatus = function () {
     }
     return stompClient.connected;
 };
-Common.getStompInfo = function () {
-    const stompInfo = {};
-    const url = Resource.getStompClient().ws._transport.url;
-    stompInfo.username = decodeURI(url.substring(url.lastIndexOf("=") + 1));
-
-    //get socket session id
-    const end = url.lastIndexOf("/");
-    const start = url.substring(0, end).lastIndexOf("/");
-    stompInfo.socketSessionId = url.substring(start + 1, end);
-    return stompInfo;
-};
 Common.stompConnect = function (name, callback) {
     const socket = new SockJS(encodeURI('/websocket-simple?name=' + name));
     const stompClient = Stomp.over(socket);
