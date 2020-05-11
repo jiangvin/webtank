@@ -10,17 +10,17 @@
         }
 
         //init room
-        this.stage = Resource.getGame().createStage({id:roomInfo.roomId});
+        this.stage = Resource.getGame().createStage({id: roomInfo.roomId});
+        this.roomInfo = roomInfo;
+
         const thisRoom = this;
         const thisStage = thisRoom.stage;
-
-        thisRoom.roomInfo = roomInfo;
 
         //重写draw函数,绘制背景
         this.stage.draw = function (context) {
             if (thisRoom.roomInfo.width && thisRoom.roomInfo.height) {
-                context.fillStyle = context.createPattern(Resource.getImage("background"),"repeat");
-                context.fillRect(0,0,
+                context.fillStyle = context.createPattern(Resource.getImage("background"), "repeat");
+                context.fillRect(0, 0,
                     thisRoom.roomInfo.width,
                     thisRoom.roomInfo.height);
             }
@@ -29,6 +29,8 @@
                 item.draw(context);
             });
         };
+
+        //扩展消息函数
         this.stage.receiveStompMessageExtension = function (messageDto) {
             switch (messageDto.messageType) {
                 case "MAP":
@@ -41,10 +43,8 @@
         };
 
         //显示基本信息
-        drawTips(thisStage, '房间号:' + roomInfo.roomId
-            + " 地图:" + roomInfo.mapId
-            + " [" + roomInfo.roomType + "]",
-            10, 6);
+        const tipMessage = '房间号:' + roomInfo.roomId + " 地图:" + roomInfo.mapId + " [" + roomInfo.roomType + "]";
+        drawTips(thisStage, tipMessage, 10, 6);
     };
 
     /**
@@ -83,7 +83,7 @@
         if (stage.items.has(data.id)) {
             item = stage.items.get(data.id);
         } else {
-            item = stage.createItem({id:data.id});
+            item = stage.createItem({id: data.id});
         }
 
         const typeId = data.typeId.toLowerCase();
@@ -102,16 +102,16 @@
             case "red_king":
             case "blue_king":
                 const thisItem = item;
-                item.play = new Play(1,30,
+                item.play = new Play(1, 30,
                     function () {
                         thisItem.orientation = (thisItem.orientation + 1) % 2;
-                    },function () {
+                    }, function () {
                         this.frames = 1;
                     })
         }
     };
 
-    const getPositionFromId = function(id) {
+    const getPositionFromId = function (id) {
         const position = {};
         const infos = id.split("_");
         position.x = parseInt(infos[0]) * _unitSize + _unitSize / 2;

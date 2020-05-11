@@ -75,7 +75,7 @@ function Stage(params) {
             array[array.length] = item;
         });
 
-        array.sort(function (item1,item2) {
+        array.sort(function (item1, item2) {
             if (item1.z !== item2.z) {
                 return item1.z - item2.z;
             }
@@ -90,7 +90,7 @@ function Stage(params) {
         this.items = new Map();
         const map = this.items;
         array.forEach(function (item) {
-            map.set(item.id,item);
+            map.set(item.id, item);
         })
     };
 
