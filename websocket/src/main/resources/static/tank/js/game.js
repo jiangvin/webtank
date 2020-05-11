@@ -327,7 +327,7 @@ function Game() {
     };
     //触屏提示圆
     this.drawTouchCycle = function (context) {
-        const touchInfo = Common.getTouchInfo();
+        const touchInfo = Control.getControlMode();
 
         if (touchInfo.touch !== true) {
             return;
@@ -341,8 +341,8 @@ function Game() {
         context.closePath();
         context.fill();
 
-        let x = _touchControl.touchX ? _touchControl.touchX : _touchControl.centerX;
-        let y = _touchControl.touchY ? _touchControl.touchY : _touchControl.centerY;
+        let x = touchInfo.touchX ? touchInfo.touchX : touchInfo.centerX;
+        let y = touchInfo.touchY ? touchInfo.touchY : touchInfo.centerY;
 
         //内圆
         context.beginPath();
