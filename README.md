@@ -32,26 +32,22 @@
 
 **逻辑流程图：**
 
-1.建立连接
-
-2.订阅地址
-
-3.暂停并发送CLIENT_READY 
-
-4.接收游戏数据
-
-5.接收SERVER_READY并解除暂停
+1.建立连接<br>
+2.订阅地址<br>
+3.暂停并发送CLIENT_READY<br>
+4.接收游戏数据<br>
+5.接收SERVER_READY并解除暂停<br>
 
 **关于超时重连问题：**
 在测试中发现有一定记录连接服务器会超时，这里前端加了一个行为判断，当连接超过5秒的时候结束锁定，并返回一个超时信息。因为后续的连接可能涉及到切换场景，所以这里的超时比较麻烦，先考虑设定成先暂停，再切换场景，最后再切换回来的操作，代码如下：
 
-  Room.getOrCreateRoom(); //创建场景
-  Common.runNextStage();  //切换场景
-  Status.setStatus(Status.getStatusPause(), "加入房间中...");
-  Common.sendStompMessage({
-      "roomId": roomId,
-      "joinTeamType": selectGroup
-  }, "JOIN_ROOM");
-  Common.addConnectTimeoutEvent(function () {
-      Common.runLastStage(); //超时后又切换回来
-  });
+  Room.getOrCreateRoom(); //创建场景<br>
+  Common.runNextStage();  //切换场景<br>
+  Status.setStatus(Status.getStatusPause(), "加入房间中...");<br>
+  Common.sendStompMessage({<br>
+      "roomId": roomId,<br>
+      "joinTeamType": selectGroup<br>
+  }, "JOIN_ROOM");<br>
+  Common.addConnectTimeoutEvent(function () {<br>
+      Common.runLastStage(); //超时后又切换回来<br>
+  });<br>
