@@ -7,6 +7,9 @@ function Stage(params) {
         showTeam: false,                 //显示团队标志
         id: null,                        //布景id
         items: new Map(),				 //对象队列
+        view: {x: 0, y: 0},              //视野
+        size: {width: 0, height: 0},     //场景大小
+        backgroundImage: null,           //背景图
 
         //处理控制事件
         controlEvent: function () {
@@ -51,7 +54,27 @@ function Stage(params) {
         }
     };
 
+    this.drawBackground = function (context) {
+        if (!this.size.width || !this.size.height || !this.backgroundImage) {
+            return;
+        }
+
+        context.fillStyle = context.createPattern(this.backgroundImage, "repeat");
+        const start = this.convertToScreenPoint({x: 0, y: 0});
+        const end = this.convertToScreenPoint({x: this.size.width, y: this.size.height});
+        context.fillRect(start.x, start.y, end.x, end.y);
+    };
+
+    //真实坐标转换屏幕坐标
+    this.convertToScreenPoint = function (point) {
+        const screenPoint = {};
+        screenPoint.x = point.x - this.view.x;
+        screenPoint.y = point.y - this.view.y;
+        return screenPoint;
+    };
+
     this.draw = function (context) {
+        this.drawBackground(context);
         this.items.forEach(function (item) {
             item.draw(context);
         });
@@ -149,7 +172,6 @@ function Stage(params) {
         item.scale = bombScale;
         item.z = 10;
         item.image = Resource.getImage("bomb");
-        const thisStage = this;
         item.play = new Play(
             6,
             3,

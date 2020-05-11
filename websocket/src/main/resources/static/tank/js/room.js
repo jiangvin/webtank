@@ -12,7 +12,7 @@
         //init room
         this.stage = Resource.getGame().createStage({id: roomInfo.roomId});
         this.roomInfo = roomInfo;
-
+        this.stage.backgroundImage = Resource.getImage("background");
         if (this.roomInfo.roomType !== "PVE") {
             this.stage.showTeam = true;
         }
@@ -20,22 +20,8 @@
         const thisRoom = this;
         const thisStage = thisRoom.stage;
 
-        //重写draw函数,绘制背景
-        this.stage.draw = function (context) {
-            if (thisRoom.roomInfo.width && thisRoom.roomInfo.height) {
-                context.fillStyle = context.createPattern(Resource.getImage("background"), "repeat");
-                context.fillRect(0, 0,
-                    thisRoom.roomInfo.width,
-                    thisRoom.roomInfo.height);
-            }
-
-            this.items.forEach(function (item) {
-                item.draw(context);
-            });
-        };
-
         //扩展消息函数
-        this.stage.receiveStompMessageExtension = function (messageDto) {
+        thisStage.receiveStompMessageExtension = function (messageDto) {
             switch (messageDto.messageType) {
                 case "MAP":
                     loadMap(thisRoom, messageDto.message);
@@ -57,8 +43,8 @@
      * @param data {{itemList,width,height,playerLife,computerLife}}
      */
     const loadMap = function (room, data) {
-        room.roomInfo.width = data.width;
-        room.roomInfo.height = data.height;
+        room.stage.size.width = data.width;
+        room.stage.size.height = data.height;
         room.roomInfo.playerLife = data.playerLife;
         room.roomInfo.computerLife = data.computerLife;
         if (room.roomInfo.roomType === 'PVE') {
