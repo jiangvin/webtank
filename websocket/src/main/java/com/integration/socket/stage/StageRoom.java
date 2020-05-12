@@ -297,17 +297,67 @@ public class StageRoom extends BaseStage {
             return;
         }
 
+        Map<String, Integer> lifeMap = getLifeMap(userBo.getTeamType());
+        if (lifeMap.isEmpty()) {
+            sendMessageToRoom(
+                String.format("没有剩余生命值，玩家 %s 将变成观看模式",
+                              userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
+            return;
+        }
+
         TankBo tankBo = new TankBo();
         tankBo.setTankId(userBo.getUsername());
         tankBo.setUserId(userBo.getUsername());
         tankBo.setTeamType(userBo.getTeamType());
-        tankBo.setType(TankTypeBo.getTankType("tank01"));
-        tankBo.setAmmoCount(tankBo.getType().getAmmoMaxCount());
+        tankBo.setType(getTankType(lifeMap));
         setStartPoint(tankBo);
+        tankBo.setAmmoCount(tankBo.getType().getAmmoMaxCount());
         tankMap.put(tankBo.getTankId(), tankBo);
 
         //即将向所有人同步信息
         sendMessageToRoom(getTankList(), MessageType.TANKS);
+    }
+
+    /**
+     * 根据队伍获得类型，并且更新life
+     * @param lifeMap
+     * @return
+     */
+    private TankTypeBo getTankType(Map<String, Integer> lifeMap) {
+        List<String> types = new ArrayList<>();
+        List<Integer> min = new ArrayList<>();
+        List<Integer> max = new ArrayList<>();
+        int totalCount = 0;
+        for (Map.Entry<String, Integer> kv : lifeMap.entrySet()) {
+            types.add(kv.getKey());
+            min.add(totalCount);
+            totalCount += kv.getValue();
+            max.add(totalCount - 1);
+        }
+        int index = random.nextInt(totalCount);
+        String selectType = null;
+        for (int i = 0; i < types.size(); ++i) {
+            if (CommonUtil.betweenAnd(index, min.get(i), max.get(i))) {
+                selectType = types.get(i);
+                break;
+            }
+        }
+        int lastCount = lifeMap.get(selectType) - 1;
+        if (lastCount == 0) {
+            lifeMap.remove(selectType);
+        } else {
+            lifeMap.put(selectType, lastCount);
+        }
+        sendMessageToRoom(MapDto.convertLifeCount(mapBo), MessageType.MAP);
+        return TankTypeBo.getTankType(selectType);
+    }
+
+    private Map<String, Integer> getLifeMap(TeamType teamType) {
+        if (teamType == TeamType.RED) {
+            return mapBo.getPlayerLife();
+        } else {
+            return mapBo.getComputerLife();
+        }
     }
 
     private List<ItemDto> getTankList() {
@@ -316,6 +366,10 @@ public class StageRoom extends BaseStage {
             tankDtoList.add(ItemDto.convert(kv.getValue()));
         }
         return tankDtoList;
+    }
+
+    private void setType(TankBo tankBo) {
+
     }
 
     private void setStartPoint(TankBo tankBo) {

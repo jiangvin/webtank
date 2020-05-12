@@ -85,7 +85,7 @@ public class RoomService {
         }
 
         //mapService会自动抛出异常，这里不用再做空判断
-        MapBo mapBo = mapService.loadMap(roomDto.getMapId());
+        MapBo mapBo = mapService.loadMap(roomDto);
 
         log.info("room:{} will be created", roomDto);
         StageRoom stageRoom = new StageRoom(roomDto, mapBo, messageService);

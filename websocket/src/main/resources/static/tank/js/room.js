@@ -43,10 +43,14 @@
      * @param data {{itemList,width,height,playerLife,computerLife}}
      */
     const loadMap = function (room, data) {
-        room.stage.size.width = data.width;
-        room.stage.size.height = data.height;
         room.roomInfo.playerLife = data.playerLife;
         room.roomInfo.computerLife = data.computerLife;
+        if (data.width) {
+            room.stage.size.width = data.width;
+        }
+        if (data.height) {
+            room.stage.size.height = data.height;
+        }
         if (room.roomInfo.roomType === 'PVE') {
             drawTips(room.stage, "玩家生命:" + room.roomInfo.playerLife,
                 10, 24, "red_team_life");
@@ -60,10 +64,11 @@
         }
 
         //load mapItem
-        data.itemList.forEach(function (itemData) {
-            createOrUpdateMapItem(room.stage, itemData);
-        })
-
+        if (data.itemList) {
+            data.itemList.forEach(function (itemData) {
+                createOrUpdateMapItem(room.stage, itemData);
+            })
+        }
     };
 
     const createOrUpdateMapItem = function (stage, data) {

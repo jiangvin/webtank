@@ -1,5 +1,6 @@
 package com.integration.socket.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.integration.socket.model.MapUnitType;
 import com.integration.socket.model.bo.MapBo;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.util.Map;
  * @date 2020/5/10
  */
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 public class MapDto {
     private Integer width;
@@ -23,16 +25,9 @@ public class MapDto {
     private List<ItemDto> itemList;
 
     public static MapDto convert(MapBo mapBo) {
-        MapDto mapDto = new MapDto();
+        MapDto mapDto = convertLifeCount(mapBo);
         mapDto.setWidth(mapBo.getWidth());
         mapDto.setHeight(mapBo.getHeight());
-        mapDto.setPlayerLife(mapBo.getPlayerLife());
-
-        int computerLife = 0;
-        for (Map.Entry<String, Integer> kv : mapBo.getComputerLife().entrySet()) {
-            computerLife += kv.getValue();
-        }
-        mapDto.setComputerLife(computerLife);
 
         List<ItemDto> itemList = new ArrayList<>();
         for (Map.Entry<String, MapUnitType> kv : mapBo.getUnitMap().entrySet()) {
@@ -43,5 +38,20 @@ public class MapDto {
         }
         mapDto.setItemList(itemList);
         return mapDto;
+    }
+
+    public static MapDto convertLifeCount(MapBo mapBo) {
+        MapDto mapDto = new MapDto();
+        mapDto.setPlayerLife(getCount(mapBo.getPlayerLife()));
+        mapDto.setComputerLife(getCount(mapBo.getComputerLife()));
+        return mapDto;
+    }
+
+    private static int getCount(Map<String, Integer> map) {
+        int life = 0;
+        for (Map.Entry<String, Integer> kv : map.entrySet()) {
+            life += kv.getValue();
+        }
+        return life;
     }
 }

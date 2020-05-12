@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -16,8 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 public class MapBo {
-    private int playerLife = 0;
-
     private int computerStartCount = 0;
 
     private int width;
@@ -27,6 +26,8 @@ public class MapBo {
     private int maxGridX;
 
     private int maxGridY;
+
+    private ConcurrentHashMap<String, Integer> playerLife = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<String, Integer> computerLife = new ConcurrentHashMap<>();
 
@@ -41,11 +42,11 @@ public class MapBo {
             throw new CustomException("宽高不能为空");
         }
 
-        if (playerLife == 0) {
-            throw new CustomException("玩家生命不能为0");
-        }
         if (computerStartCount == 0) {
             throw new CustomException("初始的电脑数量不能为0");
+        }
+        if (playerLife.isEmpty()) {
+            throw new CustomException("玩家生命不能为0");
         }
         if (computerLife.isEmpty()) {
             throw new CustomException("电脑类型不能为空");
@@ -56,5 +57,20 @@ public class MapBo {
         if (computerStartPoints.isEmpty()) {
             throw new CustomException("电脑出生点不能为空");
         }
+    }
+
+    private void duplicate(ConcurrentHashMap<String, Integer> map, ConcurrentHashMap<String, Integer> target) {
+        map.clear();
+        for (Map.Entry<String, Integer> kv : target.entrySet()) {
+            map.put(kv.getKey(), kv.getValue());
+        }
+    }
+
+    public void duplicatePlayer() {
+        duplicate(computerLife, playerLife);
+    }
+
+    public void duplicateComputer() {
+        duplicate(playerLife, computerLife);
     }
 }

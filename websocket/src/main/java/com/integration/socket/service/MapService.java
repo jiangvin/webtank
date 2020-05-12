@@ -1,12 +1,13 @@
 package com.integration.socket.service;
 
 import com.integration.socket.model.MapUnitType;
+import com.integration.socket.model.RoomType;
 import com.integration.socket.model.bo.MapBo;
+import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.util.CommonUtil;
 import com.integration.util.model.CustomException;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -43,12 +44,22 @@ public class MapService {
 
     private static final String URL_PREFIX = "http://localhost/tank/map/";
 
-    MapBo loadMap(@NonNull String mapId) {
+    private static final String PLAYER_DEFAULT_TYPE = "tank01";
+
+    MapBo loadMap(RoomDto roomDto) {
+        String mapId = roomDto.getMapId();
         if (!DEFAULT.equals(mapId)) {
             throw new CustomException("找不到地图资源!");
         }
 
-        return readFile(mapId);
+        //根据类型调整数据
+        MapBo mapBo = readFile(mapId);
+        if (roomDto.getRoomType() == RoomType.PVP) {
+            mapBo.duplicatePlayer();
+        } else if (roomDto.getRoomType() == RoomType.EVE) {
+            mapBo.duplicateComputer();
+        }
+        return mapBo;
     }
 
     private MapBo readFile(String mapId) {
@@ -75,7 +86,7 @@ public class MapService {
                             mapBo.setHeight(mapBo.getMaxGridY() * CommonUtil.UNIT_SIZE);
                             break;
                         case PLAYERS:
-                            mapBo.setPlayerLife(Integer.parseInt(kv.value));
+                            mapBo.getPlayerLife().put(PLAYER_DEFAULT_TYPE, Integer.parseInt(kv.value));
                             break;
                         case COMPUTERS:
                             parseComputers(mapBo, kv.value);
