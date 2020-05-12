@@ -28,7 +28,7 @@ public abstract class BaseStage {
 
     ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
-    ConcurrentHashMap<String, BulletBo> ammoMap = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, BulletBo> bulletMap = new ConcurrentHashMap<>();
 
     BaseStage(MessageService messageService) {
         this.messageService = messageService;
@@ -62,7 +62,7 @@ public abstract class BaseStage {
         if (ammo == null) {
             return;
         }
-        ammoMap.put(ammo.getId(), ammo);
+        bulletMap.put(ammo.getId(), ammo);
         processTankFireExtension(ammo);
         sendMessageToRoom(Collections.singletonList(ItemDto.convert(ammo)), MessageType.AMMO);
     }

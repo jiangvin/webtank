@@ -45,7 +45,7 @@ public class StageMenu extends BaseStage {
         }
 
         List<BulletBo> removeBullets = new ArrayList<>();
-        for (Map.Entry<String, BulletBo> kv : ammoMap.entrySet()) {
+        for (Map.Entry<String, BulletBo> kv : bulletMap.entrySet()) {
             BulletBo bullet = kv.getValue();
             if (bullet.getLifeTime() == 0) {
                 removeBullets.add(bullet);
@@ -56,7 +56,7 @@ public class StageMenu extends BaseStage {
             bullet.run();
         }
         for (BulletBo bullet : removeBullets) {
-            ammoMap.remove(bullet.getId());
+            bulletMap.remove(bullet.getId());
             if (tankMap.containsKey(bullet.getTankId())) {
                 tankMap.get(bullet.getTankId()).addAmmoCount();
             }

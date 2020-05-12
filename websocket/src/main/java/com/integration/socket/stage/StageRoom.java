@@ -48,7 +48,7 @@ public class StageRoom extends BaseStage {
 
     private ConcurrentHashMap<String, List<String>> gridTankMap = new ConcurrentHashMap<>();
 
-    private ConcurrentHashMap<String, List<String>> gridAmmoMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, List<String>> gridBulletMap = new ConcurrentHashMap<>();
 
     /**
      * 要删除的子弹列表，每帧刷新
@@ -97,7 +97,7 @@ public class StageRoom extends BaseStage {
             updateTank(tankBo);
         }
 
-        for (Map.Entry<String, BulletBo> kv : ammoMap.entrySet()) {
+        for (Map.Entry<String, BulletBo> kv : bulletMap.entrySet()) {
             updateBullet(kv.getValue());
         }
         removeBullets();
@@ -109,10 +109,10 @@ public class StageRoom extends BaseStage {
         }
 
         for (String bulletId : removeAmmoIds) {
-            BulletBo bullet = ammoMap.get(bulletId);
+            BulletBo bullet = bulletMap.get(bulletId);
             removeToGridAmmoMap(bullet, bullet.getStartGridKey());
             removeToGridAmmoMap(bullet, bullet.getEndGridKey());
-            ammoMap.remove(bulletId);
+            bulletMap.remove(bulletId);
             if (tankMap.containsKey(bullet.getTankId())) {
                 tankMap.get(bullet.getTankId()).addAmmoCount();
             }
@@ -286,7 +286,7 @@ public class StageRoom extends BaseStage {
             return true;
         } else {
             String goalKey = CommonUtil.generateKey(gridX, gridY);
-            if (collide(mapBo.getUnitMap().get(goalKey))) {
+            if (collideForTank(mapBo.getUnitMap().get(goalKey))) {
                 //有障碍物，停止
                 return true;
             } else {
@@ -306,7 +306,7 @@ public class StageRoom extends BaseStage {
 
         //和地图场景碰撞检测
         String goalKey = CommonUtil.generateKey(gridX, gridY);
-        if (collide(mapBo.getUnitMap().get(goalKey))) {
+        if (collideForBullet(mapBo.getUnitMap().get(goalKey))) {
             addRemoveAmmo(bullet.getId());
             processMapWhenCatchAmmo(goalKey, bullet);
             return true;
@@ -361,12 +361,12 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean collideWithAmmo(BulletBo ammo, String key) {
-        for (String id : gridAmmoMap.get(key)) {
+        for (String id : gridBulletMap.get(key)) {
             if (id.equals(ammo.getId())) {
                 continue;
             }
 
-            BulletBo target = ammoMap.get(id);
+            BulletBo target = bulletMap.get(id);
             double distance = Point.distance(ammo.getX(), ammo.getY(), target.getX(), target.getY());
             if (distance <= CommonUtil.AMMO_SIZE) {
                 addRemoveAmmo(ammo.getId());
@@ -470,7 +470,14 @@ public class StageRoom extends BaseStage {
         return false;
     }
 
-    private boolean collide(MapUnitType mapUnitType) {
+    private boolean collideForTank(MapUnitType mapUnitType) {
+        if (mapUnitType == null) {
+            return false;
+        }
+        return mapUnitType != MapUnitType.GRASS;
+    }
+
+    private boolean collideForBullet(MapUnitType mapUnitType) {
         if (mapUnitType == null) {
             return false;
         }
@@ -634,21 +641,21 @@ public class StageRoom extends BaseStage {
     }
 
     private void insertToGridAmmoMap(BulletBo ammo, String key) {
-        if (!gridAmmoMap.containsKey(key)) {
-            gridAmmoMap.put(key, new ArrayList<>());
+        if (!gridBulletMap.containsKey(key)) {
+            gridBulletMap.put(key, new ArrayList<>());
         }
-        if (!gridAmmoMap.get(key).contains(ammo.getId())) {
-            gridAmmoMap.get(key).add(ammo.getId());
+        if (!gridBulletMap.get(key).contains(ammo.getId())) {
+            gridBulletMap.get(key).add(ammo.getId());
         }
     }
 
     private void removeToGridAmmoMap(BulletBo ammo, String key) {
-        if (!gridAmmoMap.containsKey(key)) {
+        if (!gridBulletMap.containsKey(key)) {
             return;
         }
-        gridAmmoMap.get(key).remove(ammo.getId());
-        if (gridAmmoMap.get(key).isEmpty()) {
-            gridAmmoMap.remove(key);
+        gridBulletMap.get(key).remove(ammo.getId());
+        if (gridBulletMap.get(key).isEmpty()) {
+            gridBulletMap.remove(key);
         }
     }
 
