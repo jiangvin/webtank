@@ -37,7 +37,6 @@ public class StageMenu extends BaseStage {
 
     @Override
     public void update() {
-        //更新坦克
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             if (tankBo.getActionType() == ActionType.RUN) {
@@ -45,38 +44,23 @@ public class StageMenu extends BaseStage {
             }
         }
 
-        //更新子弹
-        for (int i = 0; i < ammoBoList.size(); ++i) {
-            AmmoBo ammo = ammoBoList.get(i);
-            if (ammo.getLifeTime() == 0) {
-                ammoBoList.remove(i);
-                --i;
-
-                if (tankMap.containsKey(ammo.getTankId())) {
-                    tankMap.get(ammo.getTankId()).addAmmoCount();
-                }
-
-                sendMessageToRoom(ItemDto.convert(ammo), MessageType.REMOVE_AMMO);
+        List<AmmoBo> removeBullets = new ArrayList<>();
+        for (Map.Entry<String, AmmoBo> kv : ammoMap.entrySet()) {
+            AmmoBo bullet = kv.getValue();
+            if (bullet.getLifeTime() == 0) {
+                removeBullets.add(bullet);
                 continue;
             }
-            ammo.setLifeTime(ammo.getLifeTime() - 1);
 
-            switch (ammo.getOrientationType()) {
-                case UP:
-                    ammo.setY(ammo.getY() - ammo.getSpeed());
-                    break;
-                case DOWN:
-                    ammo.setY(ammo.getY() + ammo.getSpeed());
-                    break;
-                case LEFT:
-                    ammo.setX(ammo.getX() - ammo.getSpeed());
-                    break;
-                case RIGHT:
-                    ammo.setX(ammo.getX() + ammo.getSpeed());
-                    break;
-                default:
-                    break;
+            bullet.setLifeTime(bullet.getLifeTime() - 1);
+            bullet.run();
+        }
+        for (AmmoBo bullet : removeBullets) {
+            ammoMap.remove(bullet.getId());
+            if (tankMap.containsKey(bullet.getTankId())) {
+                tankMap.get(bullet.getTankId()).addAmmoCount();
             }
+            sendMessageToRoom(ItemDto.convert(bullet), MessageType.REMOVE_AMMO);
         }
     }
 

@@ -2,6 +2,7 @@ package com.integration.socket.util;
 
 
 import java.awt.Point;
+import java.sql.Statement;
 
 /**
  * @author 蒋文龙(Vin)
@@ -16,6 +17,8 @@ public class CommonUtil {
     }
 
     public static final int UNIT_SIZE = 36;
+
+    public static final int AMMO_SIZE = 14;
 
     public static Point getPointFromKey(String key) {
         String[] infos = key.split("_");

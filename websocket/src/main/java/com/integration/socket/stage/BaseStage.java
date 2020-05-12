@@ -28,7 +28,7 @@ public abstract class BaseStage {
 
     ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
-    List<AmmoBo> ammoBoList = new ArrayList<>();
+    ConcurrentHashMap<String, AmmoBo> ammoMap = new ConcurrentHashMap<>();
 
     BaseStage(MessageService messageService) {
         this.messageService = messageService;
@@ -62,9 +62,17 @@ public abstract class BaseStage {
         if (ammo == null) {
             return;
         }
-        ammoBoList.add(ammo);
-
+        ammoMap.put(ammo.getId(), ammo);
+        processTankFireExtension(ammo);
         sendMessageToRoom(Collections.singletonList(ItemDto.convert(ammo)), MessageType.AMMO);
+    }
+
+    /**
+     * 拓展函数
+     * @param ammo
+     */
+    void processTankFireExtension(AmmoBo ammo) {
+
     }
 
     private void processTankControl(MessageDto messageDto, String sendFrom) {
@@ -152,6 +160,15 @@ public abstract class BaseStage {
 
         TankBo tank = tankMap.get(tankId);
         tankMap.remove(tank.getTankId());
+        removeTankExtension(tank);
         sendMessageToRoom(ItemDto.convert(tank), MessageType.REMOVE_TANK);
+    }
+
+    /**
+     * 删除tank的扩展函数
+     * @param tankBo
+     */
+    void removeTankExtension(TankBo tankBo) {
+
     }
 }

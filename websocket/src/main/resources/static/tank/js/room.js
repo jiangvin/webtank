@@ -27,6 +27,9 @@
                     loadMap(thisRoom, messageDto.message);
                     thisStage.sortItems();
                     break;
+                case "REMOVE_MAP":
+                    thisStage.itemBomb(messageDto.message);
+                    break;
                 default:
                     break;
             }
@@ -43,8 +46,12 @@
      * @param data {{itemList,width,height,playerLife,computerLife}}
      */
     const loadMap = function (room, data) {
-        room.roomInfo.playerLife = data.playerLife;
-        room.roomInfo.computerLife = data.computerLife;
+        if (data.playerLife !== undefined) {
+            room.roomInfo.playerLife = data.playerLife;
+        }
+        if (data.computerLife !== undefined) {
+            room.roomInfo.computerLife = data.computerLife;
+        }
         if (data.width) {
             room.stage.size.width = data.width;
         }
@@ -71,6 +78,23 @@
         }
     };
 
+    const setResourceImage = function (item,typeId) {
+        switch (typeId) {
+            case "broken_brick":
+                item.image = Resource.getImage("brick");
+                item.orientation = 1;
+                break;
+            case "broken_iron":
+                item.image = Resource.getImage("iron");
+                item.orientation = 1;
+                break;
+            default:
+                item.image = Resource.getImage(typeId);
+                item.orientation = 0;
+                break;
+        }
+    };
+
     const createOrUpdateMapItem = function (stage, data) {
         let item;
         if (stage.items.has(data.id)) {
@@ -80,7 +104,7 @@
         }
 
         const typeId = data.typeId.toLowerCase();
-        item.image = Resource.getImage(typeId);
+        setResourceImage(item,typeId);
 
         const position = getPositionFromId(data.id);
         item.x = position.x;

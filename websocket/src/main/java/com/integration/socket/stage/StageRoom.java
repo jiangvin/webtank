@@ -48,6 +48,13 @@ public class StageRoom extends BaseStage {
 
     private ConcurrentHashMap<String, List<String>> gridTankMap = new ConcurrentHashMap<>();
 
+    private ConcurrentHashMap<String, List<String>> gridAmmoMap = new ConcurrentHashMap<>();
+
+    /**
+     * 要删除的子弹列表，每帧刷新
+     */
+    private List<String> removeAmmoIds = new ArrayList<>();
+
     private MapBo mapBo;
 
     @Getter
@@ -68,6 +75,12 @@ public class StageRoom extends BaseStage {
         return userMap.size();
     }
 
+    private void addRemoveAmmo(String id) {
+        if (!this.removeAmmoIds.contains(id)) {
+            removeAmmoIds.add(id);
+        }
+    }
+
     @Override
     public List<String> getUserList() {
         List<String> users = new ArrayList<>();
@@ -79,45 +92,63 @@ public class StageRoom extends BaseStage {
 
     @Override
     public void update() {
-        //更新坦克
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             updateTank(tankBo);
         }
 
-        //更新子弹
-        for (int i = 0; i < ammoBoList.size(); ++i) {
-            AmmoBo ammo = ammoBoList.get(i);
-            if (ammo.getLifeTime() == 0) {
-                ammoBoList.remove(i);
-                --i;
-
-                if (tankMap.containsKey(ammo.getTankId())) {
-                    tankMap.get(ammo.getTankId()).addAmmoCount();
-                }
-
-                sendMessageToRoom(ItemDto.convert(ammo), MessageType.REMOVE_AMMO);
-                continue;
-            }
-            ammo.setLifeTime(ammo.getLifeTime() - 1);
-
-            switch (ammo.getOrientationType()) {
-                case UP:
-                    ammo.setY(ammo.getY() - ammo.getSpeed());
-                    break;
-                case DOWN:
-                    ammo.setY(ammo.getY() + ammo.getSpeed());
-                    break;
-                case LEFT:
-                    ammo.setX(ammo.getX() - ammo.getSpeed());
-                    break;
-                case RIGHT:
-                    ammo.setX(ammo.getX() + ammo.getSpeed());
-                    break;
-                default:
-                    break;
-            }
+        for (Map.Entry<String, AmmoBo> kv : ammoMap.entrySet()) {
+            updateAmmo(kv.getValue());
         }
+        removeBullets();
+    }
+
+    private void removeBullets() {
+        if (removeAmmoIds.isEmpty()) {
+            return;
+        }
+
+        for (String bulletId : removeAmmoIds) {
+            AmmoBo bullet = ammoMap.get(bulletId);
+            removeToGridAmmoMap(bullet, bullet.getStartGridKey());
+            removeToGridAmmoMap(bullet, bullet.getEndGridKey());
+            ammoMap.remove(bulletId);
+            if (tankMap.containsKey(bullet.getTankId())) {
+                tankMap.get(bullet.getTankId()).addAmmoCount();
+            }
+            sendMessageToRoom(ItemDto.convert(bullet), MessageType.REMOVE_AMMO);
+        }
+        removeAmmoIds.clear();
+    }
+
+    private void updateAmmo(AmmoBo ammo) {
+        if (this.removeAmmoIds.contains(ammo.getId())) {
+            return;
+        }
+
+        if (ammo.getLifeTime() == 0) {
+            addRemoveAmmo(ammo.getId());
+            return;
+        }
+
+        if (collideWithAll(ammo)) {
+            return;
+        }
+
+        ammo.setLifeTime(ammo.getLifeTime() - 1);
+        ammo.run();
+        String newStart = ammo.generateStartGridKey();
+        if (newStart.equals(ammo.getStartGridKey())) {
+            return;
+        }
+
+        removeToGridAmmoMap(ammo, ammo.getStartGridKey());
+        ammo.setStartGridKey(newStart);
+
+        //newStartKey must equal endKey
+        String newEnd = ammo.generateEndGridKey();
+        ammo.setEndGridKey(newEnd);
+        insertToGridAmmoMap(ammo, newEnd);
     }
 
     /**
@@ -255,13 +286,128 @@ public class StageRoom extends BaseStage {
             return true;
         } else {
             String goalKey = CommonUtil.generateKey(gridX, gridY);
-            if (!canPass(mapBo.getUnitMap().get(goalKey))) {
+            if (collide(mapBo.getUnitMap().get(goalKey))) {
                 //有障碍物，停止
                 return true;
             } else {
                 return collideWithTanks(tankBo);
             }
         }
+    }
+
+    private boolean collideWithAll(AmmoBo ammo) {
+        int gridX = (int)(ammo.getX() / CommonUtil.UNIT_SIZE);
+        int gridY = (int)(ammo.getY() / CommonUtil.UNIT_SIZE);
+        if (gridX < 0 || gridY < 0 || gridX >= mapBo.getMaxGridX() || gridY >= mapBo.getMaxGridY()) {
+            //超出范围
+            addRemoveAmmo(ammo.getId());
+            return true;
+        }
+
+        //和地图场景碰撞检测
+        String goalKey = CommonUtil.generateKey(gridX, gridY);
+        if (collide(mapBo.getUnitMap().get(goalKey))) {
+            addRemoveAmmo(ammo.getId());
+            processMapWhenCatchAmmo(goalKey, ammo);
+            return true;
+        }
+
+        //和坦克碰撞检测
+        TankBo tankBo = collideWithTanks(ammo);
+        if (tankBo != null) {
+            addRemoveAmmo(ammo.getId());
+            removeTankFromTankId(tankBo.getTankId());
+            return true;
+        }
+
+        //和子弹碰撞检测
+        return collideWithAmmo(ammo);
+    }
+
+    private TankBo collideWithTanks(AmmoBo ammoBo) {
+        TankBo tankBo = collideWithTanks(ammoBo, ammoBo.getStartGridKey());
+        if (tankBo != null) {
+            return tankBo;
+        }
+        return collideWithTanks(ammoBo, ammoBo.getEndGridKey());
+    }
+
+    private TankBo collideWithTanks(AmmoBo ammoBo, String key) {
+        if (!gridTankMap.containsKey(key)) {
+            return null;
+        }
+
+        for (String tankId : gridTankMap.get(key)) {
+            TankBo tankBo = tankMap.get(tankId);
+            //队伍相同，不检测
+            if (tankBo.getTeamType() == ammoBo.getTeamType()) {
+                continue;
+            }
+            double distance = Point.distance(tankBo.getX(), tankBo.getY(), ammoBo.getX(), ammoBo.getY());
+            double minDistance = (CommonUtil.AMMO_SIZE + CommonUtil.UNIT_SIZE) / 2.0;
+            if (distance <= minDistance) {
+                return tankBo;
+            }
+        }
+        return null;
+    }
+
+    private boolean collideWithAmmo(AmmoBo ammo) {
+        if (collideWithAmmo(ammo, ammo.getStartGridKey())) {
+            return true;
+        }
+
+        return collideWithAmmo(ammo, ammo.getEndGridKey());
+    }
+
+    private boolean collideWithAmmo(AmmoBo ammo, String key) {
+        for (String id : gridAmmoMap.get(key)) {
+            if (id.equals(ammo.getId())) {
+                continue;
+            }
+
+            AmmoBo target = ammoMap.get(id);
+            double distance = Point.distance(ammo.getX(), ammo.getY(), target.getX(), target.getY());
+            if (distance <= CommonUtil.AMMO_SIZE) {
+                addRemoveAmmo(ammo.getId());
+                addRemoveAmmo(target.getId());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void processMapWhenCatchAmmo(String key, AmmoBo ammoBo) {
+        MapUnitType mapUnitType = mapBo.getUnitMap().get(key);
+
+        if (mapUnitType == MapUnitType.IRON && ammoBo.isBrokenIron()) {
+            changeMap(key, MapUnitType.BROKEN_IRON);
+            return;
+        }
+
+        if (mapUnitType == MapUnitType.BROKEN_IRON && ammoBo.isBrokenIron()) {
+            removeMap(key);
+            return;
+        }
+
+        if (mapUnitType == MapUnitType.BRICK) {
+            changeMap(key, MapUnitType.BROKEN_BRICK);
+            return;
+        }
+
+        if (mapUnitType == MapUnitType.BROKEN_IRON) {
+            removeMap(key);
+        }
+    }
+
+    private void changeMap(String key, MapUnitType type) {
+        mapBo.getUnitMap().put(key, type);
+        sendMessageToRoom(MapDto.convert(key, type), MessageType.MAP);
+    }
+
+    private void removeMap(String key) {
+        mapBo.getUnitMap().remove(key);
+        sendMessageToRoom(key, MessageType.REMOVE_MAP);
     }
 
     private boolean collideWithTanks(TankBo tankBo) {
@@ -324,11 +470,17 @@ public class StageRoom extends BaseStage {
         return false;
     }
 
-    private boolean canPass(MapUnitType mapUnitType) {
+    private boolean collide(MapUnitType mapUnitType) {
         if (mapUnitType == null) {
-            return true;
+            return false;
         }
-        return mapUnitType == MapUnitType.GRASS;
+        return mapUnitType != MapUnitType.GRASS;
+    }
+
+    @Override
+    void removeTankExtension(TankBo tankBo) {
+        removeToGridTankMap(tankBo, tankBo.getStartGridKey());
+        removeToGridTankMap(tankBo, tankBo.getEndGridKey());
     }
 
     @Override
@@ -481,6 +633,25 @@ public class StageRoom extends BaseStage {
         }
     }
 
+    private void insertToGridAmmoMap(AmmoBo ammo, String key) {
+        if (!gridAmmoMap.containsKey(key)) {
+            gridAmmoMap.put(key, new ArrayList<>());
+        }
+        if (!gridAmmoMap.get(key).contains(ammo.getId())) {
+            gridAmmoMap.get(key).add(ammo.getId());
+        }
+    }
+
+    private void removeToGridAmmoMap(AmmoBo ammo, String key) {
+        if (!gridAmmoMap.containsKey(key)) {
+            return;
+        }
+        gridAmmoMap.get(key).remove(ammo.getId());
+        if (gridAmmoMap.get(key).isEmpty()) {
+            gridAmmoMap.remove(key);
+        }
+    }
+
     @Override
     TankBo updateTankControl(ItemDto tankDto) {
         if (!tankMap.containsKey(tankDto.getId())) {
@@ -501,5 +672,35 @@ public class StageRoom extends BaseStage {
 
         //返回空，不需要及时同步给客户端
         return null;
+    }
+
+    @Override
+    void processTankFireExtension(AmmoBo ammo) {
+        setAmmoStartAndEndGrid(ammo);
+    }
+
+    private void setAmmoStartAndEndGrid(AmmoBo ammoBo) {
+        int gridX = (int)(ammoBo.getX() / CommonUtil.UNIT_SIZE);
+        int gridY = (int)(ammoBo.getY() / CommonUtil.UNIT_SIZE);
+        ammoBo.setStartGridKey(CommonUtil.generateKey(gridX, gridY));
+        insertToGridAmmoMap(ammoBo, ammoBo.getStartGridKey());
+        switch (ammoBo.getOrientationType()) {
+            case UP:
+                --gridY;
+                break;
+            case DOWN:
+                ++gridY;
+                break;
+            case LEFT:
+                --gridX;
+                break;
+            case RIGHT:
+                ++gridX;
+                break;
+            default:
+                break;
+        }
+        ammoBo.setEndGridKey(CommonUtil.generateKey(gridX, gridY));
+        insertToGridAmmoMap(ammoBo, ammoBo.getEndGridKey());
     }
 }

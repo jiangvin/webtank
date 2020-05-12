@@ -47,6 +47,17 @@ public class MapDto {
         return mapDto;
     }
 
+    public static MapDto convert(String key, MapUnitType type) {
+        MapDto mapDto = new MapDto();
+        List<ItemDto> itemList = new ArrayList<>();
+        ItemDto item = new ItemDto();
+        item.setId(key);
+        item.setTypeId(type.toString());
+        itemList.add(item);
+        mapDto.setItemList(itemList);
+        return mapDto;
+    }
+
     private static int getCount(Map<String, Integer> map) {
         int life = 0;
         for (Map.Entry<String, Integer> kv : map.entrySet()) {

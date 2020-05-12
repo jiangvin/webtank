@@ -70,7 +70,9 @@ public class TankBo {
                    this.x,
                    this.y,
                    this.getType().getAmmoSpeed(),
-                   this.orientationType);
+                   this.getType().isBrokenIron(),
+                   this.orientationType,
+                   null, null);
     }
 
     public void run(double speed) {
