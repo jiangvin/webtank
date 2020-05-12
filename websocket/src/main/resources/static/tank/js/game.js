@@ -334,7 +334,7 @@ function Game() {
         }
 
         //外圆
-        context.globalAlpha = 0.1;
+        context.globalAlpha = 0.2;
         context.fillStyle = '#FFF';
         context.beginPath();
         context.arc(touchInfo.centerX, touchInfo.centerY, touchInfo.radius, 0, 2 * Math.PI);
