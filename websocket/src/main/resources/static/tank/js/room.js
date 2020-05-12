@@ -12,7 +12,7 @@
         //init room
         this.stage = Resource.getGame().createStage({id: roomInfo.roomId});
         this.roomInfo = roomInfo;
-        this.stage.backgroundImage = Resource.getImage("background");
+        this.stage.backgroundImage = Resource.getImage("background", "jpg");
         if (this.roomInfo.roomType !== "PVE") {
             this.stage.showTeam = true;
         }

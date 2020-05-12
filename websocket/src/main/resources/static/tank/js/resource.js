@@ -51,13 +51,16 @@
         images.set(imageId, img);
     };
 
-    Resource.getImage = function (id, widthPics, heightPics) {
+    Resource.getImage = function (id, type, widthPics, heightPics) {
         const images = Resource.getImages();
         if (!images.has(id)) {
             widthPics = widthPics ? widthPics : 1;
             heightPics = heightPics ? heightPics : 1;
             const img = document.createElement('img');
-            img.src = 'tank/image/' + id + ".png";
+            if (!type) {
+                type = "png";
+            }
+            img.src = 'tank/image/' + id + '.' + type;
             img.widthPics = widthPics;
             img.heightPics = heightPics;
             img.displayWidth = img.width / img.widthPics;
