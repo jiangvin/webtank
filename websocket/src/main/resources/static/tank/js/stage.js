@@ -223,7 +223,6 @@ function Stage(params) {
         item.action = 0;
         item.orientation = 0;
         item.scale = bombScale;
-        item.z = 10;
         item.image = Resource.getImage("bomb");
         item.play = new Play(
             6,
@@ -233,6 +232,10 @@ function Stage(params) {
             }, function () {
                 thisStage.removeItem(item.id);
             });
+
+        //删除重加，确保在最上层绘制
+        this.items.delete(item.id);
+        this.items.set(item.id,item);
 
         //remove center
         if (item === this.view.center) {
