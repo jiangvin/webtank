@@ -77,6 +77,7 @@ function Stage(params) {
     };
 
     this.draw = function (context) {
+        this.updateView();
         this.drawBackground(context);
         this.items.forEach(function (item) {
             item.draw(context);
@@ -128,7 +129,6 @@ function Stage(params) {
         this.items.forEach(function (item) {
             item.update();
         });
-        this.updateView();
     };
 
     this.createItem = function (options) {

@@ -19,11 +19,11 @@ function Item(params) {
         play: null,
 
         update: function () {   //更新参数信息
+        },
+        draw: function (context) {
             if (this.play) {
                 this.play.update();
             }
-        },
-        draw: function (context) {
             this.screenPoint = this.stage.convertToScreenPoint({x: this.x, y: this.y});
             drawId(this, context);
             drawImage(this, context);
