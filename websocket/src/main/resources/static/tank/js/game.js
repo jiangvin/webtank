@@ -15,7 +15,8 @@ function Game() {
     const _context = Common.getContext();
 
     //帧率相关
-    let _framesPerSecond = 60;
+    const frontFrame = new Frame();
+    const backendFrame = new Frame();
 
     //延迟相关
     let _netDelay = 0;
@@ -122,12 +123,10 @@ function Game() {
 
     //动画相关
     this.start = function () {
-        let totalFrames = 0;
-        let lastFrames = 0;
-        let lastDate = Date.now();
 
         //开启运算
         _updateHandler = setInterval(function () {
+            backendFrame.calculate();
             switch (Status.getStatusValue()) {
                 case Status.getStatusClose():
                     //游戏结束
@@ -149,14 +148,7 @@ function Game() {
         //开启渲染
         const step = function () {
 
-            //计算帧数
-            ++totalFrames;
-            const offset = Date.now() - lastDate;
-            if (offset >= 1000) {
-                _framesPerSecond = totalFrames - lastFrames;
-                lastFrames = totalFrames;
-                lastDate += offset;
-            }
+            frontFrame.calculate();
 
             //开始绘制画面
             _context.clearRect(0, 0, _canvas.width, _canvas.height);
@@ -298,7 +290,7 @@ function Game() {
 
         //帧率信息
         context.textAlign = 'left';
-        let text = '帧率:' + _framesPerSecond;
+        let text = '帧率:' + frontFrame.frames + '-' + backendFrame.frames;
         if (_netDelay > 0) {
             text += ' / 延迟:' + _netDelay + 'ms';
         }
