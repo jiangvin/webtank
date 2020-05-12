@@ -143,46 +143,57 @@ public class StageRoom extends BaseStage {
 
         double speed = tankBo.getType().getSpeed();
         double distance = tankBo.distanceToEndGrid();
-        boolean reachDestination = false;
-        if (distance <= speed) {
-            reachDestination = true;
-        }
-        // 移动 & 需要更新，必须到目的地才更新
-        if (tankBo.hasDifferentCache() && reachDestination) {
-            //相撞，停止
-            Point grid = getGrid(tankBo);
-            if (collideWithAll(grid.x, grid.y, tankBo)) {
-                tankBo.setActionType(ActionType.STOP);
-                sendTankToRoom(tankBo);
-                return;
+        boolean reachDestination = distance <= speed;
+
+        //没到目的地，不更新
+        if (!reachDestination) {
+            //只和tank做碰撞检测
+            if (collideWithTanks(tankBo)) {
+                tankForceStop(tankBo);
+            } else {
+                tankBo.run(speed);
             }
+            return;
+        }
+
+        //先更新start key
+        String startKey = tankBo.getStartGridKey();
+        removeToGridTankMap(tankBo, startKey);
+        tankBo.setStartGridKey(tankBo.getEndGridKey());
+
+        //碰撞检测,滤掉走不通的情况
+        Point grid = getGrid(tankBo);
+        if (collideWithAll(grid.x, grid.y, tankBo)) {
+            tankForceStop(tankBo);
+            return;
+        }
+
+        // 还剩两种情况
+        // 1.到了目的地 & 要更新
+        // 2.到了目的地 & 不更新
+
+        if (tankBo.hasDifferentCache()) {
+            //先移动到目的地再更新状态
             tankBo.run(distance);
-            String startKey = tankBo.getStartGridKey();
-            removeToGridTankMap(tankBo, startKey);
-            tankBo.setStartGridKey(tankBo.getEndGridKey());
             updateInCache(tankBo);
             return;
         }
 
-        //最后case, 移动 & 不需要更新
+        //最后情况：到了目的地 & 不更新状态
+        //只更新新目的地
         tankBo.run(speed);
-        if (reachDestination) {
-            Point grid = getGrid(tankBo);
-            if (collideWithAll(grid.x, grid.y, tankBo)) {
-                tankBo.setActionType(ActionType.STOP);
-                sendTankToRoom(tankBo);
-                return;
-            }
-            // 更新key
-            // startKey = endKey
-            // endKey = next
-            String startKey = tankBo.getStartGridKey();
-            removeToGridTankMap(tankBo, startKey);
-            tankBo.setStartGridKey(tankBo.getEndGridKey());
-            String endKey = CommonUtil.generateKey(grid.x, grid.y);
-            tankBo.setEndGridKey(endKey);
-            insertToGridTankMap(tankBo, endKey);
+        String endKey = CommonUtil.generateKey(grid.x, grid.y);
+        tankBo.setEndGridKey(endKey);
+        insertToGridTankMap(tankBo, endKey);
+    }
+
+    private void tankForceStop(TankBo tankBo) {
+        if (!tankBo.getStartGridKey().equals(tankBo.getEndGridKey())) {
+            removeToGridTankMap(tankBo, tankBo.getEndGridKey());
+            tankBo.setEndGridKey(tankBo.getStartGridKey());
         }
+        tankBo.setActionType(ActionType.STOP);
+        sendTankToRoom(tankBo);
     }
 
     private void updateInCache(TankBo tankBo) {
@@ -284,24 +295,26 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean collide(TankBo tank1, TankBo tank2) {
+        double distance = Point.distance(tank1.getX(), tank1.getY(), tank2.getX(), tank2.getY());
+        boolean isCollide = distance <= CommonUtil.UNIT_SIZE;
         switch (tank1.getOrientationCache()) {
             case UP:
-                if (CommonUtil.betweenAnd(tank1.getY() - tank2.getY(), 0, CommonUtil.UNIT_SIZE)) {
+                if (isCollide && tank2.getY() < tank1.getY()) {
                     return true;
                 }
                 break;
             case DOWN:
-                if (CommonUtil.betweenAnd(tank2.getY() - tank1.getY(), 0, CommonUtil.UNIT_SIZE)) {
+                if (isCollide && tank2.getY() > tank1.getY()) {
                     return true;
                 }
                 break;
             case LEFT:
-                if (CommonUtil.betweenAnd(tank1.getX() - tank2.getX(), 0, CommonUtil.UNIT_SIZE)) {
+                if (isCollide && tank2.getX() < tank1.getX()) {
                     return true;
                 }
                 break;
             case RIGHT:
-                if (CommonUtil.betweenAnd(tank2.getX() - tank1.getX(), 0, CommonUtil.UNIT_SIZE)) {
+                if (isCollide && tank2.getX() > tank1.getX()) {
                     return true;
                 }
                 break;
@@ -453,7 +466,9 @@ public class StageRoom extends BaseStage {
         if (!gridTankMap.containsKey(key)) {
             gridTankMap.put(key, new ArrayList<>());
         }
-        gridTankMap.get(key).add(tankBo.getTankId());
+        if (!gridTankMap.get(key).contains(tankBo.getTankId())) {
+            gridTankMap.get(key).add(tankBo.getTankId());
+        }
     }
 
     private void removeToGridTankMap(TankBo tankBo, String key) {
