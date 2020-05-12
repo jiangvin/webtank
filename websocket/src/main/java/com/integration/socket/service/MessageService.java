@@ -2,6 +2,7 @@ package com.integration.socket.service;
 
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.dto.MessageDto;
+import com.integration.socket.util.CommonUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -37,7 +38,7 @@ public class MessageService {
             return;
         }
 
-        String msg = messageDto.toString();
+        String msg = CommonUtil.ignoreNull(messageDto.toString());
         if (msg.length() > MAX_LOG_LENGTH) {
             msg = msg.substring(0, MAX_LOG_LENGTH) + "...";
         }

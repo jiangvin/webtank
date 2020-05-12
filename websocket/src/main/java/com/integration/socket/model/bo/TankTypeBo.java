@@ -66,7 +66,7 @@ public class TankTypeBo {
         //player
         tankTypeMap.put("tank01", new TankTypeBo(
                             "tank01",
-                            1.0,
+                            1.5,
                             1,
                             5.0,
                             90,
@@ -140,7 +140,7 @@ public class TankTypeBo {
         com = comCopyType(
                   "tank08",
                   "tank03",
-                  2.5,
+                  4.0,
                   20,
                   null,
                   null);
@@ -167,7 +167,7 @@ public class TankTypeBo {
         com = comCopyType(
                   "tank11",
                   "tank03",
-                  3.0,
+                  4.0,
                   30,
                   null,
                   "tank12");
@@ -176,7 +176,7 @@ public class TankTypeBo {
         com = comCopyType(
                   "tank12",
                   "tank02",
-                  3.5,
+                  4.5,
                   30,
                   null,
                   null);

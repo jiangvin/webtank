@@ -31,4 +31,10 @@ public class CommonUtil {
     public static boolean betweenAnd(double target, int min, int max) {
         return target >= min && target <= max;
     }
+
+    public static String ignoreNull(String lombokToString) {
+        return lombokToString != null ? lombokToString
+               .replaceAll("(?<=(, |\\())[^\\s(]+?=null(?:, )?", "")
+               .replaceFirst(", \\)$", ")") : null;
+    }
 }

@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -121,34 +120,101 @@ public class StageRoom extends BaseStage {
         }
     }
 
+    /**
+     * 内部会出现四种状态
+     * 停止 & 不需要更新
+     * 停止 & 需要更新
+     * 移动 & 需要更新
+     * 移动 & 不需要更新
+     * @param tankBo
+     */
     private void updateTank(TankBo tankBo) {
+        //先排除停止 & 不需要更新的状态
         if (tankBo.getActionType() == ActionType.STOP && !tankBo.hasDifferentCache()) {
             return;
         }
 
+        //停止 & 需要更新
         if (tankBo.getActionType() == ActionType.STOP) {
             updateInCache(tankBo);
             return;
         }
 
-        boolean needUpdateInCache = false;
+
         double speed = tankBo.getType().getSpeed();
         double distance = tankBo.distanceToEndGrid();
+        boolean reachDestination = false;
         if (distance <= speed) {
-            speed = distance;
-            needUpdateInCache = true;
+            reachDestination = true;
         }
-        tankBo.run(speed);
-
-        if (needUpdateInCache) {
+        // 移动 & 需要更新，必须到目的地才更新
+        if (tankBo.hasDifferentCache() && reachDestination) {
+            //相撞，停止
+            Point grid = getGrid(tankBo);
+            if (collideWithAll(grid.x, grid.y, tankBo)) {
+                tankBo.setActionType(ActionType.STOP);
+                sendTankToRoom(tankBo);
+                return;
+            }
+            tankBo.run(distance);
             String startKey = tankBo.getStartGridKey();
             removeToGridTankMap(tankBo, startKey);
             tankBo.setStartGridKey(tankBo.getEndGridKey());
             updateInCache(tankBo);
+            return;
+        }
+
+        //最后case, 移动 & 不需要更新
+        tankBo.run(speed);
+        if (reachDestination) {
+            Point grid = getGrid(tankBo);
+            if (collideWithAll(grid.x, grid.y, tankBo)) {
+                tankBo.setActionType(ActionType.STOP);
+                sendTankToRoom(tankBo);
+                return;
+            }
+            // 更新key
+            // startKey = endKey
+            // endKey = next
+            String startKey = tankBo.getStartGridKey();
+            removeToGridTankMap(tankBo, startKey);
+            tankBo.setStartGridKey(tankBo.getEndGridKey());
+            String endKey = CommonUtil.generateKey(grid.x, grid.y);
+            tankBo.setEndGridKey(endKey);
+            insertToGridTankMap(tankBo, endKey);
         }
     }
 
     private void updateInCache(TankBo tankBo) {
+        if (!tankBo.hasDifferentCache()) {
+            return;
+        }
+
+        Point grid = getGrid(tankBo);
+        if (tankBo.getActionCache() == ActionType.RUN && collideWithAll(grid.x, grid.y, tankBo)) {
+            //有障碍，停止, 再递归判断是否一致
+            tankBo.setActionCache(ActionType.STOP);
+            updateInCache(tankBo);
+            return;
+        }
+
+        //代码走到这里有几种可能
+        //1. 停止 & 更新移动
+        //2. 停止 & 更新停止(碰撞检测后)
+        //3. 移动 & 更新移动
+        //4. 移动 & 更新停止(主动停止或碰撞检测后都有可能)
+        tankBo.setActionType(tankBo.getActionCache());
+        tankBo.setOrientationType(tankBo.getOrientationCache());
+        if (tankBo.getActionType() == ActionType.RUN) {
+            //开始跑，更新目标
+            String endKey = CommonUtil.generateKey(grid.x, grid.y);
+            tankBo.setEndGridKey(endKey);
+            insertToGridTankMap(tankBo, endKey);
+        }
+        sendTankToRoom(tankBo);
+    }
+
+    private Point getGrid(TankBo tankBo) {
         int gridX = (int)(tankBo.getX() / CommonUtil.UNIT_SIZE);
         int gridY = (int)(tankBo.getY() / CommonUtil.UNIT_SIZE);
         if (tankBo.getActionCache() == ActionType.RUN) {
@@ -168,53 +234,53 @@ public class StageRoom extends BaseStage {
                 default:
                     break;
             }
-
-            if (!canRun(gridX, gridY, tankBo)) {
-                tankBo.setActionCache(ActionType.STOP);
-                updateInCache(tankBo);
-            }
         }
-
-        //更新缓存
-        boolean needSendMessage = tankBo.hasDifferentCache();
-        tankBo.setActionType(tankBo.getActionCache());
-        tankBo.setOrientationType(tankBo.getOrientationCache());
-        if (tankBo.getActionType() == ActionType.RUN) {
-            //开始跑，更新目标
-            String endKey = CommonUtil.generateKey(gridX, gridY);
-            tankBo.setEndGridKey(endKey);
-            insertToGridTankMap(tankBo, endKey);
-        }
-        if (needSendMessage) {
-            sendMessageToRoom(Collections.singletonList(ItemDto.convert(tankBo)), MessageType.TANKS);
-        }
+        return new Point(gridX, gridY);
     }
 
-    private boolean canRun(int gridX, int gridY, TankBo tankBo) {
+    private boolean collideWithAll(int gridX, int gridY, TankBo tankBo) {
         if (gridX < 0 || gridY < 0 || gridX >= mapBo.getMaxGridX() || gridY >= mapBo.getMaxGridY()) {
             //超出范围，停止
-            return false;
+            return true;
         } else {
             String goalKey = CommonUtil.generateKey(gridX, gridY);
             if (!canPass(mapBo.getUnitMap().get(goalKey))) {
                 //有障碍物，停止
-                return false;
-            } else if (gridTankMap.containsKey(goalKey)) {
-                for (String tankId : gridTankMap.get(goalKey)) {
-                    //跳过自己
-                    if (tankId.equals(tankBo.getTankId())) {
-                        continue;
-                    }
+                return true;
+            } else {
+                return collideWithTanks(tankBo);
+            }
+        }
+    }
 
-                    TankBo target = tankMap.get(tankId);
-                    if (collide(tankBo, target)) {
-                        //和其他坦克相撞，停止
-                        return false;
-                    }
+    private boolean collideWithTanks(TankBo tankBo) {
+        String startKey = tankBo.getStartGridKey();
+        if (collideWithTanks(tankBo, startKey)) {
+            return true;
+        }
+
+        if (tankBo.getEndGridKey() != null && !tankBo.getEndGridKey().equals(startKey)) {
+            return collideWithTanks(tankBo, tankBo.getEndGridKey());
+        }
+        return false;
+    }
+
+    private boolean collideWithTanks(TankBo tankBo, String key) {
+        if (gridTankMap.containsKey(key)) {
+            for (String tankId : gridTankMap.get(key)) {
+                //跳过自己
+                if (tankId.equals(tankBo.getTankId())) {
+                    continue;
+                }
+
+                TankBo target = tankMap.get(tankId);
+                if (collide(tankBo, target)) {
+                    //和其他坦克相撞
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private boolean collide(TankBo tank1, TankBo tank2) {
@@ -320,6 +386,7 @@ public class StageRoom extends BaseStage {
 
     /**
      * 根据队伍获得类型，并且更新life
+     *
      * @param lifeMap
      * @return
      */
@@ -368,10 +435,6 @@ public class StageRoom extends BaseStage {
         return tankDtoList;
     }
 
-    private void setType(TankBo tankBo) {
-
-    }
-
     private void setStartPoint(TankBo tankBo) {
         String posStr;
         if (tankBo.getTeamType() == TeamType.RED) {
@@ -408,7 +471,6 @@ public class StageRoom extends BaseStage {
         if (!tankMap.containsKey(tankDto.getId())) {
             return null;
         }
-
 
         TankBo tankBo = tankMap.get(tankDto.getId());
 

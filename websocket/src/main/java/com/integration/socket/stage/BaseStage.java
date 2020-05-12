@@ -121,6 +121,10 @@ public abstract class BaseStage {
         messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId()));
     }
 
+    void sendTankToRoom(TankBo tankBo) {
+        sendMessageToRoom(Collections.singletonList(ItemDto.convert(tankBo)), MessageType.TANKS);
+    }
+
     void sendMessageToUser(Object object, MessageType messageType, String username) {
         messageService.sendMessage(new MessageDto(object, messageType, username, getRoomId()));
     }

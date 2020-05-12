@@ -7,6 +7,7 @@ import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.stage.BaseStage;
 import com.integration.socket.stage.StageMenu;
 import com.integration.socket.stage.StageRoom;
+import com.integration.socket.util.CommonUtil;
 import com.integration.util.model.CustomException;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -97,7 +98,7 @@ public class GameService {
             return;
         }
 
-        log.info("receive:{} from user:{}", messageDto.toString(), sendFrom);
+        log.info("receive:{} from user:{}", CommonUtil.ignoreNull(messageDto.toString()), sendFrom);
         switch (messageDto.getMessageType()) {
             case USER_MESSAGE:
                 processUserMessage(messageDto, sendFrom);
