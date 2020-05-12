@@ -16,7 +16,7 @@ import java.awt.Point;
 
 @Data
 @AllArgsConstructor
-public class AmmoBo {
+public class BulletBo {
     private String id;
     private String tankId;
     private TeamType teamType;

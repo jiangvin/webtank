@@ -49,7 +49,7 @@ public class TankBo {
         return tankBo;
     }
 
-    public AmmoBo fire() {
+    public BulletBo fire() {
         if (ammoCount <= 0) {
             return null;
         }
@@ -62,7 +62,7 @@ public class TankBo {
         --ammoCount;
         reloadTime = type.getAmmoReloadTime();
 
-        return new AmmoBo(
+        return new BulletBo(
                    CommonUtil.getId(),
                    this.tankId,
                    this.teamType,

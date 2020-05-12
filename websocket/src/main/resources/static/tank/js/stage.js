@@ -269,6 +269,9 @@ function Stage(params) {
     };
 
     const generalUpdateAttribute = function (thisStage, newAttr) {
+        if (newAttr.x === undefined || newAttr.y === undefined) {
+            return;
+        }
         thisStage.items.get(newAttr.id).x = newAttr.x;
         thisStage.items.get(newAttr.id).y = newAttr.y;
         thisStage.items.get(newAttr.id).orientation = newAttr.orientation;

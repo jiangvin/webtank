@@ -6,7 +6,7 @@ import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
-import com.integration.socket.model.bo.AmmoBo;
+import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.TankTypeBo;
@@ -97,8 +97,8 @@ public class StageRoom extends BaseStage {
             updateTank(tankBo);
         }
 
-        for (Map.Entry<String, AmmoBo> kv : ammoMap.entrySet()) {
-            updateAmmo(kv.getValue());
+        for (Map.Entry<String, BulletBo> kv : ammoMap.entrySet()) {
+            updateBullet(kv.getValue());
         }
         removeBullets();
     }
@@ -109,7 +109,7 @@ public class StageRoom extends BaseStage {
         }
 
         for (String bulletId : removeAmmoIds) {
-            AmmoBo bullet = ammoMap.get(bulletId);
+            BulletBo bullet = ammoMap.get(bulletId);
             removeToGridAmmoMap(bullet, bullet.getStartGridKey());
             removeToGridAmmoMap(bullet, bullet.getEndGridKey());
             ammoMap.remove(bulletId);
@@ -121,34 +121,34 @@ public class StageRoom extends BaseStage {
         removeAmmoIds.clear();
     }
 
-    private void updateAmmo(AmmoBo ammo) {
-        if (this.removeAmmoIds.contains(ammo.getId())) {
+    private void updateBullet(BulletBo bullet) {
+        if (this.removeAmmoIds.contains(bullet.getId())) {
             return;
         }
 
-        if (ammo.getLifeTime() == 0) {
-            addRemoveAmmo(ammo.getId());
+        if (bullet.getLifeTime() == 0) {
+            addRemoveAmmo(bullet.getId());
             return;
         }
 
-        if (collideWithAll(ammo)) {
+        if (collideWithAll(bullet)) {
             return;
         }
 
-        ammo.setLifeTime(ammo.getLifeTime() - 1);
-        ammo.run();
-        String newStart = ammo.generateStartGridKey();
-        if (newStart.equals(ammo.getStartGridKey())) {
+        bullet.setLifeTime(bullet.getLifeTime() - 1);
+        bullet.run();
+        String newStart = bullet.generateStartGridKey();
+        if (newStart.equals(bullet.getStartGridKey())) {
             return;
         }
 
-        removeToGridAmmoMap(ammo, ammo.getStartGridKey());
-        ammo.setStartGridKey(newStart);
+        removeToGridAmmoMap(bullet, bullet.getStartGridKey());
+        bullet.setStartGridKey(newStart);
 
         //newStartKey must equal endKey
-        String newEnd = ammo.generateEndGridKey();
-        ammo.setEndGridKey(newEnd);
-        insertToGridAmmoMap(ammo, newEnd);
+        String newEnd = bullet.generateEndGridKey();
+        bullet.setEndGridKey(newEnd);
+        insertToGridAmmoMap(bullet, newEnd);
     }
 
     /**
@@ -295,44 +295,44 @@ public class StageRoom extends BaseStage {
         }
     }
 
-    private boolean collideWithAll(AmmoBo ammo) {
-        int gridX = (int)(ammo.getX() / CommonUtil.UNIT_SIZE);
-        int gridY = (int)(ammo.getY() / CommonUtil.UNIT_SIZE);
+    private boolean collideWithAll(BulletBo bullet) {
+        int gridX = (int)(bullet.getX() / CommonUtil.UNIT_SIZE);
+        int gridY = (int)(bullet.getY() / CommonUtil.UNIT_SIZE);
         if (gridX < 0 || gridY < 0 || gridX >= mapBo.getMaxGridX() || gridY >= mapBo.getMaxGridY()) {
             //超出范围
-            addRemoveAmmo(ammo.getId());
+            addRemoveAmmo(bullet.getId());
             return true;
         }
 
         //和地图场景碰撞检测
         String goalKey = CommonUtil.generateKey(gridX, gridY);
         if (collide(mapBo.getUnitMap().get(goalKey))) {
-            addRemoveAmmo(ammo.getId());
-            processMapWhenCatchAmmo(goalKey, ammo);
+            addRemoveAmmo(bullet.getId());
+            processMapWhenCatchAmmo(goalKey, bullet);
             return true;
         }
 
         //和坦克碰撞检测
-        TankBo tankBo = collideWithTanks(ammo);
+        TankBo tankBo = collideWithTanks(bullet);
         if (tankBo != null) {
-            addRemoveAmmo(ammo.getId());
+            addRemoveAmmo(bullet.getId());
             removeTankFromTankId(tankBo.getTankId());
             return true;
         }
 
         //和子弹碰撞检测
-        return collideWithAmmo(ammo);
+        return collideWithAmmo(bullet);
     }
 
-    private TankBo collideWithTanks(AmmoBo ammoBo) {
-        TankBo tankBo = collideWithTanks(ammoBo, ammoBo.getStartGridKey());
+    private TankBo collideWithTanks(BulletBo bulletBo) {
+        TankBo tankBo = collideWithTanks(bulletBo, bulletBo.getStartGridKey());
         if (tankBo != null) {
             return tankBo;
         }
-        return collideWithTanks(ammoBo, ammoBo.getEndGridKey());
+        return collideWithTanks(bulletBo, bulletBo.getEndGridKey());
     }
 
-    private TankBo collideWithTanks(AmmoBo ammoBo, String key) {
+    private TankBo collideWithTanks(BulletBo bulletBo, String key) {
         if (!gridTankMap.containsKey(key)) {
             return null;
         }
@@ -340,10 +340,10 @@ public class StageRoom extends BaseStage {
         for (String tankId : gridTankMap.get(key)) {
             TankBo tankBo = tankMap.get(tankId);
             //队伍相同，不检测
-            if (tankBo.getTeamType() == ammoBo.getTeamType()) {
+            if (tankBo.getTeamType() == bulletBo.getTeamType()) {
                 continue;
             }
-            double distance = Point.distance(tankBo.getX(), tankBo.getY(), ammoBo.getX(), ammoBo.getY());
+            double distance = Point.distance(tankBo.getX(), tankBo.getY(), bulletBo.getX(), bulletBo.getY());
             double minDistance = (CommonUtil.AMMO_SIZE + CommonUtil.UNIT_SIZE) / 2.0;
             if (distance <= minDistance) {
                 return tankBo;
@@ -352,7 +352,7 @@ public class StageRoom extends BaseStage {
         return null;
     }
 
-    private boolean collideWithAmmo(AmmoBo ammo) {
+    private boolean collideWithAmmo(BulletBo ammo) {
         if (collideWithAmmo(ammo, ammo.getStartGridKey())) {
             return true;
         }
@@ -360,13 +360,13 @@ public class StageRoom extends BaseStage {
         return collideWithAmmo(ammo, ammo.getEndGridKey());
     }
 
-    private boolean collideWithAmmo(AmmoBo ammo, String key) {
+    private boolean collideWithAmmo(BulletBo ammo, String key) {
         for (String id : gridAmmoMap.get(key)) {
             if (id.equals(ammo.getId())) {
                 continue;
             }
 
-            AmmoBo target = ammoMap.get(id);
+            BulletBo target = ammoMap.get(id);
             double distance = Point.distance(ammo.getX(), ammo.getY(), target.getX(), target.getY());
             if (distance <= CommonUtil.AMMO_SIZE) {
                 addRemoveAmmo(ammo.getId());
@@ -377,15 +377,15 @@ public class StageRoom extends BaseStage {
         return false;
     }
 
-    private void processMapWhenCatchAmmo(String key, AmmoBo ammoBo) {
+    private void processMapWhenCatchAmmo(String key, BulletBo bulletBo) {
         MapUnitType mapUnitType = mapBo.getUnitMap().get(key);
 
-        if (mapUnitType == MapUnitType.IRON && ammoBo.isBrokenIron()) {
+        if (mapUnitType == MapUnitType.IRON && bulletBo.isBrokenIron()) {
             changeMap(key, MapUnitType.BROKEN_IRON);
             return;
         }
 
-        if (mapUnitType == MapUnitType.BROKEN_IRON && ammoBo.isBrokenIron()) {
+        if (mapUnitType == MapUnitType.BROKEN_IRON && bulletBo.isBrokenIron()) {
             removeMap(key);
             return;
         }
@@ -395,7 +395,7 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        if (mapUnitType == MapUnitType.BROKEN_IRON) {
+        if (mapUnitType == MapUnitType.BROKEN_BRICK) {
             removeMap(key);
         }
     }
@@ -474,7 +474,7 @@ public class StageRoom extends BaseStage {
         if (mapUnitType == null) {
             return false;
         }
-        return mapUnitType != MapUnitType.GRASS;
+        return mapUnitType != MapUnitType.GRASS && mapUnitType != MapUnitType.RIVER;
     }
 
     @Override
@@ -633,7 +633,7 @@ public class StageRoom extends BaseStage {
         }
     }
 
-    private void insertToGridAmmoMap(AmmoBo ammo, String key) {
+    private void insertToGridAmmoMap(BulletBo ammo, String key) {
         if (!gridAmmoMap.containsKey(key)) {
             gridAmmoMap.put(key, new ArrayList<>());
         }
@@ -642,7 +642,7 @@ public class StageRoom extends BaseStage {
         }
     }
 
-    private void removeToGridAmmoMap(AmmoBo ammo, String key) {
+    private void removeToGridAmmoMap(BulletBo ammo, String key) {
         if (!gridAmmoMap.containsKey(key)) {
             return;
         }
@@ -675,16 +675,16 @@ public class StageRoom extends BaseStage {
     }
 
     @Override
-    void processTankFireExtension(AmmoBo ammo) {
+    void processTankFireExtension(BulletBo ammo) {
         setAmmoStartAndEndGrid(ammo);
     }
 
-    private void setAmmoStartAndEndGrid(AmmoBo ammoBo) {
-        int gridX = (int)(ammoBo.getX() / CommonUtil.UNIT_SIZE);
-        int gridY = (int)(ammoBo.getY() / CommonUtil.UNIT_SIZE);
-        ammoBo.setStartGridKey(CommonUtil.generateKey(gridX, gridY));
-        insertToGridAmmoMap(ammoBo, ammoBo.getStartGridKey());
-        switch (ammoBo.getOrientationType()) {
+    private void setAmmoStartAndEndGrid(BulletBo bulletBo) {
+        int gridX = (int)(bulletBo.getX() / CommonUtil.UNIT_SIZE);
+        int gridY = (int)(bulletBo.getY() / CommonUtil.UNIT_SIZE);
+        bulletBo.setStartGridKey(CommonUtil.generateKey(gridX, gridY));
+        insertToGridAmmoMap(bulletBo, bulletBo.getStartGridKey());
+        switch (bulletBo.getOrientationType()) {
             case UP:
                 --gridY;
                 break;
@@ -700,7 +700,7 @@ public class StageRoom extends BaseStage {
             default:
                 break;
         }
-        ammoBo.setEndGridKey(CommonUtil.generateKey(gridX, gridY));
-        insertToGridAmmoMap(ammoBo, ammoBo.getEndGridKey());
+        bulletBo.setEndGridKey(CommonUtil.generateKey(gridX, gridY));
+        insertToGridAmmoMap(bulletBo, bulletBo.getEndGridKey());
     }
 }

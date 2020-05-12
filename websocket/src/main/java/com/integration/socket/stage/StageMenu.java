@@ -3,7 +3,7 @@ package com.integration.socket.stage;
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
-import com.integration.socket.model.bo.AmmoBo;
+import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.model.dto.MessageDto;
@@ -44,9 +44,9 @@ public class StageMenu extends BaseStage {
             }
         }
 
-        List<AmmoBo> removeBullets = new ArrayList<>();
-        for (Map.Entry<String, AmmoBo> kv : ammoMap.entrySet()) {
-            AmmoBo bullet = kv.getValue();
+        List<BulletBo> removeBullets = new ArrayList<>();
+        for (Map.Entry<String, BulletBo> kv : ammoMap.entrySet()) {
+            BulletBo bullet = kv.getValue();
             if (bullet.getLifeTime() == 0) {
                 removeBullets.add(bullet);
                 continue;
@@ -55,7 +55,7 @@ public class StageMenu extends BaseStage {
             bullet.setLifeTime(bullet.getLifeTime() - 1);
             bullet.run();
         }
-        for (AmmoBo bullet : removeBullets) {
+        for (BulletBo bullet : removeBullets) {
             ammoMap.remove(bullet.getId());
             if (tankMap.containsKey(bullet.getTankId())) {
                 tankMap.get(bullet.getTankId()).addAmmoCount();

@@ -28,7 +28,7 @@
                     thisStage.sortItems();
                     break;
                 case "REMOVE_MAP":
-                    thisStage.itemBomb(messageDto.message);
+                    thisStage.itemBomb({id: messageDto.message});
                     break;
                 default:
                     break;
@@ -78,7 +78,7 @@
         }
     };
 
-    const setResourceImage = function (item,typeId) {
+    const setResourceImage = function (item, typeId) {
         switch (typeId) {
             case "broken_brick":
                 item.image = Resource.getImage("brick");
@@ -104,7 +104,7 @@
         }
 
         const typeId = data.typeId.toLowerCase();
-        setResourceImage(item,typeId);
+        setResourceImage(item, typeId);
 
         const position = getPositionFromId(data.id);
         item.x = position.x;

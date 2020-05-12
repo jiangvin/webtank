@@ -1,7 +1,7 @@
 package com.integration.socket.stage;
 
 import com.integration.socket.model.MessageType;
-import com.integration.socket.model.bo.AmmoBo;
+import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.model.dto.MessageDto;
@@ -28,7 +28,7 @@ public abstract class BaseStage {
 
     ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
-    ConcurrentHashMap<String, AmmoBo> ammoMap = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, BulletBo> ammoMap = new ConcurrentHashMap<>();
 
     BaseStage(MessageService messageService) {
         this.messageService = messageService;
@@ -58,7 +58,7 @@ public abstract class BaseStage {
         }
 
         TankBo tankBo = tankMap.get(sendFrom);
-        AmmoBo ammo = tankBo.fire();
+        BulletBo ammo = tankBo.fire();
         if (ammo == null) {
             return;
         }
@@ -71,7 +71,7 @@ public abstract class BaseStage {
      * 拓展函数
      * @param ammo
      */
-    void processTankFireExtension(AmmoBo ammo) {
+    void processTankFireExtension(BulletBo ammo) {
 
     }
 
