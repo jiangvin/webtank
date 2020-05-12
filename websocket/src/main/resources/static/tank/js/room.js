@@ -123,19 +123,26 @@
         }
 
         if (stage.items.has(id)) {
-            return;
-        }
-
-        stage.createItem({
-            id: id,
-            z: 8,
-            draw: function (context) {
+            stage.items.get(id).draw = function (context) {
                 context.font = '14px Helvetica';
                 context.textAlign = 'left';
                 context.textBaseline = 'top';
                 context.fillStyle = '#ffffff';
                 context.fillText(tips, x, y);
             }
-        });
+        } else {
+            stage.createItem({
+                id: id,
+                z: 8,
+                draw: function (context) {
+                    context.font = '14px Helvetica';
+                    context.textAlign = 'left';
+                    context.textBaseline = 'top';
+                    context.fillStyle = '#ffffff';
+                    context.fillText(tips, x, y);
+                }
+            });
+        }
+
     }
 }
