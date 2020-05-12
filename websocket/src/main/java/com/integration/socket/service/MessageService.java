@@ -23,7 +23,7 @@ public class MessageService {
 
     private static final String QUEUE_PATH = "/queue/send";
 
-    private static final int MAX_LOG_LENGTH = 128;
+    private static final int MAX_LOG_LENGTH = 256;
 
     private final SimpMessagingTemplate simpMessagingTemplate;
 

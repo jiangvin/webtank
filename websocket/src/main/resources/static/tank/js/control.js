@@ -25,7 +25,7 @@
             bindTouchEvent(this.controlMode);
         } else {
             input.attr("placeholder", "请输入信息,回车发送");
-            bindKeyboardEvent();
+            bindKeyboardEvent(this.controlMode);
         }
 
     };
@@ -152,7 +152,8 @@
         });
     };
 
-    const bindKeyboardEvent = function () {
+    const bindKeyboardEvent = function (controlMode) {
+        controlMode.keyDownSet = new Set();
         window.addEventListener("keydown", function (e) {
             let event = null;
             switch (e.key) {
@@ -180,6 +181,9 @@
                     break;
             }
             if (event != null) {
+                if (event !== "FIRE" && !controlMode.keyDownSet.has(e.key)) {
+                    controlMode.keyDownSet.add(e.key);
+                }
                 Resource.getGame().controlEvent(event);
             }
         });
@@ -200,7 +204,11 @@
                     break;
             }
             if (event != null) {
-                Resource.getGame().controlEvent(event);
+                controlMode.keyDownSet.delete(e.key);
+                //所有方向按键都松开才算停止
+                if (controlMode.keyDownSet.size === 0) {
+                    Resource.getGame().controlEvent(event);
+                }
             }
         });
     };
