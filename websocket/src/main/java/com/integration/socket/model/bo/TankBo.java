@@ -7,6 +7,8 @@ import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.util.CommonUtil;
 import lombok.Data;
 
+import java.awt.Point;
+
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -29,8 +31,10 @@ public class TankBo {
     /**
      * 控制缓存
      */
-    private OrientationType controlOrientation = OrientationType.UP;
-    private ActionType controlAction = ActionType.STOP;
+    private OrientationType orientationCache = OrientationType.UP;
+    private ActionType actionCache = ActionType.STOP;
+    private String startGridKey;
+    private String endGridKey;
 
     public static TankBo convert(ItemDto tankDto) {
         TankBo tankBo = new TankBo();
@@ -69,7 +73,40 @@ public class TankBo {
                    this.orientationType);
     }
 
+    public void run(double speed) {
+        switch (getOrientationType()) {
+            case UP:
+                this.y -= speed;
+                break;
+            case DOWN:
+                this.y += speed;
+                break;
+            case LEFT:
+                this.x -= speed;
+                break;
+            case RIGHT:
+                this.x += speed;
+                break;
+            default:
+                break;
+        }
+    }
+
     public void addAmmoCount() {
         ++ammoCount;
+    }
+
+    /**
+     * 离网格中心的位置
+     * @return
+     */
+    public double distanceToEndGrid() {
+        Point endGrid = CommonUtil.getPointFromKey(this.endGridKey);
+        return endGrid.distance(this.x, this.y);
+    }
+
+    public boolean hasDifferentCache() {
+        return this.getActionType() != this.getActionCache()
+               || this.getOrientationType() != this.getOrientationCache();
     }
 }

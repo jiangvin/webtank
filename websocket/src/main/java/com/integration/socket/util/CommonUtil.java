@@ -23,4 +23,12 @@ public class CommonUtil {
                    Integer.parseInt(infos[0]) * UNIT_SIZE + UNIT_SIZE / 2,
                    Integer.parseInt(infos[1]) * UNIT_SIZE + UNIT_SIZE / 2);
     }
+
+    public static String generateKey(int x, int y) {
+        return String.format("%d_%d", x, y);
+    }
+
+    public static boolean betweenAnd(double target, int min, int max) {
+        return target >= min && target <= max;
+    }
 }

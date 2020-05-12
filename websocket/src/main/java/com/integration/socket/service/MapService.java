@@ -43,7 +43,7 @@ public class MapService {
 
     private static final String URL_PREFIX = "http://localhost/tank/map/";
 
-    public MapBo loadMap(@NonNull String mapId) {
+    MapBo loadMap(@NonNull String mapId) {
         if (!DEFAULT.equals(mapId)) {
             throw new CustomException("找不到地图资源!");
         }
@@ -59,8 +59,6 @@ public class MapService {
             @Cleanup BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
             String line;
             int readMapLineNumber = -1;
-            int mapWidth = 0;
-            int mapHeight = 0;
             while ((line = reader.readLine()) != null) {
                 ++lineIndex;
                 if (line.startsWith("#") || StringUtils.isEmpty(line)) {
@@ -71,10 +69,10 @@ public class MapService {
                     switch (kv.key) {
                         case MAP_SIZE:
                             String[] infos = kv.value.split("x");
-                            mapWidth = Integer.parseInt(infos[0]);
-                            mapHeight = Integer.parseInt(infos[1]);
-                            mapBo.setWidth(mapWidth * CommonUtil.UNIT_SIZE);
-                            mapBo.setHeight(mapHeight * CommonUtil.UNIT_SIZE);
+                            mapBo.setMaxGridX(Integer.parseInt(infos[0]));
+                            mapBo.setMaxGridY(Integer.parseInt(infos[1]));
+                            mapBo.setWidth(mapBo.getMaxGridX() * CommonUtil.UNIT_SIZE);
+                            mapBo.setHeight(mapBo.getMaxGridY() * CommonUtil.UNIT_SIZE);
                             break;
                         case PLAYERS:
                             mapBo.setPlayerLife(Integer.parseInt(kv.value));
@@ -92,15 +90,15 @@ public class MapService {
                             break;
                     }
                 } else {
-                    if (mapWidth <= 0 || mapHeight <= 0) {
+                    if (mapBo.getMaxGridX() <= 0 || mapBo.getMaxGridY() <= 0) {
                         throw new CustomException("地图宽高异常!");
                     }
                     char[] chars = line.toCharArray();
-                    for (int i = 0; i < mapWidth; ++i) {
+                    for (int i = 0; i < mapBo.getMaxGridX(); ++i) {
                         readMapContent(chars[i], i, readMapLineNumber, mapBo);
                     }
                     ++readMapLineNumber;
-                    if (readMapLineNumber >= mapHeight) {
+                    if (readMapLineNumber >= mapBo.getMaxGridY()) {
                         readMapLineNumber = -1;
                     }
                 }
@@ -127,28 +125,28 @@ public class MapService {
     private void readMapContent(char info, int x, int y, MapBo mapBo) {
         switch (info) {
             case '1':
-                mapBo.getUnitMap().put(generateKey(x, y), MapUnitType.BRICK);
+                mapBo.getUnitMap().put(CommonUtil.generateKey(x, y), MapUnitType.BRICK);
                 break;
             case '2':
-                mapBo.getUnitMap().put(generateKey(x, y), MapUnitType.IRON);
+                mapBo.getUnitMap().put(CommonUtil.generateKey(x, y), MapUnitType.IRON);
                 break;
             case '3':
-                mapBo.getUnitMap().put(generateKey(x, y), MapUnitType.RIVER);
+                mapBo.getUnitMap().put(CommonUtil.generateKey(x, y), MapUnitType.RIVER);
                 break;
             case '4':
-                mapBo.getUnitMap().put(generateKey(x, y), MapUnitType.GRASS);
+                mapBo.getUnitMap().put(CommonUtil.generateKey(x, y), MapUnitType.GRASS);
                 break;
             case 'K':
-                mapBo.getUnitMap().put(generateKey(x, y), MapUnitType.RED_KING);
+                mapBo.getUnitMap().put(CommonUtil.generateKey(x, y), MapUnitType.RED_KING);
                 break;
             case 'C':
-                mapBo.getUnitMap().put(generateKey(x, y), MapUnitType.BLUE_KING);
+                mapBo.getUnitMap().put(CommonUtil.generateKey(x, y), MapUnitType.BLUE_KING);
                 break;
             case 'P':
-                mapBo.getPlayerStartPoints().add(generateKey(x, y));
+                mapBo.getPlayerStartPoints().add(CommonUtil.generateKey(x, y));
                 break;
             case 'E':
-                mapBo.getComputerStartPoints().add(generateKey(x, y));
+                mapBo.getComputerStartPoints().add(CommonUtil.generateKey(x, y));
                 break;
             default:
                 break;
@@ -161,9 +159,5 @@ public class MapService {
             String[] kv = info.split(":");
             mapBo.getComputerLife().put(kv[0], Integer.parseInt(kv[1]));
         }
-    }
-
-    private String generateKey(int x, int y) {
-        return String.format("%d_%d", x, y);
     }
 }

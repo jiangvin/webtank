@@ -24,6 +24,10 @@ public class MapBo {
 
     private int height;
 
+    private int maxGridX;
+
+    private int maxGridY;
+
     private ConcurrentHashMap<String, Integer> computerLife = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<String, MapUnitType> unitMap = new ConcurrentHashMap<>();
