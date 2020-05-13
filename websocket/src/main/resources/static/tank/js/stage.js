@@ -19,7 +19,8 @@ function Stage(params) {
 
     //处理控制事件
     this.controlEvent = function (event) {
-        if (this.view.center !== null || !this.size.width || !this.size.height) {
+        if ((this.view.center !== null && Status.getStatusValue() !== Status.getStatusPause())
+            || !this.size.width || !this.size.height) {
             return;
         }
 
