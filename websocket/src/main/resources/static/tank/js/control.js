@@ -56,6 +56,8 @@
         this.controlMode.centerX = centerX;
         this.controlMode.centerY = centerY;
         this.controlMode.radius = radius;
+        this.controlMode.minRadius = radius / 2;
+        this.controlMode.maxRadius = radius * 1.5;
 
         this.controlMode.rightCenterX = rightCenterX - rightRadius * .4;
         this.controlMode.rightCenterY = rightCenterY + rightRadius * .6;
@@ -81,8 +83,8 @@
             }
 
             distance = Common.distance(x, y, controlMode.centerX, controlMode.centerY);
-            if (distance > controlMode.radius) {
-                //超过外圆，不做任何操作
+            if (distance > controlMode.radius || distance < controlMode.minRadius) {
+                //超过外圆或者低于最小控制距离，不做任何操作
                 return;
             }
 
@@ -91,29 +93,41 @@
             Resource.getGame().controlEvent(getControlEventFromTouch(controlMode));
         });
         window.addEventListener('touchend', function (e) {
-            //所有手指都离开屏幕才算坦克停止
-            if (e.touches.length === 0) {
+            let stop = true;
+            for (let i = 0; i < e.touches.length; ++i) {
+                const touchPoint = Common.getTouchPoint(e.touches[i]);
+                const distance = Common.distance(touchPoint.x, touchPoint.y, controlMode.centerX, controlMode.centerY);
+                //还有手指在方向盘上，不停止
+                if (distance >= controlMode.minRadius && distance <= controlMode.maxRadius) {
+                    stop = false;
+                    break;
+                }
+            }
+
+            if (stop) {
                 controlMode.touchX = null;
                 controlMode.touchY = null;
                 Resource.getGame().controlEvent("Stop");
             }
         });
         window.addEventListener('touchmove', function (e) {
-            //only support one point move
-            if (e.touches.length > 1) {
+            let touchMovePoint;
+            let distance;
+            for (let i = 0; i < e.touches.length; ++i) {
+                const touchPoint = Common.getTouchPoint(e.touches[i]);
+                distance = Common.distance(touchPoint.x, touchPoint.y, controlMode.centerX, controlMode.centerY);
+                if (distance >= controlMode.minRadius && distance <= controlMode.maxRadius) {
+                    touchMovePoint = touchPoint;
+                    break;
+                }
+            }
+            if (!touchMovePoint) {
                 return;
             }
-            const touchPoint = Common.getTouchPoint(e.touches[0]);
-            let x = touchPoint.x;
-            let y = touchPoint.y;
 
-            //如果是在在右圆move，直接取消,排除启动控制对摇杆的干扰
-            let distance = Common.distance(x, y, controlMode.rightCenterX, controlMode.rightCenterY);
-            if (distance <= controlMode.rightRadius) {
-                return;
-            }
+            let x = touchMovePoint.x;
+            let y = touchMovePoint.y;
 
-            distance = Common.distance(x, y, controlMode.centerX, controlMode.centerY);
             const radius = controlMode.radius;
             if (distance <= radius) {
                 controlMode.touchX = x;
@@ -155,7 +169,7 @@
     const bindKeyboardEvent = function (controlMode) {
         controlMode.keyDownSet = new Set();
         window.addEventListener("keydown", function (e) {
-            let event = null;
+            let event;
             switch (e.key) {
                 case "Up":
                 case "ArrowUp":
@@ -180,7 +194,7 @@
                 default:
                     break;
             }
-            if (event != null) {
+            if (event !== undefined) {
                 if (event !== "FIRE" && !controlMode.keyDownSet.has(e.key)) {
                     controlMode.keyDownSet.add(e.key);
                 }
