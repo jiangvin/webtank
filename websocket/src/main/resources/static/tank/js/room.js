@@ -4,6 +4,8 @@
         this.roomInfo = null;
     }
 
+    let centerSyncInfo = {};
+
     Room.getOrCreateRoom = function (roomInfo) {
         if (this.stage) {
             return this.stage;
@@ -35,9 +37,130 @@
             }
         };
 
+        //扩展控制
+        thisStage.updateCenter = function () {
+            updateCenter(thisStage);
+        };
+
         //显示基本信息
         const tipMessage = '房间号:' + roomInfo.roomId + " 地图:" + roomInfo.mapId + " [" + roomInfo.roomType + "]";
         drawTips(thisStage, tipMessage, 10, 6);
+    };
+
+
+    const updateCenter = function (stage) {
+        const center = stage.view.center;
+        if (!center) {
+            return;
+        }
+
+        const control = stage.control;
+        if (center.orientation === control.orientation && center.action === control.action) {
+            center.update();
+            return;
+        }
+
+        const size = Resource.getUnitSize();
+        const centerGrid = {
+            x: Math.floor(center.x / size),
+            y: Math.floor(center.y / size)
+        };
+        const destination = {
+            x: centerGrid.x * size + size / 2,
+            y: centerGrid.y * size + size / 2,
+        };
+
+        if (center.action === 1) {
+            switch (center.orientation) {
+                case 0:
+                    if (center.y <= destination.y) {
+                        destination.y -= size;
+                    }
+                    break;
+                case 1:
+                    if (center.y >= destination.y) {
+                        destination.y += size;
+                    }
+                    break;
+                case 2:
+                    if (center.x <= destination.x) {
+                        destination.x -= size;
+                    }
+                    break;
+                case 3:
+                    if (center.x >= destination.x) {
+                        destination.x += size;
+                    }
+                    break;
+            }
+        }
+
+        const distance = Common.distance(center.x, center.y, destination.x, destination.y);
+        const speed = center.speed;
+        if (distance > speed) {
+            center.update();
+            return;
+        }
+
+        //先移动到屏幕中心
+        center.speed = distance;
+        center.update();
+        center.speed = speed;
+        center.orientation = control.orientation;
+        center.action = control.action;
+
+        //再看新目的地
+        if (control.action === 1) {
+            const destinationGrid = {
+                x: Math.floor(destination.x / size),
+                y: Math.floor(destination.y / size)
+            };
+            switch (control.orientation) {
+                case 0:
+                    --destinationGrid.y;
+                    break;
+                case 1:
+                    ++destinationGrid.y;
+                    break;
+                case 2:
+                    --destinationGrid.x;
+                    break;
+                case 3:
+                    ++destinationGrid.x;
+                    break;
+            }
+            if (destinationGrid.x < 0 || destinationGrid.y < 0) {
+                center.action = 0;
+            } else {
+                const key = destinationGrid.x + "_" + destinationGrid.y;
+                if (stage.items.has(key) && stage.items.get(key).isBarrier) {
+                    center.action = 0;
+                }
+            }
+            sendSyncInfo(center);
+        }
+    };
+
+    const sendSyncInfo = function (center) {
+        if (center.x === centerSyncInfo.x
+            && center.y === centerSyncInfo.y
+            && center.orientation === centerSyncInfo.orientation
+            && center.action === centerSyncInfo.action) {
+            return;
+        }
+
+        Common.sendStompMessage({
+            orientation: center.orientation,
+            action: center.action,
+            x: center.x,
+            y: center.y
+        }, "UPDATE_TANK_CONTROL");
+
+        centerSyncInfo.x = center.x;
+        centerSyncInfo.y = center.y;
+        centerSyncInfo.orientation = center.orientation;
+        centerSyncInfo.action = center.action;
+
     };
 
     /**
@@ -78,6 +201,12 @@
         }
     };
 
+    const setBarrier = function (item, typeId) {
+        if (typeId !== "grass") {
+            item.isBarrier = true;
+        }
+    };
+
     const setResourceImage = function (item, typeId) {
         switch (typeId) {
             case "broken_brick":
@@ -105,7 +234,7 @@
 
         const typeId = data.typeId.toLowerCase();
         setResourceImage(item, typeId);
-
+        setBarrier(item, typeId);
         const position = getPositionFromId(data.id);
         item.x = position.x;
         item.y = position.y;

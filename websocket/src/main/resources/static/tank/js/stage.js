@@ -357,7 +357,13 @@ function Stage(params) {
         /**
          * @param tank {{typeId}}
          */
+        const center = thisStage.view.center;
         tanks.forEach(function (tank) {
+            //过滤自己
+            if (center && center.id === tank.id) {
+                return;
+            }
+
             if (thisStage.items.has(tank.id)) {
                 //已存在
                 generalUpdateAttribute(thisStage, tank);
