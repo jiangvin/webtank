@@ -38,6 +38,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StageRoom extends BaseStage {
 
+    private static final long SYNC_BULLET_TIME = 1000;
+
+    private static final long SYNC_TANK_TIME = 2000;
+
     public StageRoom(RoomDto roomDto, MapBo mapBo, MessageService messageService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
@@ -59,6 +63,16 @@ public class StageRoom extends BaseStage {
      * 要删除的子弹列表，每帧刷新
      */
     private List<String> removeBulletIds = new ArrayList<>();
+
+    /**
+     * 要更新的子弹列表，保证子弹每秒和客户端同步一次
+     */
+    private List<BulletBo> syncBulletList = new ArrayList<>();
+
+    /**
+     * 要更新的坦克列表，保证坦克每秒和客户端同步一次
+     */
+    private List<TankBo> syncTankList = new ArrayList<>();
 
     private MapBo mapBo;
 
@@ -108,12 +122,49 @@ public class StageRoom extends BaseStage {
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             updateTank(tankBo);
+            addSyncList(tankBo);
         }
+        syncTanks();
 
         for (Map.Entry<String, BulletBo> kv : bulletMap.entrySet()) {
             updateBullet(kv.getValue());
         }
         removeBullets();
+        syncBullets();
+    }
+
+    private void addSyncList(TankBo tankBo) {
+        if (System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TANK_TIME) {
+            syncTankList.add(tankBo);
+        }
+    }
+
+    private void syncTanks() {
+        if (syncTankList.isEmpty()) {
+            return;
+        }
+
+        List<ItemDto> dtoList = new ArrayList<>();
+        for (TankBo tank : syncTankList) {
+            dtoList.add(ItemDto.convert(tank));
+            tank.refreshSyncTime();
+        }
+        sendMessageToRoom(dtoList, MessageType.TANKS);
+        syncTankList.clear();
+    }
+
+    private void syncBullets() {
+        if (syncBulletList.isEmpty()) {
+            return;
+        }
+
+        List<ItemDto> dtoList = new ArrayList<>();
+        for (BulletBo bullet : syncBulletList) {
+            dtoList.add(ItemDto.convert(bullet));
+            bullet.refreshSyncTime();
+        }
+        sendMessageToRoom(dtoList, MessageType.BULLET);
+        syncBulletList.clear();
     }
 
     private void processEvent() {
@@ -179,6 +230,12 @@ public class StageRoom extends BaseStage {
 
         bullet.setLifeTime(bullet.getLifeTime() - 1);
         bullet.run();
+
+        //超过1秒没和客户端同步，需要同步一次
+        if (System.currentTimeMillis() - bullet.getLastSyncTime() > SYNC_BULLET_TIME) {
+            syncBulletList.add(bullet);
+        }
+
         String newStart = bullet.generateStartGridKey();
         if (newStart.equals(bullet.getStartGridKey())) {
             return;
@@ -695,7 +752,7 @@ public class StageRoom extends BaseStage {
         tankMap.put(tankBo.getTankId(), tankBo);
 
         //即将向所有人同步信息
-        sendMessageToRoom(getTankList(), MessageType.TANKS);
+        sendTankToRoom(tankBo);
     }
 
     /**

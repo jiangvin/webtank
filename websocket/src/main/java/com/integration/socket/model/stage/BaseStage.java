@@ -87,8 +87,7 @@ public abstract class BaseStage {
             return;
         }
 
-        ItemDto response = ItemDto.convert(updateBo);
-        sendMessageToRoom(Collections.singletonList(response), MessageType.TANKS);
+        sendTankToRoom(updateBo);
     }
 
     /**
@@ -130,6 +129,7 @@ public abstract class BaseStage {
     }
 
     void sendTankToRoom(TankBo tankBo) {
+        tankBo.refreshSyncTime();
         sendMessageToRoom(Collections.singletonList(ItemDto.convert(tankBo)), MessageType.TANKS);
     }
 

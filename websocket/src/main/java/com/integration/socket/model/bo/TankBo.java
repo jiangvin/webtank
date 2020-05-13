@@ -27,7 +27,7 @@ public class TankBo {
     private TankTypeBo type;
     private int reloadTime;
     private int ammoCount;
-
+    private long lastSyncTime = System.currentTimeMillis();
     /**
      * 控制缓存
      */
@@ -35,6 +35,10 @@ public class TankBo {
     private ActionType actionCache = ActionType.STOP;
     private String startGridKey;
     private String endGridKey;
+
+    public void refreshSyncTime() {
+        this.lastSyncTime = System.currentTimeMillis();
+    }
 
     public static TankBo convert(ItemDto tankDto) {
         TankBo tankBo = new TankBo();
@@ -72,7 +76,9 @@ public class TankBo {
                    this.getType().getAmmoSpeed(),
                    this.getType().isBrokenIron(),
                    this.orientationType,
-                   null, null);
+                   null,
+                   null,
+                   System.currentTimeMillis());
     }
 
     public void run(double speed) {

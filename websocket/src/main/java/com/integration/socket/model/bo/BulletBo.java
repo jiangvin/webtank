@@ -28,6 +28,11 @@ public class BulletBo {
     OrientationType orientationType;
     private String startGridKey;
     private String endGridKey;
+    private long lastSyncTime;
+
+    public void refreshSyncTime() {
+        this.lastSyncTime = System.currentTimeMillis();
+    }
 
     public void run() {
         switch (orientationType) {
