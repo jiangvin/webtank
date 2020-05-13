@@ -70,7 +70,7 @@ public class GameService {
         }
 
         onlineUserService.remove(username);
-        stage.remove(username);
+        stage.removeUser(username);
         sendUserStatusAndMessage(username, true);
 
         //房间为空时删除房间
@@ -156,10 +156,10 @@ public class GameService {
         StageRoom room = roomService.create(roomDto, userBo);
 
         //remove from old stage
-        currentStage(userBo).remove(userBo.getUsername());
+        currentStage(userBo).removeUser(userBo.getUsername());
 
         //add into new stage
-        room.add(userBo, roomDto.getJoinTeamType());
+        room.addUser(userBo, roomDto.getJoinTeamType());
     }
 
     private void joinRoom(MessageDto messageDto, String sendFrom) {
@@ -180,10 +180,10 @@ public class GameService {
         }
 
         //remove from old stage
-        currentStage(userBo).remove(userBo.getUsername());
+        currentStage(userBo).removeUser(userBo.getUsername());
 
         //add into new stage
-        roomService.get(roomDto.getRoomId()).add(userBo, roomDto.getJoinTeamType());
+        roomService.get(roomDto.getRoomId()).addUser(userBo, roomDto.getJoinTeamType());
     }
 
     @Scheduled(fixedRate = 17)

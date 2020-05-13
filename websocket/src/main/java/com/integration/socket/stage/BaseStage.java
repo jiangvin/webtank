@@ -108,7 +108,7 @@ public abstract class BaseStage {
      * 用户离开时触发
      * @param username 离开的用户名
      */
-    public abstract void remove(String username);
+    public abstract void removeUser(String username);
 
     /**
      * 获取用户列表

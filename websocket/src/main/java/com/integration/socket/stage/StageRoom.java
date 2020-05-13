@@ -488,7 +488,7 @@ public class StageRoom extends BaseStage {
     }
 
     @Override
-    public void remove(String username) {
+    public void removeUser(String username) {
         if (!userMap.containsKey(username)) {
             return;
         }
@@ -512,7 +512,7 @@ public class StageRoom extends BaseStage {
         sendMessageToRoom(message, MessageType.SYSTEM_MESSAGE);
     }
 
-    public void add(UserBo userBo, TeamType teamType) {
+    public void addUser(UserBo userBo, TeamType teamType) {
         userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
         userBo.setTeamType(teamType);

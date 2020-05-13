@@ -65,7 +65,7 @@ public class StageMenu extends BaseStage {
     }
 
     @Override
-    public void remove(String username) {
+    public void removeUser(String username) {
         removeTankFromTankId(username);
         sendMessageToRoom(getUserList(), MessageType.USERS);
     }
