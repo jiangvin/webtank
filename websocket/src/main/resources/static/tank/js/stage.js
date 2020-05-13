@@ -343,11 +343,13 @@ function Stage(params) {
         });
     };
     const createOrUpdateBullets = function (thisStage, ammoList) {
+        let addNew = false;
         ammoList.forEach(function (ammo) {
             if (thisStage.items.has(ammo.id)) {
                 //已存在
                 generalUpdateAttribute(thisStage, ammo);
             } else {
+                addNew = true;
                 thisStage.createAmmo({
                     id: ammo.id,
                     x: ammo.x,
@@ -357,5 +359,8 @@ function Stage(params) {
                 });
             }
         });
+        if (addNew) {
+            thisStage.sortItems();
+        }
     }
 }
