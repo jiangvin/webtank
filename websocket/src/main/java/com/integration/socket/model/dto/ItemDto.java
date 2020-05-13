@@ -1,7 +1,7 @@
 package com.integration.socket.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.integration.socket.model.bo.AmmoBo;
+import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
 import lombok.Data;
 
@@ -21,6 +21,7 @@ public class ItemDto {
     private Integer orientation;
     private Integer action;
     private Double speed;
+    private Integer teamId;
 
     public static ItemDto convert(TankBo tankBo) {
         ItemDto tankDto = new ItemDto();
@@ -31,16 +32,19 @@ public class ItemDto {
         tankDto.setOrientation(tankBo.getOrientationType().getValue());
         tankDto.setAction(tankBo.getActionType().getValue());
         tankDto.setSpeed(tankBo.getType().getSpeed());
+        if (tankBo.getTeamType() != null) {
+            tankDto.setTeamId(tankBo.getTeamType().getValue());
+        }
         return tankDto;
     }
 
-    public static ItemDto convert(AmmoBo ammoBo) {
+    public static ItemDto convert(BulletBo bulletBo) {
         ItemDto ammoDto = new ItemDto();
-        ammoDto.setId(ammoBo.getId());
-        ammoDto.setX(ammoBo.getX());
-        ammoDto.setY(ammoBo.getY());
-        ammoDto.setOrientation(ammoBo.getOrientationType().getValue());
-        ammoDto.setSpeed(ammoBo.getSpeed());
+        ammoDto.setId(bulletBo.getId());
+        ammoDto.setX(bulletBo.getX());
+        ammoDto.setY(bulletBo.getY());
+        ammoDto.setOrientation(bulletBo.getOrientationType().getValue());
+        ammoDto.setSpeed(bulletBo.getSpeed());
         return ammoDto;
     }
 }

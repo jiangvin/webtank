@@ -49,7 +49,7 @@
                     return;
                 }
 
-                Common.setTouch(isTouch);
+                Control.createControlMode(isTouch);
                 game.addConnectCheckEvent();
 
                 //隐藏输入框和按钮

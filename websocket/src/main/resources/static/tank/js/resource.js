@@ -7,6 +7,8 @@
         //id生成器
         this.id = null;
         this.stompClient = null;
+
+        this.username = null;
     }
 
     Resource.getImages = function () {
@@ -31,6 +33,11 @@
         //others
         loadAnimationImage("ammo", this.images, 4);
         loadAnimationImage("bomb", this.images, 6);
+        loadAnimationImage("brick", this.images, 2);
+        loadAnimationImage("iron", this.images, 2);
+        loadAnimationImage("river", this.images, 2);
+        loadAnimationImage("red_king", this.images, 2);
+        loadAnimationImage("blue_king", this.images, 2);
         return this.images;
     };
 
@@ -44,13 +51,16 @@
         images.set(imageId, img);
     };
 
-    Resource.getImage = function (id, widthPics, heightPics) {
+    Resource.getImage = function (id, type, widthPics, heightPics) {
         const images = Resource.getImages();
         if (!images.has(id)) {
             widthPics = widthPics ? widthPics : 1;
             heightPics = heightPics ? heightPics : 1;
             const img = document.createElement('img');
-            img.src = 'tank/image/' + id + ".png";
+            if (!type) {
+                type = "png";
+            }
+            img.src = 'tank/image/' + id + '.' + type;
             img.widthPics = widthPics;
             img.heightPics = heightPics;
             img.displayWidth = img.width / img.widthPics;
@@ -103,7 +113,40 @@
         this.stompClient = stompClient;
     };
 
+    Resource.getStompInfo = function () {
+        if (!Resource.getStompClient()) {
+            return null;
+        }
+        const stompInfo = {};
+        const url = Resource.getStompClient().ws._transport.url;
+        stompInfo.username = decodeURI(url.substring(url.lastIndexOf("=") + 1));
+
+        //get socket session id
+        const end = url.lastIndexOf("/");
+        const start = url.substring(0, end).lastIndexOf("/");
+        stompInfo.socketSessionId = url.substring(start + 1, end);
+        return stompInfo;
+    };
+
     Resource.getStompClient = function () {
         return this.stompClient;
     };
+
+    Resource.getUnitSize = function () {
+        return 36;
+    };
+
+    Resource.getUsername = function () {
+        if (this.username) {
+            return this.username;
+        }
+
+        const stompInfo = Resource.getStompInfo();
+        if (!stompInfo) {
+            return null;
+        }
+
+        this.username = stompInfo.username;
+        return this.username;
+    }
 }

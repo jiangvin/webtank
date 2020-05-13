@@ -1,6 +1,7 @@
 package com.integration.socket.service;
 
 import com.integration.socket.model.MessageType;
+import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
@@ -29,6 +30,9 @@ public class RoomService {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private MapService mapService;
 
     /**
      * 新增List来保证rooms的顺序
@@ -80,10 +84,11 @@ public class RoomService {
             throw new CustomException("队伍不能为空");
         }
 
-        //TODO CHECK MAP
+        //mapService会自动抛出异常，这里不用再做空判断
+        MapBo mapBo = mapService.loadMap(roomDto);
 
         log.info("room:{} will be created", roomDto);
-        StageRoom stageRoom = new StageRoom(roomDto, messageService);
+        StageRoom stageRoom = new StageRoom(roomDto, mapBo, messageService);
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
         messageService.sendMessage(new MessageDto(String.format("%s 创建了房间 %s", creator.getUsername(), roomDto.getRoomId()), MessageType.SYSTEM_MESSAGE));

@@ -3,7 +3,7 @@ package com.integration.socket.stage;
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
-import com.integration.socket.model.bo.AmmoBo;
+import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.model.dto.MessageDto;
@@ -12,7 +12,6 @@ import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -32,32 +31,8 @@ public class StageMenu extends BaseStage {
     }
 
     @Override
-    public void processMessage(MessageDto messageDto, String sendFrom) {
-        switch (messageDto.getMessageType()) {
-            case UPDATE_TANK_CONTROL:
-                processTankControl(messageDto, sendFrom);
-                break;
-            case UPDATE_TANK_FIRE:
-                processTankFire(sendFrom);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void processTankFire(String sendFrom) {
-        if (!tankMap.containsKey(sendFrom)) {
-            return;
-        }
-
-        TankBo tankBo = tankMap.get(sendFrom);
-        AmmoBo ammo = tankBo.fire();
-        if (ammo == null) {
-            return;
-        }
-        ammoBoList.add(ammo);
-
-        sendRoomMessage(Collections.singletonList(ItemDto.convert(ammo)), MessageType.AMMO);
+    public String getRoomId() {
+        return null;
     }
 
     @Override
@@ -65,65 +40,34 @@ public class StageMenu extends BaseStage {
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             if (tankBo.getActionType() == ActionType.RUN) {
-                double tankSpeed = tankBo.getType().getSpeed();
-                switch (tankBo.getOrientationType()) {
-                    case UP:
-                        tankBo.setY(tankBo.getY() - tankSpeed);
-                        break;
-                    case DOWN:
-                        tankBo.setY(tankBo.getY() + tankSpeed);
-                        break;
-                    case LEFT:
-                        tankBo.setX(tankBo.getX() - tankSpeed);
-                        break;
-                    case RIGHT:
-                        tankBo.setX(tankBo.getX() + tankSpeed);
-                        break;
-                    default:
-                        break;
-                }
+                tankBo.run(tankBo.getType().getSpeed());
             }
         }
 
-        //更新子弹设定
-        for (int i = 0; i < ammoBoList.size(); ++i) {
-            AmmoBo ammo = ammoBoList.get(i);
-            if (ammo.getLifeTime() == 0) {
-                ammoBoList.remove(i);
-                --i;
-
-                if (tankMap.containsKey(ammo.getTankId())) {
-                    tankMap.get(ammo.getTankId()).addAmmoCount();
-                }
-
-                sendRoomMessage(ItemDto.convert(ammo), MessageType.REMOVE_AMMO);
+        List<BulletBo> removeBullets = new ArrayList<>();
+        for (Map.Entry<String, BulletBo> kv : bulletMap.entrySet()) {
+            BulletBo bullet = kv.getValue();
+            if (bullet.getLifeTime() == 0) {
+                removeBullets.add(bullet);
                 continue;
             }
-            ammo.setLifeTime(ammo.getLifeTime() - 1);
 
-            switch (ammo.getOrientationType()) {
-                case UP:
-                    ammo.setY(ammo.getY() - ammo.getSpeed());
-                    break;
-                case DOWN:
-                    ammo.setY(ammo.getY() + ammo.getSpeed());
-                    break;
-                case LEFT:
-                    ammo.setX(ammo.getX() - ammo.getSpeed());
-                    break;
-                case RIGHT:
-                    ammo.setX(ammo.getX() + ammo.getSpeed());
-                    break;
-                default:
-                    break;
+            bullet.setLifeTime(bullet.getLifeTime() - 1);
+            bullet.run();
+        }
+        for (BulletBo bullet : removeBullets) {
+            bulletMap.remove(bullet.getId());
+            if (tankMap.containsKey(bullet.getTankId())) {
+                tankMap.get(bullet.getTankId()).addAmmoCount();
             }
+            sendMessageToRoom(ItemDto.convert(bullet), MessageType.REMOVE_BULLET);
         }
     }
 
     @Override
-    public void remove(String username) {
+    public void removeUser(String username) {
         removeTankFromTankId(username);
-        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
+        sendMessageToRoom(getUserList(), MessageType.USERS);
     }
 
     @Override
@@ -145,8 +89,8 @@ public class StageMenu extends BaseStage {
 
         if (tankMap.containsKey(tankDto.getId())) {
             //单独发送同步消息
-            messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, sendFrom));
-            messageService.sendMessage(new MessageDto(getTankList(), MessageType.TANKS, sendFrom));
+            sendMessageToUser(getUserList(), MessageType.USERS, sendFrom);
+            sendMessageToUser(getTankList(), MessageType.TANKS, sendFrom);
             return;
         }
 
@@ -154,11 +98,10 @@ public class StageMenu extends BaseStage {
         tankMap.put(tankBo.getTankId(), tankBo);
 
         //收到单位，即将向所有人同步单位信息
-        messageService.sendMessage(new MessageDto(getUserList(), MessageType.USERS, getUserList()));
-        MessageDto sendBack = new MessageDto(getTankList(), MessageType.TANKS, getUserList());
-        messageService.sendMessage(sendBack);
+        sendMessageToRoom(getUserList(), MessageType.USERS);
+        sendMessageToRoom(getTankList(), MessageType.TANKS);
 
-        messageService.sendReady(sendFrom);
+        sendReady(sendFrom);
     }
 
     private List<ItemDto> getTankList() {
@@ -169,24 +112,8 @@ public class StageMenu extends BaseStage {
         return tankDtoList;
     }
 
-    private void processTankControl(MessageDto messageDto, String sendFrom) {
-        ItemDto request = ObjectUtil.readValue(messageDto.getMessage(), ItemDto.class);
-        if (request == null) {
-            return;
-        }
-        request.setId(sendFrom);
-
-        TankBo updateBo = updateTankControl(request);
-        if (updateBo == null) {
-            log.warn("can not update tank:{}, ignore it...", sendFrom);
-            return;
-        }
-
-        ItemDto response = ItemDto.convert(updateBo);
-        sendRoomMessage(Collections.singletonList(response), MessageType.TANKS);
-    }
-
-    private TankBo updateTankControl(ItemDto tankDto) {
+    @Override
+    TankBo updateTankControl(ItemDto tankDto) {
         if (!tankMap.containsKey(tankDto.getId())) {
             return null;
         }

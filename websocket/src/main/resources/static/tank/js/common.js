@@ -54,217 +54,16 @@ Common.windowChange = function () {
     }
     let wrapper = document.getElementById("wrapper");
     wrapper.style.cssText = style;
-    Common.generateTouchInfo(height > width);
+    Control.generateTouchModeInfo(height > width);
 };
 
 //操控相关
-let _touchControl = {"touch": null};
-Common.generateTouchInfo = function (portrait) {
-    let centerX = Common.width() / 4 / 2;
-    let centerY = Common.height() / 2 / 2;
-    let radius = centerX > centerY ? centerY : centerX;
-    centerY *= 3;
-
-    let rightCenterX = centerX * 7;
-    let rightCenterY = centerY;
-    let rightRadius = radius * .5;
-
-    if (centerX - radius < 20) {
-        rightCenterX -= 20;
-        centerX += 20;
-    }
-    if (Common.height() - centerY - radius < 20) {
-        rightCenterY -= 20;
-        centerY -= 20;
-    }
-
-    _touchControl.centerX = centerX;
-    _touchControl.centerY = centerY;
-    _touchControl.radius = radius;
-
-    _touchControl.rightCenterX = rightCenterX - rightRadius * .4;
-    _touchControl.rightCenterY = rightCenterY + rightRadius * .6;
-    _touchControl.rightRadius = rightRadius;
-
-    _touchControl.hornCenterX = rightCenterX + rightRadius;
-    _touchControl.hornCenterY = rightCenterY - rightRadius * .8;
-    _touchControl.hornRadius = rightRadius * .7;
-
-    _touchControl.portrait = portrait;
-};
-Common.setTouch = function (touch) {
-    if (_touchControl.touch !== null) {
-        return;
-    }
-    _touchControl.touch = touch;
-    const input = $('#input');
-    if (_touchControl.touch) {
-        input.attr("placeholder", "请输入信息,点击喇叭发送");
-        Common.bindTouch();
-    } else {
-        input.attr("placeholder", "请输入信息,回车发送");
-        Common.bindKeyboard();
-    }
-
-};
-Common.getTouchInfo = function () {
-    return _touchControl;
-};
-Common.getTouch = function () {
-    return _touchControl.touch;
-};
-Common.bindKeyboard = function () {
-    window.addEventListener("keydown", function (e) {
-        let event = null;
-        switch (e.key) {
-            case "Up":
-            case "ArrowUp":
-                event = "Up";
-                break;
-            case "Down":
-            case "ArrowDown":
-                event = "Down";
-                break;
-            case "Left":
-            case "ArrowLeft":
-                event = "Left";
-                break;
-            case "Right":
-            case "ArrowRight":
-                event = "Right";
-                break;
-            case " ":
-            case "Spacebar":
-                event = "FIRE";
-                break;
-            default:
-                break;
-        }
-        if (event != null) {
-            Resource.getGame().controlEvent(event);
-        }
-    });
-    window.addEventListener('keyup', function (e) {
-        let event = null;
-        switch (e.key) {
-            case "ArrowUp":
-            case "ArrowDown":
-            case "ArrowLeft":
-            case "ArrowRight":
-            case "Up":
-            case "Down":
-            case "Left":
-            case "Right":
-                event = "Stop";
-                break;
-            default:
-                break;
-        }
-        if (event != null) {
-            Resource.getGame().controlEvent(event);
-        }
-    });
-};
-Common.bindTouch = function () {
-    window.addEventListener('touchstart', function (e) {
-        const touchPoint = Common.getTouchPoint(e.touches[e.touches.length - 1]);
-        let x = touchPoint.x;
-        let y = touchPoint.y;
-
-        let distance = Common.distance(x, y, _touchControl.rightCenterX, _touchControl.rightCenterY);
-        if (distance < _touchControl.rightRadius) {
-            Resource.getGame().controlEvent("FIRE");
-            return;
-        }
-
-        distance = Common.distance(x, y, _touchControl.centerX, _touchControl.centerY);
-        if (distance > _touchControl.radius) {
-            //超过外圆，不做任何操作
-            return;
-        }
-
-        _touchControl.touchX = x;
-        _touchControl.touchY = y;
-        Resource.getGame().controlEvent(Common.getEventFromTouch());
-    });
-    window.addEventListener('touchend', function (e) {
-        //所有手指都离开屏幕才算坦克停止
-        if (e.touches.length === 0) {
-            _touchControl.touchX = null;
-            _touchControl.touchY = null;
-            Resource.getGame().controlEvent("Stop");
-        }
-    });
-    window.addEventListener('touchmove', function (e) {
-        //only support one point move
-        if (e.touches.length > 1) {
-            return;
-        }
-        const touchPoint = Common.getTouchPoint(e.touches[0]);
-        let x = touchPoint.x;
-        let y = touchPoint.y;
-
-        const distance = Common.distance(x, y, _touchControl.centerX, _touchControl.centerY);
-        const radius = _touchControl.radius;
-        if (distance <= radius) {
-            _touchControl.touchX = x;
-            _touchControl.touchY = y;
-        } else {
-            if (_touchControl.touchX == null || _touchControl.touchY == null) {
-                //从头到尾都超过外圆，不做任何操作
-                return;
-            }
-            //开始计算圆外的点和圆心连线的交点
-            //先将圆心移动到坐标原点
-            x = x - _touchControl.centerX;
-            y = y - _touchControl.centerY;
-
-            if (x === 0) {
-                //x在坐标轴上，特殊处理，不能当公式分母
-                y = y >= 0 ? radius : -radius;
-            } else {
-                let newX;
-                let newY;
-                newX = Math.sqrt(radius * radius * x * x / (x * x + y * y));
-                newY = y * newX / x;
-                if (x < 0) {
-                    newX = -newX;
-                    newY = -newY;
-                }
-                x = newX;
-                y = newY;
-            }
-
-            //再将圆心移回去
-            _touchControl.touchX = x + _touchControl.centerX;
-            _touchControl.touchY = y + _touchControl.centerY;
-        }
-        Resource.getGame().controlEvent(Common.getEventFromTouch());
-    });
-};
-Common.getEventFromTouch = function () {
-    let xLength = Math.abs(_touchControl.touchX - _touchControl.centerX);
-    let yLength = Math.abs(_touchControl.touchY - _touchControl.centerY);
-    if (xLength > yLength) {
-        if (_touchControl.touchX < _touchControl.centerX) {
-            return "Left";
-        } else {
-            return "Right";
-        }
-    } else {
-        if (_touchControl.touchY < _touchControl.centerY) {
-            return "Up";
-        } else {
-            return "Down";
-        }
-    }
-};
 Common.getTouchPoint = function (eventPoint) {
     let x = eventPoint.clientX;
     let y = eventPoint.clientY;
 
     const touchPoint = {};
-    if (_touchControl.portrait) {
+    if (Control.getControlMode().portrait) {
         //竖屏
         touchPoint.x = y;
         touchPoint.y = Common.height() - x;
@@ -325,7 +124,7 @@ Common.inputBindMessageControl = function () {
     _bindMessageControl = true;
     Common.inputBindKeyboard();
 
-    if (Common.getTouch() === true) {
+    if (Control.getControlMode().touch === true) {
         Common.inputBindTouch();
     }
 };
@@ -342,8 +141,9 @@ Common.inputBindTouch = function () {
         let x = touchPoint.x;
         let y = touchPoint.y;
 
-        const distance = Common.distance(x, y, _touchControl.hornCenterX, _touchControl.hornCenterY);
-        if (distance > _touchControl.hornRadius) {
+        const controlMode = Control.getControlMode();
+        const distance = Common.distance(x, y, controlMode.hornCenterX, controlMode.hornCenterY);
+        if (distance > controlMode.hornRadius) {
             //超过外圆，不做任何操作
             return;
         }
@@ -379,17 +179,6 @@ Common.getStompStatus = function () {
         return false;
     }
     return stompClient.connected;
-};
-Common.getStompInfo = function () {
-    const stompInfo = {};
-    const url = Resource.getStompClient().ws._transport.url;
-    stompInfo.username = decodeURI(url.substring(url.lastIndexOf("=") + 1));
-
-    //get socket session id
-    const end = url.lastIndexOf("/");
-    const start = url.substring(0, end).lastIndexOf("/");
-    stompInfo.socketSessionId = url.substring(start + 1, end);
-    return stompInfo;
 };
 Common.stompConnect = function (name, callback) {
     const socket = new SockJS(encodeURI('/websocket-simple?name=' + name));

@@ -19,6 +19,10 @@ public enum MessageType {
      */
     SYSTEM_MESSAGE,
     /**
+     * 错误信息
+     */
+    ERROR_MESSAGE,
+    /**
      * 数据传输完毕，通知前端可以解除暂停
      */
     SERVER_READY,
@@ -35,13 +39,21 @@ public enum MessageType {
      */
     REMOVE_TANK,
     /**
-     * 同步ammo信息
+     * 同步bullet信息
      */
-    AMMO,
+    BULLET,
     /**
-     * 删除AMMO
+     * 删除bullet
      */
-    REMOVE_AMMO,
+    REMOVE_BULLET,
+    /**
+     * 同步地图信息
+     */
+    MAP,
+    /**
+     * 删除地图信息
+     */
+    REMOVE_MAP,
 
 
     /**

@@ -7,6 +7,7 @@ import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.stage.BaseStage;
 import com.integration.socket.stage.StageMenu;
 import com.integration.socket.stage.StageRoom;
+import com.integration.socket.util.CommonUtil;
 import com.integration.util.model.CustomException;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +70,7 @@ public class GameService {
         }
 
         onlineUserService.remove(username);
-        stage.remove(username);
+        stage.removeUser(username);
         sendUserStatusAndMessage(username, true);
 
         //房间为空时删除房间
@@ -97,7 +98,7 @@ public class GameService {
             return;
         }
 
-        log.info("receive:{} from user:{}", messageDto.toString(), sendFrom);
+        log.info("receive:{} from user:{}", CommonUtil.ignoreNull(messageDto.toString()), sendFrom);
         switch (messageDto.getMessageType()) {
             case USER_MESSAGE:
                 processUserMessage(messageDto, sendFrom);
@@ -155,10 +156,10 @@ public class GameService {
         StageRoom room = roomService.create(roomDto, userBo);
 
         //remove from old stage
-        currentStage(userBo).remove(userBo.getUsername());
+        currentStage(userBo).removeUser(userBo.getUsername());
 
         //add into new stage
-        room.add(userBo, roomDto.getJoinTeamType());
+        room.addUser(userBo, roomDto.getJoinTeamType());
     }
 
     private void joinRoom(MessageDto messageDto, String sendFrom) {
@@ -179,13 +180,13 @@ public class GameService {
         }
 
         //remove from old stage
-        currentStage(userBo).remove(userBo.getUsername());
+        currentStage(userBo).removeUser(userBo.getUsername());
 
         //add into new stage
-        roomService.get(roomDto.getRoomId()).add(userBo, roomDto.getJoinTeamType());
+        roomService.get(roomDto.getRoomId()).addUser(userBo, roomDto.getJoinTeamType());
     }
 
-    @Scheduled(fixedDelay = 17)
+    @Scheduled(fixedRate = 17)
     public void update() {
         menu.update();
         roomService.update();

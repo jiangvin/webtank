@@ -15,7 +15,8 @@ function Game() {
     const _context = Common.getContext();
 
     //帧率相关
-    let _framesPerSecond = 60;
+    const frontFrame = new Frame();
+    const backendFrame = new Frame();
 
     //延迟相关
     let _netDelay = 0;
@@ -55,6 +56,9 @@ function Game() {
                 break;
             case "SYSTEM_MESSAGE":
                 Common.addMessage(messageDto.message, "#FF0");
+                break;
+            case "ERROR_MESSAGE":
+                Common.addMessage(messageDto.message, "#F00");
                 break;
             case "SERVER_READY":
                 serverReady();
@@ -119,12 +123,10 @@ function Game() {
 
     //动画相关
     this.start = function () {
-        let totalFrames = 0;
-        let lastFrames = 0;
-        let lastDate = Date.now();
 
         //开启运算
         _updateHandler = setInterval(function () {
+            backendFrame.calculate();
             switch (Status.getStatusValue()) {
                 case Status.getStatusClose():
                     //游戏结束
@@ -146,14 +148,7 @@ function Game() {
         //开启渲染
         const step = function () {
 
-            //计算帧数
-            ++totalFrames;
-            const offset = Date.now() - lastDate;
-            if (offset >= 1000) {
-                _framesPerSecond = totalFrames - lastFrames;
-                lastFrames = totalFrames;
-                lastDate += offset;
-            }
+            frontFrame.calculate();
 
             //开始绘制画面
             _context.clearRect(0, 0, _canvas.width, _canvas.height);
@@ -184,7 +179,6 @@ function Game() {
     //布景相关
     this.createStage = function (options) {
         const stage = new Stage(options);
-        stage.index = _stages.length;
         _stages.push(stage);
         return stage;
     };
@@ -291,12 +285,12 @@ function Game() {
         context.font = '14px Helvetica';
         context.textAlign = 'right';
         context.textBaseline = 'bottom';
-        context.fillStyle = '#AAA';
+        context.fillStyle = '#ffffff';
         context.fillText('© Created by Vin (WX: Jiang_Vin)', Common.width() - 12, Common.height() - 5);
 
         //帧率信息
         context.textAlign = 'left';
-        let text = '帧率:' + _framesPerSecond;
+        let text = '帧率:' + frontFrame.frames + '-' + backendFrame.frames;
         if (_netDelay > 0) {
             text += ' / 延迟:' + _netDelay + 'ms';
         }
@@ -325,22 +319,22 @@ function Game() {
     };
     //触屏提示圆
     this.drawTouchCycle = function (context) {
-        const touchInfo = Common.getTouchInfo();
+        const touchInfo = Control.getControlMode();
 
         if (touchInfo.touch !== true) {
             return;
         }
 
         //外圆
-        context.globalAlpha = 0.1;
+        context.globalAlpha = 0.2;
         context.fillStyle = '#FFF';
         context.beginPath();
         context.arc(touchInfo.centerX, touchInfo.centerY, touchInfo.radius, 0, 2 * Math.PI);
         context.closePath();
         context.fill();
 
-        let x = _touchControl.touchX ? _touchControl.touchX : _touchControl.centerX;
-        let y = _touchControl.touchY ? _touchControl.touchY : _touchControl.centerY;
+        let x = touchInfo.touchX ? touchInfo.touchX : touchInfo.centerX;
+        let y = touchInfo.touchY ? touchInfo.touchY : touchInfo.centerY;
 
         //内圆
         context.beginPath();
@@ -364,7 +358,7 @@ function Game() {
 
         //图层
         context.globalAlpha = 0.5;
-        let image = Resource.getImage("ammo-icon");
+        let image = Resource.getImage("ammo_icon");
         let size = touchInfo.rightRadius * 1.5;
         context.drawImage(image,
             0, 0,
@@ -372,7 +366,7 @@ function Game() {
             touchInfo.rightCenterX - size / 2, touchInfo.rightCenterY - size / 2,
             size, size);
 
-        image = Resource.getImage("horn-icon");
+        image = Resource.getImage("horn_icon");
         size = touchInfo.hornRadius * 2;
         context.drawImage(image,
             0, 0,

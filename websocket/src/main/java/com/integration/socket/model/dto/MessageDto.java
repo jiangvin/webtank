@@ -25,21 +25,35 @@ public class MessageDto {
 
     private List<String> sendToList;
 
+    /**
+     * 消息房间号，防止场景切换的中途带来的消息干扰
+     */
+    private String roomId;
+
     public MessageDto(Object message, MessageType messageType) {
-        init(message, messageType, null);
+        init(message, messageType, null, null);
     }
 
     public MessageDto(Object message, MessageType messageType, String sendTo) {
-        init(message, messageType, Collections.singletonList(sendTo));
+        init(message, messageType, Collections.singletonList(sendTo), null);
+    }
+
+    public MessageDto(Object message, MessageType messageType, String sendTo, String roomId) {
+        init(message, messageType, Collections.singletonList(sendTo), roomId);
     }
 
     public MessageDto(Object message, MessageType messageType, List<String> sendToList) {
-        init(message, messageType, sendToList);
+        init(message, messageType, sendToList, null);
     }
 
-    private void init(Object message, MessageType messageType, List<String> sendToList) {
+    public MessageDto(Object message, MessageType messageType, List<String> sendToList, String roomId) {
+        init(message, messageType, sendToList, roomId);
+    }
+
+    private void init(Object message, MessageType messageType, List<String> sendToList, String roomId) {
         this.message = message;
         this.messageType = messageType;
         this.sendToList = sendToList;
+        this.roomId = roomId;
     }
 }

@@ -1,5 +1,9 @@
 package com.integration.socket.util;
 
+
+import java.awt.Point;
+import java.sql.Statement;
+
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -10,5 +14,30 @@ public class CommonUtil {
 
     public static String getId() {
         return "generatedServerId=" + id++;
+    }
+
+    public static final int UNIT_SIZE = 36;
+
+    public static final int AMMO_SIZE = 14;
+
+    public static Point getPointFromKey(String key) {
+        String[] infos = key.split("_");
+        return new Point(
+                   Integer.parseInt(infos[0]) * UNIT_SIZE + UNIT_SIZE / 2,
+                   Integer.parseInt(infos[1]) * UNIT_SIZE + UNIT_SIZE / 2);
+    }
+
+    public static String generateKey(int x, int y) {
+        return String.format("%d_%d", x, y);
+    }
+
+    public static boolean betweenAnd(double target, int min, int max) {
+        return target >= min && target <= max;
+    }
+
+    public static String ignoreNull(String lombokToString) {
+        return lombokToString != null ? lombokToString
+               .replaceAll("(?<=(, |\\())[^\\s(]+?=null(?:, )?", "")
+               .replaceFirst(", \\)$", ")") : null;
     }
 }

@@ -1,7 +1,9 @@
 package com.integration.socket.controller;
 
+import com.integration.socket.model.MessageType;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.service.GameService;
+import com.integration.socket.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,9 @@ public class MainController {
 
     @Autowired
     private GameService gameService;
+
+    @Autowired
+    private MessageService messageService;
 
     @GetMapping("/")
     public ModelAndView tankGame() {
@@ -56,6 +61,11 @@ public class MainController {
         }
 
         String username = accessor.getUser().getName();
-        gameService.receiveMessage(messageDto, username);
+        try {
+            gameService.receiveMessage(messageDto, username);
+        } catch (Exception e) {
+            log.error("receive stomp message error:", e);
+            messageService.sendMessage(new MessageDto(e.getMessage(), MessageType.ERROR_MESSAGE, username));
+        }
     }
 }

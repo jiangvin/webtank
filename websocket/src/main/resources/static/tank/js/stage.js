@@ -1,55 +1,128 @@
 function Stage(params) {
+
+    const thisStage = this;
+
     this.params = params || {};
     this.settings = {
-        index: 0,                        //布景索引
-        items: new Map(),				 //对象队列
+        showTeam: false,                    //显示团队标志
+        id: null,                           //布景id
+        items: new Map(),				    //对象队列
+        view: {x: 0, y: 0, center: null},   //视野
+        size: {width: 0, height: 0},        //场景大小
+        backgroundImage: null,              //背景图
 
         //处理控制事件
         controlEvent: function () {
-        }
+        },
 
+        //拓展函数
+        receiveStompMessageExtension: function () {
+        }
     };
     Common.extend(this, this.settings, this.params);
 
     this.receiveStompMessage = function (messageDto) {
-        const thisStage = this;
+        //id校验，确保消息正确
+        if (!this.id) {
+            if (messageDto.roomId) {
+                return;
+            }
+        } else {
+            if (!messageDto.roomId || this.id !== messageDto.roomId) {
+                return;
+            }
+        }
+
         switch (messageDto.messageType) {
             case "TANKS":
                 createOrUpdateTanks(thisStage, messageDto.message);
+                this.sortItems();
                 break;
             case "REMOVE_TANK":
                 this.itemBomb(messageDto.message);
                 break;
-            case "AMMO":
-                createOrUpdateAmmoList(thisStage, messageDto.message);
+            case "BULLET":
+                createOrUpdateBullets(thisStage, messageDto.message);
+                this.sortItems();
                 break;
-            case "REMOVE_AMMO":
-                this.itemBomb(messageDto.message,0.5);
+            case "REMOVE_BULLET":
+                this.itemBomb(messageDto.message, 0.5);
                 break;
-
+            default:
+                this.receiveStompMessageExtension(messageDto);
+                break;
         }
     };
 
-    this.draw = function (context) {
-        const itemsWithZ = [];
-        this.items.forEach(function (item) {
-            if (item.z === 0) {
-                item.draw(context);
-            } else {
-                if (!itemsWithZ[item.z]) {
-                    itemsWithZ[item.z] = [];
-                }
-                const newIndex = itemsWithZ[item.z].length;
-                itemsWithZ[item.z][newIndex] = item;
-            }
-        });
+    this.drawBackground = function (context) {
+        if (!this.size.width || !this.size.height || !this.backgroundImage) {
+            return;
+        }
 
-        //draw item with z
-        itemsWithZ.forEach(function (items) {
-            items.forEach(function (item) {
-                item.draw(context);
-            })
-        })
+        //TODO - 平铺背景
+        const start = this.convertToScreenPoint({x: 0, y: 0});
+        context.drawImage(this.backgroundImage,
+            0, 0,
+            this.backgroundImage.width, this.backgroundImage.height,
+            start.x, start.y,
+            this.size.width, this.size.height);
+    };
+
+    //真实坐标转换屏幕坐标
+    this.convertToScreenPoint = function (point) {
+        const screenPoint = {};
+        screenPoint.x = point.x - this.view.x;
+        screenPoint.y = point.y - this.view.y;
+        return screenPoint;
+    };
+
+    this.draw = function (context) {
+        this.updateView();
+        this.drawBackground(context);
+        this.items.forEach(function (item) {
+            item.draw(context);
+        });
+    };
+
+    this.updateView = function () {
+        if (!this.size.width || !this.size.height) {
+            return;
+        }
+
+        let updateX = false;
+        let updateY = false;
+        if (this.size.width < Common.width()) {
+            updateX = true;
+            this.view.x = (this.size.width - Common.width()) / 2;
+        }
+        if (this.size.height < Common.height()) {
+            updateY = true;
+            this.view.y = (this.size.height - Common.height()) / 2;
+        }
+
+        if ((updateX && updateY) || !this.view.center) {
+            return;
+        }
+
+        if (!updateX) {
+            this.view.x = this.view.center.x - Common.width() / 2;
+            if (this.view.x < 0) {
+                this.view.x = 0;
+            }
+            if (this.view.x > this.size.width - Common.width()) {
+                this.view.x = this.size.width - Common.width()
+            }
+        }
+
+        if (!updateY) {
+            this.view.y = this.view.center.y - Common.height() / 2;
+            if (this.view.y < 0) {
+                this.view.y = 0;
+            }
+            if (this.view.y > this.size.height - Common.height()) {
+                this.view.y = this.size.height - Common.height()
+            }
+        }
     };
 
     this.update = function () {
@@ -60,9 +133,37 @@ function Stage(params) {
 
     this.createItem = function (options) {
         const item = new Item(options);
+        item.stage = this;
         this.items.set(item.id, item);
         return item;
     };
+
+    this.sortItems = function () {
+        //支援ES5的兼容写法
+        const array = [];
+        this.items.forEach(function (item) {
+            array[array.length] = item;
+        });
+
+        array.sort(function (item1, item2) {
+            if (item1.z !== item2.z) {
+                return item1.z - item2.z;
+            }
+
+            if (item1.y !== item2.y) {
+                return item1.y - item2.y;
+            }
+
+            return item1.x - item2.x;
+        });
+
+        this.items = new Map();
+        const map = this.items;
+        array.forEach(function (item) {
+            map.set(item.id, item);
+        })
+    };
+
     this.removeItem = function (id) {
         if (this.items.has(id)) {
             this.items.delete(id);
@@ -85,23 +186,30 @@ function Stage(params) {
 
     this.createTank = function (options) {
         const item = this.createItem(options);
-        item.z = 2;
         item.update = function () {
             generalUpdateEvent(item);
         };
+
+        //set center
+        if (!this.view.center && Resource.getUsername()) {
+            if (item.id === Resource.getUsername()) {
+                this.view.center = item;
+            }
+        }
+
         return item;
     };
     this.createAmmo = function (options) {
         const item = this.createItem(options);
         item.action = 1;
-        item.z = 1;
+        item.z = -2;
         item.image = Resource.getImage("ammo");
         item.update = function () {
             generalUpdateEvent(item);
         };
         return item;
     };
-    this.itemBomb = function (data,bombScale) {
+    this.itemBomb = function (data, bombScale) {
         if (bombScale === undefined) {
             bombScale = 1;
         }
@@ -116,7 +224,6 @@ function Stage(params) {
         item.orientation = 0;
         item.scale = bombScale;
         item.image = Resource.getImage("bomb");
-        const thisStage = this;
         item.play = new Play(
             6,
             3,
@@ -125,6 +232,15 @@ function Stage(params) {
             }, function () {
                 thisStage.removeItem(item.id);
             });
+
+        //删除重加，确保在最上层绘制
+        this.items.delete(item.id);
+        this.items.set(item.id,item);
+
+        //remove center
+        if (item === this.view.center) {
+            this.view.center = null;
+        }
     };
 
     const generalUpdateEvent = function (item) {
@@ -153,6 +269,9 @@ function Stage(params) {
     };
 
     const generalUpdateAttribute = function (thisStage, newAttr) {
+        if (newAttr.x === undefined || newAttr.y === undefined) {
+            return;
+        }
         thisStage.items.get(newAttr.id).x = newAttr.x;
         thisStage.items.get(newAttr.id).y = newAttr.y;
         thisStage.items.get(newAttr.id).orientation = newAttr.orientation;
@@ -183,12 +302,13 @@ function Stage(params) {
                     action: tank.action,
                     showId: true,
                     speed: tank.speed,
-                    image: tankImage
+                    image: tankImage,
+                    teamId: tank.teamId
                 });
             }
         });
     };
-    const createOrUpdateAmmoList = function (thisStage, ammoList) {
+    const createOrUpdateBullets = function (thisStage, ammoList) {
         ammoList.forEach(function (ammo) {
             if (thisStage.items.has(ammo.id)) {
                 //已存在

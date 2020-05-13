@@ -2,6 +2,7 @@ package com.integration.socket.service;
 
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.dto.MessageDto;
+import com.integration.socket.util.CommonUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -23,6 +24,8 @@ public class MessageService {
 
     private static final String QUEUE_PATH = "/queue/send";
 
+    private static final int MAX_LOG_LENGTH = 256;
+
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     public MessageService(SimpMessagingTemplate simpMessagingTemplate) {
@@ -35,7 +38,11 @@ public class MessageService {
             return;
         }
 
-        log.info("send message:{}", messageDto.toString());
+        String msg = CommonUtil.ignoreNull(messageDto.toString());
+        if (msg.length() > MAX_LOG_LENGTH) {
+            msg = msg.substring(0, MAX_LOG_LENGTH) + "...";
+        }
+        log.info("send message:{}", msg);
 
         if (sendToList == null) {
             simpMessagingTemplate.convertAndSend(
@@ -51,7 +58,7 @@ public class MessageService {
         }
     }
 
-    public void sendReady(@NonNull String username) {
-        sendMessage(new MessageDto(null, MessageType.SERVER_READY, username));
+    public void sendReady(@NonNull String username, String roomId) {
+        sendMessage(new MessageDto(null, MessageType.SERVER_READY, username, roomId));
     }
 }
