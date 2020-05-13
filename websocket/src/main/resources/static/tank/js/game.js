@@ -66,6 +66,9 @@ function Game() {
             case "USERS":
                 _users = messageDto.message;
                 break;
+            case "GAME_STATUS":
+                Status.setStatus(Status.getStatusPause(), messageDto.message, false);
+                break;
             default:
                 //给当前场景处理服务消息
                 this.currentStage().receiveStompMessage(messageDto);

@@ -76,6 +76,8 @@ public class StageRoom extends BaseStage {
 
     private Random random = new Random();
 
+    private boolean isPause = false;
+
     public int getUserCount() {
         return userMap.size();
     }
@@ -98,6 +100,10 @@ public class StageRoom extends BaseStage {
     @Override
     public void update() {
         processEvent();
+
+        if (this.isPause) {
+            return;
+        }
 
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
@@ -448,6 +454,20 @@ public class StageRoom extends BaseStage {
 
         if (mapUnitType == MapUnitType.BROKEN_BRICK) {
             removeMap(key);
+            return;
+        }
+
+        if (mapUnitType == MapUnitType.RED_KING) {
+            removeMap(key);
+            this.isPause = true;
+            sendMessageToRoom(getTeam(TeamType.BLUE) + "胜利", MessageType.GAME_STATUS);
+            return;
+        }
+
+        if (mapUnitType == MapUnitType.BLUE_KING) {
+            removeMap(key);
+            this.isPause = true;
+            sendMessageToRoom(getTeam(TeamType.RED) + "胜利", MessageType.GAME_STATUS);
         }
     }
 
@@ -540,10 +560,36 @@ public class StageRoom extends BaseStage {
         removeToGridTankMap(tankBo, tankBo.getStartGridKey());
         removeToGridTankMap(tankBo, tankBo.getEndGridKey());
 
+        //check status
+        if (checkGameStatusAfterTankBomb(tankBo)) {
+            return;
+        }
+
+        //recreate
         UserBo userBo = this.userMap.get(tankBo.getUserId());
         if (userBo != null) {
             this.eventList.add(new CreateTankEvent(userBo, 60 * 3));
         }
+    }
+
+    private boolean checkGameStatusAfterTankBomb(TankBo tankBo) {
+        if (tankBo.getTeamType() == TeamType.RED) {
+            mapBo.setPlayerLifeTotalCount(mapBo.getPlayerLifeTotalCount() - 1);
+        } else {
+            mapBo.setComputerLifeTotalCount(mapBo.getComputerLifeTotalCount() - 1);
+        }
+
+        if (mapBo.getPlayerLifeTotalCount() <= 0) {
+            this.isPause = true;
+            sendMessageToRoom(getTeam(TeamType.BLUE) + "胜利", MessageType.GAME_STATUS);
+            return true;
+        }
+        if (mapBo.getComputerLifeTotalCount() <= 0) {
+            this.isPause = true;
+            sendMessageToRoom(getTeam(TeamType.RED) + "胜利", MessageType.GAME_STATUS);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -572,11 +618,15 @@ public class StageRoom extends BaseStage {
     }
 
     private String generateUsernameWithTeam(UserBo userBo) {
+        return String.format("%s[%s]", userBo.getUsername(), getTeam(userBo.getTeamType()));
+    }
+
+    private String getTeam(TeamType teamType) {
         String teamStr = "观看";
         switch (this.roomType) {
             case EVE:
             case PVP:
-                switch (userBo.getTeamType()) {
+                switch (teamType) {
                     case RED:
                         teamStr = "红队";
                         break;
@@ -588,7 +638,7 @@ public class StageRoom extends BaseStage {
                 }
                 break;
             case PVE:
-                switch (userBo.getTeamType()) {
+                switch (teamType) {
                     case RED:
                         teamStr = "玩家";
                         break;
@@ -602,8 +652,7 @@ public class StageRoom extends BaseStage {
             default:
                 break;
         }
-
-        return String.format("%s[%s]", userBo.getUsername(), teamStr);
+        return teamStr;
     }
 
     public void addUser(UserBo userBo, TeamType teamType) {

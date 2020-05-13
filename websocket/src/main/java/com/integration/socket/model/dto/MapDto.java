@@ -42,8 +42,8 @@ public class MapDto {
 
     public static MapDto convertLifeCount(MapBo mapBo) {
         MapDto mapDto = new MapDto();
-        mapDto.setPlayerLife(getCount(mapBo.getPlayerLife()));
-        mapDto.setComputerLife(getCount(mapBo.getComputerLife()));
+        mapDto.setPlayerLife(mapBo.getCount(mapBo.getPlayerLife()));
+        mapDto.setComputerLife(mapBo.getCount(mapBo.getComputerLife()));
         return mapDto;
     }
 
@@ -56,13 +56,5 @@ public class MapDto {
         itemList.add(item);
         mapDto.setItemList(itemList);
         return mapDto;
-    }
-
-    private static int getCount(Map<String, Integer> map) {
-        int life = 0;
-        for (Map.Entry<String, Integer> kv : map.entrySet()) {
-            life += kv.getValue();
-        }
-        return life;
     }
 }
