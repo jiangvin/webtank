@@ -7,9 +7,6 @@
 function Game() {
     const thisGame = this;
 
-    //控制
-    const _control = {lastOrientation: -1, lastAction: -1};
-
     //Game的画布初始化，要放在前面
     const _canvas = Common.getCanvas();
     const _context = Common.getContext();
@@ -79,21 +76,6 @@ function Game() {
     //控制相关
     this.controlEvent = function (event) {
         switch (event) {
-            case "Up":
-                thisGame.controlUpdateToServer(0, 1);
-                break;
-            case "Down":
-                thisGame.controlUpdateToServer(1, 1);
-                break;
-            case "Left":
-                thisGame.controlUpdateToServer(2, 1);
-                break;
-            case "Right":
-                thisGame.controlUpdateToServer(3, 1);
-                break;
-            case "Stop":
-                thisGame.controlUpdateToServer(null, 0);
-                break;
             case "FIRE":
                 Common.sendStompMessage(null, "UPDATE_TANK_FIRE");
                 break;
@@ -101,27 +83,6 @@ function Game() {
                 break;
         }
         this.currentStage().controlEvent(event);
-    };
-    this.controlUpdateToServer = function (orientation, action) {
-        let update;
-        if (orientation !== null && _control.lastOrientation !== orientation) {
-            update = true;
-        }
-
-        if (action != null && _control.lastAction !== action) {
-            update = true;
-        }
-
-        if (!update) {
-            return;
-        }
-
-        _control.lastOrientation = orientation != null ? orientation : _control.lastOrientation;
-        _control.lastAction = action != null ? action : _control.lastAction;
-        Common.sendStompMessage({
-            orientation: _control.lastOrientation,
-            action: _control.lastAction
-        }, "UPDATE_TANK_CONTROL");
     };
 
     //动画相关
