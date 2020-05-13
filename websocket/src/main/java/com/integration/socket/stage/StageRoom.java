@@ -110,8 +110,8 @@ public class StageRoom extends BaseStage {
 
         for (String bulletId : removeAmmoIds) {
             BulletBo bullet = bulletMap.get(bulletId);
-            removeToGridAmmoMap(bullet, bullet.getStartGridKey());
-            removeToGridAmmoMap(bullet, bullet.getEndGridKey());
+            removeToGridBulletMap(bullet, bullet.getStartGridKey());
+            removeToGridBulletMap(bullet, bullet.getEndGridKey());
             bulletMap.remove(bulletId);
             if (tankMap.containsKey(bullet.getTankId())) {
                 tankMap.get(bullet.getTankId()).addAmmoCount();
@@ -142,13 +142,13 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        removeToGridAmmoMap(bullet, bullet.getStartGridKey());
+        removeToGridBulletMap(bullet, bullet.getStartGridKey());
         bullet.setStartGridKey(newStart);
 
         //newStartKey must equal endKey
         String newEnd = bullet.generateEndGridKey();
         bullet.setEndGridKey(newEnd);
-        insertToGridAmmoMap(bullet, newEnd);
+        insertToGridBulletMap(bullet, newEnd);
     }
 
     /**
@@ -640,20 +640,20 @@ public class StageRoom extends BaseStage {
         }
     }
 
-    private void insertToGridAmmoMap(BulletBo ammo, String key) {
+    private void insertToGridBulletMap(BulletBo bullet, String key) {
         if (!gridBulletMap.containsKey(key)) {
             gridBulletMap.put(key, new ArrayList<>());
         }
-        if (!gridBulletMap.get(key).contains(ammo.getId())) {
-            gridBulletMap.get(key).add(ammo.getId());
+        if (!gridBulletMap.get(key).contains(bullet.getId())) {
+            gridBulletMap.get(key).add(bullet.getId());
         }
     }
 
-    private void removeToGridAmmoMap(BulletBo ammo, String key) {
+    private void removeToGridBulletMap(BulletBo bullet, String key) {
         if (!gridBulletMap.containsKey(key)) {
             return;
         }
-        gridBulletMap.get(key).remove(ammo.getId());
+        gridBulletMap.get(key).remove(bullet.getId());
         if (gridBulletMap.get(key).isEmpty()) {
             gridBulletMap.remove(key);
         }
@@ -682,32 +682,13 @@ public class StageRoom extends BaseStage {
     }
 
     @Override
-    void processTankFireExtension(BulletBo ammo) {
-        setAmmoStartAndEndGrid(ammo);
-    }
+    void processTankFireExtension(BulletBo bullet) {
+        String startKey = bullet.generateStartGridKey();
+        bullet.setStartGridKey(startKey);
+        insertToGridBulletMap(bullet, startKey);
 
-    private void setAmmoStartAndEndGrid(BulletBo bulletBo) {
-        int gridX = (int)(bulletBo.getX() / CommonUtil.UNIT_SIZE);
-        int gridY = (int)(bulletBo.getY() / CommonUtil.UNIT_SIZE);
-        bulletBo.setStartGridKey(CommonUtil.generateKey(gridX, gridY));
-        insertToGridAmmoMap(bulletBo, bulletBo.getStartGridKey());
-        switch (bulletBo.getOrientationType()) {
-            case UP:
-                --gridY;
-                break;
-            case DOWN:
-                ++gridY;
-                break;
-            case LEFT:
-                --gridX;
-                break;
-            case RIGHT:
-                ++gridX;
-                break;
-            default:
-                break;
-        }
-        bulletBo.setEndGridKey(CommonUtil.generateKey(gridX, gridY));
-        insertToGridAmmoMap(bulletBo, bulletBo.getEndGridKey());
+        String endKey = bullet.generateEndGridKey();
+        bullet.setEndGridKey(endKey);
+        insertToGridBulletMap(bullet, endKey);
     }
 }
