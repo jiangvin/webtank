@@ -57,14 +57,12 @@ function Stage(params) {
         switch (messageDto.messageType) {
             case "TANKS":
                 createOrUpdateTanks(thisStage, messageDto.message);
-                this.sortItems();
                 break;
             case "REMOVE_TANK":
                 this.itemBomb(messageDto.message);
                 break;
             case "BULLET":
                 createOrUpdateBullets(thisStage, messageDto.message);
-                this.sortItems();
                 break;
             case "REMOVE_BULLET":
                 this.itemBomb(messageDto.message, 0.5);
@@ -98,6 +96,11 @@ function Stage(params) {
     };
 
     this.draw = function (context) {
+        //每秒排序一次
+        if (Resource.getGame().frontFrame.totalFrames % 60 === 0) {
+            this.sortItems();
+        }
+
         this.updateView();
         this.drawBackground(context);
         this.items.forEach(function (item) {
@@ -244,6 +247,7 @@ function Stage(params) {
         item.action = 0;
         item.orientation = 0;
         item.scale = bombScale;
+        item.z = 10;
         item.image = Resource.getImage("bomb");
         item.play = new Play(
             6,
@@ -315,7 +319,7 @@ function Stage(params) {
                 } else {
                     tankImage = Resource.getImage(tank.typeId);
                 }
-                thisStage.createTank({
+                const tankItem = thisStage.createTank({
                     id: tank.id,
                     x: tank.x,
                     y: tank.y,
@@ -324,8 +328,17 @@ function Stage(params) {
                     showId: true,
                     speed: tank.speed,
                     image: tankImage,
-                    teamId: tank.teamId
+                    teamId: tank.teamId,
+                    scale: 0.1
                 });
+                tankItem.play = new Play(30, 1,
+                    function () {
+                        tankItem.scale += this.animationScale;
+                    },
+                    function () {
+                        tankItem.scale = 1;
+                    });
+                tankItem.play.animationScale = 0.03;
             }
         });
     };
