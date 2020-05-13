@@ -1,8 +1,9 @@
 package com.integration.socket.util;
 
 
+import com.integration.socket.model.OrientationType;
+
 import java.awt.Point;
-import java.sql.Statement;
 
 /**
  * @author 蒋文龙(Vin)
@@ -39,5 +40,35 @@ public class CommonUtil {
         return lombokToString != null ? lombokToString
                .replaceAll("(?<=(, |\\())[^\\s(]+?=null(?:, )?", "")
                .replaceFirst(", \\)$", ")") : null;
+    }
+
+    private static Point generateStartGridPoint(double x, double y) {
+        return new Point((int)(x / CommonUtil.UNIT_SIZE), (int)(y / CommonUtil.UNIT_SIZE));
+    }
+
+    public static String generateStartGridKey(double x, double y) {
+        Point point = generateStartGridPoint(x, y);
+        return generateKey(point.x, point.y);
+    }
+
+    public static String generateEndGridKey(double x, double y, OrientationType orientationType) {
+        Point point = generateStartGridPoint(x, y);
+        switch (orientationType) {
+            case UP:
+                --point.y;
+                break;
+            case DOWN:
+                ++point.y;
+                break;
+            case LEFT:
+                --point.x;
+                break;
+            case RIGHT:
+                ++point.x;
+                break;
+            default:
+                break;
+        }
+        return CommonUtil.generateKey(point.x, point.y);
     }
 }

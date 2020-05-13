@@ -28,11 +28,6 @@ public class TankBo {
     private int reloadTime;
     private int ammoCount;
     private long lastSyncTime = System.currentTimeMillis();
-    /**
-     * 控制缓存
-     */
-    private OrientationType orientationCache = OrientationType.UP;
-    private ActionType actionCache = ActionType.STOP;
     private String startGridKey;
     private String endGridKey;
 
@@ -111,10 +106,5 @@ public class TankBo {
     public double distanceToEndGrid() {
         Point endGrid = CommonUtil.getPointFromKey(this.endGridKey);
         return endGrid.distance(this.x, this.y);
-    }
-
-    public boolean hasDifferentCache() {
-        return this.getActionType() != this.getActionCache()
-               || this.getOrientationType() != this.getOrientationCache();
     }
 }

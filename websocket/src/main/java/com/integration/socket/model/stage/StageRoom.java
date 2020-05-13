@@ -3,7 +3,6 @@ package com.integration.socket.model.stage;
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MapUnitType;
 import com.integration.socket.model.MessageType;
-import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
 import com.integration.socket.model.bo.BulletBo;
@@ -236,7 +235,7 @@ public class StageRoom extends BaseStage {
             syncBulletList.add(bullet);
         }
 
-        String newStart = bullet.generateStartGridKey();
+        String newStart = CommonUtil.generateStartGridKey(bullet.getX(), bullet.getY());
         if (newStart.equals(bullet.getStartGridKey())) {
             return;
         }
@@ -245,31 +244,18 @@ public class StageRoom extends BaseStage {
         bullet.setStartGridKey(newStart);
 
         //newStartKey must equal endKey
-        String newEnd = bullet.generateEndGridKey();
+        String newEnd = CommonUtil.generateEndGridKey(bullet.getX(), bullet.getY(), bullet.getOrientationType());
         bullet.setEndGridKey(newEnd);
         insertToGridBulletMap(bullet, newEnd);
     }
 
     /**
-     * 内部会出现四种状态
-     * 停止 & 不需要更新
-     * 停止 & 需要更新
-     * 移动 & 需要更新
-     * 移动 & 不需要更新
      * @param tankBo
      */
     private void updateTank(TankBo tankBo) {
-        //先排除停止 & 不需要更新的状态
-        if (tankBo.getActionType() == ActionType.STOP && !tankBo.hasDifferentCache()) {
-            return;
-        }
-
-        //停止 & 需要更新
         if (tankBo.getActionType() == ActionType.STOP) {
-            updateInCache(tankBo);
             return;
         }
-
 
         double speed = tankBo.getType().getSpeed();
         double distance = tankBo.distanceToEndGrid();
@@ -298,17 +284,6 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        // 还剩两种情况
-        // 1.到了目的地 & 要更新
-        // 2.到了目的地 & 不更新
-
-        if (tankBo.hasDifferentCache()) {
-            //先移动到目的地再更新状态
-            tankBo.run(distance);
-            updateInCache(tankBo);
-            return;
-        }
-
         //最后情况：到了目的地 & 不更新状态
         //只更新新目的地
         tankBo.run(speed);
@@ -323,43 +298,14 @@ public class StageRoom extends BaseStage {
             tankBo.setEndGridKey(tankBo.getStartGridKey());
         }
         tankBo.setActionType(ActionType.STOP);
-        sendTankToRoom(tankBo);
-    }
-
-    private void updateInCache(TankBo tankBo) {
-        if (!tankBo.hasDifferentCache()) {
-            return;
-        }
-
-        Point grid = getGrid(tankBo);
-        if (tankBo.getActionCache() == ActionType.RUN && collideWithAll(grid.x, grid.y, tankBo)) {
-            //有障碍，停止, 再递归判断是否一致
-            tankBo.setActionCache(ActionType.STOP);
-            updateInCache(tankBo);
-            return;
-        }
-
-        //代码走到这里有几种可能
-        //1. 停止 & 更新移动
-        //2. 停止 & 更新停止(碰撞检测后)
-        //3. 移动 & 更新移动
-        //4. 移动 & 更新停止(主动停止或碰撞检测后都有可能)
-        tankBo.setActionType(tankBo.getActionCache());
-        tankBo.setOrientationType(tankBo.getOrientationCache());
-        if (tankBo.getActionType() == ActionType.RUN) {
-            //开始跑，更新目标
-            String endKey = CommonUtil.generateKey(grid.x, grid.y);
-            tankBo.setEndGridKey(endKey);
-            insertToGridTankMap(tankBo, endKey);
-        }
-        sendTankToRoom(tankBo);
+        sendTankToRoom(tankBo, MessageType.TANKS_FORCE);
     }
 
     private Point getGrid(TankBo tankBo) {
         int gridX = (int)(tankBo.getX() / CommonUtil.UNIT_SIZE);
         int gridY = (int)(tankBo.getY() / CommonUtil.UNIT_SIZE);
-        if (tankBo.getActionCache() == ActionType.RUN) {
-            switch (tankBo.getOrientationCache()) {
+        if (tankBo.getActionType() == ActionType.RUN) {
+            switch (tankBo.getOrientationType()) {
                 case UP:
                     --gridY;
                     break;
@@ -571,7 +517,7 @@ public class StageRoom extends BaseStage {
     private boolean collide(TankBo tank1, TankBo tank2) {
         double distance = Point.distance(tank1.getX(), tank1.getY(), tank2.getX(), tank2.getY());
         boolean isCollide = distance <= CommonUtil.UNIT_SIZE;
-        switch (tank1.getOrientationCache()) {
+        switch (tank1.getOrientationType()) {
             case UP:
                 if (isCollide && tank2.getY() < tank1.getY()) {
                     return true;
@@ -868,34 +814,36 @@ public class StageRoom extends BaseStage {
     }
 
     @Override
-    TankBo updateTankControl(ItemDto tankDto) {
-        if (!tankMap.containsKey(tankDto.getId())) {
-            return null;
+    void updateTankControlExtension(TankBo tankBo, ItemDto tankDto) {
+        //TODO - 距离检测，防止作弊
+        tankBo.setX(tankDto.getX());
+        tankBo.setY(tankDto.getY());
+        String startKey = CommonUtil.generateStartGridKey(tankBo.getX(), tankBo.getY());
+        if (!startKey.equals(tankBo.getStartGridKey())) {
+            removeToGridTankMap(tankBo, tankBo.getStartGridKey());
+            insertToGridTankMap(tankBo, startKey);
+            tankBo.setStartGridKey(startKey);
         }
 
-        TankBo tankBo = tankMap.get(tankDto.getId());
-
-        //只更新缓存状态
-        OrientationType orientationType = OrientationType.convert(tankDto.getOrientation());
-        if (orientationType != OrientationType.UNKNOWN) {
-            tankBo.setOrientationCache(orientationType);
+        if (tankBo.getActionType() == ActionType.STOP) {
+            tankBo.setEndGridKey(startKey);
+        } else {
+            String endKey = CommonUtil.generateEndGridKey(tankBo.getX(), tankBo.getY(), tankBo.getOrientationType());
+            if (!endKey.equals(tankBo.getEndGridKey())) {
+                removeToGridTankMap(tankBo, tankBo.getEndGridKey());
+                insertToGridTankMap(tankBo, endKey);
+                tankBo.setEndGridKey(endKey);
+            }
         }
-        ActionType actionType = ActionType.convert(tankDto.getAction());
-        if (actionType != ActionType.UNKNOWN) {
-            tankBo.setActionCache(actionType);
-        }
-
-        //返回空，不需要及时同步给客户端
-        return null;
     }
 
     @Override
     void processTankFireExtension(BulletBo bullet) {
-        String startKey = bullet.generateStartGridKey();
+        String startKey = CommonUtil.generateStartGridKey(bullet.getX(), bullet.getY());
         bullet.setStartGridKey(startKey);
         insertToGridBulletMap(bullet, startKey);
 
-        String endKey = bullet.generateEndGridKey();
+        String endKey = CommonUtil.generateEndGridKey(bullet.getX(), bullet.getY(), bullet.getOrientationType());
         bullet.setEndGridKey(endKey);
         insertToGridBulletMap(bullet, endKey);
     }

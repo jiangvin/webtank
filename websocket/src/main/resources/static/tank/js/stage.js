@@ -96,6 +96,9 @@ function Stage(params) {
             case "TANKS":
                 createOrUpdateTanks(thisStage, messageDto.message);
                 break;
+            case "TANKS_FORCE":
+                createOrUpdateTanks(thisStage, messageDto.message, true);
+                break;
             case "REMOVE_TANK":
                 this.itemBomb(messageDto.message);
                 break;
@@ -353,14 +356,14 @@ function Stage(params) {
         thisStage.items.get(newAttr.id).action = newAttr.action;
     };
 
-    const createOrUpdateTanks = function (thisStage, tanks) {
+    const createOrUpdateTanks = function (thisStage, tanks, force) {
         /**
          * @param tank {{typeId}}
          */
         const center = thisStage.view.center;
         tanks.forEach(function (tank) {
-            //过滤自己
-            if (center && center.id === tank.id) {
+            //普通模式过滤自己
+            if (!force && center && center.id === tank.id) {
                 return;
             }
 

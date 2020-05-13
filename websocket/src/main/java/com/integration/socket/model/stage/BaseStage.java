@@ -1,6 +1,8 @@
 package com.integration.socket.model.stage;
 
+import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;
+import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.dto.ItemDto;
@@ -95,7 +97,33 @@ public abstract class BaseStage {
      * @param tankDto
      * @return
      */
-    abstract TankBo updateTankControl(ItemDto tankDto);
+    private TankBo updateTankControl(ItemDto tankDto) {
+        if (!tankMap.containsKey(tankDto.getId())) {
+            return null;
+        }
+
+        TankBo tankBo = tankMap.get(tankDto.getId());
+        //状态只同步朝向和移动命令
+        OrientationType orientationType = OrientationType.convert(tankDto.getOrientation());
+        if (orientationType != OrientationType.UNKNOWN) {
+            tankBo.setOrientationType(orientationType);
+        }
+        ActionType actionType = ActionType.convert(tankDto.getAction());
+        if (actionType != ActionType.UNKNOWN) {
+            tankBo.setActionType(actionType);
+        }
+        updateTankControlExtension(tankBo, tankDto);
+        return tankBo;
+    }
+
+    /**
+     * 继承扩展函数
+     * @param tankBo
+     * @param tankDto
+     */
+    void updateTankControlExtension(TankBo tankBo, ItemDto tankDto) {
+
+    }
 
     /**
      * 每一帧的更新数据 （17ms 一帧，模拟1秒60帧刷新模式）
@@ -129,8 +157,12 @@ public abstract class BaseStage {
     }
 
     void sendTankToRoom(TankBo tankBo) {
+        sendTankToRoom(tankBo, MessageType.TANKS);
+    }
+
+    void sendTankToRoom(TankBo tankBo, MessageType type) {
         tankBo.refreshSyncTime();
-        sendMessageToRoom(Collections.singletonList(ItemDto.convert(tankBo)), MessageType.TANKS);
+        sendMessageToRoom(Collections.singletonList(ItemDto.convert(tankBo)), type);
     }
 
     void sendMessageToUser(Object object, MessageType messageType, String username) {
