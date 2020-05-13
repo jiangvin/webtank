@@ -54,6 +54,10 @@ public enum MessageType {
      * 删除地图信息
      */
     REMOVE_MAP,
+    /**
+     * 游戏状态
+     */
+    GAME_STATUS,
 
 
     /**

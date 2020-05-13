@@ -11,15 +11,36 @@ function Stage(params) {
         size: {width: 0, height: 0},        //场景大小
         backgroundImage: null,              //背景图
 
-        //处理控制事件
-        controlEvent: function () {
-        },
-
         //拓展函数
         receiveStompMessageExtension: function () {
         }
     };
     Common.extend(this, this.settings, this.params);
+
+    //处理控制事件
+    this.controlEvent = function (event) {
+        if (this.view.center !== null || !this.size.width || !this.size.height) {
+            return;
+        }
+
+        const speed = 5.0;
+        switch (event) {
+            case "Up":
+                this.view.y = this.view.y > speed ? this.view.y - speed : 0;
+                break;
+            case "Down":
+                const maxY = this.size.height - Common.height();
+                this.view.y = this.view.y + speed < maxY ? this.view.y + speed : maxY;
+                break;
+            case "Left":
+                this.view.x = this.view.x > speed ? this.view.x - speed : 0;
+                break;
+            case "Right":
+                const maxX = this.size.width - Common.width();
+                this.view.x = this.view.x + speed < maxX ? this.view.x + speed : maxX;
+                break;
+        }
+    };
 
     this.receiveStompMessage = function (messageDto) {
         //id校验，确保消息正确
@@ -36,14 +57,12 @@ function Stage(params) {
         switch (messageDto.messageType) {
             case "TANKS":
                 createOrUpdateTanks(thisStage, messageDto.message);
-                this.sortItems();
                 break;
             case "REMOVE_TANK":
                 this.itemBomb(messageDto.message);
                 break;
             case "BULLET":
                 createOrUpdateBullets(thisStage, messageDto.message);
-                this.sortItems();
                 break;
             case "REMOVE_BULLET":
                 this.itemBomb(messageDto.message, 0.5);
@@ -77,6 +96,11 @@ function Stage(params) {
     };
 
     this.draw = function (context) {
+        //每秒排序一次
+        if (Resource.getGame().frontFrame.totalFrames % 60 === 0) {
+            this.sortItems();
+        }
+
         this.updateView();
         this.drawBackground(context);
         this.items.forEach(function (item) {
@@ -223,6 +247,7 @@ function Stage(params) {
         item.action = 0;
         item.orientation = 0;
         item.scale = bombScale;
+        item.z = 10;
         item.image = Resource.getImage("bomb");
         item.play = new Play(
             6,
@@ -235,7 +260,7 @@ function Stage(params) {
 
         //删除重加，确保在最上层绘制
         this.items.delete(item.id);
-        this.items.set(item.id,item);
+        this.items.set(item.id, item);
 
         //remove center
         if (item === this.view.center) {
@@ -294,7 +319,7 @@ function Stage(params) {
                 } else {
                     tankImage = Resource.getImage(tank.typeId);
                 }
-                thisStage.createTank({
+                const tankItem = thisStage.createTank({
                     id: tank.id,
                     x: tank.x,
                     y: tank.y,
@@ -303,8 +328,17 @@ function Stage(params) {
                     showId: true,
                     speed: tank.speed,
                     image: tankImage,
-                    teamId: tank.teamId
+                    teamId: tank.teamId,
+                    scale: 0.1
                 });
+                tankItem.play = new Play(30, 1,
+                    function () {
+                        tankItem.scale += this.animationScale;
+                    },
+                    function () {
+                        tankItem.scale = 1;
+                    });
+                tankItem.play.animationScale = 0.03;
             }
         });
     };

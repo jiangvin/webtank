@@ -56,7 +56,7 @@
         this.controlMode.centerX = centerX;
         this.controlMode.centerY = centerY;
         this.controlMode.radius = radius;
-        this.controlMode.minRadius = radius / 2;
+        this.controlMode.minRadius = radius / 3;
         this.controlMode.maxRadius = radius * 1.5;
 
         this.controlMode.rightCenterX = rightCenterX - rightRadius * .4;
@@ -83,14 +83,18 @@
             }
 
             distance = Common.distance(x, y, controlMode.centerX, controlMode.centerY);
-            if (distance > controlMode.radius || distance < controlMode.minRadius) {
-                //超过外圆或者低于最小控制距离，不做任何操作
+            if (distance > controlMode.radius) {
+                //超过外圆
                 return;
             }
 
             controlMode.touchX = x;
             controlMode.touchY = y;
-            Resource.getGame().controlEvent(getControlEventFromTouch(controlMode));
+
+            //排除细微控制带来的干扰
+            if (distance >= controlMode.minRadius) {
+                Resource.getGame().controlEvent(getControlEventFromTouch(controlMode));
+            }
         });
         window.addEventListener('touchend', function (e) {
             let stop = true;
@@ -116,7 +120,7 @@
             for (let i = 0; i < e.touches.length; ++i) {
                 const touchPoint = Common.getTouchPoint(e.touches[i]);
                 distance = Common.distance(touchPoint.x, touchPoint.y, controlMode.centerX, controlMode.centerY);
-                if (distance >= controlMode.minRadius && distance <= controlMode.maxRadius) {
+                if (distance <= controlMode.maxRadius) {
                     touchMovePoint = touchPoint;
                     break;
                 }
@@ -162,7 +166,11 @@
                 controlMode.touchX = x + controlMode.centerX;
                 controlMode.touchY = y + controlMode.centerY;
             }
-            Resource.getGame().controlEvent(getControlEventFromTouch(controlMode));
+
+            //排除细微控制带来的干扰
+            if (distance >= controlMode.minRadius) {
+                Resource.getGame().controlEvent(getControlEventFromTouch(controlMode));
+            }
         });
     };
 

@@ -27,6 +27,10 @@ public class MapBo {
 
     private int maxGridY;
 
+    private int playerLifeTotalCount = 0;
+
+    private int computerLifeTotalCount = 0;
+
     private ConcurrentHashMap<String, Integer> playerLife = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<String, Integer> computerLife = new ConcurrentHashMap<>();
@@ -36,6 +40,11 @@ public class MapBo {
     private List<String> playerStartPoints = new ArrayList<>();
 
     private List<String> computerStartPoints = new ArrayList<>();
+
+    public void setTotalLifeCount() {
+        this.playerLifeTotalCount = getCount(this.playerLife);
+        this.computerLifeTotalCount = getCount(this.computerLife);
+    }
 
     public void checkSelf() {
         if (width == 0 || height == 0) {
@@ -72,5 +81,13 @@ public class MapBo {
 
     public void duplicateComputer() {
         duplicate(playerLife, computerLife);
+    }
+
+    public int getCount(Map<String, Integer> lifeMap) {
+        int life = 0;
+        for (Map.Entry<String, Integer> kv : lifeMap.entrySet()) {
+            life += kv.getValue();
+        }
+        return life;
     }
 }

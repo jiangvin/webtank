@@ -3,7 +3,7 @@ package com.integration.socket.model.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
-import com.integration.socket.stage.StageRoom;
+import com.integration.socket.model.stage.StageRoom;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

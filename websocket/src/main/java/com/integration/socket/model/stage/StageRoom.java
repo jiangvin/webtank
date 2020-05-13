@@ -1,4 +1,4 @@
-package com.integration.socket.stage;
+package com.integration.socket.model.stage;
 
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MapUnitType;
@@ -14,10 +14,13 @@ import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.model.dto.MapDto;
 import com.integration.socket.model.dto.RoomDto;
+import com.integration.socket.model.event.BaseEvent;
+import com.integration.socket.model.event.CreateTankEvent;
 import com.integration.socket.service.MessageService;
 import com.integration.socket.util.CommonUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -50,6 +53,8 @@ public class StageRoom extends BaseStage {
 
     private ConcurrentHashMap<String, List<String>> gridBulletMap = new ConcurrentHashMap<>();
 
+    private List<BaseEvent> eventList = new ArrayList<>();
+
     /**
      * 要删除的子弹列表，每帧刷新
      */
@@ -70,6 +75,8 @@ public class StageRoom extends BaseStage {
     private RoomType roomType;
 
     private Random random = new Random();
+
+    private boolean isPause = false;
 
     public int getUserCount() {
         return userMap.size();
@@ -92,6 +99,12 @@ public class StageRoom extends BaseStage {
 
     @Override
     public void update() {
+        processEvent();
+
+        if (this.isPause) {
+            return;
+        }
+
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             updateTank(tankBo);
@@ -101,6 +114,35 @@ public class StageRoom extends BaseStage {
             updateBullet(kv.getValue());
         }
         removeBullets();
+    }
+
+    private void processEvent() {
+        if (eventList.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < eventList.size(); ++i) {
+            BaseEvent event = eventList.get(i);
+            if (event.getTimeout() == 0) {
+                processEvent(event);
+                eventList.remove(i);
+                --i;
+            } else {
+                event.setTimeout(event.getTimeout() - 1);
+            }
+        }
+    }
+
+    private void processEvent(BaseEvent event) {
+        //先检查是否执行
+        if (!StringUtils.isEmpty(event.getUsername()) && !this.userMap.containsKey(event.getUsername())) {
+            return;
+        }
+
+        if (event instanceof CreateTankEvent) {
+            CreateTankEvent createTankEvent = (CreateTankEvent) event;
+            addNewTank(createTankEvent.getUser());
+        }
     }
 
     private void removeBullets() {
@@ -313,12 +355,30 @@ public class StageRoom extends BaseStage {
         TankBo tankBo = collideWithTanks(bullet);
         if (tankBo != null) {
             addRemoveBulletIds(bullet.getId());
+            sendTankBombMessage(bullet, tankBo);
             removeTankFromTankId(tankBo.getTankId());
             return true;
         }
 
         //和子弹碰撞检测
         return collideWithBullets(bullet);
+    }
+
+    private void sendTankBombMessage(BulletBo bullet, TankBo tank) {
+        //不是玩家，过滤
+        if (!tank.getTankId().equals(tank.getUserId())) {
+            return;
+        }
+
+        String killerName;
+        TankBo killer = tankMap.get(bullet.getTankId());
+        if (killer == null) {
+            killerName = bullet.getTankId();
+        } else {
+            killerName = killer.getUserId();
+        }
+
+        sendMessageToRoom(String.format("%s 被 %s 摧毁了,等待3秒复活...", tank.getTankId(), killerName), MessageType.SYSTEM_MESSAGE);
     }
 
     private TankBo collideWithTanks(BulletBo bulletBo) {
@@ -394,6 +454,20 @@ public class StageRoom extends BaseStage {
 
         if (mapUnitType == MapUnitType.BROKEN_BRICK) {
             removeMap(key);
+            return;
+        }
+
+        if (mapUnitType == MapUnitType.RED_KING) {
+            removeMap(key);
+            this.isPause = true;
+            sendMessageToRoom(getTeam(TeamType.BLUE) + "胜利", MessageType.GAME_STATUS);
+            return;
+        }
+
+        if (mapUnitType == MapUnitType.BLUE_KING) {
+            removeMap(key);
+            this.isPause = true;
+            sendMessageToRoom(getTeam(TeamType.RED) + "胜利", MessageType.GAME_STATUS);
         }
     }
 
@@ -485,6 +559,37 @@ public class StageRoom extends BaseStage {
     void removeTankExtension(TankBo tankBo) {
         removeToGridTankMap(tankBo, tankBo.getStartGridKey());
         removeToGridTankMap(tankBo, tankBo.getEndGridKey());
+
+        //check status
+        if (checkGameStatusAfterTankBomb(tankBo)) {
+            return;
+        }
+
+        //recreate
+        UserBo userBo = this.userMap.get(tankBo.getUserId());
+        if (userBo != null) {
+            this.eventList.add(new CreateTankEvent(userBo, 60 * 3));
+        }
+    }
+
+    private boolean checkGameStatusAfterTankBomb(TankBo tankBo) {
+        if (tankBo.getTeamType() == TeamType.RED) {
+            mapBo.setPlayerLifeTotalCount(mapBo.getPlayerLifeTotalCount() - 1);
+        } else {
+            mapBo.setComputerLifeTotalCount(mapBo.getComputerLifeTotalCount() - 1);
+        }
+
+        if (mapBo.getPlayerLifeTotalCount() <= 0) {
+            this.isPause = true;
+            sendMessageToRoom(getTeam(TeamType.BLUE) + "胜利", MessageType.GAME_STATUS);
+            return true;
+        }
+        if (mapBo.getComputerLifeTotalCount() <= 0) {
+            this.isPause = true;
+            sendMessageToRoom(getTeam(TeamType.RED) + "胜利", MessageType.GAME_STATUS);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -492,36 +597,76 @@ public class StageRoom extends BaseStage {
         if (!userMap.containsKey(username)) {
             return;
         }
-
+        UserBo userBo = userMap.get(username);
         userMap.remove(username);
         removeTankFromUserId(username);
         if (getUserCount() == 0) {
             return;
         }
-        sendStatusAndMessage(username, true);
+        sendStatusAndMessage(userBo, true);
     }
 
-    private void sendStatusAndMessage(String username, boolean leave) {
+    private void sendStatusAndMessage(UserBo user, boolean leave) {
         sendMessageToRoom(getUserList(), MessageType.USERS);
         String message;
         if (leave) {
-            message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
+            message = String.format("%s 离开了房间 %s,当前房间人数: %d", generateUsernameWithTeam(user), roomId, getUserCount());
         } else {
-            message = String.format("%s 加入了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
+            message = String.format("%s 加入了房间 %s,当前房间人数: %d", generateUsernameWithTeam(user), roomId, getUserCount());
         }
         sendMessageToRoom(message, MessageType.SYSTEM_MESSAGE);
+    }
+
+    private String generateUsernameWithTeam(UserBo userBo) {
+        return String.format("%s[%s]", userBo.getUsername(), getTeam(userBo.getTeamType()));
+    }
+
+    private String getTeam(TeamType teamType) {
+        String teamStr = "观看";
+        switch (this.roomType) {
+            case EVE:
+            case PVP:
+                switch (teamType) {
+                    case RED:
+                        teamStr = "红队";
+                        break;
+                    case BLUE:
+                        teamStr = "蓝队";
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case PVE:
+                switch (teamType) {
+                    case RED:
+                        teamStr = "玩家";
+                        break;
+                    case BLUE:
+                        teamStr = "AI";
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+        return teamStr;
     }
 
     public void addUser(UserBo userBo, TeamType teamType) {
         userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
         userBo.setTeamType(teamType);
-        sendStatusAndMessage(userBo.getUsername(), false);
+        sendStatusAndMessage(userBo, false);
 
         //发送场景信息
         sendMessageToUser(MapDto.convert(mapBo), MessageType.MAP, userBo.getUsername());
+        sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
+        sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
 
-        addNewTank(userBo);
+        this.eventList.add(new CreateTankEvent(userBo, 60 * 3));
 
         //通知前端数据传输完毕
         sendReady(userBo.getUsername());
@@ -604,6 +749,14 @@ public class StageRoom extends BaseStage {
         return tankDtoList;
     }
 
+    private List<ItemDto> getBulletList() {
+        List<ItemDto> bulletDtoList = new ArrayList<>();
+        for (Map.Entry<String, BulletBo> kv : bulletMap.entrySet()) {
+            bulletDtoList.add(ItemDto.convert(kv.getValue()));
+        }
+        return bulletDtoList;
+    }
+
     private void setStartPoint(TankBo tankBo) {
         String posStr;
         if (tankBo.getTeamType() == TeamType.RED) {
@@ -612,6 +765,7 @@ public class StageRoom extends BaseStage {
             posStr = mapBo.getComputerStartPoints().get(random.nextInt(mapBo.getComputerStartPoints().size()));
         }
         tankBo.setStartGridKey(posStr);
+        tankBo.setEndGridKey(posStr);
         Point point = CommonUtil.getPointFromKey(posStr);
         tankBo.setX(point.getX());
         tankBo.setY(point.getY());

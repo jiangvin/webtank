@@ -1,4 +1,4 @@
-package com.integration.socket.stage;
+package com.integration.socket.model.stage;
 
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.MessageType;

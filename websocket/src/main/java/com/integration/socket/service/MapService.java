@@ -118,6 +118,7 @@ public class MapService {
             log.error("catch read file error:", e);
             throw new CustomException(String.format("地图读取错误! 行数:%d, 错误 :%s", lineIndex, e.getMessage()));
         }
+        mapBo.setTotalLifeCount();
         mapBo.checkSelf();
         return mapBo;
     }

@@ -6,7 +6,7 @@ import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.model.dto.RoomListDto;
-import com.integration.socket.stage.StageRoom;
+import com.integration.socket.model.stage.StageRoom;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
