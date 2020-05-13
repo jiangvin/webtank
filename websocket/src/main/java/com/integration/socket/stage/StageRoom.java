@@ -612,6 +612,7 @@ public class StageRoom extends BaseStage {
             posStr = mapBo.getComputerStartPoints().get(random.nextInt(mapBo.getComputerStartPoints().size()));
         }
         tankBo.setStartGridKey(posStr);
+        tankBo.setEndGridKey(posStr);
         Point point = CommonUtil.getPointFromKey(posStr);
         tankBo.setX(point.getX());
         tankBo.setY(point.getY());

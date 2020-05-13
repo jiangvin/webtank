@@ -11,15 +11,36 @@ function Stage(params) {
         size: {width: 0, height: 0},        //场景大小
         backgroundImage: null,              //背景图
 
-        //处理控制事件
-        controlEvent: function () {
-        },
-
         //拓展函数
         receiveStompMessageExtension: function () {
         }
     };
     Common.extend(this, this.settings, this.params);
+
+    //处理控制事件
+    this.controlEvent = function (event) {
+        if (this.view.center !== null || !this.size.width || !this.size.height) {
+            return;
+        }
+
+        const speed = 5.0;
+        switch (event) {
+            case "Up":
+                this.view.y = this.view.y > speed ? this.view.y - speed : 0;
+                break;
+            case "Down":
+                const maxY = this.size.height - Common.height();
+                this.view.y = this.view.y + speed < maxY ? this.view.y + speed : maxY;
+                break;
+            case "Left":
+                this.view.x = this.view.x > speed ? this.view.x - speed : 0;
+                break;
+            case "Right":
+                const maxX = this.size.width - Common.width();
+                this.view.x = this.view.x + speed < maxX ? this.view.x + speed : maxX;
+                break;
+        }
+    };
 
     this.receiveStompMessage = function (messageDto) {
         //id校验，确保消息正确
@@ -235,7 +256,7 @@ function Stage(params) {
 
         //删除重加，确保在最上层绘制
         this.items.delete(item.id);
-        this.items.set(item.id,item);
+        this.items.set(item.id, item);
 
         //remove center
         if (item === this.view.center) {
