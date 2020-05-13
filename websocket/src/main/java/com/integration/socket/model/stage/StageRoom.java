@@ -492,31 +492,62 @@ public class StageRoom extends BaseStage {
         if (!userMap.containsKey(username)) {
             return;
         }
-
+        UserBo userBo = userMap.get(username);
         userMap.remove(username);
         removeTankFromUserId(username);
         if (getUserCount() == 0) {
             return;
         }
-        sendStatusAndMessage(username, true);
+        sendStatusAndMessage(userBo, true);
     }
 
-    private void sendStatusAndMessage(String username, boolean leave) {
+    private void sendStatusAndMessage(UserBo user, boolean leave) {
         sendMessageToRoom(getUserList(), MessageType.USERS);
         String message;
         if (leave) {
-            message = String.format("%s 离开了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
+            message = String.format("%s 离开了房间 %s,当前房间人数: %d", generateUsernameWithTeam(user), roomId, getUserCount());
         } else {
-            message = String.format("%s 加入了房间 %s,当前房间人数: %d", username, roomId, getUserCount());
+            message = String.format("%s 加入了房间 %s,当前房间人数: %d", generateUsernameWithTeam(user), roomId, getUserCount());
         }
         sendMessageToRoom(message, MessageType.SYSTEM_MESSAGE);
+    }
+
+    private String generateUsernameWithTeam(UserBo userBo) {
+        String teamStr = "观看";
+        switch (this.roomType) {
+            case EVE:
+            case PVP:
+                switch (userBo.getTeamType()) {
+                    case RED:
+                        teamStr = "红队";
+                        break;
+                    case BLUE:
+                        teamStr = "蓝队";
+                        break;
+                }
+                break;
+            case PVE:
+                switch (userBo.getTeamType()) {
+                    case RED:
+                        teamStr = "玩家";
+                        break;
+                    case BLUE:
+                        teamStr = "AI";
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+
+        return String.format("%s[%s]", userBo.getUsername(), teamStr);
     }
 
     public void addUser(UserBo userBo, TeamType teamType) {
         userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
         userBo.setTeamType(teamType);
-        sendStatusAndMessage(userBo.getUsername(), false);
+        sendStatusAndMessage(userBo, false);
 
         //发送场景信息
         sendMessageToUser(MapDto.convert(mapBo), MessageType.MAP, userBo.getUsername());
