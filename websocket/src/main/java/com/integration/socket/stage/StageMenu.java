@@ -60,7 +60,7 @@ public class StageMenu extends BaseStage {
             if (tankMap.containsKey(bullet.getTankId())) {
                 tankMap.get(bullet.getTankId()).addAmmoCount();
             }
-            sendMessageToRoom(ItemDto.convert(bullet), MessageType.REMOVE_AMMO);
+            sendMessageToRoom(ItemDto.convert(bullet), MessageType.REMOVE_BULLET);
         }
     }
 

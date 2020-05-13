@@ -41,11 +41,11 @@ function Stage(params) {
             case "REMOVE_TANK":
                 this.itemBomb(messageDto.message);
                 break;
-            case "AMMO":
-                createOrUpdateAmmoList(thisStage, messageDto.message);
+            case "BULLET":
+                createOrUpdateBullets(thisStage, messageDto.message);
                 this.sortItems();
                 break;
-            case "REMOVE_AMMO":
+            case "REMOVE_BULLET":
                 this.itemBomb(messageDto.message, 0.5);
                 break;
             default:
@@ -308,7 +308,7 @@ function Stage(params) {
             }
         });
     };
-    const createOrUpdateAmmoList = function (thisStage, ammoList) {
+    const createOrUpdateBullets = function (thisStage, ammoList) {
         ammoList.forEach(function (ammo) {
             if (thisStage.items.has(ammo.id)) {
                 //已存在

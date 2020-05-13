@@ -74,7 +74,7 @@ public class BulletBo {
         return CommonUtil.generateKey(point.x, point.y);
     }
 
-    private Point generateStartGridPoint() {
+    public Point generateStartGridPoint() {
         return new Point(
                    (int)(this.x / CommonUtil.UNIT_SIZE),
                    (int)(this.y / CommonUtil.UNIT_SIZE));

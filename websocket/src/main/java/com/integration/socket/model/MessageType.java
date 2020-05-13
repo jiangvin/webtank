@@ -39,13 +39,13 @@ public enum MessageType {
      */
     REMOVE_TANK,
     /**
-     * 同步ammo信息
+     * 同步bullet信息
      */
-    AMMO,
+    BULLET,
     /**
-     * 删除AMMO
+     * 删除bullet
      */
-    REMOVE_AMMO,
+    REMOVE_BULLET,
     /**
      * 同步地图信息
      */

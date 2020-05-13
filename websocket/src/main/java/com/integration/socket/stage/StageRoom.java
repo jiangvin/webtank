@@ -53,7 +53,7 @@ public class StageRoom extends BaseStage {
     /**
      * 要删除的子弹列表，每帧刷新
      */
-    private List<String> removeAmmoIds = new ArrayList<>();
+    private List<String> removeBulletIds = new ArrayList<>();
 
     private MapBo mapBo;
 
@@ -75,9 +75,9 @@ public class StageRoom extends BaseStage {
         return userMap.size();
     }
 
-    private void addRemoveAmmo(String id) {
-        if (!this.removeAmmoIds.contains(id)) {
-            removeAmmoIds.add(id);
+    private void addRemoveBulletIds(String id) {
+        if (!this.removeBulletIds.contains(id)) {
+            removeBulletIds.add(id);
         }
     }
 
@@ -104,11 +104,11 @@ public class StageRoom extends BaseStage {
     }
 
     private void removeBullets() {
-        if (removeAmmoIds.isEmpty()) {
+        if (removeBulletIds.isEmpty()) {
             return;
         }
 
-        for (String bulletId : removeAmmoIds) {
+        for (String bulletId : removeBulletIds) {
             BulletBo bullet = bulletMap.get(bulletId);
             removeToGridBulletMap(bullet, bullet.getStartGridKey());
             removeToGridBulletMap(bullet, bullet.getEndGridKey());
@@ -116,18 +116,18 @@ public class StageRoom extends BaseStage {
             if (tankMap.containsKey(bullet.getTankId())) {
                 tankMap.get(bullet.getTankId()).addAmmoCount();
             }
-            sendMessageToRoom(ItemDto.convert(bullet), MessageType.REMOVE_AMMO);
+            sendMessageToRoom(ItemDto.convert(bullet), MessageType.REMOVE_BULLET);
         }
-        removeAmmoIds.clear();
+        removeBulletIds.clear();
     }
 
     private void updateBullet(BulletBo bullet) {
-        if (this.removeAmmoIds.contains(bullet.getId())) {
+        if (this.removeBulletIds.contains(bullet.getId())) {
             return;
         }
 
         if (bullet.getLifeTime() == 0) {
-            addRemoveAmmo(bullet.getId());
+            addRemoveBulletIds(bullet.getId());
             return;
         }
 
@@ -296,32 +296,29 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean collideWithAll(BulletBo bullet) {
-        int gridX = (int)(bullet.getX() / CommonUtil.UNIT_SIZE);
-        int gridY = (int)(bullet.getY() / CommonUtil.UNIT_SIZE);
-        if (gridX < 0 || gridY < 0 || gridX >= mapBo.getMaxGridX() || gridY >= mapBo.getMaxGridY()) {
+        if (bullet.getX() <= 0 || bullet.getY() < 0 || bullet.getX() >= mapBo.getWidth() || bullet.getY() >= mapBo.getHeight()) {
             //超出范围
-            addRemoveAmmo(bullet.getId());
+            addRemoveBulletIds(bullet.getId());
             return true;
         }
 
         //和地图场景碰撞检测
-        String goalKey = CommonUtil.generateKey(gridX, gridY);
-        if (collideForBullet(mapBo.getUnitMap().get(goalKey))) {
-            addRemoveAmmo(bullet.getId());
-            processMapWhenCatchAmmo(goalKey, bullet);
+        if (collideForBullet(mapBo.getUnitMap().get(bullet.getStartGridKey()))) {
+            addRemoveBulletIds(bullet.getId());
+            processMapWhenCatchAmmo(bullet.getStartGridKey(), bullet);
             return true;
         }
 
         //和坦克碰撞检测
         TankBo tankBo = collideWithTanks(bullet);
         if (tankBo != null) {
-            addRemoveAmmo(bullet.getId());
+            addRemoveBulletIds(bullet.getId());
             removeTankFromTankId(tankBo.getTankId());
             return true;
         }
 
         //和子弹碰撞检测
-        return collideWithAmmo(bullet);
+        return collideWithBullets(bullet);
     }
 
     private TankBo collideWithTanks(BulletBo bulletBo) {
@@ -352,15 +349,15 @@ public class StageRoom extends BaseStage {
         return null;
     }
 
-    private boolean collideWithAmmo(BulletBo ammo) {
-        if (collideWithAmmo(ammo, ammo.getStartGridKey())) {
+    private boolean collideWithBullets(BulletBo ammo) {
+        if (collideWithBullets(ammo, ammo.getStartGridKey())) {
             return true;
         }
 
-        return collideWithAmmo(ammo, ammo.getEndGridKey());
+        return collideWithBullets(ammo, ammo.getEndGridKey());
     }
 
-    private boolean collideWithAmmo(BulletBo ammo, String key) {
+    private boolean collideWithBullets(BulletBo ammo, String key) {
         for (String id : gridBulletMap.get(key)) {
             if (id.equals(ammo.getId())) {
                 continue;
@@ -369,8 +366,8 @@ public class StageRoom extends BaseStage {
             BulletBo target = bulletMap.get(id);
             double distance = Point.distance(ammo.getX(), ammo.getY(), target.getX(), target.getY());
             if (distance <= CommonUtil.AMMO_SIZE) {
-                addRemoveAmmo(ammo.getId());
-                addRemoveAmmo(target.getId());
+                addRemoveBulletIds(ammo.getId());
+                addRemoveBulletIds(target.getId());
                 return true;
             }
         }
