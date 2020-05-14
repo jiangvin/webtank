@@ -1,26 +1,41 @@
 {
-    function Room() {
+    function Room(roomInfo) {
+        this.instance = null;
+
+        this.roomInfo = roomInfo;
         this.stage = null;
-        this.roomInfo = null;
+
+        this.control = {
+            orientation: 0,
+            action: 0,
+            cache: {}
+        };
+
+        this.send = {
+            orientation: 0,
+            action: 0,
+            x: 0,
+            y: 0
+        }
     }
 
-    let centerSyncInfo = {};
-
     Room.getOrCreateRoom = function (roomInfo) {
-        if (this.stage) {
-            return this.stage;
+        if (this.instance) {
+            return this.instance;
         }
 
         //init room
-        this.stage = Resource.getGame().createStage({id: roomInfo.roomId});
-        this.roomInfo = roomInfo;
-        this.stage.backgroundImage = Resource.getImage("background", "jpg");
-        if (this.roomInfo.roomType !== "PVE") {
-            this.stage.showTeam = true;
-        }
-
-        const thisRoom = this;
+        this.instance = new Room(roomInfo);
+        this.instance.stage = Resource.getGame().createStage({id: roomInfo.roomId});
+        const thisRoom = this.instance;
         const thisStage = thisRoom.stage;
+
+        //因为延迟问题采用本地同步远端的设计，增加操控体验
+        thisStage.updateSelf = false;
+        thisStage.backgroundImage = Resource.getImage("background", "jpg");
+        if (thisRoom.roomInfo.roomType !== "PVE") {
+            thisStage.showTeam = true;
+        }
 
         //扩展消息函数
         thisStage.receiveStompMessageExtension = function (messageDto) {
@@ -37,9 +52,12 @@
             }
         };
 
-        //扩展控制
+        //重载控制函数
+        thisStage.setControl = function (orientation, action) {
+            reloadSetControl(thisRoom, orientation, action);
+        };
         thisStage.updateCenter = function () {
-            updateCenter(thisStage);
+            reloadUpdateCenter(thisRoom);
         };
 
         //显示基本信息
@@ -47,153 +65,222 @@
         drawTips(thisStage, tipMessage, 10, 6);
     };
 
-    const isBarrier = function (stage, x, y, orientation) {
-        const size = Resource.getUnitSize();
-        const grid = {
-            x: Math.floor(x / size),
-            y: Math.floor(y / size)
-        };
-        switch (orientation) {
-            case 0:
-                --grid.y;
-                break;
-            case 1:
-                ++grid.y;
-                break;
-            case 2:
-                --grid.x;
-                break;
-            case 3:
-                ++grid.x;
-                break;
+    const reloadUpdateCenter = function (room) {
+        const center = room.stage.view.center;
+        if (center === null) {
+            return;
         }
-        if (grid.x < 0 || grid.y < 0) {
+        if (center.action === 0) {
+            return;
+        }
+
+        let needSend = false;
+        const cache = room.control.cache;
+        if (cache && cache.x && cache.y) {
+            const distance = Common.distance(center.x, center.y, cache.x, cache.y);
+            if (distance > center.speed) {
+                return;
+            }
+
+            //清空缓存
+            center.x = cache.x;
+            center.y = cache.y;
+            room.control.cache = null;
+            center.orientation = room.control.orientation;
+            needSend = true;
+        }
+
+        const newControl = generateNewControl(room.stage, center.orientation, center.action);
+        if (!newControl.action) {
+            //不能通行
+            center.action = 0;
+            needSend = true;
+        } else if (newControl.cache) {
+            //能通行,但要更新缓存
+            room.control.cache = newControl.cache;
+            if (center.orientation !== room.control.cache.orientation) {
+                center.orientation = room.control.cache.orientation;
+                needSend = true;
+            }
+        }
+
+        if (needSend) {
+            sendSyncMessage(room.send, center);
+        }
+    };
+
+    const reloadSetControl = function (room, orientation, action) {
+        const center = room.stage.view.center;
+        if (center === null) {
+            return;
+        }
+        if (orientation === null) {
+            orientation = center.orientation;
+        }
+        const newControl = generateNewControl(room.stage, orientation, action);
+
+        //新命令和旧命令一样，返回
+        if (newControl.action === room.control.action && newControl.orientation === room.control.orientation) {
+            return;
+        }
+
+        room.control = newControl;
+        center.action = newControl.action;
+        if (newControl.cache) {
+            center.orientation = newControl.cache.orientation;
+        } else {
+            center.orientation = newControl.orientation;
+        }
+        sendSyncMessage(room.send, center);
+    };
+
+    const isBarrier = function (stage, point) {
+        if (point.x < 0 || point.y < 0 || point.x > Common.width() || point.y > Common.height()) {
             return true;
         }
-        const key = grid.x + "_" + grid.y;
+        const size = Resource.getUnitSize();
+        point.gridX = Math.floor(point.x / size);
+        point.gridY = Math.floor(point.y / size);
+        let key = point.gridX + "_" + point.gridY;
         return stage.items.has(key) && stage.items.get(key).isBarrier;
+
     };
 
-    const updateCenter = function (stage) {
+    const generateNewControl = function (stage, orientation, action) {
+        const newControl = {
+            orientation: orientation,
+            action: 0
+        };
+        if (action === 0) {
+            return newControl;
+        }
         const center = stage.view.center;
-        const control = stage.control;
 
-        if (center.action === 0) {
-            if (control.action === 0) {
-                if (center.orientation === control.orientation) {
-                    return;
-                }
-                center.orientation = control.orientation;
-                sendSyncInfo(center);
-                return;
-            }
-
-            if (isBarrier(stage, center.x, center.y, control.orientation)) {
-                control.action = 0;
-                updateCenter(stage);
-                return;
-            }
-            center.action = control.action;
-            center.orientation = control.orientation;
-            center.update();
-            sendSyncInfo(center);
-            return;
+        //action为1，开始碰撞检测
+        let x = center.x;
+        let y = center.y;
+        const speed = center.speed;
+        const size = Resource.getUnitSize();
+        const half = size / 2;
+        //获取前方的两个角的坐标（顺时针获取）
+        const corner1 = {};
+        const corner2 = {};
+        switch (orientation) {
+            case 0:
+                y -= speed;
+                corner1.x = x - half;
+                corner1.y = y - half;
+                corner2.x = x + half - 1;
+                corner2.y = y - half;
+                break;
+            case 1:
+                y += speed;
+                corner1.x = x + half - 1;
+                corner1.y = y + half - 1;
+                corner2.x = x - half;
+                corner2.y = y + half - 1;
+                break;
+            case 2:
+                x -= speed;
+                corner1.x = x - half;
+                corner1.y = y + half - 1;
+                corner2.x = x - half;
+                corner2.y = y - half;
+                break;
+            case 3:
+                x += speed;
+                corner1.x = x + half - 1;
+                corner1.y = y - half;
+                corner2.x = x + half - 1;
+                corner2.y = y + half - 1;
+                break;
         }
 
-        const size = Resource.getUnitSize();
-        const centerGrid = {
-            x: Math.floor(center.x / size),
-            y: Math.floor(center.y / size)
-        };
-        const destination = {
-            x: centerGrid.x * size + size / 2,
-            y: centerGrid.y * size + size / 2,
-        };
-        switch (center.orientation) {
+        corner1.isBarrier = isBarrier(stage, corner1);
+        corner2.isBarrier = isBarrier(stage, corner2);
+
+        //两个边界都有阻碍，返回
+        if (corner1.isBarrier && corner2.isBarrier) {
+            return newControl;
+        }
+
+        newControl.action = 1;
+        //两个边界都没阻碍，返回
+        if (!corner1.isBarrier && !corner2.isBarrier) {
+            return newControl;
+        }
+
+        //增加中转点(单边阻碍的情况)
+        const transferGrid = {};
+        newControl.cache = {};
+        switch (orientation) {
             case 0:
-                if (center.y < destination.y) {
-                    destination.y -= size;
+                if (corner1.isBarrier) {
+                    newControl.cache.orientation = 3;
+                    transferGrid.gridX = corner2.gridX;
+                    transferGrid.gridY = corner2.gridY + 1;
+                } else {
+                    newControl.cache.orientation = 2;
+                    transferGrid.gridX = corner1.gridX;
+                    transferGrid.gridY = corner1.gridY + 1;
                 }
                 break;
             case 1:
-                if (center.y > destination.y) {
-                    destination.y += size;
+                if (corner1.isBarrier) {
+                    newControl.cache.orientation = 2;
+                    transferGrid.gridX = corner2.gridX;
+                    transferGrid.gridY = corner2.gridY - 1;
+                } else {
+                    newControl.cache.orientation = 3;
+                    transferGrid.gridX = corner1.gridX;
+                    transferGrid.gridY = corner1.gridY - 1;
                 }
                 break;
             case 2:
-                if (center.x < destination.x) {
-                    destination.x -= size;
+                if (corner1.isBarrier) {
+                    newControl.cache.orientation = 0;
+                    transferGrid.gridX = corner2.gridX + 1;
+                    transferGrid.gridY = corner2.gridY;
+                } else {
+                    newControl.cache.orientation = 1;
+                    transferGrid.gridX = corner1.gridX + 1;
+                    transferGrid.gridY = corner1.gridY;
                 }
                 break;
             case 3:
-                if (center.x > destination.x) {
-                    destination.x += size;
+                if (corner1.isBarrier) {
+                    newControl.cache.orientation = 1;
+                    transferGrid.gridX = corner2.gridX - 1;
+                    transferGrid.gridY = corner2.gridY;
+                } else {
+                    newControl.cache.orientation = 0;
+                    transferGrid.gridX = corner1.gridX - 1;
+                    transferGrid.gridY = corner1.gridY;
                 }
                 break;
         }
-        let distance = Common.distance(center.x, center.y, destination.x, destination.y);
-        //排除精度误差
-        if (distance > size) {
-            distance -= size;
-        }
-
-        //还没到终点，先不操作
-        const speed = center.speed;
-        if (distance > speed) {
-            center.update();
-            return;
-        }
-
-        //先移动到屏幕中心再操作
-        center.x = destination.x;
-        center.y = destination.y;
-
-        //停止
-        if (control.action === 0) {
-            center.orientation = control.orientation;
-            center.action = control.action;
-            sendSyncInfo(center);
-            return;
-        }
-
-        //继续走
-        if (isBarrier(stage, center.x, center.y, center.orientation)) {
-            control.action = 0;
-            updateCenter(stage);
-            return;
-        }
-
-        if (center.orientation !== control.orientation) {
-            center.orientation = control.orientation;
-
-            //把剩下的再走完
-            center.speed = speed - distance;
-            center.update();
-            center.speed = speed;
-            sendSyncInfo(center);
-        }
+        newControl.cache.x = transferGrid.gridX * size + half;
+        newControl.cache.y = transferGrid.gridY * size + half;
+        return newControl;
     };
 
-    const sendSyncInfo = function (center) {
-        if (center.x === centerSyncInfo.x
-            && center.y === centerSyncInfo.y
-            && center.orientation === centerSyncInfo.orientation
-            && center.action === centerSyncInfo.action) {
+    const sendSyncMessage = function (send, center) {
+        if (center.x === send.x
+            && center.y === send.y
+            && center.orientation === send.orientation
+            && center.action === send.action) {
             return;
         }
-
+        send.x = center.x;
+        send.y = center.y;
+        send.orientation = center.orientation;
+        send.action = center.action;
         Common.sendStompMessage({
-            orientation: center.orientation,
-            action: center.action,
-            x: center.x,
-            y: center.y
+            orientation: send.orientation,
+            action: send.action,
+            x: send.x,
+            y: send.y
         }, "UPDATE_TANK_CONTROL");
-
-        centerSyncInfo.x = center.x;
-        centerSyncInfo.y = center.y;
-        centerSyncInfo.orientation = center.orientation;
-        centerSyncInfo.action = center.action;
-
     };
 
     /**

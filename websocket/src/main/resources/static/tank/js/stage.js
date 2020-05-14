@@ -43,6 +43,11 @@ function Stage(params) {
         }
     };
 
+    /**
+     * 该方法在room中被重载
+     * @param orientation
+     * @param action
+     */
     this.setControl = function (orientation, action) {
         if (this.view.center === null) {
             return;
@@ -203,9 +208,17 @@ function Stage(params) {
     };
 
     this.update = function () {
+        this.updateCenter();
         this.items.forEach(function (item) {
             item.update();
         });
+    };
+
+    /**
+     * 该方法在room中被重载
+     */
+    this.updateCenter = function () {
+
     };
 
     this.createItem = function (options) {
@@ -279,7 +292,6 @@ function Stage(params) {
     this.createBullet = function (options) {
         const item = this.createItem(options);
         item.action = 1;
-        item.z = -2;
         item.image = Resource.getImage("bullet");
         item.update = function () {
             generalUpdateEvent(item);
