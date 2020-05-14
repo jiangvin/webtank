@@ -7,7 +7,8 @@ import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.util.CommonUtil;
 import lombok.Data;
 
-import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author 蒋文龙(Vin)
@@ -28,8 +29,7 @@ public class TankBo {
     private int reloadTime;
     private int ammoCount;
     private long lastSyncTime = System.currentTimeMillis();
-    private String startGridKey;
-    private String endGridKey;
+    private List<String> gridKeyList = new ArrayList<>();
 
     public void refreshSyncTime() {
         this.lastSyncTime = System.currentTimeMillis();
@@ -99,12 +99,31 @@ public class TankBo {
         ++ammoCount;
     }
 
-    /**
-     * 离网格中心的位置
-     * @return
-     */
-    public double distanceToEndGrid() {
-        Point endGrid = CommonUtil.getPointFromKey(this.endGridKey);
-        return endGrid.distance(this.x, this.y);
+    public List<String> generateGridKeyList() {
+        List<String> keys = new ArrayList<>();
+        int size = CommonUtil.UNIT_SIZE;
+        int half = size / 2;
+        CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x, y), keys);
+        switch (this.orientationType) {
+            case UP:
+                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y - half), keys);
+                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half - 1, y - half), keys);
+                break;
+            case DOWN:
+                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y + half - 1), keys);
+                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half - 1, y + half - 1), keys);
+                break;
+            case LEFT:
+                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y - half), keys);
+                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y + half - 1), keys);
+                break;
+            case RIGHT:
+                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half - 1, y - half), keys);
+                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half - 1, y + half - 1), keys);
+                break;
+            default:
+                break;
+        }
+        return keys;
     }
 }

@@ -121,7 +121,6 @@ public class StageRoom extends BaseStage {
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             updateTank(tankBo);
-            addSyncList(tankBo);
         }
         syncTanks();
 
@@ -235,7 +234,7 @@ public class StageRoom extends BaseStage {
             syncBulletList.add(bullet);
         }
 
-        String newStart = CommonUtil.generateStartGridKey(bullet.getX(), bullet.getY());
+        String newStart = CommonUtil.generateGridKey(bullet.getX(), bullet.getY());
         if (newStart.equals(bullet.getStartGridKey())) {
             return;
         }
@@ -257,72 +256,21 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        double speed = tankBo.getType().getSpeed();
-        double distance = tankBo.distanceToEndGrid();
-        boolean reachDestination = distance <= speed;
-
-        //没到目的地，不更新
-        if (!reachDestination) {
-            //只和tank做碰撞检测
-            if (collideWithTanks(tankBo)) {
+        for (String key : tankBo.getGridKeyList()) {
+            Point grid = CommonUtil.getGridPointFromKey(key);
+            if (collideWithAll(grid.x, grid.y, tankBo)) {
                 tankForceStop(tankBo);
-            } else {
-                tankBo.run(speed);
+                return;
             }
-            return;
         }
-
-        //先更新start key
-        String startKey = tankBo.getStartGridKey();
-        removeToGridTankMap(tankBo, startKey);
-        tankBo.setStartGridKey(tankBo.getEndGridKey());
-
-        //碰撞检测,滤掉走不通的情况
-        Point grid = getGrid(tankBo);
-        if (collideWithAll(grid.x, grid.y, tankBo)) {
-            tankForceStop(tankBo);
-            return;
-        }
-
-        //最后情况：到了目的地 & 不更新状态
-        //只更新新目的地
-        tankBo.run(speed);
-        String endKey = CommonUtil.generateKey(grid.x, grid.y);
-        tankBo.setEndGridKey(endKey);
-        insertToGridTankMap(tankBo, endKey);
+        tankBo.run(tankBo.getType().getSpeed());
+        refreshTankGridMap(tankBo);
+        addSyncList(tankBo);
     }
 
     private void tankForceStop(TankBo tankBo) {
-        if (!tankBo.getStartGridKey().equals(tankBo.getEndGridKey())) {
-            removeToGridTankMap(tankBo, tankBo.getEndGridKey());
-            tankBo.setEndGridKey(tankBo.getStartGridKey());
-        }
         tankBo.setActionType(ActionType.STOP);
         sendTankToRoom(tankBo, MessageType.TANKS_FORCE);
-    }
-
-    private Point getGrid(TankBo tankBo) {
-        int gridX = (int)(tankBo.getX() / CommonUtil.UNIT_SIZE);
-        int gridY = (int)(tankBo.getY() / CommonUtil.UNIT_SIZE);
-        if (tankBo.getActionType() == ActionType.RUN) {
-            switch (tankBo.getOrientationType()) {
-                case UP:
-                    --gridY;
-                    break;
-                case DOWN:
-                    ++gridY;
-                    break;
-                case LEFT:
-                    --gridX;
-                    break;
-                case RIGHT:
-                    ++gridX;
-                    break;
-                default:
-                    break;
-            }
-        }
-        return new Point(gridX, gridY);
     }
 
     private boolean collideWithAll(int gridX, int gridY, TankBo tankBo) {
@@ -485,13 +433,10 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean collideWithTanks(TankBo tankBo) {
-        String startKey = tankBo.getStartGridKey();
-        if (collideWithTanks(tankBo, startKey)) {
-            return true;
-        }
-
-        if (tankBo.getEndGridKey() != null && !tankBo.getEndGridKey().equals(startKey)) {
-            return collideWithTanks(tankBo, tankBo.getEndGridKey());
+        for (String key : tankBo.getGridKeyList()) {
+            if (collideWithTanks(tankBo, key)) {
+                return true;
+            }
         }
         return false;
     }
@@ -560,9 +505,9 @@ public class StageRoom extends BaseStage {
 
     @Override
     void removeTankExtension(TankBo tankBo) {
-        removeToGridTankMap(tankBo, tankBo.getStartGridKey());
-        removeToGridTankMap(tankBo, tankBo.getEndGridKey());
-
+        for (String key : tankBo.getGridKeyList()) {
+            removeToGridTankMap(tankBo, key);
+        }
         //check status
         if (checkGameStatusAfterTankBomb(tankBo)) {
             return;
@@ -767,12 +712,11 @@ public class StageRoom extends BaseStage {
         } else {
             posStr = mapBo.getComputerStartPoints().get(random.nextInt(mapBo.getComputerStartPoints().size()));
         }
-        tankBo.setStartGridKey(posStr);
-        tankBo.setEndGridKey(posStr);
+        tankBo.getGridKeyList().add(posStr);
+        insertToGridTankMap(tankBo, posStr);
         Point point = CommonUtil.getPointFromKey(posStr);
         tankBo.setX(point.getX());
         tankBo.setY(point.getY());
-        insertToGridTankMap(tankBo, tankBo.getStartGridKey());
     }
 
     private void insertToGridTankMap(TankBo tankBo, String key) {
@@ -816,30 +760,30 @@ public class StageRoom extends BaseStage {
     @Override
     void updateTankControlExtension(TankBo tankBo, ItemDto tankDto) {
         //TODO - 距离检测，防止作弊
+
         tankBo.setX(tankDto.getX());
         tankBo.setY(tankDto.getY());
-        String startKey = CommonUtil.generateStartGridKey(tankBo.getX(), tankBo.getY());
-        if (!startKey.equals(tankBo.getStartGridKey())) {
-            removeToGridTankMap(tankBo, tankBo.getStartGridKey());
-            insertToGridTankMap(tankBo, startKey);
-            tankBo.setStartGridKey(startKey);
-        }
+        refreshTankGridMap(tankBo);
+    }
 
-        if (tankBo.getActionType() == ActionType.STOP) {
-            tankBo.setEndGridKey(startKey);
-        } else {
-            String endKey = CommonUtil.generateEndGridKey(tankBo.getX(), tankBo.getY(), tankBo.getOrientationType());
-            if (!endKey.equals(tankBo.getEndGridKey())) {
-                removeToGridTankMap(tankBo, tankBo.getEndGridKey());
-                insertToGridTankMap(tankBo, endKey);
-                tankBo.setEndGridKey(endKey);
+    private void refreshTankGridMap(TankBo tankBo) {
+        List<String> newKeys = tankBo.generateGridKeyList();
+        for (String oldKey : tankBo.getGridKeyList()) {
+            if (!newKeys.contains(oldKey)) {
+                removeToGridTankMap(tankBo, oldKey);
             }
         }
+        for (String newKey : newKeys) {
+            if (!tankBo.getGridKeyList().contains(newKey)) {
+                insertToGridTankMap(tankBo, newKey);
+            }
+        }
+        tankBo.setGridKeyList(newKeys);
     }
 
     @Override
     void processTankFireExtension(BulletBo bullet) {
-        String startKey = CommonUtil.generateStartGridKey(bullet.getX(), bullet.getY());
+        String startKey = CommonUtil.generateGridKey(bullet.getX(), bullet.getY());
         bullet.setStartGridKey(startKey);
         insertToGridBulletMap(bullet, startKey);
 

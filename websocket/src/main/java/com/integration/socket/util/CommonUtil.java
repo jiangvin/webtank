@@ -4,6 +4,7 @@ package com.integration.socket.util;
 import com.integration.socket.model.OrientationType;
 
 import java.awt.Point;
+import java.util.List;
 
 /**
  * @author 蒋文龙(Vin)
@@ -28,6 +29,11 @@ public class CommonUtil {
                    Integer.parseInt(infos[1]) * UNIT_SIZE + UNIT_SIZE / 2);
     }
 
+    public static Point getGridPointFromKey(String key) {
+        String[] infos = key.split("_");
+        return new Point(Integer.parseInt(infos[0]), Integer.parseInt(infos[1]));
+    }
+
     public static String generateKey(int x, int y) {
         return String.format("%d_%d", x, y);
     }
@@ -42,17 +48,17 @@ public class CommonUtil {
                .replaceFirst(", \\)$", ")") : null;
     }
 
-    private static Point generateStartGridPoint(double x, double y) {
+    private static Point generateGridPoint(double x, double y) {
         return new Point((int)(x / CommonUtil.UNIT_SIZE), (int)(y / CommonUtil.UNIT_SIZE));
     }
 
-    public static String generateStartGridKey(double x, double y) {
-        Point point = generateStartGridPoint(x, y);
+    public static String generateGridKey(double x, double y) {
+        Point point = generateGridPoint(x, y);
         return generateKey(point.x, point.y);
     }
 
     public static String generateEndGridKey(double x, double y, OrientationType orientationType) {
-        Point point = generateStartGridPoint(x, y);
+        Point point = generateGridPoint(x, y);
         switch (orientationType) {
             case UP:
                 --point.y;
@@ -70,5 +76,12 @@ public class CommonUtil {
                 break;
         }
         return CommonUtil.generateKey(point.x, point.y);
+    }
+
+    public static void addWithoutRepeat(String str, List<String> list) {
+        if (list.contains(str)) {
+            return;
+        }
+        list.add(str);
     }
 }
