@@ -103,7 +103,6 @@ public class TankBo {
         List<String> keys = new ArrayList<>();
         int size = CommonUtil.UNIT_SIZE;
         int half = size / 2;
-        CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x, y), keys);
         switch (this.orientationType) {
             case UP:
                 CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y - half), keys);

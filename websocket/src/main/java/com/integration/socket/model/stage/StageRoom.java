@@ -257,8 +257,7 @@ public class StageRoom extends BaseStage {
         }
 
         for (String key : tankBo.getGridKeyList()) {
-            Point grid = CommonUtil.getGridPointFromKey(key);
-            if (collideWithAll(grid.x, grid.y, tankBo)) {
+            if (collideWithAll(tankBo, key)) {
                 tankForceStop(tankBo);
                 return;
             }
@@ -273,19 +272,19 @@ public class StageRoom extends BaseStage {
         sendTankToRoom(tankBo, MessageType.TANKS_FORCE);
     }
 
-    private boolean collideWithAll(int gridX, int gridY, TankBo tankBo) {
-        if (gridX < 0 || gridY < 0 || gridX >= mapBo.getMaxGridX() || gridY >= mapBo.getMaxGridY()) {
+    private boolean collideWithAll(TankBo tankBo, String key) {
+        Point grid = CommonUtil.getGridPointFromKey(key);
+        if (grid.x < 0 || grid.y < 0 || grid.x >= mapBo.getMaxGridX() || grid.y >= mapBo.getMaxGridY()) {
             //超出范围，停止
             return true;
-        } else {
-            String goalKey = CommonUtil.generateKey(gridX, gridY);
-            if (collideForTank(mapBo.getUnitMap().get(goalKey))) {
-                //有障碍物，停止
-                return true;
-            } else {
-                return collideWithTanks(tankBo);
-            }
         }
+
+        if (collideForTank(mapBo.getUnitMap().get(key))) {
+            //有障碍物，停止
+            return true;
+        }
+
+        return collideWithTanks(tankBo, key);
     }
 
     private boolean collideWithAll(BulletBo bullet) {
@@ -430,15 +429,6 @@ public class StageRoom extends BaseStage {
     private void removeMap(String key) {
         mapBo.getUnitMap().remove(key);
         sendMessageToRoom(key, MessageType.REMOVE_MAP);
-    }
-
-    private boolean collideWithTanks(TankBo tankBo) {
-        for (String key : tankBo.getGridKeyList()) {
-            if (collideWithTanks(tankBo, key)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean collideWithTanks(TankBo tankBo, String key) {
