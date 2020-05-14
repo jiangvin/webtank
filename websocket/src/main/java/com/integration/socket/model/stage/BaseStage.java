@@ -156,13 +156,17 @@ public abstract class BaseStage {
         messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId()));
     }
 
-    void sendTankToRoom(TankBo tankBo) {
-        sendTankToRoom(tankBo, MessageType.TANKS);
+    void sendMessageToRoom(Object object, MessageType messageType, String note) {
+        messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId(), note));
     }
 
-    void sendTankToRoom(TankBo tankBo, MessageType type) {
+    void sendTankToRoom(TankBo tankBo) {
+        sendTankToRoom(tankBo, null);
+    }
+
+    void sendTankToRoom(TankBo tankBo, String note) {
         tankBo.refreshSyncTime();
-        sendMessageToRoom(Collections.singletonList(ItemDto.convert(tankBo)), type);
+        sendMessageToRoom(Collections.singletonList(ItemDto.convert(tankBo)), MessageType.TANKS, note);
     }
 
     void sendMessageToUser(Object object, MessageType messageType, String username) {

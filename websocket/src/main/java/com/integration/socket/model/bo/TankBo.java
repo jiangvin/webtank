@@ -102,27 +102,12 @@ public class TankBo {
     public List<String> generateGridKeyList() {
         List<String> keys = new ArrayList<>();
         int size = CommonUtil.UNIT_SIZE;
-        int half = size / 2;
-        switch (this.orientationType) {
-            case UP:
-                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y - half), keys);
-                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half - 1, y - half), keys);
-                break;
-            case DOWN:
-                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y + half - 1), keys);
-                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half - 1, y + half - 1), keys);
-                break;
-            case LEFT:
-                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y - half), keys);
-                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y + half - 1), keys);
-                break;
-            case RIGHT:
-                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half - 1, y - half), keys);
-                CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half - 1, y + half - 1), keys);
-                break;
-            default:
-                break;
-        }
+        //缩小一个像素点检测，减少误差
+        int half = size / 2 - 1;
+        CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y - half), keys);
+        CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half, y - half), keys);
+        CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y + half), keys);
+        CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half, y + half), keys);
         return keys;
     }
 }

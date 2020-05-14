@@ -31,13 +31,9 @@ public enum MessageType {
      */
     USERS,
     /**
-     * 同步tank信息，该模式下客户端不更新自己
+     * 同步tank信息
      */
     TANKS,
-    /**
-     * 强制更新tank信息，客户端会更新自己
-     */
-    TANKS_FORCE,
     /**
      * 删除TANK
      */

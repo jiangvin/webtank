@@ -135,7 +135,7 @@
     };
 
     const isBarrier = function (stage, point) {
-        if (point.x < 0 || point.y < 0 || point.x > Common.width() || point.y > Common.height()) {
+        if (point.x < 0 || point.y < 0 || point.x > stage.size.width || point.y > stage.size.height) {
             return true;
         }
         const size = Resource.getUnitSize();
@@ -168,29 +168,29 @@
         switch (orientation) {
             case 0:
                 y -= speed;
-                corner1.x = x - half;
-                corner1.y = y - half;
+                corner1.x = x - half + 1;
+                corner1.y = y - half + 1;
                 corner2.x = x + half - 1;
-                corner2.y = y - half;
+                corner2.y = y - half + 1;
                 break;
             case 1:
                 y += speed;
                 corner1.x = x + half - 1;
                 corner1.y = y + half - 1;
-                corner2.x = x - half;
+                corner2.x = x - half + 1;
                 corner2.y = y + half - 1;
                 break;
             case 2:
                 x -= speed;
-                corner1.x = x - half;
+                corner1.x = x - half + 1;
                 corner1.y = y + half - 1;
-                corner2.x = x - half;
-                corner2.y = y - half;
+                corner2.x = x - half + 1;
+                corner2.y = y - half + 1;
                 break;
             case 3:
                 x += speed;
                 corner1.x = x + half - 1;
-                corner1.y = y - half;
+                corner1.y = y - half + 1;
                 corner2.x = x + half - 1;
                 corner2.y = y + half - 1;
                 break;

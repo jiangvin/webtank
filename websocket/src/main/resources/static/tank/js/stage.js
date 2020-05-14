@@ -97,6 +97,9 @@ function Stage(params) {
         }
     };
 
+    /**
+     * @param messageDto {{note,roomId,message,messageType}}
+     */
     this.receiveStompMessage = function (messageDto) {
         //id校验，确保消息正确
         if (!this.id) {
@@ -111,10 +114,12 @@ function Stage(params) {
 
         switch (messageDto.messageType) {
             case "TANKS":
-                createOrUpdateTanks(thisStage, messageDto.message, this.updateSelf);
-                break;
-            case "TANKS_FORCE":
-                createOrUpdateTanks(thisStage, messageDto.message, true);
+                //除了坦克之间的碰撞以外其他情况不更新自己，否则会和客户端的自动避让起冲突
+                let updateSelf = this.updateSelf;
+                if (!updateSelf && messageDto.note === "COLLIDE_TANK") {
+                    updateSelf = true;
+                }
+                createOrUpdateTanks(thisStage, messageDto.message, updateSelf);
                 break;
             case "REMOVE_TANK":
                 this.itemBomb(messageDto.message);
@@ -376,12 +381,11 @@ function Stage(params) {
          */
         const center = thisStage.view.center;
         tanks.forEach(function (tank) {
-            //普通模式过滤自己
-            if (!force && center && center.id === tank.id) {
-                return;
-            }
-
             if (thisStage.items.has(tank.id)) {
+                //普通模式除非撞上tank，否则过滤自己
+                if (!force && center && center.id === tank.id) {
+                    return;
+                }
                 //已存在
                 generalUpdateAttribute(thisStage, tank);
             } else {

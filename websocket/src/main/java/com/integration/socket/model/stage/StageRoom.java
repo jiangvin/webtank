@@ -1,6 +1,7 @@
 package com.integration.socket.model.stage;
 
 import com.integration.socket.model.ActionType;
+import com.integration.socket.model.CollideType;
 import com.integration.socket.model.MapUnitType;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.RoomType;
@@ -257,9 +258,10 @@ public class StageRoom extends BaseStage {
         }
 
         for (String key : tankBo.getGridKeyList()) {
-            if (collideWithAll(tankBo, key)) {
-                tankForceStop(tankBo);
-                return;
+            CollideType type = collideWithAll(tankBo, key);
+            if (type != CollideType.COLLIDE_NONE) {
+                tankBo.setActionType(ActionType.STOP);
+                sendTankToRoom(tankBo, type.toString());
             }
         }
         tankBo.run(tankBo.getType().getSpeed());
@@ -267,24 +269,23 @@ public class StageRoom extends BaseStage {
         addSyncList(tankBo);
     }
 
-    private void tankForceStop(TankBo tankBo) {
-        tankBo.setActionType(ActionType.STOP);
-        sendTankToRoom(tankBo, MessageType.TANKS_FORCE);
-    }
-
-    private boolean collideWithAll(TankBo tankBo, String key) {
+    private CollideType collideWithAll(TankBo tankBo, String key) {
         Point grid = CommonUtil.getGridPointFromKey(key);
         if (grid.x < 0 || grid.y < 0 || grid.x >= mapBo.getMaxGridX() || grid.y >= mapBo.getMaxGridY()) {
             //超出范围，停止
-            return true;
+            return CollideType.COLLIDE_BOUNDARY;
         }
 
         if (collideForTank(mapBo.getUnitMap().get(key))) {
             //有障碍物，停止
-            return true;
+            return CollideType.COLLIDE_MAP;
         }
 
-        return collideWithTanks(tankBo, key);
+        if (collideWithTanks(tankBo, key)) {
+            //有其他坦克，停止
+            return CollideType.COLLIDE_TANK;
+        }
+        return CollideType.COLLIDE_NONE;
     }
 
     private boolean collideWithAll(BulletBo bullet) {
