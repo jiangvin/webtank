@@ -3,6 +3,7 @@ package com.integration.socket.controller;
 import com.integration.socket.model.MessageType;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomListDto;
+import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.service.OnlineUserService;
 import com.integration.socket.service.RoomService;
 import com.integration.util.model.CustomException;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,6 +32,9 @@ public class UserController {
 
     @Autowired
     private RoomService roomService;
+
+    @Autowired
+    private MapDao mapDao;
 
     @GetMapping("/ping")
     public MessageDto ping() {
@@ -67,7 +70,7 @@ public class UserController {
 
     @GetMapping("/getMaps")
     public List<String> getMaps() {
-        return Collections.singletonList("default");
+        return mapDao.queryMapIdList();
     }
 
 }

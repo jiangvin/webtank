@@ -174,6 +174,10 @@ function Stage(params) {
             return;
         }
 
+        if (Status.getStatusValue() === Status.getStatusPause()) {
+            return;
+        }
+
         let updateX = false;
         let updateY = false;
         if (this.size.width < Common.width()) {

@@ -43,7 +43,7 @@ public class MainController {
     @GetMapping("/chat")
     public ModelAndView helloWorld() {
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("main");
+        mav.setViewName("chat");
         mav.getModel().put("name", "chat");
         return mav;
     }

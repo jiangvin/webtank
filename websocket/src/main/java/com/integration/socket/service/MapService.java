@@ -4,16 +4,14 @@ import com.integration.socket.model.MapUnitType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.dto.RoomDto;
+import com.integration.socket.repository.dao.MapDao;
+import com.integration.socket.repository.jooq.tables.records.MapRecord;
 import com.integration.socket.util.CommonUtil;
 import com.integration.util.model.CustomException;
-import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
 
 /**
  * @author 蒋文龙(Vin)
@@ -30,7 +28,8 @@ public class MapService {
         private String value;
     }
 
-    private static final String DEFAULT = "default";
+    @Autowired
+    private MapDao mapDao;
 
     private static final String MAP_SIZE = "map_size";
 
@@ -42,36 +41,39 @@ public class MapService {
 
     private static final String MAP_CONTENT = "map_content";
 
-    private static final String URL_PREFIX = "http://localhost/tank/map/";
-
     private static final String PLAYER_DEFAULT_TYPE = "tank01";
 
     MapBo loadMap(RoomDto roomDto) {
         String mapId = roomDto.getMapId();
-        if (!DEFAULT.equals(mapId)) {
+        MapRecord record = mapDao.queryFromId(mapId);
+        if (record == null) {
+            throw new CustomException("找不到地图资源!");
+        }
+        String content = mapDao.queryFromId(mapId).getData();
+        if (StringUtils.isEmpty(content)) {
             throw new CustomException("找不到地图资源!");
         }
 
         //根据类型调整数据
-        MapBo mapBo = readFile(mapId);
+        MapBo mapBo = readFile(content);
         if (roomDto.getRoomType() == RoomType.PVP) {
             mapBo.duplicatePlayer();
         } else if (roomDto.getRoomType() == RoomType.EVE) {
             mapBo.duplicateComputer();
+        } else if (roomDto.getRoomType() == RoomType.PVE) {
+            mapBo.removeMapUnit(MapUnitType.BLUE_KING);
         }
         return mapBo;
     }
 
-    private MapBo readFile(String mapId) {
+    private MapBo readFile(String content) {
         MapBo mapBo = new MapBo();
+        String[] lines = content.replace("\r", "").split("\n");
         int lineIndex = 0;
+        int readMapLineNumber = -1;
         try {
-            URL url = new URL(URL_PREFIX + mapId + ".txt");
-            @Cleanup BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-            String line;
-            int readMapLineNumber = -1;
-            while ((line = reader.readLine()) != null) {
-                ++lineIndex;
+            for (lineIndex = 0; lineIndex < lines.length; ++lineIndex) {
+                String line = lines[lineIndex];
                 if (line.startsWith("#") || StringUtils.isEmpty(line)) {
                     continue;
                 }

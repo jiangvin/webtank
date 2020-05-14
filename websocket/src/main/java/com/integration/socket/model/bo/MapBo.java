@@ -83,6 +83,18 @@ public class MapBo {
         duplicate(playerLife, computerLife);
     }
 
+    public void removeMapUnit(MapUnitType mapUnitType) {
+        List<String> removeKeys = new ArrayList<>();
+        for (Map.Entry<String, MapUnitType> kv : unitMap.entrySet()) {
+            if (kv.getValue() == mapUnitType) {
+                removeKeys.add(kv.getKey());
+            }
+        }
+        for (String key : removeKeys) {
+            unitMap.remove(key);
+        }
+    }
+
     public int getCount(Map<String, Integer> lifeMap) {
         int life = 0;
         for (Map.Entry<String, Integer> kv : lifeMap.entrySet()) {
