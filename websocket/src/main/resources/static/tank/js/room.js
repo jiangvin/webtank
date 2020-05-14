@@ -47,16 +47,56 @@
         drawTips(thisStage, tipMessage, 10, 6);
     };
 
+    const isBarrier = function (stage, x, y, orientation) {
+        const size = Resource.getUnitSize();
+        const grid = {
+            x: Math.floor(x / size),
+            y: Math.floor(y / size)
+        };
+        switch (orientation) {
+            case 0:
+                --grid.y;
+                break;
+            case 1:
+                ++grid.y;
+                break;
+            case 2:
+                --grid.x;
+                break;
+            case 3:
+                ++grid.x;
+                break;
+        }
+        if (grid.x < 0 || grid.y < 0) {
+            return true;
+        }
+        const key = grid.x + "_" + grid.y;
+        return stage.items.has(key) && stage.items.get(key).isBarrier;
+    };
 
     const updateCenter = function (stage) {
         const center = stage.view.center;
-        if (!center) {
-            return;
-        }
-
         const control = stage.control;
-        if (center.orientation === control.orientation && center.action === control.action) {
+
+        if (center.action === 0) {
+            if (control.action === 0) {
+                if (center.orientation === control.orientation) {
+                    return;
+                }
+                center.orientation = control.orientation;
+                sendSyncInfo(center);
+                return;
+            }
+
+            if (isBarrier(stage, center.x, center.y, control.orientation)) {
+                control.action = 0;
+                updateCenter(stage);
+                return;
+            }
+            center.action = control.action;
+            center.orientation = control.orientation;
             center.update();
+            sendSyncInfo(center);
             return;
         }
 
@@ -69,74 +109,67 @@
             x: centerGrid.x * size + size / 2,
             y: centerGrid.y * size + size / 2,
         };
-
-        if (center.action === 1) {
-            switch (center.orientation) {
-                case 0:
-                    if (center.y <= destination.y) {
-                        destination.y -= size;
-                    }
-                    break;
-                case 1:
-                    if (center.y >= destination.y) {
-                        destination.y += size;
-                    }
-                    break;
-                case 2:
-                    if (center.x <= destination.x) {
-                        destination.x -= size;
-                    }
-                    break;
-                case 3:
-                    if (center.x >= destination.x) {
-                        destination.x += size;
-                    }
-                    break;
-            }
+        switch (center.orientation) {
+            case 0:
+                if (center.y < destination.y) {
+                    destination.y -= size;
+                }
+                break;
+            case 1:
+                if (center.y > destination.y) {
+                    destination.y += size;
+                }
+                break;
+            case 2:
+                if (center.x < destination.x) {
+                    destination.x -= size;
+                }
+                break;
+            case 3:
+                if (center.x > destination.x) {
+                    destination.x += size;
+                }
+                break;
+        }
+        let distance = Common.distance(center.x, center.y, destination.x, destination.y);
+        //排除精度误差
+        if (distance > size) {
+            distance -= size;
         }
 
-        const distance = Common.distance(center.x, center.y, destination.x, destination.y);
+        //还没到终点，先不操作
         const speed = center.speed;
         if (distance > speed) {
             center.update();
             return;
         }
 
-        //先移动到屏幕中心
-        center.speed = distance;
-        center.update();
-        center.speed = speed;
-        center.orientation = control.orientation;
-        center.action = control.action;
+        //先移动到屏幕中心再操作
+        center.x = destination.x;
+        center.y = destination.y;
 
-        //再看新目的地
-        if (control.action === 1) {
-            const destinationGrid = {
-                x: Math.floor(destination.x / size),
-                y: Math.floor(destination.y / size)
-            };
-            switch (control.orientation) {
-                case 0:
-                    --destinationGrid.y;
-                    break;
-                case 1:
-                    ++destinationGrid.y;
-                    break;
-                case 2:
-                    --destinationGrid.x;
-                    break;
-                case 3:
-                    ++destinationGrid.x;
-                    break;
-            }
-            if (destinationGrid.x < 0 || destinationGrid.y < 0) {
-                center.action = 0;
-            } else {
-                const key = destinationGrid.x + "_" + destinationGrid.y;
-                if (stage.items.has(key) && stage.items.get(key).isBarrier) {
-                    center.action = 0;
-                }
-            }
+        //停止
+        if (control.action === 0) {
+            center.orientation = control.orientation;
+            center.action = control.action;
+            sendSyncInfo(center);
+            return;
+        }
+
+        //继续走
+        if (isBarrier(stage, center.x, center.y, center.orientation)) {
+            control.action = 0;
+            updateCenter(stage);
+            return;
+        }
+
+        if (center.orientation !== control.orientation) {
+            center.orientation = control.orientation;
+
+            //把剩下的再走完
+            center.speed = speed - distance;
+            center.update();
+            center.speed = speed;
             sendSyncInfo(center);
         }
     };
