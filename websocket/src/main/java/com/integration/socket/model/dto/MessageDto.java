@@ -30,30 +30,33 @@ public class MessageDto {
      */
     private String roomId;
 
+    private String note;
+
     public MessageDto(Object message, MessageType messageType) {
-        init(message, messageType, null, null);
+        init(message, messageType, null, null, null);
     }
 
     public MessageDto(Object message, MessageType messageType, String sendTo) {
-        init(message, messageType, Collections.singletonList(sendTo), null);
+        init(message, messageType, Collections.singletonList(sendTo), null, null);
     }
 
     public MessageDto(Object message, MessageType messageType, String sendTo, String roomId) {
-        init(message, messageType, Collections.singletonList(sendTo), roomId);
-    }
-
-    public MessageDto(Object message, MessageType messageType, List<String> sendToList) {
-        init(message, messageType, sendToList, null);
+        init(message, messageType, Collections.singletonList(sendTo), roomId, null);
     }
 
     public MessageDto(Object message, MessageType messageType, List<String> sendToList, String roomId) {
-        init(message, messageType, sendToList, roomId);
+        init(message, messageType, sendToList, roomId, null);
     }
 
-    private void init(Object message, MessageType messageType, List<String> sendToList, String roomId) {
+    public MessageDto(Object message, MessageType messageType, List<String> sendToList, String roomId, String note) {
+        init(message, messageType, sendToList, roomId, note);
+    }
+
+    private void init(Object message, MessageType messageType, List<String> sendToList, String roomId, String note) {
         this.message = message;
         this.messageType = messageType;
         this.sendToList = sendToList;
         this.roomId = roomId;
+        this.note = note;
     }
 }

@@ -4,12 +4,13 @@ function Stage(params) {
 
     this.params = params || {};
     this.settings = {
-        showTeam: false,                    //显示团队标志
-        id: null,                           //布景id
-        items: new Map(),				    //对象队列
-        view: {x: 0, y: 0, center: null},   //视野
-        size: {width: 0, height: 0},        //场景大小
-        backgroundImage: null,              //背景图
+        showTeam: false,                       //显示团队标志
+        id: null,                              //布景id
+        items: new Map(),				       //对象队列
+        view: {x: 0, y: 0, center: null},      //视野
+        size: {width: 0, height: 0},           //场景大小
+        backgroundImage: null,                 //背景图
+        updateSelf: true,                      //服务器远端同步自己
 
         //拓展函数
         receiveStompMessageExtension: function () {
@@ -19,7 +20,59 @@ function Stage(params) {
 
     //处理控制事件
     this.controlEvent = function (event) {
-        if (this.view.center !== null || !this.size.width || !this.size.height) {
+        this.controlTank(event);
+        this.controlView(event);
+    };
+
+    this.controlTank = function (event) {
+        switch (event) {
+            case "Up":
+                this.setControl(0, 1);
+                break;
+            case "Down":
+                this.setControl(1, 1);
+                break;
+            case "Left":
+                this.setControl(2, 1);
+                break;
+            case "Right":
+                this.setControl(3, 1);
+                break;
+            case "Stop":
+                this.setControl(null, 0);
+        }
+    };
+
+    /**
+     * 该方法在room中被重载
+     * @param orientation
+     * @param action
+     */
+    this.setControl = function (orientation, action) {
+        if (this.view.center === null) {
+            return;
+        }
+        const center = this.view.center;
+
+        if (orientation === null) {
+            orientation = center.orientation;
+        }
+        if (center.orientation === orientation && center.action === action) {
+            return;
+        }
+
+        Common.sendStompMessage({
+            orientation: orientation,
+            action: action
+        }, "UPDATE_TANK_CONTROL");
+    };
+
+    this.controlView = function (event) {
+        if (this.view.center !== null && Status.getStatusValue() !== Status.getStatusPause()) {
+            return;
+        }
+
+        if (!this.size.width || !this.size.height) {
             return;
         }
 
@@ -42,6 +95,9 @@ function Stage(params) {
         }
     };
 
+    /**
+     * @param messageDto {{note,roomId,message,messageType}}
+     */
     this.receiveStompMessage = function (messageDto) {
         //id校验，确保消息正确
         if (!this.id) {
@@ -56,7 +112,12 @@ function Stage(params) {
 
         switch (messageDto.messageType) {
             case "TANKS":
-                createOrUpdateTanks(thisStage, messageDto.message);
+                //除了坦克之间的碰撞以外其他情况不更新自己，否则会和客户端的自动避让起冲突
+                let updateSelf = this.updateSelf;
+                if (!updateSelf && messageDto.note === "COLLIDE_TANK") {
+                    updateSelf = true;
+                }
+                createOrUpdateTanks(thisStage, messageDto.message, updateSelf);
                 break;
             case "REMOVE_TANK":
                 this.itemBomb(messageDto.message);
@@ -150,9 +211,17 @@ function Stage(params) {
     };
 
     this.update = function () {
+        this.updateCenter();
         this.items.forEach(function (item) {
             item.update();
         });
+    };
+
+    /**
+     * 该方法在room中被重载
+     */
+    this.updateCenter = function () {
+
     };
 
     this.createItem = function (options) {
@@ -223,11 +292,10 @@ function Stage(params) {
 
         return item;
     };
-    this.createAmmo = function (options) {
+    this.createBullet = function (options) {
         const item = this.createItem(options);
         item.action = 1;
-        item.z = -2;
-        item.image = Resource.getImage("ammo");
+        item.image = Resource.getImage("bullet");
         item.update = function () {
             generalUpdateEvent(item);
         };
@@ -294,6 +362,7 @@ function Stage(params) {
     };
 
     const generalUpdateAttribute = function (thisStage, newAttr) {
+        //没有坐标则什么也不更新
         if (newAttr.x === undefined || newAttr.y === undefined) {
             return;
         }
@@ -304,12 +373,17 @@ function Stage(params) {
         thisStage.items.get(newAttr.id).action = newAttr.action;
     };
 
-    const createOrUpdateTanks = function (thisStage, tanks) {
+    const createOrUpdateTanks = function (thisStage, tanks, force) {
         /**
          * @param tank {{typeId}}
          */
+        const center = thisStage.view.center;
         tanks.forEach(function (tank) {
             if (thisStage.items.has(tank.id)) {
+                //普通模式除非撞上tank，否则过滤自己
+                if (!force && center && center.id === tank.id) {
+                    return;
+                }
                 //已存在
                 generalUpdateAttribute(thisStage, tank);
             } else {
@@ -343,12 +417,14 @@ function Stage(params) {
         });
     };
     const createOrUpdateBullets = function (thisStage, ammoList) {
+        let addNew = false;
         ammoList.forEach(function (ammo) {
             if (thisStage.items.has(ammo.id)) {
                 //已存在
                 generalUpdateAttribute(thisStage, ammo);
             } else {
-                thisStage.createAmmo({
+                addNew = true;
+                thisStage.createBullet({
                     id: ammo.id,
                     x: ammo.x,
                     y: ammo.y,
@@ -357,5 +433,8 @@ function Stage(params) {
                 });
             }
         });
+        if (addNew) {
+            thisStage.sortItems();
+        }
     }
 }
