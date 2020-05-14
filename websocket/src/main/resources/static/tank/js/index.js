@@ -32,7 +32,7 @@
             //更新logo id
             const tankLogo = Menu.getTankLogo();
             stageMenu.updateItemId(tankLogo, name, false);
-
+            stageMenu.view.center = tankLogo;
             //注册事件
             game.addTimeEvent("CLIENT_READY", function () {
                 Common.sendStompMessage(

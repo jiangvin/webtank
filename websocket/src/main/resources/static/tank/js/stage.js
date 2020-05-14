@@ -10,7 +10,7 @@ function Stage(params) {
         view: {x: 0, y: 0, center: null},      //视野
         size: {width: 0, height: 0},           //场景大小
         backgroundImage: null,                 //背景图
-        control: {orientation: 0, action: 0},  //缓存控制
+        updateSelf: true,                      //服务器远端同步自己
 
         //拓展函数
         receiveStompMessageExtension: function () {
@@ -20,11 +20,11 @@ function Stage(params) {
 
     //处理控制事件
     this.controlEvent = function (event) {
-        this.controlCenter(event);
+        this.controlTank(event);
         this.controlView(event);
     };
 
-    this.controlCenter = function (event) {
+    this.controlTank = function (event) {
         switch (event) {
             case "Up":
                 this.setControl(0, 1);
@@ -44,12 +44,24 @@ function Stage(params) {
     };
 
     this.setControl = function (orientation, action) {
+        if (this.view.center === null) {
+            return;
+        }
+        const center = this.view.center;
+
         if (orientation === null) {
-            orientation = this.control.orientation;
+            orientation = center.orientation;
+        }
+        if (center.orientation === orientation && center.action === action) {
+            return;
         }
 
-        this.control.orientation = orientation;
-        this.control.action = action;
+        center.orientation = orientation;
+        center.action = action;
+        Common.sendStompMessage({
+            orientation: center.orientation,
+            action: center.action
+        }, "UPDATE_TANK_CONTROL");
     };
 
     this.controlView = function (event) {
@@ -94,7 +106,7 @@ function Stage(params) {
 
         switch (messageDto.messageType) {
             case "TANKS":
-                createOrUpdateTanks(thisStage, messageDto.message);
+                createOrUpdateTanks(thisStage, messageDto.message, this.updateSelf);
                 break;
             case "TANKS_FORCE":
                 createOrUpdateTanks(thisStage, messageDto.message, true);
@@ -192,19 +204,8 @@ function Stage(params) {
 
     this.update = function () {
         this.items.forEach(function (item) {
-            if (item === thisStage.view.center) {
-                thisStage.updateCenter();
-            } else {
-                item.update();
-            }
+            item.update();
         });
-    };
-
-    /**
-     * 将在room里面重载
-     */
-    this.updateCenter = function () {
-        this.view.center.update();
     };
 
     this.createItem = function (options) {
@@ -275,11 +276,11 @@ function Stage(params) {
 
         return item;
     };
-    this.createAmmo = function (options) {
+    this.createBullet = function (options) {
         const item = this.createItem(options);
         item.action = 1;
         item.z = -2;
-        item.image = Resource.getImage("ammo");
+        item.image = Resource.getImage("bullet");
         item.update = function () {
             generalUpdateEvent(item);
         };
@@ -346,6 +347,7 @@ function Stage(params) {
     };
 
     const generalUpdateAttribute = function (thisStage, newAttr) {
+        //没有坐标则什么也不更新
         if (newAttr.x === undefined || newAttr.y === undefined) {
             return;
         }
@@ -408,7 +410,7 @@ function Stage(params) {
                 generalUpdateAttribute(thisStage, ammo);
             } else {
                 addNew = true;
-                thisStage.createAmmo({
+                thisStage.createBullet({
                     id: ammo.id,
                     x: ammo.x,
                     y: ammo.y,

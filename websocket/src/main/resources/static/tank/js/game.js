@@ -322,7 +322,7 @@ function Game() {
 
         //图层
         context.globalAlpha = 0.5;
-        let image = Resource.getImage("ammo_icon");
+        let image = Resource.getImage("bullet_icon");
         let size = touchInfo.rightRadius * 1.5;
         context.drawImage(image,
             0, 0,
