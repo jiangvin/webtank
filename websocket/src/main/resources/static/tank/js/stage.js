@@ -61,11 +61,9 @@ function Stage(params) {
             return;
         }
 
-        center.orientation = orientation;
-        center.action = action;
         Common.sendStompMessage({
-            orientation: center.orientation,
-            action: center.action
+            orientation: orientation,
+            action: action
         }, "UPDATE_TANK_CONTROL");
     };
 
