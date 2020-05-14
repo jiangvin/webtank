@@ -15,6 +15,10 @@
         <version>1.0.0</version>
     </parent>
 
+    <properties>
+        <jooq.version>3.11.4</jooq.version>
+    </properties>
+
     <dependencies>
         <!-- 引入 websocket 依赖类-->
         <dependency>
@@ -34,6 +38,27 @@
             <artifactId>util</artifactId>
             <version>1.0.0</version>
         </dependency>
+
+        <!--JDBC连接相关-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <!--for jooq-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jooq</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-codegen-maven</artifactId>
+            <version>${jooq.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -41,6 +66,35 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!--for jooq generate code-->
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>${jooq.version}</version>
+                <configuration>
+                    <jdbc>
+                        <driver>com.mysql.cj.jdbc.Driver</driver>
+                        <url></url>
+                        <user></user>
+                        <password></password>
+                    </jdbc>
+
+                    <generator>
+                        <database>
+                            <name>org.jooq.meta.mysql.MySQLDatabase</name>
+                            <includes>.*</includes>
+                            <inputSchema></inputSchema>
+                            <outputSchemaToDefault>true</outputSchemaToDefault>
+                        </database>
+
+                        <target>
+                            <packageName>com.integration.socket.repository.jooq</packageName>
+                            <directory>src/main/java</directory>
+                        </target>
+                    </generator>
+                </configuration>
             </plugin>
         </plugins>
     </build>
