@@ -1,15 +1,19 @@
 package com.integration.socket.controller;
 
 import com.integration.socket.model.MessageType;
+import com.integration.socket.model.dto.MapEditDto;
 import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.repository.dao.MapDao;
+import com.integration.socket.service.MapService;
 import com.integration.socket.service.OnlineUserService;
 import com.integration.socket.service.RoomService;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +39,9 @@ public class UserController {
 
     @Autowired
     private MapDao mapDao;
+
+    @Autowired
+    private MapService mapService;
 
     @GetMapping("/ping")
     public MessageDto ping() {
@@ -71,6 +78,17 @@ public class UserController {
     @GetMapping("/getMaps")
     public List<String> getMaps() {
         return mapDao.queryMapIdList();
+    }
+
+    @GetMapping("/getMap/{id}")
+    public MapEditDto getMap(@PathVariable(value = "id") String id) {
+        return MapEditDto.convert(mapDao.queryFromId(id));
+    }
+
+    @PostMapping("/setMap")
+    public boolean setMap(MapEditDto mapEditDto) {
+        mapService.saveMap(mapEditDto);
+        return true;
     }
 
 }

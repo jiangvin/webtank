@@ -3,6 +3,7 @@ package com.integration.socket.service;
 import com.integration.socket.model.MapUnitType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.bo.MapBo;
+import com.integration.socket.model.dto.MapEditDto;
 import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.repository.jooq.tables.records.MapRecord;
@@ -66,6 +67,26 @@ public class MapService {
         return mapBo;
     }
 
+    public void saveMap(MapEditDto mapEditDto) {
+        if (StringUtils.isEmpty(mapEditDto.getId())) {
+            throw new CustomException("名字不能为空");
+        }
+        readFile(mapEditDto.getData());
+        if (mapDao.queryMapIdList().contains(mapEditDto.getId())) {
+            //地图已存在
+            MapRecord mapRecord = mapDao.queryFromId(mapEditDto.getId());
+            if (mapRecord.getSecret() != null && !mapRecord.getSecret().equals(mapEditDto.getPw())) {
+                throw new CustomException("密码校验出错!");
+            }
+        }
+
+        String secret = null;
+        if (!StringUtils.isEmpty(mapEditDto.getPw())) {
+            secret = mapEditDto.getPw();
+        }
+        mapDao.insertMap(mapEditDto.getId(), secret, mapEditDto.getData());
+    }
+
     private MapBo readFile(String content) {
         MapBo mapBo = new MapBo();
         String[] lines = content.replace("\r", "").split("\n");
@@ -73,12 +94,15 @@ public class MapService {
         int readMapLineNumber = -1;
         try {
             for (lineIndex = 0; lineIndex < lines.length; ++lineIndex) {
-                String line = lines[lineIndex];
+                String line = lines[lineIndex].trim();
                 if (line.startsWith("#") || StringUtils.isEmpty(line)) {
                     continue;
                 }
                 if (readMapLineNumber <= -1) {
                     KeyValue kv = getKeyValue(line);
+                    if (kv == null) {
+                        continue;
+                    }
                     switch (kv.key) {
                         case MAP_SIZE:
                             String[] infos = kv.value.split("x");
@@ -118,7 +142,7 @@ public class MapService {
             }
         } catch (Exception e) {
             log.error("catch read file error:", e);
-            throw new CustomException(String.format("地图读取错误! 行数:%d, 错误 :%s", lineIndex, e.getMessage()));
+            throw new CustomException(String.format("地图读取错误! 行数:%d, 错误 :%s", lineIndex + 1, e.getMessage()));
         }
         mapBo.setTotalLifeCount();
         mapBo.checkSelf();
@@ -128,7 +152,7 @@ public class MapService {
     private KeyValue getKeyValue(String line) {
         int index = line.indexOf("=");
         if (index <= 0) {
-            throw new CustomException("地图格式错误!");
+            return null;
         }
         KeyValue kv = new KeyValue();
         kv.key = line.substring(0, index).toLowerCase();
@@ -151,15 +175,19 @@ public class MapService {
                 mapBo.getUnitMap().put(CommonUtil.generateKey(x, y), MapUnitType.GRASS);
                 break;
             case 'K':
+            case 'k':
                 mapBo.getUnitMap().put(CommonUtil.generateKey(x, y), MapUnitType.RED_KING);
                 break;
             case 'C':
+            case 'c':
                 mapBo.getUnitMap().put(CommonUtil.generateKey(x, y), MapUnitType.BLUE_KING);
                 break;
             case 'P':
+            case 'p':
                 mapBo.getPlayerStartPoints().add(CommonUtil.generateKey(x, y));
                 break;
             case 'E':
+            case 'e':
                 mapBo.getComputerStartPoints().add(CommonUtil.generateKey(x, y));
                 break;
             default:
