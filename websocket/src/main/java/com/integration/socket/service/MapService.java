@@ -4,7 +4,6 @@ import com.integration.socket.model.MapUnitType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.dto.MapEditDto;
-import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.repository.jooq.tables.records.MapRecord;
 import com.integration.socket.util.CommonUtil;
@@ -44,8 +43,7 @@ public class MapService {
 
     private static final String PLAYER_DEFAULT_TYPE = "tank01";
 
-    MapBo loadMap(RoomDto roomDto) {
-        String mapId = roomDto.getMapId();
+    public MapBo loadMap(String mapId, RoomType roomType) {
         MapRecord record = mapDao.queryFromId(mapId);
         if (record == null) {
             throw new CustomException("找不到地图资源!");
@@ -55,13 +53,14 @@ public class MapService {
             throw new CustomException("找不到地图资源!");
         }
 
-        //根据类型调整数据
         MapBo mapBo = readFile(content);
-        if (roomDto.getRoomType() == RoomType.PVP) {
+        mapBo.setMapId(mapId);
+        //根据类型调整数据
+        if (roomType == RoomType.PVP) {
             mapBo.duplicatePlayer();
-        } else if (roomDto.getRoomType() == RoomType.EVE) {
+        } else if (roomType == RoomType.EVE) {
             mapBo.duplicateComputer();
-        } else if (roomDto.getRoomType() == RoomType.PVE) {
+        } else if (roomType == RoomType.PVE) {
             mapBo.removeMapUnit(MapUnitType.BLUE_KING);
         }
         return mapBo;

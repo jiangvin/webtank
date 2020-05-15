@@ -31,6 +31,8 @@ public class MapBo {
 
     private int computerLifeTotalCount = 0;
 
+    private String mapId;
+
     private ConcurrentHashMap<String, Integer> playerLife = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<String, Integer> computerLife = new ConcurrentHashMap<>();

@@ -8,6 +8,7 @@ import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.MapBo;
+import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.bo.UserBo;
@@ -42,13 +43,11 @@ public class StageRoom extends BaseStage {
 
     private static final long SYNC_TANK_TIME = 2000;
 
-    public StageRoom(RoomDto roomDto, MapBo mapBo, MessageService messageService) {
+    public StageRoom(RoomDto roomDto, MapMangerBo mapManger, MessageService messageService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
         this.creator = roomDto.getCreator();
-        this.mapId = roomDto.getMapId();
-        this.roomType = roomDto.getRoomType();
-        this.mapBo = mapBo;
+        this.mapManger = mapManger;
     }
 
     private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
@@ -74,19 +73,25 @@ public class StageRoom extends BaseStage {
      */
     private List<TankBo> syncTankList = new ArrayList<>();
 
-    private MapBo mapBo;
-
     @Getter
     private String roomId;
 
     @Getter
     private String creator;
 
-    @Getter
-    private String mapId;
+    public String getMapId() {
+        return mapManger.getMapBo().getMapId();
+    }
 
-    @Getter
-    private RoomType roomType;
+    public RoomType getRoomType() {
+        return mapManger.getRoomType();
+    }
+
+    private MapBo getMapBo() {
+        return mapManger.getMapBo();
+    }
+
+    private MapMangerBo mapManger;
 
     private Random random = new Random();
 
@@ -272,12 +277,12 @@ public class StageRoom extends BaseStage {
 
     private CollideType collideWithAll(TankBo tankBo, String key) {
         Point grid = CommonUtil.getGridPointFromKey(key);
-        if (grid.x < 0 || grid.y < 0 || grid.x >= mapBo.getMaxGridX() || grid.y >= mapBo.getMaxGridY()) {
+        if (grid.x < 0 || grid.y < 0 || grid.x >= getMapBo().getMaxGridX() || grid.y >= getMapBo().getMaxGridY()) {
             //超出范围，停止
             return CollideType.COLLIDE_BOUNDARY;
         }
 
-        if (collideForTank(mapBo.getUnitMap().get(key))) {
+        if (collideForTank(getMapBo().getUnitMap().get(key))) {
             //有障碍物，停止
             return CollideType.COLLIDE_MAP;
         }
@@ -290,14 +295,14 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean collideWithAll(BulletBo bullet) {
-        if (bullet.getX() < 0 || bullet.getY() < 0 || bullet.getX() >= mapBo.getWidth() || bullet.getY() >= mapBo.getHeight()) {
+        if (bullet.getX() < 0 || bullet.getY() < 0 || bullet.getX() >= getMapBo().getWidth() || bullet.getY() >= getMapBo().getHeight()) {
             //超出范围
             addRemoveBulletIds(bullet.getId());
             return true;
         }
 
         //和地图场景碰撞检测
-        if (collideForBullet(mapBo.getUnitMap().get(bullet.getStartGridKey()))) {
+        if (collideForBullet(getMapBo().getUnitMap().get(bullet.getStartGridKey()))) {
             addRemoveBulletIds(bullet.getId());
             processMapWhenCatchAmmo(bullet.getStartGridKey(), bullet);
             return true;
@@ -387,7 +392,7 @@ public class StageRoom extends BaseStage {
     }
 
     private void processMapWhenCatchAmmo(String key, BulletBo bulletBo) {
-        MapUnitType mapUnitType = mapBo.getUnitMap().get(key);
+        MapUnitType mapUnitType = getMapBo().getUnitMap().get(key);
 
         if (mapUnitType == MapUnitType.IRON && bulletBo.isBrokenIron()) {
             changeMap(key, MapUnitType.BROKEN_IRON);
@@ -411,25 +416,41 @@ public class StageRoom extends BaseStage {
 
         if (mapUnitType == MapUnitType.RED_KING) {
             removeMap(key);
-            this.isPause = true;
-            sendMessageToRoom(getTeam(TeamType.BLUE) + "胜利", MessageType.GAME_STATUS);
+            processGameOver(TeamType.BLUE);
             return;
         }
 
         if (mapUnitType == MapUnitType.BLUE_KING) {
             removeMap(key);
-            this.isPause = true;
-            sendMessageToRoom(getTeam(TeamType.RED) + "胜利", MessageType.GAME_STATUS);
+            processGameOver(TeamType.RED);
         }
     }
 
+    private void processGameOver(TeamType winTeam) {
+        this.isPause = true;
+        boolean processNextMap = true;
+
+        if (getRoomType() == RoomType.PVE) {
+            if (winTeam == TeamType.RED) {
+                this.pauseMessage = "恭喜通关";
+            } else {
+                this.pauseMessage = "游戏失败";
+                processNextMap = false;
+            }
+        } else {
+            this.pauseMessage = getTeam(TeamType.BLUE) + "胜利!";
+        }
+        sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
+
+    }
+
     private void changeMap(String key, MapUnitType type) {
-        mapBo.getUnitMap().put(key, type);
+        getMapBo().getUnitMap().put(key, type);
         sendMessageToRoom(MapDto.convert(key, type), MessageType.MAP);
     }
 
     private void removeMap(String key) {
-        mapBo.getUnitMap().remove(key);
+        getMapBo().getUnitMap().remove(key);
         sendMessageToRoom(key, MessageType.REMOVE_MAP);
     }
 
@@ -514,21 +535,17 @@ public class StageRoom extends BaseStage {
 
     private boolean checkGameStatusAfterTankBomb(TankBo tankBo) {
         if (tankBo.getTeamType() == TeamType.RED) {
-            mapBo.setPlayerLifeTotalCount(mapBo.getPlayerLifeTotalCount() - 1);
+            getMapBo().setPlayerLifeTotalCount(getMapBo().getPlayerLifeTotalCount() - 1);
         } else {
-            mapBo.setComputerLifeTotalCount(mapBo.getComputerLifeTotalCount() - 1);
+            getMapBo().setComputerLifeTotalCount(getMapBo().getComputerLifeTotalCount() - 1);
         }
 
-        if (mapBo.getPlayerLifeTotalCount() <= 0) {
-            this.isPause = true;
-            this.pauseMessage = getTeam(TeamType.BLUE) + "胜利!";
-            sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
+        if (getMapBo().getPlayerLifeTotalCount() <= 0) {
+            processGameOver(TeamType.BLUE);
             return true;
         }
-        if (mapBo.getComputerLifeTotalCount() <= 0) {
-            this.isPause = true;
-            this.pauseMessage = getTeam(TeamType.RED) + "胜利!";
-            sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
+        if (getMapBo().getComputerLifeTotalCount() <= 0) {
+            processGameOver(TeamType.RED);
             return true;
         }
         return false;
@@ -565,7 +582,7 @@ public class StageRoom extends BaseStage {
 
     private String getTeam(TeamType teamType) {
         String teamStr = "观看";
-        switch (this.roomType) {
+        switch (getRoomType()) {
             case EVE:
             case PVP:
                 switch (teamType) {
@@ -585,7 +602,7 @@ public class StageRoom extends BaseStage {
                         teamStr = "玩家";
                         break;
                     case BLUE:
-                        teamStr = "电脑";
+                        teamStr = "AI";
                         break;
                     default:
                         break;
@@ -607,7 +624,7 @@ public class StageRoom extends BaseStage {
         if (this.isPause) {
             sendMessageToUser(this.pauseMessage, MessageType.GAME_STATUS, userBo.getUsername());
         }
-        sendMessageToUser(MapDto.convert(mapBo), MessageType.MAP, userBo.getUsername());
+        sendMessageToUser(MapDto.convert(getMapBo()), MessageType.MAP, userBo.getUsername());
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
 
@@ -674,15 +691,15 @@ public class StageRoom extends BaseStage {
         } else {
             lifeMap.put(selectType, lastCount);
         }
-        sendMessageToRoom(MapDto.convertLifeCount(mapBo), MessageType.MAP);
+        sendMessageToRoom(MapDto.convertLifeCount(getMapBo()), MessageType.MAP);
         return TankTypeBo.getTankType(selectType);
     }
 
     private Map<String, Integer> getLifeMap(TeamType teamType) {
         if (teamType == TeamType.RED) {
-            return mapBo.getPlayerLife();
+            return getMapBo().getPlayerLife();
         } else {
-            return mapBo.getComputerLife();
+            return getMapBo().getComputerLife();
         }
     }
 
@@ -705,9 +722,9 @@ public class StageRoom extends BaseStage {
     private void setStartPoint(TankBo tankBo) {
         String posStr;
         if (tankBo.getTeamType() == TeamType.RED) {
-            posStr = mapBo.getPlayerStartPoints().get(random.nextInt(mapBo.getPlayerStartPoints().size()));
+            posStr = getMapBo().getPlayerStartPoints().get(random.nextInt(getMapBo().getPlayerStartPoints().size()));
         } else {
-            posStr = mapBo.getComputerStartPoints().get(random.nextInt(mapBo.getComputerStartPoints().size()));
+            posStr = getMapBo().getComputerStartPoints().get(random.nextInt(getMapBo().getComputerStartPoints().size()));
         }
         tankBo.getGridKeyList().add(posStr);
         insertToGridTankMap(tankBo, posStr);
