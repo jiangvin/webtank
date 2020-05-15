@@ -18,6 +18,8 @@ import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
+import javax.websocket.ContainerProvider;
+import javax.websocket.WebSocketContainer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -92,8 +94,13 @@ public abstract class BaseBot {
     }
 
     private void connect() {
-        List<Transport> transports = new ArrayList<>(1);
-        transports.add(new WebSocketTransport(new StandardWebSocketClient()));
+        List<Transport> transports = new ArrayList<>();
+
+        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+        container.setDefaultMaxTextMessageBufferSize(512 * 1024);
+        WebSocketClient wsClient = new StandardWebSocketClient(container);
+        transports.add(new WebSocketTransport(wsClient));
+
         WebSocketClient transport = new SockJsClient(transports);
         stompClient = new WebSocketStompClient(transport);
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
@@ -101,7 +108,6 @@ public abstract class BaseBot {
         taskScheduler.afterPropertiesSet();
         stompClient.setTaskScheduler(taskScheduler);
         MessageReceiveHandler messageReceiveHandler = new MessageReceiveHandler(this);
-        stompClient.start();
         try {
             stompSession = stompClient.connect(SOCKET_URL + name, messageReceiveHandler).get(1, TimeUnit.SECONDS);
             stompSession.subscribe("/topic/send", messageReceiveHandler);
