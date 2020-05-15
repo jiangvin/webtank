@@ -24,6 +24,7 @@
     <modules>
         <module>util</module>
         <module>websocket</module>
+        <module>bot</module>
     </modules>
 
     <dependencies>

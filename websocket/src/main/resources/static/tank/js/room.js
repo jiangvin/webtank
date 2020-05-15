@@ -16,7 +16,7 @@
             action: 0,
             x: 0,
             y: 0
-        }
+        };
 
         this.drawTitle = function (stage) {
             //显示基本信息
