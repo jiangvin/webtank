@@ -1,4 +1,4 @@
-package com.integration.socket.model;
+package com.integration.dto.map;
 
 /**
  * @author 蒋文龙(Vin)

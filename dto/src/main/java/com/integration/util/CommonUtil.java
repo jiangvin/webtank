@@ -1,4 +1,4 @@
-package com.integration.dto.util;
+package com.integration.util;
 
 
 import com.integration.dto.OrientationType;

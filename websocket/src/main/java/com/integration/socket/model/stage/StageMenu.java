@@ -5,7 +5,7 @@ import com.integration.dto.message.MessageType;
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
-import com.integration.socket.model.dto.ItemDto;
+import com.integration.dto.map.ItemDto;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +59,7 @@ public class StageMenu extends BaseStage {
             if (tankMap.containsKey(bullet.getTankId())) {
                 tankMap.get(bullet.getTankId()).addAmmoCount();
             }
-            sendMessageToRoom(ItemDto.convert(bullet), MessageType.REMOVE_BULLET);
+            sendMessageToRoom(bullet.convertToDto(), MessageType.REMOVE_BULLET);
         }
     }
 
@@ -106,7 +106,7 @@ public class StageMenu extends BaseStage {
     private List<ItemDto> getTankList() {
         List<ItemDto> tankDtoList = new ArrayList<>();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            tankDtoList.add(ItemDto.convert(kv.getValue()));
+            tankDtoList.add(kv.getValue().convertToDto());
         }
         return tankDtoList;
     }

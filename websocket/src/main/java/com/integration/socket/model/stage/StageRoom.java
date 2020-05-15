@@ -3,7 +3,7 @@ package com.integration.socket.model.stage;
 import com.integration.dto.message.MessageType;
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.CollideType;
-import com.integration.socket.model.MapUnitType;
+import com.integration.dto.map.MapUnitType;
 import com.integration.dto.room.RoomType;
 import com.integration.dto.room.TeamType;
 import com.integration.socket.model.bo.BulletBo;
@@ -12,15 +12,15 @@ import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.socket.model.dto.ItemDto;
-import com.integration.socket.model.dto.MapDto;
+import com.integration.dto.map.ItemDto;
+import com.integration.dto.map.MapDto;
 import com.integration.dto.room.RoomDto;
 import com.integration.socket.model.event.BaseEvent;
 import com.integration.socket.model.event.CreateTankEvent;
 import com.integration.socket.model.event.LoadMapEvent;
 import com.integration.socket.model.event.MessageEvent;
 import com.integration.socket.service.MessageService;
-import com.integration.dto.util.CommonUtil;
+import com.integration.util.CommonUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
@@ -163,7 +163,7 @@ public class StageRoom extends BaseStage {
 
         List<ItemDto> dtoList = new ArrayList<>();
         for (TankBo tank : syncTankList) {
-            dtoList.add(ItemDto.convert(tank));
+            dtoList.add(tank.convertToDto());
             tank.refreshSyncTime();
         }
         sendMessageToRoom(dtoList, MessageType.TANKS);
@@ -177,7 +177,7 @@ public class StageRoom extends BaseStage {
 
         List<ItemDto> dtoList = new ArrayList<>();
         for (BulletBo bullet : syncBulletList) {
-            dtoList.add(ItemDto.convert(bullet));
+            dtoList.add(bullet.convertToDto());
             bullet.refreshSyncTime();
         }
         sendMessageToRoom(dtoList, MessageType.BULLET);
@@ -220,7 +220,7 @@ public class StageRoom extends BaseStage {
         }
 
         if (event instanceof LoadMapEvent) {
-            sendMessageToRoom(MapDto.convert(getMapBo()), MessageType.MAP);
+            sendMessageToRoom(getMapBo().convertToDto(), MessageType.MAP);
             this.isPause = false;
             sendMessageToRoom(null, MessageType.SERVER_READY);
             //1 ~ 5 秒陆续出现坦克
@@ -243,7 +243,7 @@ public class StageRoom extends BaseStage {
             if (tankMap.containsKey(bullet.getTankId())) {
                 tankMap.get(bullet.getTankId()).addAmmoCount();
             }
-            sendMessageToRoom(ItemDto.convert(bullet), MessageType.REMOVE_BULLET);
+            sendMessageToRoom(bullet.convertToDto(), MessageType.REMOVE_BULLET);
         }
         removeBulletIds.clear();
     }
@@ -697,7 +697,7 @@ public class StageRoom extends BaseStage {
         if (this.isPause) {
             sendMessageToUser(this.pauseMessage, MessageType.GAME_STATUS, userBo.getUsername());
         }
-        sendMessageToUser(MapDto.convert(getMapBo()), MessageType.MAP, userBo.getUsername());
+        sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUsername());
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
 
@@ -764,7 +764,7 @@ public class StageRoom extends BaseStage {
         } else {
             lifeMap.put(selectType, lastCount);
         }
-        sendMessageToRoom(MapDto.convertLifeCount(getMapBo()), MessageType.MAP);
+        sendMessageToRoom(getMapBo().convertLifeCountToDto(), MessageType.MAP);
         return TankTypeBo.getTankType(selectType);
     }
 
@@ -779,7 +779,7 @@ public class StageRoom extends BaseStage {
     private List<ItemDto> getTankList() {
         List<ItemDto> tankDtoList = new ArrayList<>();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            tankDtoList.add(ItemDto.convert(kv.getValue()));
+            tankDtoList.add(kv.getValue().convertToDto());
         }
         return tankDtoList;
     }
@@ -787,7 +787,7 @@ public class StageRoom extends BaseStage {
     private List<ItemDto> getBulletList() {
         List<ItemDto> bulletDtoList = new ArrayList<>();
         for (Map.Entry<String, BulletBo> kv : bulletMap.entrySet()) {
-            bulletDtoList.add(ItemDto.convert(kv.getValue()));
+            bulletDtoList.add(kv.getValue().convertToDto());
         }
         return bulletDtoList;
     }

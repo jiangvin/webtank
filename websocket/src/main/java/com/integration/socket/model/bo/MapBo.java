@@ -1,6 +1,8 @@
 package com.integration.socket.model.bo;
 
-import com.integration.socket.model.MapUnitType;
+import com.integration.dto.map.ItemDto;
+import com.integration.dto.map.MapUnitType;
+import com.integration.dto.map.MapDto;
 import com.integration.util.model.CustomException;
 import lombok.Data;
 
@@ -42,6 +44,30 @@ public class MapBo {
     private List<String> playerStartPoints = new ArrayList<>();
 
     private List<String> computerStartPoints = new ArrayList<>();
+
+    public MapDto convertToDto() {
+        MapDto mapDto = convertLifeCountToDto();
+        mapDto.setWidth(getWidth());
+        mapDto.setHeight(getHeight());
+        mapDto.setMapId(getMapId());
+        List<ItemDto> itemList = new ArrayList<>();
+        for (Map.Entry<String, MapUnitType> kv : getUnitMap().entrySet()) {
+            ItemDto item = new ItemDto();
+            item.setId(kv.getKey());
+            item.setTypeId(kv.getValue().toString());
+            itemList.add(item);
+        }
+        mapDto.setItemList(itemList);
+        return mapDto;
+    }
+
+    public MapDto convertLifeCountToDto() {
+        MapDto mapDto = new MapDto();
+        mapDto.setPlayerLife(getCount(getPlayerLife()));
+        mapDto.setComputerLife(getCount(getComputerLife()));
+        return mapDto;
+    }
+
 
     public void setTotalLifeCount() {
         this.playerLifeTotalCount = getCount(this.playerLife);

@@ -2,6 +2,7 @@ package com.integration.socket.model.bo;
 
 import com.integration.dto.OrientationType;
 import com.integration.dto.room.TeamType;
+import com.integration.dto.map.ItemDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -26,6 +27,16 @@ public class BulletBo {
     private String startGridKey;
     private String endGridKey;
     private long lastSyncTime;
+
+    public ItemDto convertToDto() {
+        ItemDto ammoDto = new ItemDto();
+        ammoDto.setId(getId());
+        ammoDto.setX(getX());
+        ammoDto.setY(getY());
+        ammoDto.setOrientation(getOrientationType().getValue());
+        ammoDto.setSpeed(getSpeed());
+        return ammoDto;
+    }
 
     public void refreshSyncTime() {
         this.lastSyncTime = System.currentTimeMillis();

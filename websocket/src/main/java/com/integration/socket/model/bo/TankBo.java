@@ -3,8 +3,8 @@ package com.integration.socket.model.bo;
 import com.integration.socket.model.ActionType;
 import com.integration.dto.OrientationType;
 import com.integration.dto.room.TeamType;
-import com.integration.socket.model.dto.ItemDto;
-import com.integration.dto.util.CommonUtil;
+import com.integration.dto.map.ItemDto;
+import com.integration.util.CommonUtil;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -30,6 +30,21 @@ public class TankBo {
     private int ammoCount;
     private long lastSyncTime = System.currentTimeMillis();
     private List<String> gridKeyList = new ArrayList<>();
+
+    public ItemDto convertToDto() {
+        ItemDto tankDto = new ItemDto();
+        tankDto.setId(getTankId());
+        tankDto.setX(getX());
+        tankDto.setY(getY());
+        tankDto.setTypeId(getType().getTypeId());
+        tankDto.setOrientation(getOrientationType().getValue());
+        tankDto.setAction(getActionType().getValue());
+        tankDto.setSpeed(getType().getSpeed());
+        if (getTeamType() != null) {
+            tankDto.setTeamId(getTeamType().getValue());
+        }
+        return tankDto;
+    }
 
     public void refreshSyncTime() {
         this.lastSyncTime = System.currentTimeMillis();

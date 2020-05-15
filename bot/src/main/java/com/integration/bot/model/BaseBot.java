@@ -1,12 +1,14 @@
 package com.integration.bot.model;
 
 import com.integration.bot.handler.MessageReceiveHandler;
+import com.integration.bot.model.event.BaseEvent;
+import com.integration.bot.model.event.UserCheckEvent;
 import com.integration.dto.bot.RequestBotDto;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.TeamType;
-import com.integration.dto.util.CommonUtil;
+import com.integration.util.CommonUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -37,11 +39,25 @@ public abstract class BaseBot {
 
     private static final String SOCKET_URL = "http://localhost/websocket-simple?name=";
 
+    private static final int BOT_LIFETIME = 90 * 60 * 1000;
+
     private String name;
     private String roomId;
     private TeamType teamType;
 
+    /**
+     * 最多存活90分钟
+     */
+    private long startTime = System.currentTimeMillis();
+
+    /**
+     * 当只剩BOT一个人时，2分钟后结束
+     */
+    private Integer userCount;
+
     private boolean deadFlag = false;
+
+    private List<BaseEvent> eventList = new ArrayList<>();
 
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
@@ -66,6 +82,9 @@ public abstract class BaseBot {
             return false;
         }
 
+        processEvent();
+
+
         return true;
     }
 
@@ -74,8 +93,46 @@ public abstract class BaseBot {
      */
     abstract void updateExtension();
 
+    private void processEvent() {
+        if (eventList.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < eventList.size(); ++i) {
+            BaseEvent event = eventList.get(i);
+            if (event.getTimeout() == 0) {
+                processEvent(event);
+                eventList.remove(i);
+                --i;
+            } else {
+                event.setTimeout(event.getTimeout() - 1);
+            }
+        }
+    }
+
+    private void processEvent(BaseEvent event) {
+        if (event instanceof UserCheckEvent) {
+            if (this.userCount <= 1) {
+                log.info("bot:{} will be closed because no user in room.", this.name);
+                this.deadFlag = true;
+            }
+        }
+    }
+
     public void receiveMessage(MessageDto messageDto) {
         log.info("receive message: {}", CommonUtil.ignoreNull(messageDto.toString()));
+        switch (messageDto.getMessageType()) {
+            case USERS:
+                this.userCount = ((List) messageDto.getMessage()).size();
+                if (this.userCount <= 1) {
+                    UserCheckEvent userCheckEvent = new UserCheckEvent();
+                    userCheckEvent.setTimeout(2 * 60 * 6);
+                    eventList.add(userCheckEvent);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     void sendMessage(MessageDto messageDto) {
@@ -84,7 +141,16 @@ public abstract class BaseBot {
     }
 
     public boolean isDead() {
-        return deadFlag || stompClient == null || stompSession == null || !stompSession.isConnected();
+        if (deadFlag) {
+            return true;
+        }
+
+        if (stompClient == null || stompSession == null || !stompSession.isConnected()) {
+            return true;
+        }
+
+        //机器人存活时间不得超过90分钟
+        return System.currentTimeMillis() - this.startTime >= BOT_LIFETIME;
     }
 
     public void close() {
