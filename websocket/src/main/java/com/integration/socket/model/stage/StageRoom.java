@@ -289,7 +289,7 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean collideWithAll(BulletBo bullet) {
-        if (bullet.getX() <= 0 || bullet.getY() < 0 || bullet.getX() >= mapBo.getWidth() || bullet.getY() >= mapBo.getHeight()) {
+        if (bullet.getX() < 0 || bullet.getY() < 0 || bullet.getX() >= mapBo.getWidth() || bullet.getY() >= mapBo.getHeight()) {
             //超出范围
             addRemoveBulletIds(bullet.getId());
             return true;

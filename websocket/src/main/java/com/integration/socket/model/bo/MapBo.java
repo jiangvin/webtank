@@ -77,10 +77,12 @@ public class MapBo {
 
     public void duplicatePlayer() {
         duplicate(computerLife, playerLife);
+        this.computerLifeTotalCount = this.playerLifeTotalCount;
     }
 
     public void duplicateComputer() {
         duplicate(playerLife, computerLife);
+        this.playerLifeTotalCount = this.computerLifeTotalCount;
     }
 
     public void removeMapUnit(MapUnitType mapUnitType) {
