@@ -52,3 +52,5 @@
   Common.addConnectTimeoutEvent(function () {<br>
       Common.runLastStage(); //超时后又切换回来<br>
   });<br>
+
+**关于操控和碰撞检测:** 试这块逻辑非常坎坷，写了三版，最终效果大致才满意，先测试一下，之后再整理逻辑。
