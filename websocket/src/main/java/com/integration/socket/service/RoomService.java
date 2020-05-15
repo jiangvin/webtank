@@ -1,9 +1,9 @@
 package com.integration.socket.service;
 
-import com.integration.socket.model.MessageType;
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
 import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.model.stage.StageRoom;

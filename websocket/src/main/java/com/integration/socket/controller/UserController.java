@@ -1,8 +1,8 @@
 package com.integration.socket.controller;
 
-import com.integration.socket.model.MessageType;
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
 import com.integration.socket.model.dto.MapEditDto;
-import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.service.MapService;

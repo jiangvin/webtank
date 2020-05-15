@@ -1,12 +1,12 @@
 package com.integration.socket.model.stage;
 
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
 import com.integration.socket.model.ActionType;
-import com.integration.socket.model.MessageType;
 import com.integration.socket.model.OrientationType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.dto.ItemDto;
-import com.integration.socket.model.dto.MessageDto;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;

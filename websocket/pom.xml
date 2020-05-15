@@ -35,6 +35,12 @@
             <version>1.0.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.integration</groupId>
+            <artifactId>dto</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!--JDBC连接相关-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

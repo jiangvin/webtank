@@ -22,6 +22,7 @@
     </properties>
 
     <modules>
+        <module>dto</module>
         <module>util</module>
         <module>websocket</module>
         <module>bot</module>

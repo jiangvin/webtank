@@ -1,7 +1,6 @@
-package com.integration.socket.model.dto;
+package com.integration.dto.message;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.integration.socket.model.MessageType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

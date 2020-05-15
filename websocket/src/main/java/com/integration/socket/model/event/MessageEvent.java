@@ -1,6 +1,6 @@
 package com.integration.socket.model.event;
 
-import com.integration.socket.model.MessageType;
+import com.integration.dto.message.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

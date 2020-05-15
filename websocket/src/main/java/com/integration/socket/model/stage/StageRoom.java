@@ -1,9 +1,9 @@
 package com.integration.socket.model.stage;
 
+import com.integration.dto.message.MessageType;
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.CollideType;
 import com.integration.socket.model.MapUnitType;
-import com.integration.socket.model.MessageType;
 import com.integration.socket.model.RoomType;
 import com.integration.socket.model.TeamType;
 import com.integration.socket.model.bo.BulletBo;

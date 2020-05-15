@@ -1,7 +1,7 @@
 package com.integration.socket.service;
 
-import com.integration.socket.model.MessageType;
-import com.integration.socket.model.dto.MessageDto;
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
 import com.integration.socket.util.CommonUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
