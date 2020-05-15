@@ -6,7 +6,7 @@ import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.dto.MapEditDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.repository.jooq.tables.records.MapRecord;
-import com.integration.socket.util.CommonUtil;
+import com.integration.dto.util.CommonUtil;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

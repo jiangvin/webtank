@@ -1,7 +1,7 @@
-package com.integration.socket.util;
+package com.integration.dto.util;
 
 
-import com.integration.socket.model.OrientationType;
+import com.integration.dto.OrientationType;
 
 import java.awt.Point;
 import java.util.List;

@@ -2,7 +2,7 @@ package com.integration.socket.service;
 
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
-import com.integration.socket.util.CommonUtil;
+import com.integration.dto.util.CommonUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

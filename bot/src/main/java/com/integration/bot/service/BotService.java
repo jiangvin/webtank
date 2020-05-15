@@ -26,12 +26,12 @@ public class BotService {
     public void createBot(RequestBotDto requestBotDto) {
         log.info("receive request bot:{}", requestBotDto.toString());
         BaseBot bot = botFactory(requestBotDto);
-        if (!bot.isAlive()) {
+        if (bot.isDead()) {
             bot.close();
             throw new CustomException("连接建立失败!");
         }
 
-        log.info("bot will be created:{}", bot.toString());
+        log.info("bot will be created:{}", bot.getName());
         botList.add(bot);
     }
 

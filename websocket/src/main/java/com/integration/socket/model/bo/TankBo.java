@@ -1,10 +1,10 @@
 package com.integration.socket.model.bo;
 
 import com.integration.socket.model.ActionType;
-import com.integration.socket.model.OrientationType;
+import com.integration.dto.OrientationType;
 import com.integration.dto.room.TeamType;
 import com.integration.socket.model.dto.ItemDto;
-import com.integration.socket.util.CommonUtil;
+import com.integration.dto.util.CommonUtil;
 import lombok.Data;
 
 import java.util.ArrayList;

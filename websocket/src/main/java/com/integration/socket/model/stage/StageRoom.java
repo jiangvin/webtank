@@ -20,7 +20,7 @@ import com.integration.socket.model.event.CreateTankEvent;
 import com.integration.socket.model.event.LoadMapEvent;
 import com.integration.socket.model.event.MessageEvent;
 import com.integration.socket.service.MessageService;
-import com.integration.socket.util.CommonUtil;
+import com.integration.dto.util.CommonUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;

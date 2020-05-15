@@ -6,6 +6,7 @@ import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.TeamType;
+import com.integration.dto.util.CommonUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -40,6 +41,8 @@ public abstract class BaseBot {
     private String roomId;
     private TeamType teamType;
 
+    private boolean deadFlag = false;
+
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
 
@@ -48,7 +51,7 @@ public abstract class BaseBot {
         this.roomId = requestBotDto.getRoomId();
         this.teamType = requestBotDto.getTeamType();
         connect();
-        if (!isAlive()) {
+        if (isDead()) {
             return;
         }
         sendMessage(new MessageDto(null, MessageType.CLIENT_READY));
@@ -59,7 +62,7 @@ public abstract class BaseBot {
     }
 
     public boolean update() {
-        if (!isAlive()) {
+        if (isDead()) {
             return false;
         }
 
@@ -72,16 +75,16 @@ public abstract class BaseBot {
     abstract void updateExtension();
 
     public void receiveMessage(MessageDto messageDto) {
-        log.info("receive message: {}", messageDto.toString());
+        log.info("receive message: {}", CommonUtil.ignoreNull(messageDto.toString()));
     }
 
     void sendMessage(MessageDto messageDto) {
-        log.info("send message: {}", messageDto.toString());
+        log.info("send message: {}", CommonUtil.ignoreNull(messageDto.toString()));
         stompSession.send("/send", messageDto);
     }
 
-    public boolean isAlive() {
-        return stompClient != null && stompSession != null && stompSession.isConnected();
+    public boolean isDead() {
+        return deadFlag || stompClient == null || stompSession == null || !stompSession.isConnected();
     }
 
     public void close() {
