@@ -30,4 +30,13 @@ public class MapMangerBo {
         this.mapBo = mapService.loadMap(mapId, roomType);
         this.loadedMapIds.add(mapBo.getMapId());
     }
+
+    public boolean loadNextMap() {
+        MapBo mapBo = mapService.loadNextMap(loadedMapIds, roomType);
+        if (mapBo == null) {
+            return false;
+        }
+        this.mapBo = mapBo;
+        return true;
+    }
 }

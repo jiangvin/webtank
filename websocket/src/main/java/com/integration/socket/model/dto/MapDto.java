@@ -22,13 +22,14 @@ public class MapDto {
     private Integer height;
     private Integer playerLife;
     private Integer computerLife;
+    private String mapId;
     private List<ItemDto> itemList;
 
     public static MapDto convert(MapBo mapBo) {
         MapDto mapDto = convertLifeCount(mapBo);
         mapDto.setWidth(mapBo.getWidth());
         mapDto.setHeight(mapBo.getHeight());
-
+        mapDto.setMapId(mapBo.getMapId());
         List<ItemDto> itemList = new ArrayList<>();
         for (Map.Entry<String, MapUnitType> kv : mapBo.getUnitMap().entrySet()) {
             ItemDto item = new ItemDto();

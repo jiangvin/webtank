@@ -11,5 +11,5 @@ import lombok.Data;
 public abstract class BaseEvent {
     private long timeout = 0;
 
-    private String username;
+    private String usernameCheck;
 }

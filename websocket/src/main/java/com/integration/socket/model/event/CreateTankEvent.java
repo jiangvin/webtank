@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 public class CreateTankEvent extends BaseEvent {
     public CreateTankEvent(UserBo user, int timeout) {
         this.user = user;
-        setUsername(user.getUsername());
+        setUsernameCheck(user.getUsername());
         setTimeout(timeout);
     }
 

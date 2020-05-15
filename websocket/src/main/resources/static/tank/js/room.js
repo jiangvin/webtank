@@ -17,6 +17,13 @@
             x: 0,
             y: 0
         }
+
+        this.drawTitle = function (stage) {
+            //显示基本信息
+            const tipMessage = '房间号:' + this.roomInfo.roomId
+                + " 地图:" + this.roomInfo.mapId + " [" + this.roomInfo.roomType + "]";
+            drawTips(stage, tipMessage, 10, 6, "ROOM_TITLE");
+        }
     }
 
     Room.getOrCreateRoom = function (roomInfo) {
@@ -47,6 +54,10 @@
                 case "REMOVE_MAP":
                     thisStage.itemBomb({id: messageDto.message});
                     break;
+                case "CLEAR_MAP":
+                    thisStage.items.clear();
+                    thisStage.view.center = null;
+                    break;
                 default:
                     break;
             }
@@ -61,8 +72,7 @@
         };
 
         //显示基本信息
-        const tipMessage = '房间号:' + roomInfo.roomId + " 地图:" + roomInfo.mapId + " [" + roomInfo.roomType + "]";
-        drawTips(thisStage, tipMessage, 10, 6);
+        thisRoom.drawTitle(thisStage);
     };
 
     const reloadUpdateCenter = function (room) {
@@ -286,9 +296,13 @@
     /**
      *
      * @param room
-     * @param data {{itemList,width,height,playerLife,computerLife}}
+     * @param data {{itemList,width,height,playerLife,computerLife,mapId}}
      */
     const loadMap = function (room, data) {
+        if (data.mapId !== undefined) {
+            room.roomInfo.mapId = data.mapId;
+            room.drawTitle(room.stage);
+        }
         if (data.playerLife !== undefined) {
             room.roomInfo.playerLife = data.playerLife;
         }

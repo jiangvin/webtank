@@ -17,6 +17,8 @@ import com.integration.socket.model.dto.MapDto;
 import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.model.event.BaseEvent;
 import com.integration.socket.model.event.CreateTankEvent;
+import com.integration.socket.model.event.LoadMapEvent;
+import com.integration.socket.model.event.MessageEvent;
 import com.integration.socket.service.MessageService;
 import com.integration.socket.util.CommonUtil;
 import lombok.Getter;
@@ -191,13 +193,30 @@ public class StageRoom extends BaseStage {
 
     private void processEvent(BaseEvent event) {
         //先检查是否执行
-        if (!StringUtils.isEmpty(event.getUsername()) && !this.userMap.containsKey(event.getUsername())) {
+        if (!StringUtils.isEmpty(event.getUsernameCheck()) && !this.userMap.containsKey(event.getUsernameCheck())) {
             return;
         }
 
         if (event instanceof CreateTankEvent) {
             CreateTankEvent createTankEvent = (CreateTankEvent) event;
             addNewTank(createTankEvent.getUser());
+            return;
+        }
+
+        if (event instanceof MessageEvent) {
+            MessageEvent messageEvent = (MessageEvent) event;
+            sendMessageToRoom(messageEvent.getContent(), messageEvent.getMessageType());
+            return;
+        }
+
+        if (event instanceof LoadMapEvent) {
+            sendMessageToRoom(MapDto.convert(getMapBo()), MessageType.MAP);
+            this.isPause = false;
+            sendMessageToRoom(null, MessageType.SERVER_READY);
+            //1 ~ 5 秒陆续出现坦克
+            for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
+                this.eventList.add(new CreateTankEvent(kv.getValue(), random.nextInt(60 * 4) + 60));
+            }
         }
     }
 
@@ -442,6 +461,50 @@ public class StageRoom extends BaseStage {
         }
         sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
 
+        if (!processNextMap) {
+            return;
+        }
+
+        if (!mapManger.loadNextMap()) {
+            return;
+        }
+
+        clear();
+        long loadTimeoutSeconds = 10;
+        long cleanMapTimeoutSeconds = 6;
+        this.pauseMessage = "正在加载下一张地图...";
+        sendMessageToRoom("10秒后加载下一张地图...", MessageType.SYSTEM_MESSAGE);
+        for (int i = 1; i < loadTimeoutSeconds; ++i) {
+            String content = String.format("%d秒后加载下一张地图...", i);
+            MessageEvent messageEvent = new MessageEvent(content, MessageType.SYSTEM_MESSAGE);
+            messageEvent.setTimeout((loadTimeoutSeconds - i) * 60);
+            this.eventList.add(messageEvent);
+        }
+        //清空地图
+        MessageEvent cleanEvent = new MessageEvent(null, MessageType.CLEAR_MAP);
+        cleanEvent.setTimeout(cleanMapTimeoutSeconds * 60);
+        this.eventList.add(cleanEvent);
+
+        //更改标题
+        MessageEvent changeTitle = new MessageEvent(this.pauseMessage, MessageType.GAME_STATUS);
+        changeTitle.setTimeout(cleanMapTimeoutSeconds * 60);
+        this.eventList.add(changeTitle);
+
+        //加载新地图
+        LoadMapEvent loadEvent = new LoadMapEvent();
+        loadEvent.setTimeout(loadTimeoutSeconds * 60);
+        this.eventList.add(loadEvent);
+    }
+
+    private void clear() {
+        this.tankMap.clear();
+        this.bulletMap.clear();
+        this.gridBulletMap.clear();
+        this.gridTankMap.clear();
+        this.removeBulletIds.clear();
+        this.eventList.clear();
+        this.syncTankList.clear();
+        this.syncBulletList.clear();
     }
 
     private void changeMap(String key, MapUnitType type) {

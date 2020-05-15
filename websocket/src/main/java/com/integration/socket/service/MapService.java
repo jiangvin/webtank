@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -42,6 +44,22 @@ public class MapService {
     private static final String MAP_CONTENT = "map_content";
 
     private static final String PLAYER_DEFAULT_TYPE = "tank01";
+
+    public MapBo loadNextMap(List<String> loadedMapIds, RoomType roomType) {
+        List<String> mapIds = mapDao.queryMapIdList();
+        String nextMapId = null;
+        for (String mapId : mapIds) {
+            if (!loadedMapIds.contains(mapId)) {
+                nextMapId = mapId;
+                break;
+            }
+        }
+        if (nextMapId == null) {
+            return null;
+        }
+
+        return loadMap(nextMapId, roomType);
+    }
 
     public MapBo loadMap(String mapId, RoomType roomType) {
         MapRecord record = mapDao.queryFromId(mapId);
