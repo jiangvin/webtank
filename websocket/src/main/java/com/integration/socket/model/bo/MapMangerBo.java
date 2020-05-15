@@ -37,6 +37,7 @@ public class MapMangerBo {
             return false;
         }
         this.mapBo = mapBo;
+        this.loadedMapIds.add(mapBo.getMapId());
         return true;
     }
 }
