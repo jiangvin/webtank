@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>地图编辑界面</title>
+</head>
+<script src="jquery.js"></script>
+<body>
+<div>
+    <div>
+        <label>地图</label>
+        <select id="mapSelector" >
+            <option value="-1">读取中</option>
+        </select>
+        <button id="refresh" onclick="refreshMaps();">刷新</button>
+        <button id="load" onclick="loadMap();">读取</button>
+    </div>
+    <div>
+        <label>地图名称:</label>
+        <input type="text" id="name" placeholder="名称不存在则新增"/>
+    </div>
+    <div>
+        <label>修改密码:</label>
+        <input type="password" id="pw" />
+    </div>
+    <div>
+        <div>地图内容:</div>
+        <textarea id="content" style="font-size: 16px;width: 70%;height: 700px;">
+
+        </textarea>
+    </div>
+    <div>
+        <button id="save" onclick="save();">保存</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    refreshMaps();
+    function refreshMaps() {
+        $.getJSON('/user/getMaps', function(result) {
+            if (result.success) {
+                setSelectorItems(result.data);
+            }
+        });
+    }
+
+    function setSelectorItems(maps) {
+        const selector = $('#mapSelector')[0];
+        const length = selector.options.length;
+        for (let i = length-1; i >= 0; --i) {
+            selector.options[i] = null;
+        }
+
+        for (let i = 0; i < maps.length; ++i) {
+            const opt = document.createElement('option');
+            opt.text = maps[i];
+            opt.value = i;
+            selector.add(opt);
+        }
+    }
+    
+    function loadMap() {
+        const selectOpt = $('#mapSelector')[0].selectedOptions[0];
+        $.getJSON('/user/getMap/' + selectOpt.text, function(result) {
+            if (result.success) {
+                setMapData(result.data);
+            }
+        });
+    }
+
+    function setMapData(data) {
+        $('#name')[0].value = data.id;
+        $('#content')[0].value = data.data;
+    }
+    
+    function save() {
+        $.ajax({
+            url: encodeURI('/user/setMap'),
+            type: 'post',
+            data: {
+                id:$('#name')[0].value,
+                pw:$('#pw')[0].value,
+                data:$('#content')[0].value
+            },
+            dataType: 'json',
+            success: function (result) {
+                if (!result.success) {
+                    alert(result.message);
+                } else {
+                    alert("保存成功!");
+                }
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
