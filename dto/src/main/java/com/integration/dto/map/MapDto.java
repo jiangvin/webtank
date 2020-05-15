@@ -27,7 +27,7 @@ public class MapDto {
         List<ItemDto> itemList = new ArrayList<>();
         ItemDto item = new ItemDto();
         item.setId(key);
-        item.setTypeId(type.toString());
+        item.setTypeId(type.getValue().toString());
         itemList.add(item);
         mapDto.setItemList(itemList);
         return mapDto;

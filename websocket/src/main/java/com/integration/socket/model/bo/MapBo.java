@@ -54,7 +54,7 @@ public class MapBo {
         for (Map.Entry<String, MapUnitType> kv : getUnitMap().entrySet()) {
             ItemDto item = new ItemDto();
             item.setId(kv.getKey());
-            item.setTypeId(kv.getValue().toString());
+            item.setTypeId(kv.getValue().getValue().toString());
             itemList.add(item);
         }
         mapDto.setItemList(itemList);

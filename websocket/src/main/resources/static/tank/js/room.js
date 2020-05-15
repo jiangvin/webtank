@@ -336,24 +336,38 @@
     };
 
     const setBarrier = function (item, typeId) {
-        if (typeId !== "grass") {
+        if (typeId !== 5) {
             item.isBarrier = true;
         }
     };
 
     const setResourceImage = function (item, typeId) {
         switch (typeId) {
-            case "broken_brick":
+            case 0:
+                item.image = Resource.getImage("brick");
+                break;
+            case 1:
                 item.image = Resource.getImage("brick");
                 item.orientation = 1;
                 break;
-            case "broken_iron":
+            case 2:
+                item.image = Resource.getImage("iron");
+                break;
+            case 3:
                 item.image = Resource.getImage("iron");
                 item.orientation = 1;
                 break;
-            default:
-                item.image = Resource.getImage(typeId);
-                item.orientation = 0;
+            case 4:
+                item.image = Resource.getImage("river");
+                break;
+            case 5:
+                item.image = Resource.getImage("grass");
+                break;
+            case 6:
+                item.image = Resource.getImage("red_king");
+                break;
+            case 7:
+                item.image = Resource.getImage("blue_king");
                 break;
         }
     };
@@ -366,25 +380,29 @@
             item = stage.createItem({id: data.id});
         }
 
-        const typeId = data.typeId.toLowerCase();
+        const typeId = parseInt(data.typeId);
         setResourceImage(item, typeId);
+        if (!item.image) {
+            return;
+        }
+
         setBarrier(item, typeId);
         const position = getPositionFromId(data.id);
         item.x = position.x;
         item.y = position.y;
 
         //调整z值
-        if (typeId === "grass") {
+        if (typeId === 5) {
             item.z = 2;
-        } else if (typeId === "river") {
+        } else if (typeId === 4) {
             item.z = -4;
         }
 
         //播放动画
         switch (typeId) {
-            case "river":
-            case "red_king":
-            case "blue_king":
+            case 4:
+            case 6:
+            case 7:
                 item.play = new Play(1, 30,
                     function () {
                         item.orientation = (item.orientation + 1) % 2;
