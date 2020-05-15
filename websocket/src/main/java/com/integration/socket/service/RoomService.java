@@ -4,7 +4,7 @@ import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
 import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.socket.model.dto.RoomDto;
+import com.integration.dto.room.RoomDto;
 import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.model.stage.StageRoom;
 import com.integration.util.model.CustomException;
@@ -52,7 +52,7 @@ public class RoomService {
     public RoomListDto getRoomListDto(int start, int limit) {
         List<RoomDto> roomDtoList = new ArrayList<>();
         for (StageRoom room : roomList.subList(start, Math.min(start + limit, roomList.size()))) {
-            roomDtoList.add(RoomDto.convert(room));
+            roomDtoList.add(room.convertToDto());
         }
         return new RoomListDto(roomDtoList, roomList.size());
     }

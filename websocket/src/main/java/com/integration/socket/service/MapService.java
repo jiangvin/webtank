@@ -1,7 +1,7 @@
 package com.integration.socket.service;
 
 import com.integration.socket.model.MapUnitType;
-import com.integration.socket.model.RoomType;
+import com.integration.dto.room.RoomType;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.dto.MapEditDto;
 import com.integration.socket.repository.dao.MapDao;

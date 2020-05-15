@@ -4,8 +4,8 @@ import com.integration.dto.message.MessageType;
 import com.integration.socket.model.ActionType;
 import com.integration.socket.model.CollideType;
 import com.integration.socket.model.MapUnitType;
-import com.integration.socket.model.RoomType;
-import com.integration.socket.model.TeamType;
+import com.integration.dto.room.RoomType;
+import com.integration.dto.room.TeamType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.MapMangerBo;
@@ -14,7 +14,7 @@ import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.ItemDto;
 import com.integration.socket.model.dto.MapDto;
-import com.integration.socket.model.dto.RoomDto;
+import com.integration.dto.room.RoomDto;
 import com.integration.socket.model.event.BaseEvent;
 import com.integration.socket.model.event.CreateTankEvent;
 import com.integration.socket.model.event.LoadMapEvent;
@@ -50,6 +50,16 @@ public class StageRoom extends BaseStage {
         this.roomId = roomDto.getRoomId();
         this.creator = roomDto.getCreator();
         this.mapManger = mapManger;
+    }
+
+    public RoomDto convertToDto() {
+        RoomDto roomDto = new RoomDto();
+        roomDto.setRoomId(getRoomId());
+        roomDto.setCreator(getCreator());
+        roomDto.setMapId(getMapId());
+        roomDto.setRoomType(getRoomType());
+        roomDto.setUserCount(getUserCount());
+        return roomDto;
     }
 
     private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();

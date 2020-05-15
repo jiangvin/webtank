@@ -1,6 +1,6 @@
 package com.integration.socket.model.bo;
 
-import com.integration.socket.model.RoomType;
+import com.integration.dto.room.RoomType;
 import com.integration.socket.service.MapService;
 import lombok.Data;
 

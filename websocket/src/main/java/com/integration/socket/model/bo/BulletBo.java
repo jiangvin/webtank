@@ -1,7 +1,7 @@
 package com.integration.socket.model.bo;
 
 import com.integration.socket.model.OrientationType;
-import com.integration.socket.model.TeamType;
+import com.integration.dto.room.TeamType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
