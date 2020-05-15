@@ -91,6 +91,7 @@ public class StageRoom extends BaseStage {
     private Random random = new Random();
 
     private boolean isPause = false;
+    private String pauseMessage;
 
     public int getUserCount() {
         return userMap.size();
@@ -520,12 +521,14 @@ public class StageRoom extends BaseStage {
 
         if (mapBo.getPlayerLifeTotalCount() <= 0) {
             this.isPause = true;
-            sendMessageToRoom(getTeam(TeamType.BLUE) + "胜利", MessageType.GAME_STATUS);
+            this.pauseMessage = getTeam(TeamType.BLUE) + "胜利!";
+            sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
             return true;
         }
         if (mapBo.getComputerLifeTotalCount() <= 0) {
             this.isPause = true;
-            sendMessageToRoom(getTeam(TeamType.RED) + "胜利", MessageType.GAME_STATUS);
+            this.pauseMessage = getTeam(TeamType.RED) + "胜利!";
+            sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
             return true;
         }
         return false;
@@ -582,7 +585,7 @@ public class StageRoom extends BaseStage {
                         teamStr = "玩家";
                         break;
                     case BLUE:
-                        teamStr = "AI";
+                        teamStr = "电脑";
                         break;
                     default:
                         break;
@@ -601,6 +604,9 @@ public class StageRoom extends BaseStage {
         sendStatusAndMessage(userBo, false);
 
         //发送场景信息
+        if (this.isPause) {
+            sendMessageToUser(this.pauseMessage, MessageType.GAME_STATUS, userBo.getUsername());
+        }
         sendMessageToUser(MapDto.convert(mapBo), MessageType.MAP, userBo.getUsername());
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
@@ -752,8 +758,10 @@ public class StageRoom extends BaseStage {
     void updateTankControlExtension(TankBo tankBo, ItemDto tankDto) {
         //TODO - 距离检测，防止作弊
 
-        tankBo.setX(tankDto.getX());
-        tankBo.setY(tankDto.getY());
+        if (tankDto.getX() != null && tankDto.getY() != null) {
+            tankBo.setX(tankDto.getX());
+            tankBo.setY(tankDto.getY());
+        }
         refreshTankGridMap(tankBo);
     }
 
