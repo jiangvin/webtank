@@ -6,4 +6,6 @@ package com.integration.bot.model;
  * @date 2020/5/15
  */
 public class BotBo {
+    public BotBo() {
+    }
 }
