@@ -175,7 +175,7 @@ public abstract class BaseBot {
                 processTank(objectMapper.convertValue(messageDto.getMessage(), List.class));
                 break;
             case REMOVE_TANK:
-                ItemDto dto = (ItemDto) messageDto.getMessage();
+                ItemDto dto = objectMapper.convertValue(messageDto.getMessage(), ItemDto.class);
                 tankMap.remove(dto.getId());
                 break;
             case SERVER_READY:

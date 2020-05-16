@@ -34,7 +34,7 @@ public class SimpleBot extends BaseBot {
     /**
      * 阻塞的时候 x-1 / x的概率不动
      */
-    private static final int KEEP_TRY_RATE = 60;
+    private static final int KEEP_TRY_RATE = 30;
 
     /**
      * 发射子弹有半秒延迟
@@ -130,6 +130,16 @@ public class SimpleBot extends BaseBot {
             sendTankControl(tank);
             return;
         }
+
+        //如果是因为随机掉头到这里要特殊处理
+        if (forward) {
+            if (tank.getActionType() == ActionType.STOP) {
+                tank.setActionType(ActionType.RUN);
+                sendTankControl(tank);
+            }
+            return;
+        }
+
         if (back != null) {
             tank.setOrientationType(back);
             sendTankControl(tank);
@@ -201,7 +211,7 @@ public class SimpleBot extends BaseBot {
     }
 
     private boolean canPass(double x, double y, String tankId) {
-        if (x < 0 || y < 0 || x > mapDto.getWidth() || y > mapDto.getHeight()) {
+        if (x <= 0 || y <= 0 || x >= mapDto.getWidth() || y >= mapDto.getHeight()) {
             return false;
         }
 
