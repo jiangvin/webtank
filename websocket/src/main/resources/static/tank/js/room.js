@@ -18,11 +18,40 @@
             y: 0
         };
 
-        this.drawTitle = function (stage) {
+        this.drawTitle = function () {
             //显示基本信息
             const tipMessage = '房间号:' + this.roomInfo.roomId
                 + " 地图:" + this.roomInfo.mapId + " [" + this.roomInfo.roomType + "]";
-            drawTips(stage, tipMessage, 10, 6, "ROOM_TITLE");
+            this.drawTips(tipMessage, 10, 6, "ROOM_TITLE");
+        };
+
+        this.drawTips = function (tips, x, y, id) {
+            if (id === undefined) {
+                id = Resource.getId();
+            }
+
+            if (this.stage.items.has(id)) {
+                this.stage.items.get(id).draw = function (context) {
+                    context.font = '14px Helvetica';
+                    context.textAlign = 'left';
+                    context.textBaseline = 'top';
+                    context.fillStyle = '#ffffff';
+                    context.fillText(tips, x, y);
+                }
+            } else {
+                this.stage.createItem({
+                    id: id,
+                    z: 8,
+                    draw: function (context) {
+                        context.font = '14px Helvetica';
+                        context.textAlign = 'left';
+                        context.textBaseline = 'top';
+                        context.fillStyle = '#ffffff';
+                        context.fillText(tips, x, y);
+                    }
+                });
+            }
+
         }
     }
 
@@ -330,14 +359,14 @@
             room.stage.size.height = data.height;
         }
         if (room.roomInfo.roomType === 'PVE') {
-            drawTips(room.stage, "玩家生命:" + room.roomInfo.playerLife,
+            room.drawTips("玩家剩余生命:" + room.roomInfo.playerLife,
                 10, 24, "red_team_life");
-            drawTips(room.stage, "电脑生命:" + room.roomInfo.computerLife,
+            room.drawTips("电脑剩余生命:" + room.roomInfo.computerLife,
                 10, 40, "blue_team_life");
         } else {
-            drawTips(room.stage, "红队生命:" + room.roomInfo.playerLife,
+            room.drawTips("红队剩余生命:" + room.roomInfo.playerLife,
                 10, 24, "red_team_life");
-            drawTips(room.stage, "蓝队生命:" + room.roomInfo.computerLife,
+            room.drawTips( "蓝队剩余生命:" + room.roomInfo.computerLife,
                 10, 40, "blue_team_life");
         }
 
@@ -435,33 +464,4 @@
         position.y = parseInt(infos[1]) * size + size / 2;
         return position;
     };
-
-    const drawTips = function (stage, tips, x, y, id) {
-        if (id === undefined) {
-            id = Resource.getId();
-        }
-
-        if (stage.items.has(id)) {
-            stage.items.get(id).draw = function (context) {
-                context.font = '14px Helvetica';
-                context.textAlign = 'left';
-                context.textBaseline = 'top';
-                context.fillStyle = '#ffffff';
-                context.fillText(tips, x, y);
-            }
-        } else {
-            stage.createItem({
-                id: id,
-                z: 8,
-                draw: function (context) {
-                    context.font = '14px Helvetica';
-                    context.textAlign = 'left';
-                    context.textBaseline = 'top';
-                    context.fillStyle = '#ffffff';
-                    context.fillText(tips, x, y);
-                }
-            });
-        }
-
-    }
 }
