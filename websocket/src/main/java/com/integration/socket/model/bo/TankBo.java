@@ -63,6 +63,13 @@ public class TankBo {
         tankBo.setY(tankDto.getY());
         tankBo.setType(TankTypeBo.getTankType(tankDto.getTypeId()));
         tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
+
+        //bo的team type不能为空
+        if (tankDto.getTeamId() == null) {
+            tankBo.setTeamType(TeamType.RED);
+        } else {
+            tankBo.setTeamType(TeamType.convert(tankDto.getTeamId()));
+        }
         return tankBo;
     }
 

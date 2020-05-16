@@ -49,6 +49,8 @@ public class MessageService {
                 TOPIC_PATH,
                 messageDto);
         } else {
+            //清空原有人数，减少数据量
+            messageDto.setSendToList(null);
             for (String sendTo : sendToList) {
                 simpMessagingTemplate.convertAndSendToUser(
                     sendTo,

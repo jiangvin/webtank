@@ -348,7 +348,7 @@ public class StageRoom extends BaseStage {
         TankBo tankBo = collideWithTanks(bullet);
         if (tankBo != null) {
             addRemoveBulletIds(bullet.getId());
-            sendTankBombMessage(bullet, tankBo);
+            sendTankBombMessage(tankBo);
             removeTankFromTankId(tankBo.getTankId());
             return true;
         }
@@ -357,21 +357,13 @@ public class StageRoom extends BaseStage {
         return collideWithBullets(bullet);
     }
 
-    private void sendTankBombMessage(BulletBo bullet, TankBo tank) {
+    private void sendTankBombMessage(TankBo tank) {
         //不是玩家，过滤
         if (!tank.getTankId().equals(tank.getUserId())) {
             return;
         }
 
-        String killerName;
-        TankBo killer = tankMap.get(bullet.getTankId());
-        if (killer == null) {
-            killerName = bullet.getTankId();
-        } else {
-            killerName = killer.getUserId();
-        }
-
-        sendMessageToRoom(String.format("%s 被 %s 摧毁了,等待3秒复活...", tank.getTankId(), killerName), MessageType.SYSTEM_MESSAGE);
+        sendMessageToRoom(String.format("%s 被摧毁了,等待3秒复活...", tank.getTankId()), MessageType.SYSTEM_MESSAGE);
     }
 
     private TankBo collideWithTanks(BulletBo bulletBo) {

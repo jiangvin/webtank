@@ -131,7 +131,7 @@ public class TankTypeBo {
         com = comCopyType(
                   "tank07",
                   "tank02",
-                  3.0,
+                  2.5,
                   20,
                   null,
                   null);
@@ -140,7 +140,7 @@ public class TankTypeBo {
         com = comCopyType(
                   "tank08",
                   "tank03",
-                  4.0,
+                  3.0,
                   20,
                   null,
                   null);
@@ -158,7 +158,7 @@ public class TankTypeBo {
         com = comCopyType(
                   "tank10",
                   "tank04",
-                  null,
+                  2.5,
                   20,
                   null,
                   "tank11");
@@ -167,7 +167,7 @@ public class TankTypeBo {
         com = comCopyType(
                   "tank11",
                   "tank03",
-                  4.0,
+                  3.0,
                   20,
                   null,
                   "tank12");
@@ -176,7 +176,7 @@ public class TankTypeBo {
         com = comCopyType(
                   "tank12",
                   "tank02",
-                  4.5,
+                  4.0,
                   10,
                   null,
                   null);
