@@ -36,9 +36,7 @@ public class Tank {
         tank.setReloadTime(item.getReloadTime());
         tank.setBulletCount(item.getBulletCount());
         tank.setUserId(item.getUserId());
-
-        //一秒六帧，10倍计算
-        tank.setSpeed(item.getSpeed() * 10);
+        tank.setSpeed(item.getSpeed());
         return tank;
     }
 
@@ -62,5 +60,12 @@ public class Tank {
             default:
                 break;
         }
+    }
+
+    public void reloadBullet() {
+        if (reloadTime <= 0) {
+            return;
+        }
+        --reloadTime;
     }
 }

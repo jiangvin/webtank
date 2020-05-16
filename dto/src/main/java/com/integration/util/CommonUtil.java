@@ -48,7 +48,7 @@ public class CommonUtil {
                .replaceFirst(", \\)$", ")") : null;
     }
 
-    private static Point generateGridPoint(double x, double y) {
+    public static Point generateGridPoint(double x, double y) {
         return new Point((int)(x / CommonUtil.UNIT_SIZE), (int)(y / CommonUtil.UNIT_SIZE));
     }
 

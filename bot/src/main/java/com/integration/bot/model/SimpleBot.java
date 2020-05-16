@@ -26,15 +26,30 @@ public class SimpleBot extends BaseBot {
         super(requestBotDto);
     }
 
-    private static final int KEEP_GOING_RATE = 20;
+    /**
+     *  x-1 / x 的概率继续前进
+     */
+    private static final int KEEP_GOING_RATE = 120;
+
+    /**
+     * 阻塞的时候 x-1 / x的概率不动
+     */
+    private static final int KEEP_TRY_RATE = 60;
+
+    /**
+     * 发射子弹有半秒延迟
+     */
+    private static final int COMMON_RELOAD_TIME = 30;
 
     private Random random = new Random();
 
     @Override
     void updateExtension() {
         for (Map.Entry<String, Tank> kv : tankMap.entrySet()) {
-            updateTank(kv.getValue());
-            kv.getValue().run();
+            Tank tank = kv.getValue();
+            updateTank(tank);
+            tank.run();
+            tank.reloadBullet();
         }
     }
 
@@ -45,37 +60,144 @@ public class SimpleBot extends BaseBot {
 
         if (tank.getBulletCount() != 0 && tank.getReloadTime() == 0) {
             sendMessage(new MessageDto(tank.getId(), MessageType.UPDATE_TANK_FIRE));
+            tank.setReloadTime(COMMON_RELOAD_TIME);
         }
 
-        List<OrientationType> orientationList = new ArrayList<>();
-        if (canPass(tank.getX(), tank.getY() - tank.getSpeed(), tank.getId())) {
-            orientationList.add(OrientationType.UP);
-        }
-        if (canPass(tank.getX(), tank.getY() + tank.getSpeed(), tank.getId())) {
-            orientationList.add(OrientationType.DOWN);
-        }
-        if (canPass(tank.getX() - tank.getSpeed(), tank.getY(), tank.getId())) {
-            orientationList.add(OrientationType.LEFT);
-        }
-        if (canPass(tank.getX() + tank.getSpeed(), tank.getY(), tank.getId())) {
-            orientationList.add(OrientationType.RIGHT);
-        }
-
-        if (orientationList.isEmpty()) {
+        boolean forward = canPass(tank, tank.getOrientationType());
+        if (forward && random.nextInt(KEEP_GOING_RATE) != 0) {
+            if (tank.getActionType() == ActionType.STOP) {
+                tank.setActionType(ActionType.RUN);
+                sendTankControl(tank);
+            }
             return;
         }
 
-        if (tank.getActionType() == ActionType.RUN
-                && orientationList.contains(tank.getOrientationType())
-                && random.nextInt(KEEP_GOING_RATE) != 0) {
-            //keep going
-            return;
+        List<OrientationType> sideList = new ArrayList<>();
+        OrientationType back = null;
+        switch (tank.getOrientationType()) {
+            case UP:
+                if (canPass(tank, OrientationType.LEFT)) {
+                    sideList.add(OrientationType.LEFT);
+                }
+                if (canPass(tank, OrientationType.RIGHT)) {
+                    sideList.add(OrientationType.RIGHT);
+                }
+                if (canPass(tank, OrientationType.DOWN)) {
+                    back = OrientationType.DOWN;
+                }
+                break;
+            case DOWN:
+                if (canPass(tank, OrientationType.LEFT)) {
+                    sideList.add(OrientationType.LEFT);
+                }
+                if (canPass(tank, OrientationType.RIGHT)) {
+                    sideList.add(OrientationType.RIGHT);
+                }
+                if (canPass(tank, OrientationType.UP)) {
+                    back = OrientationType.UP;
+                }
+                break;
+            case LEFT:
+                if (canPass(tank, OrientationType.UP)) {
+                    sideList.add(OrientationType.UP);
+                }
+                if (canPass(tank, OrientationType.DOWN)) {
+                    sideList.add(OrientationType.DOWN);
+                }
+                if (canPass(tank, OrientationType.RIGHT)) {
+                    back = OrientationType.RIGHT;
+                }
+                break;
+            case RIGHT:
+                if (canPass(tank, OrientationType.UP)) {
+                    sideList.add(OrientationType.UP);
+                }
+                if (canPass(tank, OrientationType.DOWN)) {
+                    sideList.add(OrientationType.DOWN);
+                }
+                if (canPass(tank, OrientationType.LEFT)) {
+                    back = OrientationType.LEFT;
+                }
+                break;
+            default:
+                break;
         }
 
-        int index = random.nextInt(orientationList.size());
-        tank.setOrientationType(orientationList.get(index));
         tank.setActionType(ActionType.RUN);
+        if (!sideList.isEmpty()) {
+            int index = random.nextInt(sideList.size());
+            tank.setOrientationType(sideList.get(index));
+            sendTankControl(tank);
+            return;
+        }
+        if (back != null) {
+            tank.setOrientationType(back);
+            sendTankControl(tank);
+            return;
+        }
+        if (random.nextInt(KEEP_TRY_RATE) != 0) {
+            return;
+        }
+        tank.setOrientationType(OrientationType.convert(random.nextInt(4)));
         sendTankControl(tank);
+    }
+
+    private boolean canPass(Tank tank, OrientationType orientation) {
+        //获取前方的两个角的坐标（顺时针获取）
+        List<Point> corners = generateCorners(tank, orientation);
+        Point corner1 = corners.get(0);
+        Point corner2 = corners.get(1);
+        if (!canPass(corner1.x, corner1.y, tank.getId())) {
+            return false;
+        }
+        return canPass(corner2.x, corner2.y, tank.getId());
+    }
+
+    private List<Point> generateCorners(Tank tank, OrientationType orientation) {
+        int x = (int) tank.getX();
+        int y = (int) tank.getY();
+        int size = CommonUtil.UNIT_SIZE;
+        int halfLite = size / 2 - 1;
+
+        //获取前方的两个角的坐标（顺时针获取）
+        Point corner1 = new Point();
+        Point corner2 = new Point();
+        switch (orientation) {
+            case UP:
+                y -= tank.getSpeed();
+                corner1.x = x - halfLite;
+                corner1.y = y - halfLite;
+                corner2.x = x + halfLite;
+                corner2.y = y - halfLite;
+                break;
+            case DOWN:
+                y += tank.getSpeed();
+                corner1.x = x + halfLite;
+                corner1.y = y + halfLite;
+                corner2.x = x - halfLite;
+                corner2.y = y + halfLite;
+                break;
+            case LEFT:
+                x -= tank.getSpeed();
+                corner1.x = x - halfLite;
+                corner1.y = y + halfLite;
+                corner2.x = x - halfLite;
+                corner2.y = y - halfLite;
+                break;
+            case RIGHT:
+                x += tank.getSpeed();
+                corner1.x = x + halfLite;
+                corner1.y = y - halfLite;
+                corner2.x = x + halfLite;
+                corner2.y = y + halfLite;
+                break;
+            default:
+                break;
+        }
+        List<Point> corners = new ArrayList<>();
+        corners.add(corner1);
+        corners.add(corner2);
+        return corners;
     }
 
     private boolean canPass(double x, double y, String tankId) {

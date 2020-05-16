@@ -129,7 +129,7 @@ public abstract class BaseBot {
     }
 
     private void processEvent(BaseEvent event) {
-        log.info("process event:{}", event.getClass().toString());
+        log.info("process event:{}", event.getClass().getName());
         if (event instanceof UserCountCheckEvent) {
             if (this.userCount <= 1) {
                 log.info("bot:{} will be closed because no user in room.", this.name);

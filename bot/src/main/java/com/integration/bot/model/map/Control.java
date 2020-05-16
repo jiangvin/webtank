@@ -13,7 +13,8 @@ import lombok.Data;
 @Data
 public class Control {
     private OrientationType orientation;
-    private ActionType action;
+    private OrientationType cacheOrientation;
+    private ActionType action = ActionType.STOP;
     private Integer cacheX;
     private Integer cacheY;
 }

@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  * @description
  * @date 2020/5/1
  */
-@ControllerAdvice("com.integration.socket.controller")
+@ControllerAdvice("com.integration.bot.controller")
 public class ResponseAdvice implements ResponseBodyAdvice<Object> {
     @Override
     public boolean supports(@NonNull MethodParameter returnType,
