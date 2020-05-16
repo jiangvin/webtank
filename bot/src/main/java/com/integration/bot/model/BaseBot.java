@@ -233,6 +233,8 @@ public abstract class BaseBot {
         dto.setId(tank.getId());
         dto.setOrientation(tank.getOrientationType().getValue());
         dto.setAction(tank.getActionType().getValue());
+        dto.setX(tank.getX());
+        dto.setY(tank.getY());
         sendMessage(new MessageDto(dto, MessageType.UPDATE_TANK_CONTROL));
     }
 
