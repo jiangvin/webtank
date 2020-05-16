@@ -409,6 +409,10 @@ public class StageRoom extends BaseStage {
             }
 
             BulletBo target = bulletMap.get(id);
+            if (target.getTeamType() == ammo.getTeamType()) {
+                continue;
+            }
+
             double distance = Point.distance(ammo.getX(), ammo.getY(), target.getX(), target.getY());
             if (distance <= CommonUtil.AMMO_SIZE) {
                 addRemoveBulletIds(ammo.getId());
@@ -466,7 +470,7 @@ public class StageRoom extends BaseStage {
                 processNextMap = false;
             }
         } else {
-            this.pauseMessage = getTeam(TeamType.BLUE) + "胜利!";
+            this.pauseMessage = getTeam(winTeam) + "胜利!";
         }
         sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
 
