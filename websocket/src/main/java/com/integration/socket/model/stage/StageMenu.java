@@ -2,7 +2,7 @@ package com.integration.socket.model.stage;
 
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
-import com.integration.socket.model.ActionType;
+import com.integration.dto.map.ActionType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.dto.map.ItemDto;

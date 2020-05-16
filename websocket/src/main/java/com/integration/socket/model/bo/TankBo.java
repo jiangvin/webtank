@@ -1,7 +1,7 @@
 package com.integration.socket.model.bo;
 
-import com.integration.socket.model.ActionType;
-import com.integration.dto.OrientationType;
+import com.integration.dto.map.ActionType;
+import com.integration.dto.map.OrientationType;
 import com.integration.dto.room.TeamType;
 import com.integration.dto.map.ItemDto;
 import com.integration.util.CommonUtil;
@@ -27,7 +27,7 @@ public class TankBo {
     private double y;
     private TankTypeBo type;
     private int reloadTime;
-    private int ammoCount;
+    private int bulletCount;
     private long lastSyncTime = System.currentTimeMillis();
     private List<String> gridKeyList = new ArrayList<>();
 
@@ -40,6 +40,9 @@ public class TankBo {
         tankDto.setOrientation(getOrientationType().getValue());
         tankDto.setAction(getActionType().getValue());
         tankDto.setSpeed(getType().getSpeed());
+        tankDto.setBulletCount(getBulletCount());
+        tankDto.setReloadTime(getReloadTime());
+        tankDto.setUserId(getUserId());
         if (getTeamType() != null) {
             tankDto.setTeamId(getTeamType().getValue());
         }
@@ -59,12 +62,12 @@ public class TankBo {
         tankBo.setX(tankDto.getX());
         tankBo.setY(tankDto.getY());
         tankBo.setType(TankTypeBo.getTankType(tankDto.getTypeId()));
-        tankBo.setAmmoCount(tankBo.getType().getAmmoMaxCount());
+        tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
         return tankBo;
     }
 
     public BulletBo fire() {
-        if (ammoCount <= 0) {
+        if (bulletCount <= 0) {
             return null;
         }
 
@@ -73,7 +76,7 @@ public class TankBo {
         }
 
         //重置重新填装
-        --ammoCount;
+        --bulletCount;
         reloadTime = type.getAmmoReloadTime();
 
         return new BulletBo(
@@ -111,7 +114,7 @@ public class TankBo {
     }
 
     public void addAmmoCount() {
-        ++ammoCount;
+        ++bulletCount;
     }
 
     public List<String> generateGridKeyList() {

@@ -1,7 +1,7 @@
 package com.integration.socket.model.stage;
 
 import com.integration.dto.message.MessageType;
-import com.integration.socket.model.ActionType;
+import com.integration.dto.map.ActionType;
 import com.integration.socket.model.CollideType;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.room.RoomType;
@@ -209,7 +209,7 @@ public class StageRoom extends BaseStage {
 
         if (event instanceof CreateTankEvent) {
             CreateTankEvent createTankEvent = (CreateTankEvent) event;
-            addNewTank(createTankEvent.getUser());
+            addNewTank(createTankEvent.getUser(), createTankEvent.getTankId());
             return;
         }
 
@@ -288,6 +288,10 @@ public class StageRoom extends BaseStage {
      * @param tankBo
      */
     private void updateTank(TankBo tankBo) {
+        if (tankBo.getReloadTime() > 0) {
+            tankBo.setReloadTime(tankBo.getReloadTime() - 1);
+        }
+
         if (tankBo.getActionType() == ActionType.STOP) {
             return;
         }
@@ -701,13 +705,34 @@ public class StageRoom extends BaseStage {
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
 
-        this.eventList.add(new CreateTankEvent(userBo, 60 * 3));
+        createTankForNewUser(userBo, teamType);
 
         //通知前端数据传输完毕
         sendReady(userBo.getUsername());
     }
 
-    private void addNewTank(UserBo userBo) {
+    private void createTankForNewUser(UserBo userBo, TeamType teamType) {
+        boolean createForComputer = false;
+        if (getRoomType() == RoomType.EVE) {
+            createForComputer = true;
+        } else if (getRoomType() == RoomType.PVE && teamType == TeamType.BLUE) {
+            createForComputer = true;
+        }
+
+        if (!createForComputer) {
+            this.eventList.add(new CreateTankEvent(userBo, 60 * 3));
+            return;
+        }
+
+        for (int i = 0; i < getMapBo().getComputerStartCount(); ++i) {
+            this.eventList.add(new CreateTankEvent(
+                                   userBo,
+                                   CommonUtil.getId(),
+                                   60 * random.nextInt(getMapBo().getComputerStartCount())));
+        }
+    }
+
+    private void addNewTank(UserBo userBo, String tankId) {
         if (userBo.getTeamType() == TeamType.VIEW) {
             return;
         }
@@ -721,12 +746,12 @@ public class StageRoom extends BaseStage {
         }
 
         TankBo tankBo = new TankBo();
-        tankBo.setTankId(userBo.getUsername());
+        tankBo.setTankId(tankId);
         tankBo.setUserId(userBo.getUsername());
         tankBo.setTeamType(userBo.getTeamType());
         tankBo.setType(getTankType(lifeMap));
         setStartPoint(tankBo);
-        tankBo.setAmmoCount(tankBo.getType().getAmmoMaxCount());
+        tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
         tankMap.put(tankBo.getTankId(), tankBo);
 
         //即将向所有人同步信息

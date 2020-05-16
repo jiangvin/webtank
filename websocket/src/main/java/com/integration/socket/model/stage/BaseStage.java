@@ -2,8 +2,8 @@ package com.integration.socket.model.stage;
 
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
-import com.integration.socket.model.ActionType;
-import com.integration.dto.OrientationType;
+import com.integration.dto.map.ActionType;
+import com.integration.dto.map.OrientationType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.dto.map.ItemDto;
@@ -47,19 +47,27 @@ public abstract class BaseStage {
                 processTankControl(messageDto, sendFrom);
                 break;
             case UPDATE_TANK_FIRE:
-                processTankFire(sendFrom);
+                processTankFire((String) messageDto.getMessage(), sendFrom);
                 break;
             default:
                 break;
         }
     }
 
-    private void processTankFire(String sendFrom) {
-        if (!tankMap.containsKey(sendFrom)) {
+    private void processTankFire(String tankId, String sendFrom) {
+        if (tankId == null) {
+            tankId = sendFrom;
+        }
+
+        if (!tankMap.containsKey(tankId)) {
             return;
         }
 
-        TankBo tankBo = tankMap.get(sendFrom);
+        TankBo tankBo = tankMap.get(tankId);
+        if (!tankBo.getUserId().equals(sendFrom)) {
+            return;
+        }
+
         BulletBo ammo = tankBo.fire();
         if (ammo == null) {
             return;
@@ -82,9 +90,11 @@ public abstract class BaseStage {
         if (request == null) {
             return;
         }
-        request.setId(sendFrom);
+        if (request.getId() == null) {
+            request.setId(sendFrom);
+        }
 
-        TankBo updateBo = updateTankControl(request);
+        TankBo updateBo = updateTankControl(request, sendFrom);
         if (updateBo == null) {
             return;
         }
@@ -97,12 +107,16 @@ public abstract class BaseStage {
      * @param tankDto
      * @return
      */
-    private TankBo updateTankControl(ItemDto tankDto) {
+    private TankBo updateTankControl(ItemDto tankDto, String sendFrom) {
         if (!tankMap.containsKey(tankDto.getId())) {
             return null;
         }
 
         TankBo tankBo = tankMap.get(tankDto.getId());
+        if (!tankBo.getUserId().equals(sendFrom)) {
+            return null;
+        }
+
         //状态只同步朝向和移动命令
         OrientationType orientationType = OrientationType.convert(tankDto.getOrientation());
         if (orientationType != OrientationType.UNKNOWN) {

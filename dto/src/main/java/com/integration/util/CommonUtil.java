@@ -1,7 +1,7 @@
 package com.integration.util;
 
 
-import com.integration.dto.OrientationType;
+import com.integration.dto.map.OrientationType;
 
 import java.awt.Point;
 import java.util.List;

@@ -13,6 +13,7 @@ import lombok.Data;
 @Data
 public class ItemDto {
     private String id;
+    private String userId;
     private Double x;
     private Double y;
     private String typeId;
@@ -20,4 +21,6 @@ public class ItemDto {
     private Integer action;
     private Double speed;
     private Integer teamId;
+    private Integer bulletCount;
+    private Integer reloadTime;
 }

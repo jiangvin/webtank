@@ -1,15 +1,21 @@
 package com.integration.bot.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.integration.bot.handler.MessageReceiveHandler;
 import com.integration.bot.model.event.BaseEvent;
-import com.integration.bot.model.event.UserCheckEvent;
+import com.integration.bot.model.event.PauseCheckEvent;
+import com.integration.bot.model.event.UserCountCheckEvent;
+import com.integration.bot.model.map.Tank;
 import com.integration.dto.bot.RequestBotDto;
+import com.integration.dto.map.ItemDto;
+import com.integration.dto.map.MapDto;
+import com.integration.dto.map.MapUnitType;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.TeamType;
 import com.integration.util.CommonUtil;
-import lombok.Data;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -25,6 +31,8 @@ import javax.websocket.ContainerProvider;
 import javax.websocket.WebSocketContainer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,17 +41,24 @@ import java.util.concurrent.TimeUnit;
  * @date 2020/5/15
  */
 
-@Data
 @Slf4j
 public abstract class BaseBot {
 
     private static final String SOCKET_URL = "http://localhost/websocket-simple?name=";
-
     private static final int BOT_LIFETIME = 90 * 60 * 1000;
 
-    private String name;
+    private ObjectMapper objectMapper = new ObjectMapper();
     private String roomId;
     private TeamType teamType;
+    private boolean isPause = true;
+    private List<BaseEvent> eventList = new ArrayList<>();
+    private WebSocketStompClient stompClient;
+    private StompSession stompSession;
+
+    MapDto mapDto = new MapDto();
+    @Getter String name;
+    Map<String, MapUnitType> unitMap = new ConcurrentHashMap<>();
+    Map<String, Tank> tankMap = new ConcurrentHashMap<>();
 
     /**
      * 最多存活90分钟
@@ -55,12 +70,10 @@ public abstract class BaseBot {
      */
     private Integer userCount;
 
+    /**
+     * 结束标记，控制结束逻辑
+     */
     private boolean deadFlag = false;
-
-    private List<BaseEvent> eventList = new ArrayList<>();
-
-    private WebSocketStompClient stompClient;
-    private StompSession stompSession;
 
     BaseBot(RequestBotDto requestBotDto) {
         this.name = requestBotDto.getName();
@@ -75,6 +88,7 @@ public abstract class BaseBot {
         roomDto.setRoomId(this.roomId);
         roomDto.setJoinTeamType(this.teamType);
         sendMessage(new MessageDto(roomDto, MessageType.JOIN_ROOM));
+        this.eventList.add(new PauseCheckEvent());
     }
 
     public boolean update() {
@@ -84,7 +98,11 @@ public abstract class BaseBot {
 
         processEvent();
 
+        if (isPause) {
+            return true;
+        }
 
+        updateExtension();
         return true;
     }
 
@@ -111,9 +129,18 @@ public abstract class BaseBot {
     }
 
     private void processEvent(BaseEvent event) {
-        if (event instanceof UserCheckEvent) {
+        log.info("process event:{}", event.getClass().toString());
+        if (event instanceof UserCountCheckEvent) {
             if (this.userCount <= 1) {
                 log.info("bot:{} will be closed because no user in room.", this.name);
+                this.deadFlag = true;
+                return;
+            }
+        }
+
+        if (event instanceof PauseCheckEvent) {
+            if (isPause) {
+                log.info("bot:{} will be closed because game pause.", this.name);
                 this.deadFlag = true;
             }
         }
@@ -121,18 +148,92 @@ public abstract class BaseBot {
 
     public void receiveMessage(MessageDto messageDto) {
         log.info("receive message: {}", CommonUtil.ignoreNull(messageDto.toString()));
+
+        if (!roomId.equals(messageDto.getRoomId())) {
+            return;
+        }
+
         switch (messageDto.getMessageType()) {
             case USERS:
                 this.userCount = ((List) messageDto.getMessage()).size();
                 if (this.userCount <= 1) {
-                    UserCheckEvent userCheckEvent = new UserCheckEvent();
-                    userCheckEvent.setTimeout(2 * 60 * 6);
-                    eventList.add(userCheckEvent);
+                    eventList.add(new UserCountCheckEvent());
                 }
+                break;
+            case MAP:
+                processMap(objectMapper.convertValue(messageDto.getMessage(), MapDto.class));
+                break;
+            case REMOVE_MAP:
+                String key = (String) messageDto.getMessage();
+                unitMap.remove(key);
+                break;
+            case CLEAR_MAP:
+                unitMap.clear();
+                tankMap.clear();
+                break;
+            case TANKS:
+                processTank(objectMapper.convertValue(messageDto.getMessage(), List.class));
+                break;
+            case REMOVE_TANK:
+                ItemDto dto = (ItemDto) messageDto.getMessage();
+                tankMap.remove(dto.getId());
+                break;
+            case SERVER_READY:
+                isPause = false;
+                break;
+            case GAME_STATUS:
+                isPause = true;
+                eventList.add(new PauseCheckEvent());
                 break;
             default:
                 break;
         }
+    }
+
+    private void processTank(List<Object> dtoList) {
+        for (Object dto : dtoList) {
+            Tank tank = Tank.convert(objectMapper.convertValue(dto, ItemDto.class));
+            tankMap.put(tank.getId(), tank);
+        }
+    }
+
+    private void processMap(MapDto mapDto) {
+        if (mapDto.getWidth() != null) {
+            this.mapDto.setWidth(mapDto.getWidth());
+        }
+        if (mapDto.getHeight() != null) {
+            this.mapDto.setHeight(mapDto.getHeight());
+        }
+        if (mapDto.getMapId() != null) {
+            this.mapDto.setMapId(mapDto.getMapId());
+        }
+        if (mapDto.getPlayerLife() != null) {
+            this.mapDto.setPlayerLife(mapDto.getPlayerLife());
+        }
+        if (mapDto.getComputerLife() != null) {
+            this.mapDto.setComputerLife(mapDto.getComputerLife());
+        }
+        if (mapDto.getItemList() != null && !mapDto.getItemList().isEmpty()) {
+            processMapUnitList(mapDto.getItemList());
+        }
+    }
+
+    private void processMapUnitList(List<ItemDto> unitList) {
+        for (ItemDto itemDto : unitList) {
+            MapUnitType unitType = MapUnitType.convert(Integer.parseInt(itemDto.getTypeId()));
+            if (unitType == null) {
+                continue;
+            }
+            this.unitMap.put(itemDto.getId(), unitType);
+        }
+    }
+
+    void sendTankControl(Tank tank) {
+        ItemDto dto = new ItemDto();
+        dto.setId(tank.getId());
+        dto.setOrientation(tank.getOrientationType().getValue());
+        dto.setAction(tank.getActionType().getValue());
+        sendMessage(new MessageDto(dto, MessageType.UPDATE_TANK_CONTROL));
     }
 
     void sendMessage(MessageDto messageDto) {
@@ -146,11 +247,16 @@ public abstract class BaseBot {
         }
 
         if (stompClient == null || stompSession == null || !stompSession.isConnected()) {
+            log.info("bot:{} will be closed because stomp connect was closed", getName());
             return true;
         }
 
         //机器人存活时间不得超过90分钟
-        return System.currentTimeMillis() - this.startTime >= BOT_LIFETIME;
+        if (System.currentTimeMillis() - this.startTime >= BOT_LIFETIME) {
+            log.info("bot:{} will be closed because lifetime more than 90 minutes", getName());
+            return true;
+        }
+        return false;
     }
 
     public void close() {

@@ -114,7 +114,7 @@ public class TankTypeBo {
                              "tank05",
                              "tank01",
                              null,
-                             60,
+                             30,
                              "tank06",
                              null);
         tankTypeMap.put(com.getTypeId(), com);
@@ -123,7 +123,7 @@ public class TankTypeBo {
                   "tank06",
                   "tank02",
                   null,
-                  60,
+                  20,
                   null,
                   null);
         tankTypeMap.put(com.getTypeId(), com);
@@ -132,7 +132,7 @@ public class TankTypeBo {
                   "tank07",
                   "tank02",
                   3.0,
-                  60,
+                  20,
                   null,
                   null);
         tankTypeMap.put(com.getTypeId(), com);
@@ -150,7 +150,7 @@ public class TankTypeBo {
                   "tank09",
                   "tank04",
                   null,
-                  40,
+                  30,
                   null,
                   "tank10");
         tankTypeMap.put(com.getTypeId(), com);
@@ -159,7 +159,7 @@ public class TankTypeBo {
                   "tank10",
                   "tank04",
                   null,
-                  30,
+                  20,
                   null,
                   "tank11");
         tankTypeMap.put(com.getTypeId(), com);
@@ -168,7 +168,7 @@ public class TankTypeBo {
                   "tank11",
                   "tank03",
                   4.0,
-                  30,
+                  20,
                   null,
                   "tank12");
         tankTypeMap.put(com.getTypeId(), com);
@@ -177,7 +177,7 @@ public class TankTypeBo {
                   "tank12",
                   "tank02",
                   4.5,
-                  30,
+                  10,
                   null,
                   null);
         tankTypeMap.put(com.getTypeId(), com);

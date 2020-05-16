@@ -1,6 +1,6 @@
 package com.integration.socket.model.bo;
 
-import com.integration.dto.OrientationType;
+import com.integration.dto.map.OrientationType;
 import com.integration.dto.room.TeamType;
 import com.integration.dto.map.ItemDto;
 import lombok.AllArgsConstructor;
@@ -35,6 +35,7 @@ public class BulletBo {
         ammoDto.setY(getY());
         ammoDto.setOrientation(getOrientationType().getValue());
         ammoDto.setSpeed(getSpeed());
+        ammoDto.setTeamId(getTeamType().getValue());
         return ammoDto;
     }
 
