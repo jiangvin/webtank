@@ -5,9 +5,11 @@ import com.integration.bot.model.SimpleBot;
 import com.integration.dto.bot.RequestBotDto;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,16 @@ import java.util.List;
 @Service
 @Slf4j
 public class BotService {
+
+    @Value("${server.host:localhost}")
+    private String serverHost;
+
+    public static String serverAddress;
+
+    @PostConstruct
+    private void init() {
+        serverAddress = String.format("http://%s/websocket-simple?name=", serverHost);
+    }
 
     private List<BaseBot> botList = new ArrayList<>();
 

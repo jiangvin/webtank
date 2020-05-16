@@ -6,6 +6,7 @@ import com.integration.bot.model.event.BaseEvent;
 import com.integration.bot.model.event.PauseCheckEvent;
 import com.integration.bot.model.event.UserCountCheckEvent;
 import com.integration.bot.model.map.Tank;
+import com.integration.bot.service.BotService;
 import com.integration.dto.bot.RequestBotDto;
 import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
@@ -44,7 +45,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public abstract class BaseBot {
 
-    private static final String SOCKET_URL = "http://localhost/websocket-simple?name=";
     private static final int BOT_LIFETIME = 90 * 60 * 1000;
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -287,7 +287,7 @@ public abstract class BaseBot {
         stompClient.setTaskScheduler(taskScheduler);
         MessageReceiveHandler messageReceiveHandler = new MessageReceiveHandler(this);
         try {
-            stompSession = stompClient.connect(SOCKET_URL + name, messageReceiveHandler).get(1, TimeUnit.SECONDS);
+            stompSession = stompClient.connect(BotService.serverAddress + name, messageReceiveHandler).get(1, TimeUnit.SECONDS);
             stompSession.subscribe("/topic/send", messageReceiveHandler);
             stompSession.subscribe("/user/queue/send", messageReceiveHandler);
         } catch (Exception e) {
