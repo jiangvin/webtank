@@ -24,6 +24,8 @@ public class Tank {
     private int reloadTime;
     private int bulletCount;
     private double speed;
+    private OrientationType lastSendOrientation;
+    private ActionType lastSendAction;
 
     public static Tank convert(ItemDto item) {
         Tank tank = new Tank();
@@ -38,6 +40,17 @@ public class Tank {
         tank.setUserId(item.getUserId());
         tank.setSpeed(item.getSpeed());
         return tank;
+    }
+
+    public void copyPropertyFromServer(Tank tank) {
+        x = tank.x;
+        y = tank.y;
+        reloadTime = tank.reloadTime;
+        bulletCount = tank.bulletCount;
+        speed = tank.speed;
+
+        lastSendOrientation = tank.orientationType;
+        lastSendAction = tank.actionType;
     }
 
     public void run() {

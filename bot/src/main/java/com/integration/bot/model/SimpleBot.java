@@ -50,7 +50,18 @@ public class SimpleBot extends BaseBot {
             updateTank(tank);
             tank.run();
             tank.reloadBullet();
+            syncControl(tank);
         }
+    }
+
+    private void syncControl(Tank tank) {
+        if (tank.getOrientationType() == tank.getLastSendOrientation() && tank.getActionType() == tank.getLastSendAction()) {
+            return;
+        }
+
+        tank.setLastSendOrientation(tank.getOrientationType());
+        tank.setLastSendAction(tank.getActionType());
+        sendTankControl(tank);
     }
 
     private void updateTank(Tank tank) {
@@ -63,12 +74,9 @@ public class SimpleBot extends BaseBot {
             tank.setReloadTime(COMMON_RELOAD_TIME);
         }
 
+        tank.setActionType(ActionType.RUN);
         boolean forward = canPass(tank, tank.getOrientationType());
         if (forward && random.nextInt(KEEP_GOING_RATE) != 0) {
-            if (tank.getActionType() == ActionType.STOP) {
-                tank.setActionType(ActionType.RUN);
-                sendTankControl(tank);
-            }
             return;
         }
 
@@ -123,33 +131,27 @@ public class SimpleBot extends BaseBot {
                 break;
         }
 
-        tank.setActionType(ActionType.RUN);
         if (!sideList.isEmpty()) {
             int index = random.nextInt(sideList.size());
             tank.setOrientationType(sideList.get(index));
-            sendTankControl(tank);
             return;
         }
 
         //如果是因为随机掉头到这里要特殊处理
         if (forward) {
-            if (tank.getActionType() == ActionType.STOP) {
-                tank.setActionType(ActionType.RUN);
-                sendTankControl(tank);
-            }
             return;
         }
 
         if (back != null) {
             tank.setOrientationType(back);
-            sendTankControl(tank);
             return;
         }
+
         if (random.nextInt(KEEP_TRY_RATE) != 0) {
             return;
         }
+
         tank.setOrientationType(OrientationType.convert(random.nextInt(4)));
-        sendTankControl(tank);
     }
 
     private boolean canPass(Tank tank, OrientationType orientation) {

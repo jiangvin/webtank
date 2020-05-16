@@ -194,7 +194,11 @@ public abstract class BaseBot {
     private void processTank(List<Object> dtoList) {
         for (Object dto : dtoList) {
             Tank tank = Tank.convert(objectMapper.convertValue(dto, ItemDto.class));
-            tankMap.put(tank.getId(), tank);
+            if (tankMap.containsKey(tank.getId()) && tankMap.get(tank.getId()).getTeamType() == this.teamType) {
+                tankMap.get(tank.getId()).copyPropertyFromServer(tank);
+            } else {
+                tankMap.put(tank.getId(), tank);
+            }
         }
     }
 
