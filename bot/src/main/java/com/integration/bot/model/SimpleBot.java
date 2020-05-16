@@ -225,6 +225,11 @@ public class SimpleBot extends BaseBot {
                 continue;
             }
 
+            //不是自己人，不用让
+            if (tank.getTeamType() != this.teamType) {
+                continue;
+            }
+
             double distance = Point.distance(x, y, tank.getX(), tank.getY());
             if (distance <= CommonUtil.UNIT_SIZE) {
                 return false;

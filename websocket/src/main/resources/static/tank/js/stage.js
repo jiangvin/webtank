@@ -79,18 +79,26 @@ function Stage(params) {
         const speed = 5.0;
         switch (event) {
             case "Up":
-                this.view.y = this.view.y > speed ? this.view.y - speed : 0;
+                if (this.size.height > Common.height()) {
+                    this.view.y = this.view.y > speed ? this.view.y - speed : 0;
+                }
                 break;
             case "Down":
-                const maxY = this.size.height - Common.height();
-                this.view.y = this.view.y + speed < maxY ? this.view.y + speed : maxY;
+                if (this.size.height > Common.height()) {
+                    const maxY = this.size.height - Common.height();
+                    this.view.y = this.view.y + speed < maxY ? this.view.y + speed : maxY;
+                }
                 break;
             case "Left":
-                this.view.x = this.view.x > speed ? this.view.x - speed : 0;
+                if (this.size.width > Common.width()) {
+                    this.view.x = this.view.x > speed ? this.view.x - speed : 0;
+                }
                 break;
             case "Right":
-                const maxX = this.size.width - Common.width();
-                this.view.x = this.view.x + speed < maxX ? this.view.x + speed : maxX;
+                if (this.size.width > Common.width()) {
+                    const maxX = this.size.width - Common.width();
+                    this.view.x = this.view.x + speed < maxX ? this.view.x + speed : maxX;
+                }
                 break;
         }
     };
@@ -293,9 +301,18 @@ function Stage(params) {
                 this.view.center = item;
             }
         }
-
+        this.createTankExtension(item);
         return item;
     };
+
+    /**
+     * 在room中重载
+     * @param item
+     */
+    this.createTankExtension = function (item) {
+
+    };
+
     this.createBullet = function (options) {
         const item = this.createItem(options);
         item.action = 1;

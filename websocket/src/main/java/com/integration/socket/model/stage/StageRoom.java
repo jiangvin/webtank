@@ -225,7 +225,7 @@ public class StageRoom extends BaseStage {
             sendMessageToRoom(null, MessageType.SERVER_READY);
             //1 ~ 5 秒陆续出现坦克
             for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-                this.eventList.add(new CreateTankEvent(kv.getValue(), random.nextInt(60 * 4) + 60));
+                createTankForUser(kv.getValue(), kv.getValue().getTeamType(), random.nextInt(60 * 4) + 60);
             }
         }
     }
@@ -237,6 +237,9 @@ public class StageRoom extends BaseStage {
 
         for (String bulletId : removeBulletIds) {
             BulletBo bullet = bulletMap.get(bulletId);
+            if (bullet == null) {
+                continue;
+            }
             removeToGridBulletMap(bullet, bullet.getStartGridKey());
             removeToGridBulletMap(bullet, bullet.getEndGridKey());
             bulletMap.remove(bulletId);
@@ -606,7 +609,7 @@ public class StageRoom extends BaseStage {
         //recreate
         UserBo userBo = this.userMap.get(tankBo.getUserId());
         if (userBo != null) {
-            this.eventList.add(new CreateTankEvent(userBo, 60 * 3));
+            this.eventList.add(new CreateTankEvent(userBo, tankBo.getTankId(), 60 * 3));
         }
     }
 
@@ -705,13 +708,13 @@ public class StageRoom extends BaseStage {
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
 
-        createTankForNewUser(userBo, teamType);
+        createTankForUser(userBo, teamType, 60 * 3);
 
         //通知前端数据传输完毕
         sendReady(userBo.getUsername());
     }
 
-    private void createTankForNewUser(UserBo userBo, TeamType teamType) {
+    private void createTankForUser(UserBo userBo, TeamType teamType, int timeoutForPlayer) {
         boolean createForComputer = false;
         if (getRoomType() == RoomType.EVE) {
             createForComputer = true;
@@ -720,7 +723,7 @@ public class StageRoom extends BaseStage {
         }
 
         if (!createForComputer) {
-            this.eventList.add(new CreateTankEvent(userBo, 60 * 3));
+            this.eventList.add(new CreateTankEvent(userBo, timeoutForPlayer));
             return;
         }
 

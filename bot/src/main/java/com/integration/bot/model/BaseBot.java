@@ -49,14 +49,15 @@ public abstract class BaseBot {
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private String roomId;
-    private TeamType teamType;
     private boolean isPause = true;
     private List<BaseEvent> eventList = new ArrayList<>();
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
 
+    @Getter
+    String name;
+    TeamType teamType;
     MapDto mapDto = new MapDto();
-    @Getter String name;
     Map<String, MapUnitType> unitMap = new ConcurrentHashMap<>();
     Map<String, Tank> tankMap = new ConcurrentHashMap<>();
 

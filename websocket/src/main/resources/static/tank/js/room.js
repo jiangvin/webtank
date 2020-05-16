@@ -70,9 +70,23 @@
         thisStage.updateCenter = function () {
             reloadUpdateCenter(thisRoom);
         };
+        thisStage.createTankExtension = function(item) {
+            reloadCreateTankExtension(thisRoom,item)
+        };
 
         //显示基本信息
         thisRoom.drawTitle(thisStage);
+    };
+
+    const reloadCreateTankExtension = function (thisRoom,item) {
+        if (thisRoom.roomInfo.roomType === "PVE" && item.teamId === 2) {
+            item.showId = false;
+            return;
+        }
+
+        if (thisRoom.roomInfo.roomType === "EVE") {
+            item.showId = false;
+        }
     };
 
     const reloadUpdateCenter = function (room) {
