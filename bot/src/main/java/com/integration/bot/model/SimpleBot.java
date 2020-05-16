@@ -47,7 +47,7 @@ public class SimpleBot extends BaseBot {
     void updateExtension() {
         for (Map.Entry<String, Tank> kv : tankMap.entrySet()) {
             Tank tank = kv.getValue();
-            updateTank(tank);
+            updateTank(tank, false);
             tank.run();
             tank.reloadBullet();
             syncControl(tank);
@@ -64,7 +64,7 @@ public class SimpleBot extends BaseBot {
         sendTankControl(tank);
     }
 
-    private void updateTank(Tank tank) {
+    private void updateTank(Tank tank, boolean ignoreCollideWithTanks) {
         if (!tank.getUserId().equals(name)) {
             return;
         }
@@ -75,7 +75,7 @@ public class SimpleBot extends BaseBot {
         }
 
         tank.setActionType(ActionType.RUN);
-        boolean forward = canPass(tank, tank.getOrientationType());
+        boolean forward = canPass(tank, tank.getOrientationType(), ignoreCollideWithTanks);
         if (forward && random.nextInt(KEEP_GOING_RATE) != 0) {
             return;
         }
@@ -84,46 +84,46 @@ public class SimpleBot extends BaseBot {
         OrientationType back = null;
         switch (tank.getOrientationType()) {
             case UP:
-                if (canPass(tank, OrientationType.LEFT)) {
+                if (canPass(tank, OrientationType.LEFT, ignoreCollideWithTanks)) {
                     sideList.add(OrientationType.LEFT);
                 }
-                if (canPass(tank, OrientationType.RIGHT)) {
+                if (canPass(tank, OrientationType.RIGHT, ignoreCollideWithTanks)) {
                     sideList.add(OrientationType.RIGHT);
                 }
-                if (canPass(tank, OrientationType.DOWN)) {
+                if (canPass(tank, OrientationType.DOWN, ignoreCollideWithTanks)) {
                     back = OrientationType.DOWN;
                 }
                 break;
             case DOWN:
-                if (canPass(tank, OrientationType.LEFT)) {
+                if (canPass(tank, OrientationType.LEFT, ignoreCollideWithTanks)) {
                     sideList.add(OrientationType.LEFT);
                 }
-                if (canPass(tank, OrientationType.RIGHT)) {
+                if (canPass(tank, OrientationType.RIGHT, ignoreCollideWithTanks)) {
                     sideList.add(OrientationType.RIGHT);
                 }
-                if (canPass(tank, OrientationType.UP)) {
+                if (canPass(tank, OrientationType.UP, ignoreCollideWithTanks)) {
                     back = OrientationType.UP;
                 }
                 break;
             case LEFT:
-                if (canPass(tank, OrientationType.UP)) {
+                if (canPass(tank, OrientationType.UP, ignoreCollideWithTanks)) {
                     sideList.add(OrientationType.UP);
                 }
-                if (canPass(tank, OrientationType.DOWN)) {
+                if (canPass(tank, OrientationType.DOWN, ignoreCollideWithTanks)) {
                     sideList.add(OrientationType.DOWN);
                 }
-                if (canPass(tank, OrientationType.RIGHT)) {
+                if (canPass(tank, OrientationType.RIGHT, ignoreCollideWithTanks)) {
                     back = OrientationType.RIGHT;
                 }
                 break;
             case RIGHT:
-                if (canPass(tank, OrientationType.UP)) {
+                if (canPass(tank, OrientationType.UP, ignoreCollideWithTanks)) {
                     sideList.add(OrientationType.UP);
                 }
-                if (canPass(tank, OrientationType.DOWN)) {
+                if (canPass(tank, OrientationType.DOWN, ignoreCollideWithTanks)) {
                     sideList.add(OrientationType.DOWN);
                 }
-                if (canPass(tank, OrientationType.LEFT)) {
+                if (canPass(tank, OrientationType.LEFT, ignoreCollideWithTanks)) {
                     back = OrientationType.LEFT;
                 }
                 break;
@@ -147,22 +147,28 @@ public class SimpleBot extends BaseBot {
             return;
         }
 
-        if (random.nextInt(KEEP_TRY_RATE) != 0) {
+        if (!ignoreCollideWithTanks) {
+            updateTank(tank, true);
             return;
         }
 
+
+        tank.setActionType(ActionType.STOP);
+        if (random.nextInt(KEEP_TRY_RATE) != 0) {
+            return;
+        }
         tank.setOrientationType(OrientationType.convert(random.nextInt(4)));
     }
 
-    private boolean canPass(Tank tank, OrientationType orientation) {
+    private boolean canPass(Tank tank, OrientationType orientation, boolean ignoreCollideWithTanks) {
         //获取前方的两个角的坐标（顺时针获取）
         List<Point> corners = generateCorners(tank, orientation);
         Point corner1 = corners.get(0);
         Point corner2 = corners.get(1);
-        if (!canPass(corner1.x, corner1.y, tank.getId())) {
+        if (!canPass(corner1.x, corner1.y, tank.getId(), ignoreCollideWithTanks)) {
             return false;
         }
-        return canPass(corner2.x, corner2.y, tank.getId());
+        return canPass(corner2.x, corner2.y, tank.getId(), ignoreCollideWithTanks);
     }
 
     private List<Point> generateCorners(Tank tank, OrientationType orientation) {
@@ -212,7 +218,7 @@ public class SimpleBot extends BaseBot {
         return corners;
     }
 
-    private boolean canPass(double x, double y, String tankId) {
+    private boolean canPass(double x, double y, String tankId, boolean ignoreCollideWithTanks) {
         if (x <= 0 || y <= 0 || x >= mapDto.getWidth() || y >= mapDto.getHeight()) {
             return false;
         }
@@ -221,14 +227,13 @@ public class SimpleBot extends BaseBot {
             return false;
         }
 
+        if (ignoreCollideWithTanks) {
+            return true;
+        }
+
         for (Map.Entry<String, Tank> kv : tankMap.entrySet()) {
             Tank tank = kv.getValue();
             if (tank.getId().equals(tankId)) {
-                continue;
-            }
-
-            //不是自己人，不用让
-            if (tank.getTeamType() != this.teamType) {
                 continue;
             }
 

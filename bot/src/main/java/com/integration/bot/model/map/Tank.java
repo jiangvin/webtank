@@ -43,8 +43,6 @@ public class Tank {
     }
 
     public void copyPropertyFromServer(Tank tank) {
-        x = tank.x;
-        y = tank.y;
         reloadTime = tank.reloadTime;
         bulletCount = tank.bulletCount;
         speed = tank.speed;
