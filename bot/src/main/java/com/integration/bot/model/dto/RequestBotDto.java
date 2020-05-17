@@ -1,4 +1,4 @@
-package com.integration.dto.bot;
+package com.integration.bot.model.dto;
 
 import com.integration.dto.room.TeamType;
 import lombok.Data;
@@ -12,7 +12,7 @@ import lombok.NonNull;
 
 @Data
 public class RequestBotDto {
-    @NonNull private String name;
+    private String name;
     @NonNull private String roomId;
     @NonNull private TeamType teamType;
     private BotType botType = BotType.SIMPLE;

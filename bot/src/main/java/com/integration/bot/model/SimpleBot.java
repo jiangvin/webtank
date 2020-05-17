@@ -1,7 +1,7 @@
 package com.integration.bot.model;
 
 import com.integration.bot.model.map.Tank;
-import com.integration.dto.bot.RequestBotDto;
+import com.integration.bot.model.dto.RequestBotDto;
 import com.integration.dto.map.ActionType;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.map.OrientationType;

@@ -8,7 +8,7 @@ import com.integration.bot.model.event.SendMessageEvent;
 import com.integration.bot.model.event.UserCountCheckEvent;
 import com.integration.bot.model.map.Tank;
 import com.integration.bot.service.BotService;
-import com.integration.dto.bot.RequestBotDto;
+import com.integration.bot.model.dto.RequestBotDto;
 import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;

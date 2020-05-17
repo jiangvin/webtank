@@ -1,7 +1,7 @@
 package com.integration.bot.controller;
 
 import com.integration.bot.service.BotService;
-import com.integration.dto.bot.RequestBotDto;
+import com.integration.bot.model.dto.RequestBotDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
