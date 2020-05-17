@@ -67,10 +67,10 @@ function Game() {
                 Status.setStatus(Status.getStatusPause(), messageDto.message, false);
                 break;
             default:
-                //给当前场景处理服务消息
-                this.currentStage().receiveStompMessage(messageDto);
                 break;
         }
+        //给当前场景处理服务消息
+        this.currentStage().receiveStompMessage(messageDto);
     };
 
     //控制相关

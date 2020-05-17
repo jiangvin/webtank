@@ -137,9 +137,9 @@ function Stage(params) {
                 this.itemBomb(messageDto.message, 0.5);
                 break;
             default:
-                this.receiveStompMessageExtension(messageDto);
                 break;
         }
+        this.receiveStompMessageExtension(messageDto);
     };
 
     this.drawBackground = function (context) {

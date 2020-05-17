@@ -23,6 +23,14 @@
         //开始初始化
         this.stage = game.createStage();
 
+        //扩展消息函数
+        const thisMenu = this;
+        this.stage.receiveStompMessageExtension = function (messageDto) {
+            if (messageDto.note === "CREAT_ROOM") {
+                queryRoomList(thisMenu);
+            }
+        };
+
         this.tankLogo = this.stage.createTank({
             image: Common.getRandomTankImage(),
             x: Common.width() / 2,
@@ -77,6 +85,17 @@
     Menu.deleteInfo = function () {
         this.stage.items.delete("info1");
         this.stage.items.delete("info2");
+
+        this.stage.createItem({
+            id: "info3",
+            draw: function (context) {
+                context.font = '30px Helvetica';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillStyle = '#949494';
+                context.fillText('请创建或者加入房间', Common.width() / 2, Common.height() * .8);
+            }
+        });
     };
 
     /**

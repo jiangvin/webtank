@@ -91,7 +91,17 @@ public class RoomService {
         StageRoom stageRoom = new StageRoom(roomDto, mapMangerBo, messageService);
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
-        messageService.sendMessage(new MessageDto(String.format("%s 创建了房间 %s", creator.getUsername(), roomDto.getRoomId()), MessageType.SYSTEM_MESSAGE));
+        String note = null;
+        if (roomList.size() <= 6) {
+            note = "CREAT_ROOM";
+        }
+        messageService.sendMessage(new MessageDto(String.format("%s 创建了房间 %s",
+                                                                creator.getUsername(),
+                                                                roomDto.getRoomId()),
+                                                  MessageType.SYSTEM_MESSAGE,
+                                                  null,
+                                                  null,
+                                                  note));
         return stageRoom;
     }
 }
