@@ -91,11 +91,11 @@ public class StageRoom extends BaseStage {
     @Getter
     private String creator;
 
-    public String getMapId() {
+    private String getMapId() {
         return mapManger.getMapBo().getMapId();
     }
 
-    public RoomType getRoomType() {
+    private RoomType getRoomType() {
         return mapManger.getRoomType();
     }
 
@@ -711,24 +711,17 @@ public class StageRoom extends BaseStage {
     }
 
     private void createTankForUser(UserBo userBo, TeamType teamType, int timeoutForPlayer) {
-        boolean createForComputer = false;
-        if (getRoomType() == RoomType.EVE) {
-            createForComputer = true;
-        } else if (getRoomType() == RoomType.PVE && teamType == TeamType.BLUE) {
-            createForComputer = true;
-        }
-
-        if (!createForComputer) {
-            this.eventList.add(new CreateTankEvent(userBo, timeoutForPlayer));
+        if (isBot(teamType)) {
+            for (int i = 0; i < getMapBo().getComputerStartCount(); ++i) {
+                this.eventList.add(new CreateTankEvent(
+                                       userBo,
+                                       CommonUtil.getId(),
+                                       60 * random.nextInt(getMapBo().getComputerStartCount())));
+            }
             return;
         }
 
-        for (int i = 0; i < getMapBo().getComputerStartCount(); ++i) {
-            this.eventList.add(new CreateTankEvent(
-                                   userBo,
-                                   CommonUtil.getId(),
-                                   60 * random.nextInt(getMapBo().getComputerStartCount())));
-        }
+        this.eventList.add(new CreateTankEvent(userBo, timeoutForPlayer));
     }
 
     private void addNewTank(UserBo userBo, String tankId) {
@@ -738,9 +731,11 @@ public class StageRoom extends BaseStage {
 
         Map<String, Integer> lifeMap = getLifeMap(userBo.getTeamType());
         if (lifeMap.isEmpty()) {
-            sendMessageToRoom(
-                String.format("没有剩余生命值，玩家 %s 将变成观看模式",
-                              userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
+            if (!isBot(userBo.getTeamType())) {
+                sendMessageToRoom(
+                    String.format("没有剩余生命值，玩家 %s 将变成观看模式",
+                                  userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
+            }
             return;
         }
 
@@ -903,5 +898,12 @@ public class StageRoom extends BaseStage {
         String endKey = CommonUtil.generateEndGridKey(bullet.getX(), bullet.getY(), bullet.getOrientationType());
         bullet.setEndGridKey(endKey);
         insertToGridBulletMap(bullet, endKey);
+    }
+
+    private boolean isBot(TeamType teamType) {
+        if (getRoomType() == RoomType.EVE) {
+            return true;
+        }
+        return getRoomType() == RoomType.PVE && teamType == TeamType.BLUE;
     }
 }

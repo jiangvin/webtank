@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.integration.bot.handler.MessageReceiveHandler;
 import com.integration.bot.model.event.BaseEvent;
 import com.integration.bot.model.event.PauseCheckEvent;
+import com.integration.bot.model.event.SendMessageEvent;
 import com.integration.bot.model.event.UserCountCheckEvent;
 import com.integration.bot.model.map.Tank;
 import com.integration.bot.service.BotService;
@@ -53,10 +54,10 @@ public abstract class BaseBot {
     private List<BaseEvent> eventList = new ArrayList<>();
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
+    private TeamType teamType;
 
     @Getter
     String name;
-    TeamType teamType;
     MapDto mapDto = new MapDto();
     Map<String, MapUnitType> unitMap = new ConcurrentHashMap<>();
     Map<String, Tank> tankMap = new ConcurrentHashMap<>();
@@ -67,7 +68,7 @@ public abstract class BaseBot {
     private long startTime = System.currentTimeMillis();
 
     /**
-     * 当只剩BOT一个人时，2分钟后结束
+     * 当只剩BOT一个人时结束
      */
     private Integer userCount;
 
@@ -88,7 +89,8 @@ public abstract class BaseBot {
         RoomDto roomDto = new RoomDto();
         roomDto.setRoomId(this.roomId);
         roomDto.setJoinTeamType(this.teamType);
-        sendMessage(new MessageDto(roomDto, MessageType.JOIN_ROOM));
+        MessageDto messageDto = new MessageDto(roomDto, MessageType.JOIN_ROOM);
+        this.eventList.add(new SendMessageEvent(5 * 60, messageDto));
         this.eventList.add(new PauseCheckEvent());
     }
 
@@ -130,19 +132,29 @@ public abstract class BaseBot {
     }
 
     private void processEvent(BaseEvent event) {
-        log.info("process event:{}", event.getClass().getName());
-        if (event instanceof UserCountCheckEvent) {
+        log.info("process event:{}", event.getClass().getSimpleName());
+        if (event instanceof SendMessageEvent) {
+            SendMessageEvent sendMessageEvent = (SendMessageEvent) event;
+            sendMessage(sendMessageEvent.getMessage());
+        } else if (event instanceof UserCountCheckEvent) {
             if (this.userCount <= 1) {
-                log.info("bot:{} will be closed because no user in room.", this.name);
-                this.deadFlag = true;
-                return;
+                UserCountCheckEvent userCountCheckEvent = (UserCountCheckEvent) event;
+                if (userCountCheckEvent.isFinished()) {
+                    log.info("bot:{} will be closed because no user in room.", this.name);
+                    this.deadFlag = true;
+                } else {
+                    this.eventList.add(userCountCheckEvent);
+                }
             }
-        }
-
-        if (event instanceof PauseCheckEvent) {
+        } else if (event instanceof PauseCheckEvent) {
+            PauseCheckEvent pauseCheckEvent = (PauseCheckEvent) event;
             if (isPause) {
-                log.info("bot:{} will be closed because game pause.", this.name);
-                this.deadFlag = true;
+                if (pauseCheckEvent.isFinished()) {
+                    log.info("bot:{} will be closed because game pause.", this.name);
+                    this.deadFlag = true;
+                } else {
+                    this.eventList.add(pauseCheckEvent);
+                }
             }
         }
     }

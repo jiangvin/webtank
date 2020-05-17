@@ -5,8 +5,8 @@ package com.integration.bot.model.event;
  * @description
  * @date 2020/5/15
  */
-public class UserCountCheckEvent extends BaseEvent {
+public class UserCountCheckEvent extends BaseLoopEvent {
     public UserCountCheckEvent() {
-        setTimeout(2 * 60 * 60);
+        super(10 * 60, 3);
     }
 }

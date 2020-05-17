@@ -5,8 +5,8 @@ package com.integration.bot.model.event;
  * @description
  * @date 2020/5/16
  */
-public class PauseCheckEvent extends BaseEvent {
+public class PauseCheckEvent extends BaseLoopEvent {
     public PauseCheckEvent() {
-        setTimeout(60 * 60);
+        super(10 * 60, 3);
     }
 }

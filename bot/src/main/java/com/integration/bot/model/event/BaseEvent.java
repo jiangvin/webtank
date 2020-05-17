@@ -1,6 +1,7 @@
 package com.integration.bot.model.event;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author 蒋文龙(Vin)
@@ -8,7 +9,12 @@ import lombok.Data;
  * @date 2020/5/15
  */
 
-@Data
 public abstract class BaseEvent {
-    private long timeout;
+    @Getter
+    @Setter
+    long timeout;
+
+    BaseEvent(long timeout) {
+        this.timeout = timeout;
+    }
 }
