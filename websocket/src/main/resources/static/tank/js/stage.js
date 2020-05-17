@@ -147,13 +147,48 @@ function Stage(params) {
             return;
         }
 
-        //TODO - 平铺背景
-        const start = this.convertToScreenPoint({x: 0, y: 0});
-        context.drawImage(this.backgroundImage,
-            0, 0,
-            this.backgroundImage.width, this.backgroundImage.height,
-            start.x, start.y,
-            this.size.width, this.size.height);
+        if (!this.backgroundImage.repeatX || !this.backgroundImage.repeatY) {
+            this.calculateBackgroundRepeat();
+        }
+
+
+        const mapStart = this.convertToScreenPoint({x: 0, y: 0});
+        for (let x = 0; x < this.backgroundImage.repeatX; ++x) {
+            for (let y = 0; y < this.backgroundImage.repeatY; ++y) {
+                const start = {};
+                const end = {};
+                start.x = x * this.backgroundImage.sizeX;
+                start.y = y * this.backgroundImage.sizeY;
+
+                end.x = start.x + this.backgroundImage.sizeX;
+                end.y = start.y + this.backgroundImage.sizeY;
+
+                context.drawImage(this.backgroundImage,
+                    0, 0,
+                    this.backgroundImage.width, this.backgroundImage.height,
+                    start.x + mapStart.x, start.y + mapStart.y,
+                    this.backgroundImage.sizeX, this.backgroundImage.sizeY);
+            }
+        }
+    };
+
+    this.calculateBackgroundRepeat = function () {
+        const imageRate = this.backgroundImage.width / this.backgroundImage.height;
+        const mapRate = this.size.width / this.size.height;
+        if (mapRate >= imageRate * 0.7 && mapRate <= imageRate * 1.3) {
+            this.backgroundImage.repeatX = 1;
+            this.backgroundImage.repeatY = 1;
+        } else {
+            if (mapRate < imageRate * 0.7) {
+                this.backgroundImage.repeatX = 1;
+                this.backgroundImage.repeatY = Math.round(this.size.height / (this.size.width / imageRate));
+            } else {
+                this.backgroundImage.repeatY = 1;
+                this.backgroundImage.repeatX = Math.round(this.size.width / (this.size.height * imageRate));
+            }
+        }
+        this.backgroundImage.sizeX = this.size.width / this.backgroundImage.repeatX;
+        this.backgroundImage.sizeY = this.size.height / this.backgroundImage.repeatY;
     };
 
     //真实坐标转换屏幕坐标

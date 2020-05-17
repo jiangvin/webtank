@@ -352,11 +352,10 @@
         if (data.computerLife !== undefined) {
             room.roomInfo.computerLife = data.computerLife;
         }
-        if (data.width) {
+        if (data.width && data.height) {
             room.stage.size.width = data.width;
-        }
-        if (data.height) {
             room.stage.size.height = data.height;
+            room.stage.calculateBackgroundRepeat();
         }
         if (room.roomInfo.roomType === 'PVE') {
             room.drawTips("玩家剩余生命:" + room.roomInfo.playerLife,
