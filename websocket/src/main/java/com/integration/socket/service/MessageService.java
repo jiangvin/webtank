@@ -1,8 +1,8 @@
 package com.integration.socket.service;
 
-import com.integration.socket.model.MessageType;
-import com.integration.socket.model.dto.MessageDto;
-import com.integration.socket.util.CommonUtil;
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
+import com.integration.util.CommonUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -49,6 +49,8 @@ public class MessageService {
                 TOPIC_PATH,
                 messageDto);
         } else {
+            //清空原有人数，减少数据量
+            messageDto.setSendToList(null);
             for (String sendTo : sendToList) {
                 simpMessagingTemplate.convertAndSendToUser(
                     sendTo,

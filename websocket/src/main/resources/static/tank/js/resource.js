@@ -30,7 +30,10 @@
             loadAnimationImage(id, this.images, 4);
         }
 
-        //others
+        //item
+        loadAnimationImage("item_star", this.images, 2);
+
+        //map unit
         loadAnimationImage("bullet", this.images, 4);
         loadAnimationImage("bomb", this.images, 6);
         loadAnimationImage("brick", this.images, 2);
@@ -52,6 +55,10 @@
     };
 
     Resource.getImage = function (id, type, widthPics, heightPics) {
+        if (id === "tankMenu") {
+            return Common.getRandomTankImage();
+        }
+
         const images = Resource.getImages();
         if (!images.has(id)) {
             widthPics = widthPics ? widthPics : 1;
@@ -88,6 +95,40 @@
                 }
             }
         }, false);
+        window.addEventListener('touchstart', function (e) {
+            if (e.touches.length > 1) {
+                // 判断默认行为是否可以被禁用
+                if (e.cancelable) {
+                    // 判断默认行为是否已经被禁用
+                    if (!e.defaultPrevented) {
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (e) {
+            let now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                // 判断默认行为是否可以被禁用
+                if (e.cancelable) {
+                    // 判断默认行为是否已经被禁用
+                    if (!e.defaultPrevented) {
+                        e.preventDefault();
+                    }
+                }
+            }
+            lastTouchEnd = now;
+        }, false);
+        document.addEventListener('gesturestart', function (e) {
+            // 判断默认行为是否可以被禁用
+            if (e.cancelable) {
+                // 判断默认行为是否已经被禁用
+                if (!e.defaultPrevented) {
+                    e.preventDefault();
+                }
+            }
+        });
 
         return this.game;
     };
@@ -99,13 +140,18 @@
         return "generatedClientId=" + this.id++;
     };
 
-    Resource.getSelect = function (options) {
+    Resource.getSelect = function (optionValues, optionTexts) {
         const select = document.createElement('select');
-        options.forEach(function (optionText) {
+        for (let i = 0; i < optionValues.length; ++i) {
             const option = document.createElement('option');
-            option.text = optionText;
+            option.value = optionValues[i];
+            if (optionTexts && optionTexts[i]) {
+                option.text = optionTexts[i];
+            } else {
+                option.text = optionValues[i];
+            }
             select.add(option);
-        });
+        }
         return select;
     };
 

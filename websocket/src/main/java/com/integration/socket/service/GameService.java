@@ -1,13 +1,13 @@
 package com.integration.socket.service;
 
-import com.integration.socket.model.MessageType;
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.socket.model.dto.MessageDto;
-import com.integration.socket.model.dto.RoomDto;
+import com.integration.dto.room.RoomDto;
 import com.integration.socket.model.stage.BaseStage;
 import com.integration.socket.model.stage.StageMenu;
 import com.integration.socket.model.stage.StageRoom;
-import com.integration.socket.util.CommonUtil;
+import com.integration.util.CommonUtil;
 import com.integration.util.model.CustomException;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;

@@ -16,6 +16,42 @@
             action: 0,
             x: 0,
             y: 0
+        };
+
+        this.drawTitle = function () {
+            //显示基本信息
+            const tipMessage = '房间号:' + this.roomInfo.roomId
+                + " 地图:" + this.roomInfo.mapId + " [" + this.roomInfo.roomType + "]";
+            this.drawTips(tipMessage, 10, 6, "ROOM_TITLE");
+        };
+
+        this.drawTips = function (tips, x, y, id) {
+            if (id === undefined) {
+                id = Resource.getId();
+            }
+
+            if (this.stage.items.has(id)) {
+                this.stage.items.get(id).draw = function (context) {
+                    context.font = '14px Helvetica';
+                    context.textAlign = 'left';
+                    context.textBaseline = 'top';
+                    context.fillStyle = '#ffffff';
+                    context.fillText(tips, x, y);
+                }
+            } else {
+                this.stage.createItem({
+                    id: id,
+                    z: 8,
+                    draw: function (context) {
+                        context.font = '14px Helvetica';
+                        context.textAlign = 'left';
+                        context.textBaseline = 'top';
+                        context.fillStyle = '#ffffff';
+                        context.fillText(tips, x, y);
+                    }
+                });
+            }
+
         }
     }
 
@@ -47,6 +83,16 @@
                 case "REMOVE_MAP":
                     thisStage.itemBomb({id: messageDto.message});
                     break;
+                case "ITEM":
+                    createGameItem(thisStage, messageDto.message);
+                    break;
+                case "REMOVE_ITEM":
+                    thisStage.removeItem(messageDto.message);
+                    break;
+                case "CLEAR_MAP":
+                    thisStage.items.clear();
+                    thisStage.view.center = null;
+                    break;
                 default:
                     break;
             }
@@ -59,10 +105,42 @@
         thisStage.updateCenter = function () {
             reloadUpdateCenter(thisRoom);
         };
+        thisStage.createTankExtension = function (item) {
+            reloadCreateTankExtension(thisRoom, item)
+        };
 
         //显示基本信息
-        const tipMessage = '房间号:' + roomInfo.roomId + " 地图:" + roomInfo.mapId + " [" + roomInfo.roomType + "]";
-        drawTips(thisStage, tipMessage, 10, 6);
+        thisRoom.drawTitle(thisStage);
+    };
+
+    const createGameItem = function (stage, itemData) {
+        if (stage.items.has(itemData.id)) {
+            return;
+        }
+        const imageId = "item_" + itemData.typeId.toLowerCase();
+        const gameItem = stage.createItem({
+            id: itemData.id,
+            x: itemData.x,
+            y: itemData.y,
+            image: Resource.getImage(imageId)
+        });
+        gameItem.play = new Play(1, 15,
+            function () {
+                gameItem.orientation = (gameItem.orientation + 1) % 2;
+            }, function () {
+                this.frames = 1;
+            });
+    };
+
+    const reloadCreateTankExtension = function (thisRoom, item) {
+        if (thisRoom.roomInfo.roomType === "PVE" && item.teamId === 2) {
+            item.showId = false;
+            return;
+        }
+
+        if (thisRoom.roomInfo.roomType === "EVE") {
+            item.showId = false;
+        }
     };
 
     const reloadUpdateCenter = function (room) {
@@ -286,30 +364,33 @@
     /**
      *
      * @param room
-     * @param data {{itemList,width,height,playerLife,computerLife}}
+     * @param data {{itemList,width,height,playerLife,computerLife,mapId}}
      */
     const loadMap = function (room, data) {
+        if (data.mapId !== undefined) {
+            room.roomInfo.mapId = data.mapId;
+            room.drawTitle(room.stage);
+        }
         if (data.playerLife !== undefined) {
             room.roomInfo.playerLife = data.playerLife;
         }
         if (data.computerLife !== undefined) {
             room.roomInfo.computerLife = data.computerLife;
         }
-        if (data.width) {
+        if (data.width && data.height) {
             room.stage.size.width = data.width;
-        }
-        if (data.height) {
             room.stage.size.height = data.height;
+            room.stage.calculateBackgroundRepeat();
         }
         if (room.roomInfo.roomType === 'PVE') {
-            drawTips(room.stage, "玩家生命:" + room.roomInfo.playerLife,
+            room.drawTips("玩家剩余生命:" + room.roomInfo.playerLife,
                 10, 24, "red_team_life");
-            drawTips(room.stage, "电脑生命:" + room.roomInfo.computerLife,
+            room.drawTips("电脑剩余生命:" + room.roomInfo.computerLife,
                 10, 40, "blue_team_life");
         } else {
-            drawTips(room.stage, "红队生命:" + room.roomInfo.playerLife,
+            room.drawTips("红队剩余生命:" + room.roomInfo.playerLife,
                 10, 24, "red_team_life");
-            drawTips(room.stage, "蓝队生命:" + room.roomInfo.computerLife,
+            room.drawTips("蓝队剩余生命:" + room.roomInfo.computerLife,
                 10, 40, "blue_team_life");
         }
 
@@ -322,24 +403,38 @@
     };
 
     const setBarrier = function (item, typeId) {
-        if (typeId !== "grass") {
+        if (typeId !== 5) {
             item.isBarrier = true;
         }
     };
 
     const setResourceImage = function (item, typeId) {
         switch (typeId) {
-            case "broken_brick":
+            case 0:
+                item.image = Resource.getImage("brick");
+                break;
+            case 1:
                 item.image = Resource.getImage("brick");
                 item.orientation = 1;
                 break;
-            case "broken_iron":
+            case 2:
+                item.image = Resource.getImage("iron");
+                break;
+            case 3:
                 item.image = Resource.getImage("iron");
                 item.orientation = 1;
                 break;
-            default:
-                item.image = Resource.getImage(typeId);
-                item.orientation = 0;
+            case 4:
+                item.image = Resource.getImage("river");
+                break;
+            case 5:
+                item.image = Resource.getImage("grass");
+                break;
+            case 6:
+                item.image = Resource.getImage("red_king");
+                break;
+            case 7:
+                item.image = Resource.getImage("blue_king");
                 break;
         }
     };
@@ -352,25 +447,29 @@
             item = stage.createItem({id: data.id});
         }
 
-        const typeId = data.typeId.toLowerCase();
+        const typeId = parseInt(data.typeId);
         setResourceImage(item, typeId);
+        if (!item.image) {
+            return;
+        }
+
         setBarrier(item, typeId);
         const position = getPositionFromId(data.id);
         item.x = position.x;
         item.y = position.y;
 
         //调整z值
-        if (typeId === "grass") {
+        if (typeId === 5) {
             item.z = 2;
-        } else if (typeId === "river") {
+        } else if (typeId === 4) {
             item.z = -4;
         }
 
         //播放动画
         switch (typeId) {
-            case "river":
-            case "red_king":
-            case "blue_king":
+            case 4:
+            case 6:
+            case 7:
                 item.play = new Play(1, 30,
                     function () {
                         item.orientation = (item.orientation + 1) % 2;
@@ -389,33 +488,4 @@
         position.y = parseInt(infos[1]) * size + size / 2;
         return position;
     };
-
-    const drawTips = function (stage, tips, x, y, id) {
-        if (id === undefined) {
-            id = Resource.getId();
-        }
-
-        if (stage.items.has(id)) {
-            stage.items.get(id).draw = function (context) {
-                context.font = '14px Helvetica';
-                context.textAlign = 'left';
-                context.textBaseline = 'top';
-                context.fillStyle = '#ffffff';
-                context.fillText(tips, x, y);
-            }
-        } else {
-            stage.createItem({
-                id: id,
-                z: 8,
-                draw: function (context) {
-                    context.font = '14px Helvetica';
-                    context.textAlign = 'left';
-                    context.textBaseline = 'top';
-                    context.fillStyle = '#ffffff';
-                    context.fillText(tips, x, y);
-                }
-            });
-        }
-
-    }
 }

@@ -1,7 +1,7 @@
 package com.integration.socket.controller;
 
-import com.integration.socket.model.MessageType;
-import com.integration.socket.model.dto.MessageDto;
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
 import com.integration.socket.service.GameService;
 import com.integration.socket.service.MessageService;
 import lombok.extern.slf4j.Slf4j;

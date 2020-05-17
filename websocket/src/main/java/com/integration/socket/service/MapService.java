@@ -1,18 +1,19 @@
 package com.integration.socket.service;
 
-import com.integration.socket.model.MapUnitType;
-import com.integration.socket.model.RoomType;
+import com.integration.dto.map.MapUnitType;
+import com.integration.dto.room.RoomType;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.dto.MapEditDto;
-import com.integration.socket.model.dto.RoomDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.repository.jooq.tables.records.MapRecord;
-import com.integration.socket.util.CommonUtil;
+import com.integration.util.CommonUtil;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 /**
  * @author 蒋文龙(Vin)
@@ -44,8 +45,23 @@ public class MapService {
 
     private static final String PLAYER_DEFAULT_TYPE = "tank01";
 
-    MapBo loadMap(RoomDto roomDto) {
-        String mapId = roomDto.getMapId();
+    public MapBo loadNextMap(List<String> loadedMapIds, RoomType roomType) {
+        List<String> mapIds = mapDao.queryMapIdList();
+        String nextMapId = null;
+        for (String mapId : mapIds) {
+            if (!loadedMapIds.contains(mapId)) {
+                nextMapId = mapId;
+                break;
+            }
+        }
+        if (nextMapId == null) {
+            return null;
+        }
+
+        return loadMap(nextMapId, roomType);
+    }
+
+    public MapBo loadMap(String mapId, RoomType roomType) {
         MapRecord record = mapDao.queryFromId(mapId);
         if (record == null) {
             throw new CustomException("找不到地图资源!");
@@ -55,13 +71,14 @@ public class MapService {
             throw new CustomException("找不到地图资源!");
         }
 
-        //根据类型调整数据
         MapBo mapBo = readFile(content);
-        if (roomDto.getRoomType() == RoomType.PVP) {
+        mapBo.setMapId(mapId);
+        //根据类型调整数据
+        if (roomType == RoomType.PVP) {
             mapBo.duplicatePlayer();
-        } else if (roomDto.getRoomType() == RoomType.EVE) {
+        } else if (roomType == RoomType.EVE) {
             mapBo.duplicateComputer();
-        } else if (roomDto.getRoomType() == RoomType.PVE) {
+        } else if (roomType == RoomType.PVE) {
             mapBo.removeMapUnit(MapUnitType.BLUE_KING);
         }
         return mapBo;

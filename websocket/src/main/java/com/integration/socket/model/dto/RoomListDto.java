@@ -1,5 +1,6 @@
 package com.integration.socket.model.dto;
 
+import com.integration.dto.room.RoomDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

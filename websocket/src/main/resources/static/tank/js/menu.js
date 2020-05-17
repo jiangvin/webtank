@@ -23,6 +23,14 @@
         //开始初始化
         this.stage = game.createStage();
 
+        //扩展消息函数
+        const thisMenu = this;
+        this.stage.receiveStompMessageExtension = function (messageDto) {
+            if (messageDto.note === "CREAT_ROOM") {
+                queryRoomList(thisMenu);
+            }
+        };
+
         this.tankLogo = this.stage.createTank({
             image: Common.getRandomTankImage(),
             x: Common.width() / 2,
@@ -77,6 +85,17 @@
     Menu.deleteInfo = function () {
         this.stage.items.delete("info1");
         this.stage.items.delete("info2");
+
+        this.stage.createItem({
+            id: "info3",
+            draw: function (context) {
+                context.font = '30px Helvetica';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillStyle = '#949494';
+                context.fillText('请创建或者加入房间', Common.width() / 2, Common.height() * .8);
+            }
+        });
     };
 
     /**
@@ -295,12 +314,39 @@
         div.appendChild(input);
         selectWindow.appendChild(div);
 
-        selectWindow.appendChild(createRoomSelect("地图:", data, "selectMap"));
-        selectWindow.appendChild(createRoomSelect("类型:", ["PVP", "PVE", "EVE"], "selectType"));
+        selectWindow.appendChild(createRoomSelect("地图:", "selectMap", data));
+        const selectType = createRoomSelect(
+            "类型:",
+            "selectType",
+            ["PVE", "PVP", "EVE"],
+            ["闯关", "对战", "电脑测试"]);
+
+        //AI设定
+        const selectAi = document.createElement('select');
+        selectAi.id = "selectAi";
+        const aiSimple = document.createElement('option');
+        aiSimple.text = "简单电脑";
+        aiSimple.value = "SIMPLE";
+        selectAi.add(aiSimple);
+        const aiCustom = document.createElement('option');
+        aiCustom.text = "外部接入";
+        aiCustom.value = "-1";
+        selectAi.add(aiCustom);
+
+        //样式
+        selectAi.style.position = "relative";
+        selectAi.style.top = ".1em";
+        selectAi.style.marginLeft = "1em";
+        selectType.appendChild(selectAi);
+
+        selectWindow.appendChild(selectType);
+
         document.getElementById("selectType").onchange = function () {
-            setSelectGroup($('#selectType').val());
+            const value = $('#selectType').val();
+            setSelectGroup(value);
+            setSelectAi(value);
         };
-        selectWindow.appendChild(createRoomSelect("队伍:", [], "selectGroup"));
+        selectWindow.appendChild(createRoomSelect("队伍:", "selectGroup", []));
         setSelectGroup($('#selectType').val());
 
         const divButton = document.createElement('div');
@@ -323,6 +369,15 @@
         divButton.appendChild(buttonCancel);
     };
 
+    const setSelectAi = function (selectType) {
+        if (selectType === "PVE" || selectType === "EVE") {
+            document.getElementById('selectAi').style.visibility = 'visible';
+        } else {
+            document.getElementById('selectAi').style.visibility = 'hidden';
+
+        }
+    };
+
     const setSelectGroup = function (selectType) {
         const selectGroup = $('#selectGroup');
         selectGroup.find('option').remove().end();
@@ -342,14 +397,14 @@
         }
     };
 
-    const createRoomSelect = function (typeText, options, selectId) {
+    const createRoomSelect = function (typeText, selectId, optionValues, optionTexts) {
         const div = document.createElement('div');
         div.className = "select-item";
         const label = document.createElement('label');
         label.className = "radio-label";
         label.textContent = typeText;
         div.appendChild(label);
-        const select = Resource.getSelect(options);
+        const select = Resource.getSelect(optionValues, optionTexts);
         select.id = selectId;
         select.style.width = "12em";
         div.appendChild(select);
@@ -374,6 +429,28 @@
                 "mapId": mapId
             });
             Common.runNextStage();
+
+            //AI传输设定
+            const selectAi = $('#selectAi');
+            selectAi.css("visibility", "hidden");
+            const ai = selectAi.val();
+            if (roomType !== "PVP" && ai !== "-1") {
+                Common.getRequest("/user/getBotAddress", function (url) {
+                    Resource.getGame().addTimeEvent("connect_ai",
+                        function () {
+                            Common.postRequest(url,
+                                {
+                                    "Content-Type": "application/x-www-form-urlencoded"
+                                },
+                                {
+                                    "roomId": roomId,
+                                    "teamType": "BLUE",
+                                    "botType": ai
+                                })
+                        }, 5 * 60)
+                });
+            }
+
             Status.setStatus(Status.getStatusPause(), "房间创建中...");
             Common.sendStompMessage({
                 "roomId": roomId,

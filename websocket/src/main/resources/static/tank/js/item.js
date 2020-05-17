@@ -21,10 +21,17 @@ function Item(params) {
         update: function () {   //更新参数信息
         },
         draw: function (context) {
-            if (this.play) {
-                this.play.update();
-            }
             this.screenPoint = this.stage.convertToScreenPoint({x: this.x, y: this.y});
+            const point = this.screenPoint;
+            const half = Resource.getUnitSize() / 2;
+            if (point.x <= -half ||
+                point.y <= -half ||
+                point.x >= Common.width() + half ||
+                point.y >= Common.height() + half) {
+                return;
+            }
+
+            drawAnimation(this);
             drawId(this, context);
             drawImage(this, context);
             drawTeam(this, context);
@@ -34,6 +41,12 @@ function Item(params) {
     if (this.id === "") {
         this.id = Resource.getId();
     }
+
+    const drawAnimation = function (item) {
+        if (item.play) {
+            item.play.update();
+        }
+    };
 
     const drawId = function (item, context) {
         if (!item.showId) {

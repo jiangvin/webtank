@@ -1,6 +1,6 @@
 package com.integration.socket.model.bo;
 
-import com.integration.socket.model.TeamType;
+import com.integration.dto.room.TeamType;
 import lombok.Data;
 import lombok.NonNull;
 

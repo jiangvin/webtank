@@ -79,18 +79,26 @@ function Stage(params) {
         const speed = 5.0;
         switch (event) {
             case "Up":
-                this.view.y = this.view.y > speed ? this.view.y - speed : 0;
+                if (this.size.height > Common.height()) {
+                    this.view.y = this.view.y > speed ? this.view.y - speed : 0;
+                }
                 break;
             case "Down":
-                const maxY = this.size.height - Common.height();
-                this.view.y = this.view.y + speed < maxY ? this.view.y + speed : maxY;
+                if (this.size.height > Common.height()) {
+                    const maxY = this.size.height - Common.height();
+                    this.view.y = this.view.y + speed < maxY ? this.view.y + speed : maxY;
+                }
                 break;
             case "Left":
-                this.view.x = this.view.x > speed ? this.view.x - speed : 0;
+                if (this.size.width > Common.width()) {
+                    this.view.x = this.view.x > speed ? this.view.x - speed : 0;
+                }
                 break;
             case "Right":
-                const maxX = this.size.width - Common.width();
-                this.view.x = this.view.x + speed < maxX ? this.view.x + speed : maxX;
+                if (this.size.width > Common.width()) {
+                    const maxX = this.size.width - Common.width();
+                    this.view.x = this.view.x + speed < maxX ? this.view.x + speed : maxX;
+                }
                 break;
         }
     };
@@ -129,9 +137,9 @@ function Stage(params) {
                 this.itemBomb(messageDto.message, 0.5);
                 break;
             default:
-                this.receiveStompMessageExtension(messageDto);
                 break;
         }
+        this.receiveStompMessageExtension(messageDto);
     };
 
     this.drawBackground = function (context) {
@@ -139,13 +147,48 @@ function Stage(params) {
             return;
         }
 
-        //TODO - 平铺背景
-        const start = this.convertToScreenPoint({x: 0, y: 0});
-        context.drawImage(this.backgroundImage,
-            0, 0,
-            this.backgroundImage.width, this.backgroundImage.height,
-            start.x, start.y,
-            this.size.width, this.size.height);
+        if (!this.backgroundImage.repeatX || !this.backgroundImage.repeatY) {
+            this.calculateBackgroundRepeat();
+        }
+
+
+        const mapStart = this.convertToScreenPoint({x: 0, y: 0});
+        for (let x = 0; x < this.backgroundImage.repeatX; ++x) {
+            for (let y = 0; y < this.backgroundImage.repeatY; ++y) {
+                const start = {};
+                const end = {};
+                start.x = x * this.backgroundImage.sizeX;
+                start.y = y * this.backgroundImage.sizeY;
+
+                end.x = start.x + this.backgroundImage.sizeX;
+                end.y = start.y + this.backgroundImage.sizeY;
+
+                context.drawImage(this.backgroundImage,
+                    0, 0,
+                    this.backgroundImage.width, this.backgroundImage.height,
+                    start.x + mapStart.x, start.y + mapStart.y,
+                    this.backgroundImage.sizeX, this.backgroundImage.sizeY);
+            }
+        }
+    };
+
+    this.calculateBackgroundRepeat = function () {
+        const imageRate = this.backgroundImage.width / this.backgroundImage.height;
+        const mapRate = this.size.width / this.size.height;
+        if (mapRate >= imageRate * 0.7 && mapRate <= imageRate * 1.3) {
+            this.backgroundImage.repeatX = 1;
+            this.backgroundImage.repeatY = 1;
+        } else {
+            if (mapRate < imageRate * 0.7) {
+                this.backgroundImage.repeatX = 1;
+                this.backgroundImage.repeatY = Math.round(this.size.height / (this.size.width / imageRate));
+            } else {
+                this.backgroundImage.repeatY = 1;
+                this.backgroundImage.repeatX = Math.round(this.size.width / (this.size.height * imageRate));
+            }
+        }
+        this.backgroundImage.sizeX = this.size.width / this.backgroundImage.repeatX;
+        this.backgroundImage.sizeY = this.size.height / this.backgroundImage.repeatY;
     };
 
     //真实坐标转换屏幕坐标
@@ -293,9 +336,18 @@ function Stage(params) {
                 this.view.center = item;
             }
         }
-
+        this.createTankExtension(item);
         return item;
     };
+
+    /**
+     * 在room中重载
+     * @param item
+     */
+    this.createTankExtension = function (item) {
+
+    };
+
     this.createBullet = function (options) {
         const item = this.createItem(options);
         item.action = 1;
@@ -377,6 +429,22 @@ function Stage(params) {
         thisStage.items.get(newAttr.id).action = newAttr.action;
     };
 
+    const updateTankProperty = function (stage,tankData) {
+        const tankItem = stage.items.get(tankData.id);
+        tankItem.speed = tankData.speed;
+        if (tankData.type !== "tankMenu") {
+            tankItem.image = Resource.getImage(tankData.typeId);
+        }
+    };
+
+    const updateTankControl = function (stage,tankData) {
+        const tankItem = stage.items.get(tankData.id);
+        tankItem.x = tankData.x;
+        tankItem.y = tankData.y;
+        tankItem.orientation = tankData.orientation;
+        tankItem.action = tankData.action;
+    };
+
     const createOrUpdateTanks = function (thisStage, tanks, force) {
         /**
          * @param tank {{typeId}}
@@ -384,19 +452,16 @@ function Stage(params) {
         const center = thisStage.view.center;
         tanks.forEach(function (tank) {
             if (thisStage.items.has(tank.id)) {
+                updateTankProperty(thisStage,tank);
                 //普通模式除非撞上tank，否则过滤自己
                 if (!force && center && center.id === tank.id) {
                     return;
                 }
                 //已存在
-                generalUpdateAttribute(thisStage, tank);
+                updateTankControl(thisStage, tank);
             } else {
                 let tankImage;
-                if (tank.typeId === "tankMenu") {
-                    tankImage = Common.getRandomTankImage();
-                } else {
-                    tankImage = Resource.getImage(tank.typeId);
-                }
+                tankImage = Resource.getImage(tank.typeId);
                 const tankItem = thisStage.createTank({
                     id: tank.id,
                     x: tank.x,

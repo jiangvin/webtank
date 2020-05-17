@@ -1,4 +1,4 @@
-package com.integration.socket.model;
+package com.integration.dto.message;
 
 /**
  * @author 蒋文龙(Vin)
@@ -54,6 +54,18 @@ public enum MessageType {
      * 删除地图信息
      */
     REMOVE_MAP,
+    /**
+     * 同步道具
+     */
+    ITEM,
+    /**
+     * 删除道具
+     */
+    REMOVE_ITEM,
+    /**
+     * 清空所有地图信息
+     */
+    CLEAR_MAP,
     /**
      * 游戏状态
      */

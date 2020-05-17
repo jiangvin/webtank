@@ -1,7 +1,7 @@
-package com.integration.socket.util;
+package com.integration.util;
 
 
-import com.integration.socket.model.OrientationType;
+import com.integration.dto.map.OrientationType;
 
 import java.awt.Point;
 import java.util.List;
@@ -48,7 +48,7 @@ public class CommonUtil {
                .replaceFirst(", \\)$", ")") : null;
     }
 
-    private static Point generateGridPoint(double x, double y) {
+    public static Point generateGridPoint(double x, double y) {
         return new Point((int)(x / CommonUtil.UNIT_SIZE), (int)(y / CommonUtil.UNIT_SIZE));
     }
 

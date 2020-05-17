@@ -1,10 +1,10 @@
 package com.integration.socket.service;
 
-import com.integration.socket.model.MessageType;
-import com.integration.socket.model.bo.MapBo;
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
+import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.socket.model.dto.MessageDto;
-import com.integration.socket.model.dto.RoomDto;
+import com.integration.dto.room.RoomDto;
 import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.model.stage.StageRoom;
 import com.integration.util.model.CustomException;
@@ -52,7 +52,7 @@ public class RoomService {
     public RoomListDto getRoomListDto(int start, int limit) {
         List<RoomDto> roomDtoList = new ArrayList<>();
         for (StageRoom room : roomList.subList(start, Math.min(start + limit, roomList.size()))) {
-            roomDtoList.add(RoomDto.convert(room));
+            roomDtoList.add(room.convertToDto());
         }
         return new RoomListDto(roomDtoList, roomList.size());
     }
@@ -85,13 +85,23 @@ public class RoomService {
         }
 
         //mapService会自动抛出异常，这里不用再做空判断
-        MapBo mapBo = mapService.loadMap(roomDto);
+        MapMangerBo mapMangerBo = new MapMangerBo(mapService, roomDto.getMapId(), roomDto.getRoomType());
 
         log.info("room:{} will be created", roomDto);
-        StageRoom stageRoom = new StageRoom(roomDto, mapBo, messageService);
+        StageRoom stageRoom = new StageRoom(roomDto, mapMangerBo, messageService);
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
-        messageService.sendMessage(new MessageDto(String.format("%s 创建了房间 %s", creator.getUsername(), roomDto.getRoomId()), MessageType.SYSTEM_MESSAGE));
+        String note = null;
+        if (roomList.size() <= 6) {
+            note = "CREAT_ROOM";
+        }
+        messageService.sendMessage(new MessageDto(String.format("%s 创建了房间 %s",
+                                                                creator.getUsername(),
+                                                                roomDto.getRoomId()),
+                                                  MessageType.SYSTEM_MESSAGE,
+                                                  null,
+                                                  null,
+                                                  note));
         return stageRoom;
     }
 }

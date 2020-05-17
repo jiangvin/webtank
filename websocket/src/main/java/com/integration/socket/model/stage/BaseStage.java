@@ -1,12 +1,12 @@
 package com.integration.socket.model.stage;
 
-import com.integration.socket.model.ActionType;
-import com.integration.socket.model.MessageType;
-import com.integration.socket.model.OrientationType;
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
+import com.integration.dto.map.ActionType;
+import com.integration.dto.map.OrientationType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
-import com.integration.socket.model.dto.ItemDto;
-import com.integration.socket.model.dto.MessageDto;
+import com.integration.dto.map.ItemDto;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -47,26 +47,34 @@ public abstract class BaseStage {
                 processTankControl(messageDto, sendFrom);
                 break;
             case UPDATE_TANK_FIRE:
-                processTankFire(sendFrom);
+                processTankFire((String) messageDto.getMessage(), sendFrom);
                 break;
             default:
                 break;
         }
     }
 
-    private void processTankFire(String sendFrom) {
-        if (!tankMap.containsKey(sendFrom)) {
+    private void processTankFire(String tankId, String sendFrom) {
+        if (tankId == null) {
+            tankId = sendFrom;
+        }
+
+        if (!tankMap.containsKey(tankId)) {
             return;
         }
 
-        TankBo tankBo = tankMap.get(sendFrom);
+        TankBo tankBo = tankMap.get(tankId);
+        if (!tankBo.getUserId().equals(sendFrom)) {
+            return;
+        }
+
         BulletBo ammo = tankBo.fire();
         if (ammo == null) {
             return;
         }
         bulletMap.put(ammo.getId(), ammo);
         processTankFireExtension(ammo);
-        sendMessageToRoom(Collections.singletonList(ItemDto.convert(ammo)), MessageType.BULLET);
+        sendMessageToRoom(Collections.singletonList(ammo.convertToDto()), MessageType.BULLET);
     }
 
     /**
@@ -82,9 +90,11 @@ public abstract class BaseStage {
         if (request == null) {
             return;
         }
-        request.setId(sendFrom);
+        if (request.getId() == null) {
+            request.setId(sendFrom);
+        }
 
-        TankBo updateBo = updateTankControl(request);
+        TankBo updateBo = updateTankControl(request, sendFrom);
         if (updateBo == null) {
             return;
         }
@@ -97,12 +107,16 @@ public abstract class BaseStage {
      * @param tankDto
      * @return
      */
-    private TankBo updateTankControl(ItemDto tankDto) {
+    private TankBo updateTankControl(ItemDto tankDto, String sendFrom) {
         if (!tankMap.containsKey(tankDto.getId())) {
             return null;
         }
 
         TankBo tankBo = tankMap.get(tankDto.getId());
+        if (!tankBo.getUserId().equals(sendFrom)) {
+            return null;
+        }
+
         //状态只同步朝向和移动命令
         OrientationType orientationType = OrientationType.convert(tankDto.getOrientation());
         if (orientationType != OrientationType.UNKNOWN) {
@@ -166,7 +180,7 @@ public abstract class BaseStage {
 
     void sendTankToRoom(TankBo tankBo, String note) {
         tankBo.refreshSyncTime();
-        sendMessageToRoom(Collections.singletonList(ItemDto.convert(tankBo)), MessageType.TANKS, note);
+        sendMessageToRoom(Collections.singletonList(tankBo.convertToDto()), MessageType.TANKS, note);
     }
 
     void sendMessageToUser(Object object, MessageType messageType, String username) {
@@ -197,7 +211,7 @@ public abstract class BaseStage {
         TankBo tank = tankMap.get(tankId);
         tankMap.remove(tank.getTankId());
         removeTankExtension(tank);
-        sendMessageToRoom(ItemDto.convert(tank), MessageType.REMOVE_TANK);
+        sendMessageToRoom(tank.convertToDto(), MessageType.REMOVE_TANK);
     }
 
     /**

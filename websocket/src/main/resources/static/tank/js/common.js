@@ -256,6 +256,26 @@ Common.getRequest = function (url, callBack) {
         callBack(result.data);
     });
 };
+Common.postRequest = function (url, headers, body, callbackSuccess, callBackFailed) {
+    $.ajax({
+        url: encodeURI(url),
+        type: 'post',
+        data: body,
+        headers: headers,
+        success: function (result) {
+            if (!result.success) {
+                Common.addMessage(result.message, "#ff0000");
+                if (callBackFailed) {
+                    callBackFailed();
+                }
+                return;
+            }
+            if (callbackSuccess) {
+                callbackSuccess(result.data);
+            }
+        }
+    });
+};
 
 //expand
 Date.prototype.format = function (fmt) {
