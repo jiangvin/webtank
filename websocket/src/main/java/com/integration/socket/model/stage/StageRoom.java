@@ -6,7 +6,9 @@ import com.integration.socket.model.CollideType;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.room.RoomType;
 import com.integration.dto.room.TeamType;
+import com.integration.socket.model.ItemType;
 import com.integration.socket.model.bo.BulletBo;
+import com.integration.socket.model.bo.ItemBo;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
@@ -16,6 +18,7 @@ import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
 import com.integration.dto.room.RoomDto;
 import com.integration.socket.model.event.BaseEvent;
+import com.integration.socket.model.event.CreateItemEvent;
 import com.integration.socket.model.event.CreateTankEvent;
 import com.integration.socket.model.event.LoadMapEvent;
 import com.integration.socket.model.event.MessageEvent;
@@ -45,11 +48,16 @@ public class StageRoom extends BaseStage {
 
     private static final long SYNC_TANK_TIME = 2000;
 
+    private static final int MAX_ITEM_LIMIT = 3;
+
+    private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
+
     public StageRoom(RoomDto roomDto, MapMangerBo mapManger, MessageService messageService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
         this.creator = roomDto.getCreator();
         this.mapManger = mapManger;
+        init();
     }
 
     public RoomDto convertToDto() {
@@ -67,6 +75,8 @@ public class StageRoom extends BaseStage {
     private ConcurrentHashMap<String, List<String>> gridTankMap = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<String, List<String>> gridBulletMap = new ConcurrentHashMap<>();
+
+    private Map<String, ItemBo> itemMap = new ConcurrentHashMap<>();
 
     private List<BaseEvent> eventList = new ArrayList<>();
 
@@ -90,6 +100,22 @@ public class StageRoom extends BaseStage {
 
     @Getter
     private String creator;
+
+    private void init() {
+        this.eventList.add(new CreateItemEvent());
+    }
+
+    private void clear() {
+        this.tankMap.clear();
+        this.bulletMap.clear();
+        this.itemMap.clear();
+        this.gridBulletMap.clear();
+        this.gridTankMap.clear();
+        this.removeBulletIds.clear();
+        this.eventList.clear();
+        this.syncTankList.clear();
+        this.syncBulletList.clear();
+    }
 
     private String getMapId() {
         return mapManger.getMapBo().getMapId();
@@ -227,6 +253,33 @@ public class StageRoom extends BaseStage {
             for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
                 createTankForUser(kv.getValue(), kv.getValue().getTeamType(), random.nextInt(60 * 4) + 60);
             }
+            return;
+        }
+
+        if (event instanceof CreateItemEvent) {
+            CreateItemEvent createItemEvent = (CreateItemEvent) event;
+            if (itemMap.size() < MAX_ITEM_LIMIT) {
+                ItemType itemType = ItemType.values()[random.nextInt(ItemType.values().length)];
+                for (int time = 0; time < TRY_TIMES_OF_CREATE_ITEM; ++time) {
+                    Point grid = new Point();
+                    grid.x = random.nextInt(getMapBo().getMaxGridX());
+                    grid.y = random.nextInt(getMapBo().getMaxGridY());
+                    String key = CommonUtil.generateKey(grid.x, grid.y);
+                    if (getMapBo().getUnitMap().containsKey(key)) {
+                        continue;
+                    }
+                    if (itemMap.containsKey(key)) {
+                        continue;
+                    }
+                    Point pos = CommonUtil.getPointFromKey(key);
+                    ItemBo itemBo = new ItemBo(key, pos, CommonUtil.getId(), itemType);
+                    itemMap.put(key, itemBo);
+                    sendMessageToRoom(itemBo.toDto(), MessageType.ITEM);
+                    break;
+                }
+            }
+            createItemEvent.resetTimeout();
+            this.eventList.add(createItemEvent);
         }
     }
 
@@ -306,9 +359,40 @@ public class StageRoom extends BaseStage {
                 sendTankToRoom(tankBo, type.toString());
             }
         }
+
+        catchItem(tankBo);
         tankBo.run(tankBo.getType().getSpeed());
         refreshTankGridMap(tankBo);
         addSyncList(tankBo);
+    }
+
+    private void catchItem(TankBo tankBo) {
+        for (String key : tankBo.getGridKeyList()) {
+            if (!itemMap.containsKey(key)) {
+                return;
+            }
+
+            ItemBo itemBo = itemMap.get(key);
+            double distance = Point.distance(tankBo.getX(), tankBo.getY(), itemBo.getPos().x, itemBo.getPos().y);
+            if (distance <= CommonUtil.UNIT_SIZE) {
+                catchItem(tankBo, itemBo);
+            }
+        }
+    }
+
+    private void catchItem(TankBo tankBo, ItemBo itemBo) {
+        switch (itemBo.getType()) {
+            case STAR:
+                if (!tankBo.levelUp()) {
+                    return;
+                }
+                sendTankToRoom(tankBo);
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                break;
+            default:
+                break;
+        }
     }
 
     private CollideType collideWithAll(TankBo tankBo, String key) {
@@ -348,8 +432,12 @@ public class StageRoom extends BaseStage {
         TankBo tankBo = collideWithTanks(bullet);
         if (tankBo != null) {
             addRemoveBulletIds(bullet.getId());
-            sendTankBombMessage(tankBo);
-            removeTankFromTankId(tankBo.getTankId());
+            if (tankBo.levelDown()) {
+                sendTankToRoom(tankBo);
+            } else {
+                sendTankBombMessage(tankBo);
+                removeTankFromTankId(tankBo.getTankId());
+            }
             return true;
         }
 
@@ -507,17 +595,6 @@ public class StageRoom extends BaseStage {
         LoadMapEvent loadEvent = new LoadMapEvent();
         loadEvent.setTimeout(loadTimeoutSeconds * 60);
         this.eventList.add(loadEvent);
-    }
-
-    private void clear() {
-        this.tankMap.clear();
-        this.bulletMap.clear();
-        this.gridBulletMap.clear();
-        this.gridTankMap.clear();
-        this.removeBulletIds.clear();
-        this.eventList.clear();
-        this.syncTankList.clear();
-        this.syncBulletList.clear();
     }
 
     private void changeMap(String key, MapUnitType type) {

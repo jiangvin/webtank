@@ -30,7 +30,10 @@
             loadAnimationImage(id, this.images, 4);
         }
 
-        //others
+        //item
+        loadAnimationImage("item_star", this.images, 2);
+
+        //map unit
         loadAnimationImage("bullet", this.images, 4);
         loadAnimationImage("bomb", this.images, 6);
         loadAnimationImage("brick", this.images, 2);
@@ -52,6 +55,10 @@
     };
 
     Resource.getImage = function (id, type, widthPics, heightPics) {
+        if (id === "tankMenu") {
+            return Common.getRandomTankImage();
+        }
+
         const images = Resource.getImages();
         if (!images.has(id)) {
             widthPics = widthPics ? widthPics : 1;

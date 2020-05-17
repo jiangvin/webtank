@@ -78,7 +78,7 @@ public class TankTypeBo {
                             "tank02",
                             2.0,
                             1,
-                            10.0,
+                            7.0,
                             90,
                             0,
                             false,
@@ -86,9 +86,9 @@ public class TankTypeBo {
                             "tank03"));
         tankTypeMap.put("tank03", new TankTypeBo(
                             "tank03",
-                            2.0,
+                            2.5,
                             2,
-                            10.0,
+                            9.0,
                             90,
                             0,
                             false,
@@ -96,9 +96,9 @@ public class TankTypeBo {
                             "tank04"));
         tankTypeMap.put("tank04", new TankTypeBo(
                             "tank04",
-                            2.0,
+                            2.5,
                             2,
-                            10.0,
+                            9.0,
                             90,
                             0,
                             true,

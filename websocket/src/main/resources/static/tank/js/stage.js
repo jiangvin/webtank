@@ -429,6 +429,20 @@ function Stage(params) {
         thisStage.items.get(newAttr.id).action = newAttr.action;
     };
 
+    const updateTankProperty = function (stage,tankData) {
+        const tankItem = stage.items.get(tankData.id);
+        tankItem.speed = tankData.speed;
+        tankItem.image = Resource.getImage(tankData.typeId);
+    };
+
+    const updateTankControl = function (stage,tankData) {
+        const tankItem = stage.items.get(tankData.id);
+        tankItem.x = tankData.x;
+        tankItem.y = tankData.y;
+        tankItem.orientation = tankData.orientation;
+        tankItem.action = tankData.action;
+    };
+
     const createOrUpdateTanks = function (thisStage, tanks, force) {
         /**
          * @param tank {{typeId}}
@@ -436,19 +450,16 @@ function Stage(params) {
         const center = thisStage.view.center;
         tanks.forEach(function (tank) {
             if (thisStage.items.has(tank.id)) {
+                updateTankProperty(thisStage,tank);
                 //普通模式除非撞上tank，否则过滤自己
                 if (!force && center && center.id === tank.id) {
                     return;
                 }
                 //已存在
-                generalUpdateAttribute(thisStage, tank);
+                updateTankControl(thisStage, tank);
             } else {
                 let tankImage;
-                if (tank.typeId === "tankMenu") {
-                    tankImage = Common.getRandomTankImage();
-                } else {
-                    tankImage = Resource.getImage(tank.typeId);
-                }
+                tankImage = Resource.getImage(tank.typeId);
                 const tankItem = thisStage.createTank({
                     id: tank.id,
                     x: tank.x,

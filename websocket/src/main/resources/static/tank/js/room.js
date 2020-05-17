@@ -83,6 +83,12 @@
                 case "REMOVE_MAP":
                     thisStage.itemBomb({id: messageDto.message});
                     break;
+                case "ITEM":
+                    createGameItem(thisStage, messageDto.message);
+                    break;
+                case "REMOVE_ITEM":
+                    thisStage.removeItem(messageDto.message);
+                    break;
                 case "CLEAR_MAP":
                     thisStage.items.clear();
                     thisStage.view.center = null;
@@ -99,15 +105,34 @@
         thisStage.updateCenter = function () {
             reloadUpdateCenter(thisRoom);
         };
-        thisStage.createTankExtension = function(item) {
-            reloadCreateTankExtension(thisRoom,item)
+        thisStage.createTankExtension = function (item) {
+            reloadCreateTankExtension(thisRoom, item)
         };
 
         //显示基本信息
         thisRoom.drawTitle(thisStage);
     };
 
-    const reloadCreateTankExtension = function (thisRoom,item) {
+    const createGameItem = function (stage, itemData) {
+        if (stage.items.has(itemData.id)) {
+            return;
+        }
+        const imageId = "item_" + itemData.typeId.toLowerCase();
+        const gameItem = stage.createItem({
+            id: itemData.id,
+            x: itemData.x,
+            y: itemData.y,
+            image: Resource.getImage(imageId)
+        });
+        gameItem.play = new Play(1, 15,
+            function () {
+                gameItem.orientation = (gameItem.orientation + 1) % 2;
+            }, function () {
+                this.frames = 1;
+            });
+    };
+
+    const reloadCreateTankExtension = function (thisRoom, item) {
         if (thisRoom.roomInfo.roomType === "PVE" && item.teamId === 2) {
             item.showId = false;
             return;
@@ -365,7 +390,7 @@
         } else {
             room.drawTips("红队剩余生命:" + room.roomInfo.playerLife,
                 10, 24, "red_team_life");
-            room.drawTips( "蓝队剩余生命:" + room.roomInfo.computerLife,
+            room.drawTips("蓝队剩余生命:" + room.roomInfo.computerLife,
                 10, 40, "blue_team_life");
         }
 

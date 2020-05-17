@@ -74,6 +74,33 @@ public class TankBo {
         return tankBo;
     }
 
+    public boolean levelUp() {
+        if (type.getUpId() == null) {
+            return false;
+        }
+
+        return changeType(type.getUpId());
+    }
+
+    public boolean levelDown() {
+        if (type.getDownId() == null) {
+            return false;
+        }
+
+        return changeType(type.getDownId());
+    }
+
+    private boolean changeType(String typeId) {
+        TankTypeBo newType = TankTypeBo.getTankType(typeId);
+        if (newType == null) {
+            return false;
+        }
+        reloadTime += newType.getAmmoReloadTime() - type.getAmmoReloadTime();
+        bulletCount += newType.getAmmoMaxCount() - type.getAmmoMaxCount();
+        type = newType;
+        return true;
+    }
+
     public BulletBo fire() {
         if (bulletCount <= 0) {
             return null;

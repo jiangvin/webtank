@@ -55,6 +55,14 @@ public enum MessageType {
      */
     REMOVE_MAP,
     /**
+     * 同步道具
+     */
+    ITEM,
+    /**
+     * 删除道具
+     */
+    REMOVE_ITEM,
+    /**
      * 清空所有地图信息
      */
     CLEAR_MAP,
