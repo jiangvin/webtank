@@ -102,10 +102,6 @@ public class StageRoom extends BaseStage {
     private String creator;
 
     private void init() {
-        this.eventList.add(new CreateItemEvent());
-    }
-
-    private void clear() {
         this.tankMap.clear();
         this.bulletMap.clear();
         this.itemMap.clear();
@@ -115,6 +111,8 @@ public class StageRoom extends BaseStage {
         this.eventList.clear();
         this.syncTankList.clear();
         this.syncBulletList.clear();
+
+        this.eventList.add(new CreateItemEvent());
     }
 
     private String getMapId() {
@@ -570,7 +568,7 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        clear();
+        init();
         long loadTimeoutSeconds = 10;
         long cleanMapTimeoutSeconds = 6;
         this.pauseMessage = "正在加载下一张地图...";
