@@ -314,8 +314,12 @@
         div.appendChild(input);
         selectWindow.appendChild(div);
 
-        selectWindow.appendChild(createRoomSelect("地图:", data, "selectMap"));
-        const selectType = createRoomSelect("类型:", ["PVP", "PVE", "EVE"], "selectType");
+        selectWindow.appendChild(createRoomSelect("地图:", "selectMap", data));
+        const selectType = createRoomSelect(
+            "类型:",
+            "selectType",
+            ["PVE", "PVP", "EVE"],
+            ["闯关", "对战", "电脑测试"]);
 
         //AI设定
         const selectAi = document.createElement('select');
@@ -333,7 +337,6 @@
         selectAi.style.position = "relative";
         selectAi.style.top = ".1em";
         selectAi.style.marginLeft = "1em";
-        selectAi.style.visibility = 'hidden';
         selectType.appendChild(selectAi);
 
         selectWindow.appendChild(selectType);
@@ -343,7 +346,7 @@
             setSelectGroup(value);
             setSelectAi(value);
         };
-        selectWindow.appendChild(createRoomSelect("队伍:", [], "selectGroup"));
+        selectWindow.appendChild(createRoomSelect("队伍:", "selectGroup", []));
         setSelectGroup($('#selectType').val());
 
         const divButton = document.createElement('div');
@@ -394,14 +397,14 @@
         }
     };
 
-    const createRoomSelect = function (typeText, options, selectId) {
+    const createRoomSelect = function (typeText, selectId, optionValues, optionTexts) {
         const div = document.createElement('div');
         div.className = "select-item";
         const label = document.createElement('label');
         label.className = "radio-label";
         label.textContent = typeText;
         div.appendChild(label);
-        const select = Resource.getSelect(options);
+        const select = Resource.getSelect(optionValues, optionTexts);
         select.id = selectId;
         select.style.width = "12em";
         div.appendChild(select);
@@ -429,22 +432,22 @@
 
             //AI传输设定
             const selectAi = $('#selectAi');
-            selectAi.css("visibility","hidden");
+            selectAi.css("visibility", "hidden");
             const ai = selectAi.val();
             if (roomType !== "PVP" && ai !== "-1") {
-                Common.getRequest("/user/getBotAddress",function (url) {
+                Common.getRequest("/user/getBotAddress", function (url) {
                     Resource.getGame().addTimeEvent("connect_ai",
                         function () {
                             Common.postRequest(url,
                                 {
-                                    "Content-Type":"application/x-www-form-urlencoded"
+                                    "Content-Type": "application/x-www-form-urlencoded"
                                 },
                                 {
-                                    "roomId":roomId,
-                                    "teamType":"BLUE",
-                                    "botType":ai
+                                    "roomId": roomId,
+                                    "teamType": "BLUE",
+                                    "botType": ai
                                 })
-                        },5 * 60)
+                        }, 5 * 60)
                 });
             }
 

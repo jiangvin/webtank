@@ -133,13 +133,18 @@
         return "generatedClientId=" + this.id++;
     };
 
-    Resource.getSelect = function (options) {
+    Resource.getSelect = function (optionValues, optionTexts) {
         const select = document.createElement('select');
-        options.forEach(function (optionText) {
+        for (let i = 0; i < optionValues.length; ++i) {
             const option = document.createElement('option');
-            option.text = optionText;
+            option.value = optionValues[i];
+            if (optionTexts && optionTexts[i]) {
+                option.text = optionTexts[i];
+            } else {
+                option.text = optionValues[i];
+            }
             select.add(option);
-        });
+        }
         return select;
     };
 

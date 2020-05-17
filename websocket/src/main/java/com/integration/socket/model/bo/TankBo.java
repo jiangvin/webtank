@@ -1,12 +1,13 @@
 package com.integration.socket.model.bo;
 
 import com.integration.dto.map.ActionType;
+import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.OrientationType;
 import com.integration.dto.room.TeamType;
-import com.integration.dto.map.ItemDto;
 import com.integration.util.CommonUtil;
 import lombok.Data;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,20 +86,42 @@ public class TankBo {
         //重置重新填装
         --bulletCount;
         reloadTime = type.getAmmoReloadTime();
-
+        Point bulletPos = getBulletPos();
         return new BulletBo(
                    CommonUtil.getId(),
                    this.tankId,
                    this.teamType,
                    type.getAmmoMaxLifeTime(),
-                   this.x,
-                   this.y,
+                   bulletPos.x,
+                   bulletPos.y,
                    this.getType().getAmmoSpeed(),
                    this.getType().isBrokenIron(),
                    this.orientationType,
                    null,
                    null,
                    System.currentTimeMillis());
+    }
+
+    private Point getBulletPos() {
+        Point point = new Point((int)x, (int)y);
+        int half = CommonUtil.UNIT_SIZE / 2;
+        switch (orientationType) {
+            case UP:
+                point.y -= half;
+                break;
+            case DOWN:
+                point.y += half;
+                break;
+            case LEFT:
+                point.x -= half;
+                break;
+            case RIGHT:
+                point.x += half;
+                break;
+            default:
+                break;
+        }
+        return point;
     }
 
     public void run(double speed) {
