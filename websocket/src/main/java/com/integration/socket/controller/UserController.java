@@ -11,6 +11,7 @@ import com.integration.socket.service.RoomService;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +31,9 @@ import java.util.List;
 @RequestMapping("user")
 @Slf4j
 public class UserController {
+
+    @Value("${bot.host:localhost}")
+    private String botHost;
 
     @Autowired
     private OnlineUserService onlineUserService;
@@ -83,6 +87,11 @@ public class UserController {
     @GetMapping("/getMap/{id}")
     public MapEditDto getMap(@PathVariable(value = "id") String id) {
         return MapEditDto.convert(mapDao.queryFromId(id));
+    }
+
+    @GetMapping("/getBotAddress")
+    public String getBotAddress() {
+        return String.format("http://%s:8200/requestBot", this.botHost);
     }
 
     @PostMapping("/setMap")
