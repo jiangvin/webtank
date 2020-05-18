@@ -1,7 +1,7 @@
 package com.integration.bot.model;
 
-import com.integration.bot.model.map.Tank;
 import com.integration.bot.model.dto.RequestBotDto;
+import com.integration.bot.model.map.Tank;
 import com.integration.dto.map.ActionType;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.map.OrientationType;
@@ -48,20 +48,8 @@ public class SimpleBot extends BaseBot {
         for (Map.Entry<String, Tank> kv : tankMap.entrySet()) {
             Tank tank = kv.getValue();
             updateTank(tank, false);
-            tank.run();
-            tank.reloadBullet();
-            syncControl(tank);
+            syncTank(tank);
         }
-    }
-
-    private void syncControl(Tank tank) {
-        if (tank.getOrientationType() == tank.getLastSendOrientation() && tank.getActionType() == tank.getLastSendAction()) {
-            return;
-        }
-
-        tank.setLastSendOrientation(tank.getOrientationType());
-        tank.setLastSendAction(tank.getActionType());
-        sendTankControl(tank);
     }
 
     private void updateTank(Tank tank, boolean ignoreCollideWithTanks) {
@@ -69,10 +57,7 @@ public class SimpleBot extends BaseBot {
             return;
         }
 
-        if (tank.getBulletCount() != 0 && tank.getReloadTime() == 0) {
-            sendMessage(new MessageDto(tank.getId(), MessageType.UPDATE_TANK_FIRE));
-            tank.setReloadTime(COMMON_RELOAD_TIME);
-        }
+        updateFire(tank);
 
         tank.setActionType(ActionType.RUN);
         boolean forward = canPass(tank, tank.getOrientationType(), ignoreCollideWithTanks);
@@ -81,54 +66,24 @@ public class SimpleBot extends BaseBot {
         }
 
         List<OrientationType> sideList = new ArrayList<>();
-        OrientationType back = null;
-        switch (tank.getOrientationType()) {
-            case UP:
-                if (canPass(tank, OrientationType.LEFT, ignoreCollideWithTanks)) {
-                    sideList.add(OrientationType.LEFT);
-                }
-                if (canPass(tank, OrientationType.RIGHT, ignoreCollideWithTanks)) {
-                    sideList.add(OrientationType.RIGHT);
-                }
-                if (canPass(tank, OrientationType.DOWN, ignoreCollideWithTanks)) {
-                    back = OrientationType.DOWN;
-                }
-                break;
-            case DOWN:
-                if (canPass(tank, OrientationType.LEFT, ignoreCollideWithTanks)) {
-                    sideList.add(OrientationType.LEFT);
-                }
-                if (canPass(tank, OrientationType.RIGHT, ignoreCollideWithTanks)) {
-                    sideList.add(OrientationType.RIGHT);
-                }
-                if (canPass(tank, OrientationType.UP, ignoreCollideWithTanks)) {
-                    back = OrientationType.UP;
-                }
-                break;
-            case LEFT:
-                if (canPass(tank, OrientationType.UP, ignoreCollideWithTanks)) {
-                    sideList.add(OrientationType.UP);
-                }
-                if (canPass(tank, OrientationType.DOWN, ignoreCollideWithTanks)) {
-                    sideList.add(OrientationType.DOWN);
-                }
-                if (canPass(tank, OrientationType.RIGHT, ignoreCollideWithTanks)) {
-                    back = OrientationType.RIGHT;
-                }
-                break;
-            case RIGHT:
-                if (canPass(tank, OrientationType.UP, ignoreCollideWithTanks)) {
-                    sideList.add(OrientationType.UP);
-                }
-                if (canPass(tank, OrientationType.DOWN, ignoreCollideWithTanks)) {
-                    sideList.add(OrientationType.DOWN);
-                }
-                if (canPass(tank, OrientationType.LEFT, ignoreCollideWithTanks)) {
-                    back = OrientationType.LEFT;
-                }
-                break;
-            default:
-                break;
+        if (tank.getOrientationType() == OrientationType.UP || tank.getOrientationType() == OrientationType.DOWN) {
+            if (canPass(tank, OrientationType.LEFT, ignoreCollideWithTanks)) {
+                sideList.add(OrientationType.LEFT);
+            }
+            if (canPass(tank, OrientationType.RIGHT, ignoreCollideWithTanks)) {
+                sideList.add(OrientationType.RIGHT);
+            }
+        } else {
+            if (canPass(tank, OrientationType.UP, ignoreCollideWithTanks)) {
+                sideList.add(OrientationType.UP);
+            }
+            if (canPass(tank, OrientationType.DOWN, ignoreCollideWithTanks)) {
+                sideList.add(OrientationType.DOWN);
+            }
+        }
+        OrientationType back = tank.getOrientationType().getBack();
+        if (!canPass(tank, back, ignoreCollideWithTanks)) {
+            back = null;
         }
 
         if (!sideList.isEmpty()) {
@@ -152,12 +107,18 @@ public class SimpleBot extends BaseBot {
             return;
         }
 
-
         tank.setActionType(ActionType.STOP);
         if (random.nextInt(KEEP_TRY_RATE) != 0) {
             return;
         }
         tank.setOrientationType(OrientationType.convert(random.nextInt(4)));
+    }
+
+    private void updateFire(Tank tank) {
+        if (tank.getBulletCount() != 0 && tank.getReloadTime() == 0) {
+            sendMessage(new MessageDto(tank.getId(), MessageType.UPDATE_TANK_FIRE));
+            tank.setReloadTime(COMMON_RELOAD_TIME);
+        }
     }
 
     private boolean canPass(Tank tank, OrientationType orientation, boolean ignoreCollideWithTanks) {

@@ -245,7 +245,20 @@ public abstract class BaseBot {
         }
     }
 
-    void sendTankControl(Tank tank) {
+    void syncTank(Tank tank) {
+        tank.run();
+        tank.reloadBullet();
+
+        if (tank.getOrientationType() == tank.getLastSendOrientation() && tank.getActionType() == tank.getLastSendAction()) {
+            return;
+        }
+
+        tank.setLastSendOrientation(tank.getOrientationType());
+        tank.setLastSendAction(tank.getActionType());
+        sendTankControl(tank);
+    }
+
+    private void sendTankControl(Tank tank) {
         ItemDto dto = new ItemDto();
         dto.setId(tank.getId());
         dto.setOrientation(tank.getOrientationType().getValue());
