@@ -22,6 +22,21 @@ public enum OrientationType {
         return this.value;
     }
 
+    public OrientationType getBack() {
+        switch (this) {
+            case UP:
+                return OrientationType.DOWN;
+            case DOWN:
+                return OrientationType.UP;
+            case LEFT:
+                return OrientationType.RIGHT;
+            case RIGHT:
+                return OrientationType.LEFT;
+            default:
+                return OrientationType.UNKNOWN;
+        }
+    }
+
     public static OrientationType convert(int value) {
         for (OrientationType orientationType : OrientationType.values()) {
             if (orientationType.value == value) {

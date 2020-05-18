@@ -432,7 +432,7 @@ function Stage(params) {
     const updateTankProperty = function (stage,tankData) {
         const tankItem = stage.items.get(tankData.id);
         tankItem.speed = tankData.speed;
-        if (tankData.type !== "tankMenu") {
+        if (tankData.typeId !== "tankMenu") {
             tankItem.image = Resource.getImage(tankData.typeId);
         }
     };
