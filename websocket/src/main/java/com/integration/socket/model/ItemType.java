@@ -6,5 +6,6 @@ package com.integration.socket.model;
  * @date 2020/5/17
  */
 public enum ItemType {
-    STAR
+    STAR,
+    SHIELD
 }

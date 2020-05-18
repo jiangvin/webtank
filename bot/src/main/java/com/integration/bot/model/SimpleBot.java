@@ -37,9 +37,9 @@ public class SimpleBot extends BaseBot {
     private static final int KEEP_TRY_RATE = 30;
 
     /**
-     * 发射子弹有半秒延迟
+     * 发射子弹有一秒延迟
      */
-    private static final int COMMON_RELOAD_TIME = 30;
+    private static final int COMMON_RELOAD_TIME = 60;
 
     private Random random = new Random();
 

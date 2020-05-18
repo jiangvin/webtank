@@ -106,7 +106,7 @@ public class StageMenu extends BaseStage {
     private List<ItemDto> getTankList() {
         List<ItemDto> tankDtoList = new ArrayList<>();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            tankDtoList.add(kv.getValue().convertToDto());
+            tankDtoList.add(kv.getValue().toDto());
         }
         return tankDtoList;
     }

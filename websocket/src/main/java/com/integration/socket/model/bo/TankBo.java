@@ -31,8 +31,9 @@ public class TankBo {
     private int bulletCount;
     private long lastSyncTime = System.currentTimeMillis();
     private List<String> gridKeyList = new ArrayList<>();
+    private int shieldTimeout = 0;
 
-    public ItemDto convertToDto() {
+    public ItemDto toDto() {
         ItemDto tankDto = new ItemDto();
         tankDto.setId(getTankId());
         tankDto.setX(getX());
@@ -46,6 +47,9 @@ public class TankBo {
         tankDto.setUserId(getUserId());
         if (getTeamType() != null) {
             tankDto.setTeamId(getTeamType().getValue());
+        }
+        if (hasShield()) {
+            tankDto.setHasShield(true);
         }
         return tankDto;
     }
@@ -72,6 +76,10 @@ public class TankBo {
             tankBo.setTeamType(TeamType.convert(tankDto.getTeamId()));
         }
         return tankBo;
+    }
+
+    public boolean hasShield() {
+        return shieldTimeout > 0;
     }
 
     public boolean levelUp() {

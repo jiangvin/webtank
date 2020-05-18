@@ -23,4 +23,6 @@ public class ItemDto {
     private Integer teamId;
     private Integer bulletCount;
     private Integer reloadTime;
+
+    private Boolean hasShield;
 }

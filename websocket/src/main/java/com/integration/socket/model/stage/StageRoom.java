@@ -52,6 +52,10 @@ public class StageRoom extends BaseStage {
 
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
 
+    private static final int DEFAULT_SHIELD_TIME = 20 * 60;
+
+    private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
+
     public StageRoom(RoomDto roomDto, MapMangerBo mapManger, MessageService messageService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
@@ -174,8 +178,8 @@ public class StageRoom extends BaseStage {
         syncBullets();
     }
 
-    private void addSyncList(TankBo tankBo) {
-        if (System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TANK_TIME) {
+    private void addSyncList(TankBo tankBo, boolean forceUpdate) {
+        if (forceUpdate || System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TANK_TIME) {
             syncTankList.add(tankBo);
         }
     }
@@ -187,7 +191,7 @@ public class StageRoom extends BaseStage {
 
         List<ItemDto> dtoList = new ArrayList<>();
         for (TankBo tank : syncTankList) {
-            dtoList.add(tank.convertToDto());
+            dtoList.add(tank.toDto());
             tank.refreshSyncTime();
         }
         sendMessageToRoom(dtoList, MessageType.TANKS);
@@ -342,54 +346,81 @@ public class StageRoom extends BaseStage {
      * @param tankBo
      */
     private void updateTank(TankBo tankBo) {
+        boolean needUpdate = false;
+
+        //填装弹药计算
         if (tankBo.getReloadTime() > 0) {
             tankBo.setReloadTime(tankBo.getReloadTime() - 1);
-        }
-
-        if (tankBo.getActionType() == ActionType.STOP) {
-            return;
-        }
-
-        for (String key : tankBo.getGridKeyList()) {
-            CollideType type = collideWithAll(tankBo, key);
-            if (type != CollideType.COLLIDE_NONE) {
-                tankBo.setActionType(ActionType.STOP);
-                sendTankToRoom(tankBo, type.toString());
+            if (tankBo.getReloadTime() == 0) {
+                needUpdate = true;
             }
         }
 
-        catchItem(tankBo);
-        tankBo.run(tankBo.getType().getSpeed());
-        refreshTankGridMap(tankBo);
-        addSyncList(tankBo);
+        //护盾计算
+        if (tankBo.getShieldTimeout() > 0) {
+            tankBo.setShieldTimeout(tankBo.getShieldTimeout() - 1);
+            if (!tankBo.hasShield()) {
+                needUpdate = true;
+            }
+        }
+
+        //移动计算
+        if (tankBo.getActionType() == ActionType.RUN) {
+            boolean canRun = true;
+            //障碍物检测
+            for (String key : tankBo.getGridKeyList()) {
+                CollideType type = collideWithAll(tankBo, key);
+                if (type != CollideType.COLLIDE_NONE) {
+                    tankBo.setActionType(ActionType.STOP);
+                    sendTankToRoom(tankBo, type.toString());
+                    //已经发送了一次，重置标识
+                    needUpdate = false;
+                    canRun = false;
+                    break;
+                }
+            }
+
+            if (canRun) {
+                if (catchItem(tankBo)) {
+                    needUpdate = true;
+                }
+                tankBo.run(tankBo.getType().getSpeed());
+                refreshTankGridMap(tankBo);
+            }
+        }
+
+        addSyncList(tankBo, needUpdate);
     }
 
-    private void catchItem(TankBo tankBo) {
+    private boolean catchItem(TankBo tankBo) {
         for (String key : tankBo.getGridKeyList()) {
             if (!itemMap.containsKey(key)) {
-                return;
+                continue;
             }
 
             ItemBo itemBo = itemMap.get(key);
             double distance = Point.distance(tankBo.getX(), tankBo.getY(), itemBo.getPos().x, itemBo.getPos().y);
             if (distance <= CommonUtil.UNIT_SIZE) {
-                catchItem(tankBo, itemBo);
+                return catchItem(tankBo, itemBo);
             }
         }
+        return false;
     }
 
-    private void catchItem(TankBo tankBo, ItemBo itemBo) {
+    private boolean catchItem(TankBo tankBo, ItemBo itemBo) {
         switch (itemBo.getType()) {
             case STAR:
                 if (!tankBo.levelUp()) {
-                    return;
+                    return false;
                 }
-                sendTankToRoom(tankBo);
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
-                break;
+                return true;
+            case SHIELD:
+                tankBo.setShieldTimeout(tankBo.getShieldTimeout() + DEFAULT_SHIELD_TIME);
+                return true;
             default:
-                break;
+                return false;
         }
     }
 
@@ -430,11 +461,13 @@ public class StageRoom extends BaseStage {
         TankBo tankBo = collideWithTanks(bullet);
         if (tankBo != null) {
             addRemoveBulletIds(bullet.getId());
-            if (tankBo.levelDown()) {
-                sendTankToRoom(tankBo);
-            } else {
-                sendTankBombMessage(tankBo);
-                removeTankFromTankId(tankBo.getTankId());
+            if (!tankBo.hasShield()) {
+                if (tankBo.levelDown()) {
+                    sendTankToRoom(tankBo);
+                } else {
+                    sendTankBombMessage(tankBo);
+                    removeTankFromTankId(tankBo.getTankId());
+                }
             }
             return true;
         }
@@ -472,7 +505,7 @@ public class StageRoom extends BaseStage {
                 continue;
             }
             double distance = Point.distance(tankBo.getX(), tankBo.getY(), bulletBo.getX(), bulletBo.getY());
-            double minDistance = (CommonUtil.AMMO_SIZE + CommonUtil.UNIT_SIZE) / 2.0;
+            double minDistance = CommonUtil.UNIT_SIZE / 2.0;
             if (distance <= minDistance) {
                 return tankBo;
             }
@@ -819,6 +852,9 @@ public class StageRoom extends BaseStage {
         tankBo.setUserId(userBo.getUsername());
         tankBo.setTeamType(userBo.getTeamType());
         tankBo.setType(getTankType(lifeMap));
+        if (tankId.equals(userBo.getUsername())) {
+            tankBo.setShieldTimeout(DEFAULT_SHIELD_TIME_FOR_NEW_TANK);
+        }
         setStartPoint(tankBo);
         tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
         tankMap.put(tankBo.getTankId(), tankBo);
@@ -873,7 +909,7 @@ public class StageRoom extends BaseStage {
     private List<ItemDto> getTankList() {
         List<ItemDto> tankDtoList = new ArrayList<>();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            tankDtoList.add(kv.getValue().convertToDto());
+            tankDtoList.add(kv.getValue().toDto());
         }
         return tankDtoList;
     }
