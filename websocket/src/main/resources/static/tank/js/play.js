@@ -38,5 +38,9 @@ function Play(frames, timePerFrame, updateEvent, endEvent) {
             --this.frames;
             this.times = this.timePerFrame;
         }
+    };
+
+    this.isFinish = function () {
+        return this.frames < 0;
     }
 }

@@ -429,15 +429,16 @@ function Stage(params) {
         thisStage.items.get(newAttr.id).action = newAttr.action;
     };
 
-    const updateTankProperty = function (stage,tankData) {
+    const updateTankProperty = function (stage, tankData) {
         const tankItem = stage.items.get(tankData.id);
         tankItem.speed = tankData.speed;
+        tankItem.hasShield = tankData.hasShield;
         if (tankData.typeId !== "tankMenu") {
             tankItem.image = Resource.getImage(tankData.typeId);
         }
     };
 
-    const updateTankControl = function (stage,tankData) {
+    const updateTankControl = function (stage, tankData) {
         const tankItem = stage.items.get(tankData.id);
         tankItem.x = tankData.x;
         tankItem.y = tankData.y;
@@ -452,7 +453,7 @@ function Stage(params) {
         const center = thisStage.view.center;
         tanks.forEach(function (tank) {
             if (thisStage.items.has(tank.id)) {
-                updateTankProperty(thisStage,tank);
+                updateTankProperty(thisStage, tank);
                 //普通模式除非撞上tank，否则过滤自己
                 if (!force && center && center.id === tank.id) {
                     return;
@@ -464,16 +465,13 @@ function Stage(params) {
                 tankImage = Resource.getImage(tank.typeId);
                 const tankItem = thisStage.createTank({
                     id: tank.id,
-                    x: tank.x,
-                    y: tank.y,
-                    orientation: tank.orientation,
-                    action: tank.action,
                     showId: true,
-                    speed: tank.speed,
-                    image: tankImage,
                     teamId: tank.teamId,
+                    image: tankImage,
                     scale: 0.1
                 });
+                updateTankProperty(thisStage, tank);
+                updateTankControl(thisStage, tank);
                 tankItem.play = new Play(30, 1,
                     function () {
                         tankItem.scale += this.animationScale;

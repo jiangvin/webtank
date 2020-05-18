@@ -30,12 +30,16 @@
             loadAnimationImage(id, this.images, 4);
         }
 
+        //animation
+        loadAnimationImage("shield", this.images, 4);
+        loadAnimationImage("bomb", this.images, 6);
+
         //item
         loadAnimationImage("item_star", this.images, 2);
+        loadAnimationImage("item_shield", this.images, 2);
 
         //map unit
         loadAnimationImage("bullet", this.images, 4);
-        loadAnimationImage("bomb", this.images, 6);
         loadAnimationImage("brick", this.images, 2);
         loadAnimationImage("iron", this.images, 2);
         loadAnimationImage("river", this.images, 2);

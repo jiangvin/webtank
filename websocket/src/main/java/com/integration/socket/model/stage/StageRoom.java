@@ -418,6 +418,8 @@ public class StageRoom extends BaseStage {
                 return true;
             case SHIELD:
                 tankBo.setShieldTimeout(tankBo.getShieldTimeout() + DEFAULT_SHIELD_TIME);
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return true;
             default:
                 return false;
