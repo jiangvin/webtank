@@ -47,12 +47,12 @@ public class SimpleBot extends BaseBot {
     void updateExtension() {
         for (Map.Entry<String, Tank> kv : tankMap.entrySet()) {
             Tank tank = kv.getValue();
-            updateTank(tank, false);
+            updateTank(tank);
             syncTank(tank);
         }
     }
 
-    private void updateTank(Tank tank, boolean ignoreCollideWithTanks) {
+    private void updateTank(Tank tank) {
         if (!tank.getUserId().equals(name)) {
             return;
         }
@@ -60,29 +60,29 @@ public class SimpleBot extends BaseBot {
         updateFire(tank);
 
         tank.setActionType(ActionType.RUN);
-        boolean forward = canPass(tank, tank.getOrientationType(), ignoreCollideWithTanks);
+        boolean forward = canPass(tank, tank.getOrientationType());
         if (forward && random.nextInt(KEEP_GOING_RATE) != 0) {
             return;
         }
 
         List<OrientationType> sideList = new ArrayList<>();
         if (tank.getOrientationType() == OrientationType.UP || tank.getOrientationType() == OrientationType.DOWN) {
-            if (canPass(tank, OrientationType.LEFT, ignoreCollideWithTanks)) {
+            if (canPass(tank, OrientationType.LEFT)) {
                 sideList.add(OrientationType.LEFT);
             }
-            if (canPass(tank, OrientationType.RIGHT, ignoreCollideWithTanks)) {
+            if (canPass(tank, OrientationType.RIGHT)) {
                 sideList.add(OrientationType.RIGHT);
             }
         } else {
-            if (canPass(tank, OrientationType.UP, ignoreCollideWithTanks)) {
+            if (canPass(tank, OrientationType.UP)) {
                 sideList.add(OrientationType.UP);
             }
-            if (canPass(tank, OrientationType.DOWN, ignoreCollideWithTanks)) {
+            if (canPass(tank, OrientationType.DOWN)) {
                 sideList.add(OrientationType.DOWN);
             }
         }
         OrientationType back = tank.getOrientationType().getBack();
-        if (!canPass(tank, back, ignoreCollideWithTanks)) {
+        if (!canPass(tank, back)) {
             back = null;
         }
 
@@ -102,11 +102,6 @@ public class SimpleBot extends BaseBot {
             return;
         }
 
-        if (!ignoreCollideWithTanks) {
-            updateTank(tank, true);
-            return;
-        }
-
         tank.setActionType(ActionType.STOP);
         if (random.nextInt(KEEP_TRY_RATE) != 0) {
             return;
@@ -121,15 +116,19 @@ public class SimpleBot extends BaseBot {
         }
     }
 
-    private boolean canPass(Tank tank, OrientationType orientation, boolean ignoreCollideWithTanks) {
+    private boolean canPass(Tank tank, OrientationType orientation) {
+        if (collideWithTanks(tank, orientation)) {
+            return false;
+        }
+
         //获取前方的两个角的坐标（顺时针获取）
         List<Point> corners = generateCorners(tank, orientation);
         Point corner1 = corners.get(0);
         Point corner2 = corners.get(1);
-        if (!canPass(corner1.x, corner1.y, tank.getId(), ignoreCollideWithTanks)) {
+        if (!canPass(corner1.x, corner1.y)) {
             return false;
         }
-        return canPass(corner2.x, corner2.y, tank.getId(), ignoreCollideWithTanks);
+        return canPass(corner2.x, corner2.y);
     }
 
     private List<Point> generateCorners(Tank tank, OrientationType orientation) {
@@ -179,31 +178,50 @@ public class SimpleBot extends BaseBot {
         return corners;
     }
 
-    private boolean canPass(double x, double y, String tankId, boolean ignoreCollideWithTanks) {
+    private boolean canPass(double x, double y) {
         if (x <= 0 || y <= 0 || x >= mapDto.getWidth() || y >= mapDto.getHeight()) {
             return false;
         }
 
-        if (collideWithMap(x, y)) {
-            return false;
-        }
+        return !collideWithMap(x, y);
+    }
 
-        if (ignoreCollideWithTanks) {
-            return true;
-        }
-
+    private boolean collideWithTanks(Tank tank, OrientationType orientation) {
         for (Map.Entry<String, Tank> kv : tankMap.entrySet()) {
-            Tank tank = kv.getValue();
-            if (tank.getId().equals(tankId)) {
+            Tank target = kv.getValue();
+            if (target.getId().equals(tank.getId())) {
                 continue;
             }
 
-            double distance = Point.distance(x, y, tank.getX(), tank.getY());
+            double distance = Point.distance(tank.getX(), tank.getY(), target.getX(), target.getY());
             if (distance <= CommonUtil.UNIT_SIZE) {
-                return false;
+                switch (orientation) {
+                    case UP:
+                        if (tank.getY() > target.getY()) {
+                            return true;
+                        }
+                        break;
+                    case DOWN:
+                        if (tank.getY() < target.getY()) {
+                            return true;
+                        }
+                        break;
+                    case LEFT:
+                        if (tank.getX() > target.getX()) {
+                            return true;
+                        }
+                        break;
+                    case RIGHT:
+                        if (tank.getX() < target.getX()) {
+                            return true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
         }
-        return true;
+        return false;
     }
 
     private boolean collideWithMap(double x, double y) {
