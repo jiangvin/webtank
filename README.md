@@ -40,17 +40,6 @@
 5.接收SERVER_READY并解除暂停<br>
 
 **关于超时重连问题：**
-在测试中发现有一定记录连接服务器会超时，这里前端加了一个行为判断，当连接超过5秒的时候结束锁定，并返回一个超时信息。因为后续的连接可能涉及到切换场景，所以这里的超时比较麻烦，先考虑设定成先暂停，再切换场景，最后再切换回来的操作，代码如下：
-
-  Room.getOrCreateRoom(); //创建场景<br>
-  Common.runNextStage();  //切换场景<br>
-  Status.setStatus(Status.getStatusPause(), "加入房间中...");<br>
-  Common.sendStompMessage({<br>
-      "roomId": roomId,<br>
-      "joinTeamType": selectGroup<br>
-  }, "JOIN_ROOM");<br>
-  Common.addConnectTimeoutEvent(function () {<br>
-      Common.runLastStage(); //超时后又切换回来<br>
-  });<br>
+在测试中发现有一定记录连接服务器会超时，这里前端加了一个行为判断，当连接超过5秒的时候结束锁定，并返回一个超时信息。因为后续的连接可能涉及到切换场景，所以这里的超时比较麻烦，先考虑设定成先暂停，再切换场景，最后再切换回来的操作
 
 **关于操控和碰撞检测:** 试这块逻辑非常坎坷，写了三版，最终效果大致才满意，先测试一下，之后再整理逻辑。
