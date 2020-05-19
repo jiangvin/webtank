@@ -9,7 +9,30 @@
         this.stompClient = null;
 
         this.username = null;
+
+        this.scale = null;
     }
+
+    Resource.getScale = function () {
+        return this.scale;
+    };
+
+    Resource.calculateScale = function (d1, d2) {
+        let width;
+        let height;
+        if (d1 > d2) {
+            width = d1;
+            height = d2;
+        } else {
+            width = d2;
+            height = d1;
+        }
+        let scaleX = width / 800;
+        let scaleY = height / 500;
+        this.scale = scaleX > scaleY ? scaleY : scaleX;
+        this.scale = this.scale < 1 ? this.scale : 1;
+        return this.scale;
+    };
 
     Resource.getImages = function () {
         if (this.images) {

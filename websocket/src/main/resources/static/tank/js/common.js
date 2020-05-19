@@ -32,25 +32,30 @@ Common.height = function () {
 Common.windowChange = function () {
     const width = document.documentElement.clientWidth;
     const height = document.documentElement.clientHeight;
+    const scale = Resource.calculateScale(width, height);
 
+    const newWidth = width / scale;
+    const newHeight = height / scale;
     let style = "";
-    if (width >= height) { // 横屏
-        style += "width:" + width + "px;";  // 注意旋转后的宽高切换
-        style += "height:" + height + "px;";
-        style += "-webkit-transform: rotate(0); transform: rotate(0);";
-        style += "-webkit-transform-origin: 0 0;";
-        style += "transform-origin: 0 0;";
-        _canvas.width = width;
-        _canvas.height = height;
-    } else { // 竖屏
-        style += "width:" + height + "px;";
-        style += "height:" + width + "px;";
-        style += "-webkit-transform: rotate(90deg); transform: rotate(90deg);";
-        // 注意旋转中点的处理
-        style += "-webkit-transform-origin: " + width / 2 + "px " + width / 2 + "px;";
-        style += "transform-origin: " + width / 2 + "px " + width / 2 + "px;";
-        _canvas.width = height;
-        _canvas.height = width;
+    //变形的中心点为左上角
+    style += "-webkit-transform-origin: 0 0;";
+    style += "transform-origin: 0 0;";
+    if (width >= height) {
+        // 横屏
+        style += "width:" + newWidth + "px;";
+        style += "height:" + newHeight + "px;";
+        style += "-webkit-transform: rotate(0) scale(" + scale + ");";
+        style += "transform: rotate(0) scale(" + scale + ");";
+        _canvas.width = newWidth;
+        _canvas.height = newHeight;
+    } else {
+        // 竖屏
+        style += "width:" + newHeight + "px;";
+        style += "height:" + newWidth + "px;";
+        style += "-webkit-transform: rotate(90deg) scale(" + scale + ") translate(0px," + -newWidth + "px);";
+        style += "transform: rotate(90deg) scale(" + scale + ") translate(0px," + -newWidth + "px);";
+        _canvas.width = newHeight;
+        _canvas.height = newWidth;
     }
     let wrapper = document.getElementById("wrapper");
     wrapper.style.cssText = style;
@@ -62,16 +67,23 @@ Common.getTouchPoint = function (eventPoint) {
     let x = eventPoint.clientX;
     let y = eventPoint.clientY;
 
+    //缩放处理
+    const scale = Resource.getScale();
+
     const touchPoint = {};
     if (Control.getControlMode().portrait) {
         //竖屏
         touchPoint.x = y;
-        touchPoint.y = Common.height() - x;
+        touchPoint.y = Common.height() * scale - x;
     } else {
         //横屏
         touchPoint.x = x;
         touchPoint.y = y;
     }
+
+    touchPoint.x /= scale;
+    touchPoint.y /= scale;
+
     return touchPoint;
 };
 
