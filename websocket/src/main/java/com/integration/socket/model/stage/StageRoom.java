@@ -56,24 +56,6 @@ public class StageRoom extends BaseStage {
 
     private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
 
-    public StageRoom(RoomDto roomDto, MapMangerBo mapManger, MessageService messageService) {
-        super(messageService);
-        this.roomId = roomDto.getRoomId();
-        this.creator = roomDto.getCreator();
-        this.mapManger = mapManger;
-        init();
-    }
-
-    public RoomDto convertToDto() {
-        RoomDto roomDto = new RoomDto();
-        roomDto.setRoomId(getRoomId());
-        roomDto.setCreator(getCreator());
-        roomDto.setMapId(getMapId());
-        roomDto.setRoomType(getRoomType());
-        roomDto.setUserCount(getUserCount());
-        return roomDto;
-    }
-
     private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<String, List<String>> gridTankMap = new ConcurrentHashMap<>();
@@ -99,13 +81,37 @@ public class StageRoom extends BaseStage {
      */
     private List<TankBo> syncTankList = new ArrayList<>();
 
+    /**
+     * 在通关后记录玩家属性
+     */
+    private Map<String, TankTypeBo> tankTypeSaveMap = new ConcurrentHashMap<>();
+
     @Getter
     private String roomId;
 
     @Getter
     private String creator;
 
+    public StageRoom(RoomDto roomDto, MapMangerBo mapManger, MessageService messageService) {
+        super(messageService);
+        this.roomId = roomDto.getRoomId();
+        this.creator = roomDto.getCreator();
+        this.mapManger = mapManger;
+        init();
+    }
+
+    public RoomDto convertToDto() {
+        RoomDto roomDto = new RoomDto();
+        roomDto.setRoomId(getRoomId());
+        roomDto.setCreator(getCreator());
+        roomDto.setMapId(getMapId());
+        roomDto.setRoomType(getRoomType());
+        roomDto.setUserCount(getUserCount());
+        return roomDto;
+    }
+
     private void init() {
+        saveTankType();
         this.tankMap.clear();
         this.bulletMap.clear();
         this.itemMap.clear();
@@ -117,6 +123,17 @@ public class StageRoom extends BaseStage {
         this.syncBulletList.clear();
 
         this.eventList.add(new CreateItemEvent());
+    }
+
+    private void saveTankType() {
+        this.tankTypeSaveMap.clear();
+        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
+            TankBo tankBo = kv.getValue();
+            if (tankBo.isBot()) {
+                return;
+            }
+            this.tankTypeSaveMap.put(tankBo.getUserId(), tankBo.getType());
+        }
     }
 
     private String getMapId() {
@@ -393,6 +410,10 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean catchItem(TankBo tankBo) {
+        if (!canCatchItem(tankBo)) {
+            return false;
+        }
+
         for (String key : tankBo.getGridKeyList()) {
             if (!itemMap.containsKey(key)) {
                 continue;
@@ -405,6 +426,10 @@ public class StageRoom extends BaseStage {
             }
         }
         return false;
+    }
+
+    private boolean canCatchItem(TankBo tankBo) {
+        return getRoomType() != RoomType.PVE || tankBo.getTankId().equals(tankBo.getUserId());
     }
 
     private boolean catchItem(TankBo tankBo, ItemBo itemBo) {
@@ -853,15 +878,24 @@ public class StageRoom extends BaseStage {
         tankBo.setTankId(tankId);
         tankBo.setUserId(userBo.getUsername());
         tankBo.setTeamType(userBo.getTeamType());
-        tankBo.setType(getTankType(lifeMap));
-        if (tankId.equals(userBo.getUsername())) {
+
+        //设定类型
+        TankTypeBo initType = getTankType(lifeMap);
+        TankTypeBo saveType = this.tankTypeSaveMap.get(userBo.getUsername());
+        if (saveType != null) {
+            tankBo.setType(saveType);
+            this.tankTypeSaveMap.remove(userBo.getUsername());
+        } else {
+            tankBo.setType(initType);
+        }
+
+        if (!tankBo.isBot()) {
             tankBo.setShieldTimeout(DEFAULT_SHIELD_TIME_FOR_NEW_TANK);
         }
         setStartPoint(tankBo);
         tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
         tankMap.put(tankBo.getTankId(), tankBo);
 
-        //即将向所有人同步信息
         sendTankToRoom(tankBo);
     }
 

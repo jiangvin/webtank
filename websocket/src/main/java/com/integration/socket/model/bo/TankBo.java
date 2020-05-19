@@ -82,6 +82,10 @@ public class TankBo {
         return shieldTimeout > 0;
     }
 
+    public boolean isBot() {
+        return !this.tankId.equals(this.userId);
+    }
+
     public boolean levelUp() {
         if (type.getUpId() == null) {
             return false;
