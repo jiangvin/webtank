@@ -11,7 +11,7 @@ import lombok.NonNull;
  */
 
 @Data
-public class RequestBotDto {
+public class BotDto {
     private String name;
     @NonNull private String roomId;
     @NonNull private TeamType teamType;

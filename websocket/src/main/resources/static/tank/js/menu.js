@@ -319,7 +319,7 @@
             "类型:",
             "selectType",
             ["PVE", "PVP", "EVE"],
-            ["闯关", "对战", "电脑测试"]);
+            ["闯关", "对战", "电脑对战"]);
 
         //AI设定
         const selectAi = document.createElement('select');

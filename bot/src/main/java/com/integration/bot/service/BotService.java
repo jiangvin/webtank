@@ -2,7 +2,7 @@ package com.integration.bot.service;
 
 import com.integration.bot.model.BaseBot;
 import com.integration.bot.model.SimpleBot;
-import com.integration.bot.model.dto.RequestBotDto;
+import com.integration.bot.model.dto.BotDto;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,13 +43,13 @@ public class BotService {
 
     private List<BaseBot> botList = new ArrayList<>();
 
-    public void createBot(RequestBotDto requestBotDto) {
-        if (StringUtils.isEmpty(requestBotDto.getName())) {
-            requestBotDto.setName(getBotName());
+    public void createBot(BotDto botDto) {
+        if (StringUtils.isEmpty(botDto.getName())) {
+            botDto.setName(getBotName());
         }
 
-        log.info("receive request bot:{}", requestBotDto.toString());
-        BaseBot bot = botFactory(requestBotDto);
+        log.info("receive request bot:{}", botDto.toString());
+        BaseBot bot = botFactory(botDto);
         if (bot.isDead()) {
             bot.close();
             throw new CustomException("连接建立失败!");
@@ -59,11 +59,11 @@ public class BotService {
         botList.add(bot);
     }
 
-    private BaseBot botFactory(RequestBotDto requestBotDto) {
+    private BaseBot botFactory(BotDto botDto) {
         BaseBot bot;
-        switch (requestBotDto.getBotType()) {
+        switch (botDto.getBotType()) {
             default:
-                bot = new SimpleBot(requestBotDto);
+                bot = new SimpleBot(botDto);
                 break;
         }
         return bot;

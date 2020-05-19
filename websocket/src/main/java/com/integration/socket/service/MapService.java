@@ -93,7 +93,7 @@ public class MapService {
             //地图已存在
             MapRecord mapRecord = mapDao.queryFromId(mapEditDto.getId());
             if (mapRecord.getSecret() != null && !mapRecord.getSecret().equals(mapEditDto.getPw())) {
-                throw new CustomException("密码校验出错!");
+                throw new CustomException("密码校验出错,请重新输入密码或者修改地图名存为新地图");
             }
         }
 

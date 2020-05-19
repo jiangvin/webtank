@@ -8,7 +8,7 @@ import com.integration.bot.model.event.SendMessageEvent;
 import com.integration.bot.model.event.UserCountCheckEvent;
 import com.integration.bot.model.map.Tank;
 import com.integration.bot.service.BotService;
-import com.integration.bot.model.dto.RequestBotDto;
+import com.integration.bot.model.dto.BotDto;
 import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
@@ -77,10 +77,10 @@ public abstract class BaseBot {
      */
     private boolean deadFlag = false;
 
-    BaseBot(RequestBotDto requestBotDto) {
-        this.name = requestBotDto.getName();
-        this.roomId = requestBotDto.getRoomId();
-        this.teamType = requestBotDto.getTeamType();
+    BaseBot(BotDto botDto) {
+        this.name = botDto.getName();
+        this.roomId = botDto.getRoomId();
+        this.teamType = botDto.getTeamType();
         connect();
         if (isDead()) {
             return;

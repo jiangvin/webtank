@@ -1,6 +1,6 @@
 package com.integration.bot.model;
 
-import com.integration.bot.model.dto.RequestBotDto;
+import com.integration.bot.model.dto.BotDto;
 import com.integration.bot.model.map.Tank;
 import com.integration.dto.map.ActionType;
 import com.integration.dto.map.MapUnitType;
@@ -22,8 +22,8 @@ import java.util.Random;
  */
 
 public class SimpleBot extends BaseBot {
-    public SimpleBot(RequestBotDto requestBotDto) {
-        super(requestBotDto);
+    public SimpleBot(BotDto botDto) {
+        super(botDto);
     }
 
     /**
