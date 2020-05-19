@@ -1,8 +1,9 @@
 package com.integration.socket.interceptor;
 
 import com.integration.socket.service.OnlineUserService;
-import com.integration.util.exception.ExceptionUtil;
+import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -41,11 +42,11 @@ public class WebSocketHandshakeInterceptor extends HttpSessionHandshakeIntercept
 
         final String name = servletRequest.getParameter("name");
         if (StringUtils.isEmpty(name)) {
-            throw new ExceptionUtil.BadRequestException(ExceptionUtil.Type.INVALID_USER_NAME);
+            throw new CustomException("can not find username!", HttpStatus.UNAUTHORIZED);
         }
 
         if (onlineUserService.exists(name)) {
-            throw new ExceptionUtil.ForbiddenException(ExceptionUtil.Type.USER_NAME_ALREADY_EXISTS);
+            throw new CustomException("username already exists!", HttpStatus.BAD_REQUEST);
         }
         return super.beforeHandshake(request, response, webSocketHandler, attributes);
     }
