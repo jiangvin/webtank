@@ -60,6 +60,7 @@
         //item
         loadAnimationImage("item_star", this.images, 2);
         loadAnimationImage("item_shield", this.images, 2);
+        loadAnimationImage("item_red_star", this.images, 2);
 
         //map unit
         loadAnimationImage("bullet", this.images, 4);

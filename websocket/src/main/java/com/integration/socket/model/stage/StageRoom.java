@@ -441,6 +441,13 @@ public class StageRoom extends BaseStage {
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return true;
+            case RED_STAR:
+                if (!tankBo.levelUpToTop()) {
+                    return false;
+                }
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return true;
             case SHIELD:
                 tankBo.setShieldTimeout(tankBo.getShieldTimeout() + DEFAULT_SHIELD_TIME);
                 itemMap.remove(itemBo.getPosKey());

@@ -20,7 +20,7 @@
             Common.getRequest('/user/checkName?name=' + name, function () {
                 //先设定为暂停
                 Status.setStatus(Status.getStatusPause(), "等待连接中...");
-
+                Common.addConnectTimeoutEvent();
                 //开始连接
                 Common.stompConnect(name, function () {
                     updateAfterConnect(name, isTouch);
@@ -42,7 +42,6 @@
                         "orientation": tankLogo.orientation,
                         "action": tankLogo.action
                     }, "CLIENT_READY");
-                Common.addConnectTimeoutEvent();
             }, 50);
             game.addMessageEvent("SERVER_READY", function () {
                 if (Status.getStatusValue() !== Status.getStatusPause()) {

@@ -86,6 +86,14 @@ public class TankBo {
         return !this.tankId.equals(this.userId);
     }
 
+    public boolean levelUpToTop() {
+        boolean levelUp = false;
+        while (levelUp()) {
+            levelUp = true;
+        }
+        return levelUp;
+    }
+
     public boolean levelUp() {
         if (type.getUpId() == null) {
             return false;
