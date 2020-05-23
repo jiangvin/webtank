@@ -118,7 +118,7 @@ public class TankBo {
             return null;
         }
 
-        if (reloadTime != 0) {
+        if (reloadTime > 0) {
             return null;
         }
 

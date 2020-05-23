@@ -110,7 +110,7 @@ public class SimpleBot extends BaseBot {
     }
 
     private void updateFire(Tank tank) {
-        if (tank.getBulletCount() != 0 && tank.getReloadTime() == 0) {
+        if (tank.getBulletCount() != 0 && tank.getReloadTime() <= 0) {
             sendMessage(new MessageDto(tank.getId(), MessageType.UPDATE_TANK_FIRE));
             tank.setReloadTime(COMMON_RELOAD_TIME);
         }
