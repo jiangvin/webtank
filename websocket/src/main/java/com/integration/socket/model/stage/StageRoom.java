@@ -130,7 +130,7 @@ public class StageRoom extends BaseStage {
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             if (tankBo.isBot()) {
-                return;
+                continue;
             }
             this.tankTypeSaveMap.put(tankBo.getUserId(), tankBo.getType());
         }
