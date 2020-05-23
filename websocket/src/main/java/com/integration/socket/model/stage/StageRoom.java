@@ -592,13 +592,13 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        if (mapUnitType == MapUnitType.RED_KING) {
+        if (mapUnitType == MapUnitType.RED_KING && bulletBo.getTeamType() != TeamType.RED) {
             removeMap(key);
             processGameOver(TeamType.BLUE);
             return;
         }
 
-        if (mapUnitType == MapUnitType.BLUE_KING) {
+        if (mapUnitType == MapUnitType.BLUE_KING && bulletBo.getTeamType() != TeamType.BLUE) {
             removeMap(key);
             processGameOver(TeamType.RED);
         }
@@ -620,21 +620,26 @@ public class StageRoom extends BaseStage {
         }
         sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
 
-        if (!processNextMap) {
+        if (processNextMap && !mapManger.loadNextMap()) {
             return;
         }
 
-        if (!mapManger.loadNextMap()) {
+        if (!processNextMap && !mapManger.reload()) {
             return;
         }
 
         init();
         long loadTimeoutSeconds = 10;
-        long cleanMapTimeoutSeconds = 6;
-        this.pauseMessage = "正在加载下一张地图...";
-        sendMessageToRoom("10秒后加载下一张地图...", MessageType.SYSTEM_MESSAGE);
-        for (int i = 1; i < loadTimeoutSeconds; ++i) {
-            String content = String.format("%d秒后加载下一张地图...", i);
+        long cleanMapTimeoutSeconds = 8;
+        this.pauseMessage = "正在加载地图...";
+        String tips;
+        if (processNextMap) {
+            tips = "进入下一关";
+        } else {
+            tips = "重新开始本关";
+        }
+        for (int i = 1; i <= loadTimeoutSeconds; ++i) {
+            String content = String.format("%d秒后%s...", i, tips);
             MessageEvent messageEvent = new MessageEvent(content, MessageType.SYSTEM_MESSAGE);
             messageEvent.setTimeout((loadTimeoutSeconds - i) * 60);
             this.eventList.add(messageEvent);
@@ -649,7 +654,7 @@ public class StageRoom extends BaseStage {
         changeTitle.setTimeout(cleanMapTimeoutSeconds * 60);
         this.eventList.add(changeTitle);
 
-        //加载新地图
+        //加载地图
         LoadMapEvent loadEvent = new LoadMapEvent();
         loadEvent.setTimeout(loadTimeoutSeconds * 60);
         this.eventList.add(loadEvent);
