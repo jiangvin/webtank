@@ -48,6 +48,12 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!-- 引入资源依赖类-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

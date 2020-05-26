@@ -180,7 +180,7 @@ public abstract class BaseStage {
 
     void sendTankToRoom(TankBo tankBo, String note) {
         tankBo.refreshSyncTime();
-        sendMessageToRoom(Collections.singletonList(tankBo.convertToDto()), MessageType.TANKS, note);
+        sendMessageToRoom(Collections.singletonList(tankBo.toDto()), MessageType.TANKS, note);
     }
 
     void sendMessageToUser(Object object, MessageType messageType, String username) {
@@ -211,7 +211,7 @@ public abstract class BaseStage {
         TankBo tank = tankMap.get(tankId);
         tankMap.remove(tank.getTankId());
         removeTankExtension(tank);
-        sendMessageToRoom(tank.convertToDto(), MessageType.REMOVE_TANK);
+        sendMessageToRoom(tank.toDto(), MessageType.REMOVE_TANK);
     }
 
     /**

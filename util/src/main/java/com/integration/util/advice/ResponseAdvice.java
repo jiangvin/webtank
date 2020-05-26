@@ -1,4 +1,4 @@
-package com.integration.bot.advice;
+package com.integration.util.advice;
 
 import com.integration.util.model.ResultDto;
 import org.springframework.core.MethodParameter;
@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  * @description
  * @date 2020/5/1
  */
-@ControllerAdvice("com.integration.bot.controller")
+@ControllerAdvice("com")
 public class ResponseAdvice implements ResponseBodyAdvice<Object> {
     @Override
     public boolean supports(@NonNull MethodParameter returnType,

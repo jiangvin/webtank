@@ -13,7 +13,8 @@ function Item(params) {
         screenPoint: {},         //屏幕坐标
         speed: 0,
         action: 0,              //动作,0是停,1是走
-        orientation: 0,			//当前定位方向,0-3 上下左右
+        orientation: 0,         //当前定位方向,0-3 上下左右
+        hasShield: false,       //是否有护盾
 
         //动画相关
         play: null,
@@ -72,6 +73,39 @@ function Item(params) {
             item.image.width / item.image.widthPics, item.image.height / item.image.heightPics,
             item.screenPoint.x - displayWidth / 2, item.screenPoint.y - displayHeight / 2,
             displayWidth, displayHeight);
+
+        drawShield(item,context);
+    };
+
+    const drawShield = function (item,context) {
+        if (!item.hasShield) {
+            return;
+        }
+
+        if (!item.play || item.play.isFinish()) {
+            item.play = new Play(1, 15,
+                function () {
+                    item.play.shieldFrame = (item.play.shieldFrame + 1) % 4;
+                }, function () {
+                    this.frames = 1;
+                });
+            item.play.shieldFrame = 0;
+        }
+        if (item.play.shieldFrame === undefined) {
+            return;
+        }
+
+        const image = Resource.getImage("shield");
+        const displayWidth = image.width / image.widthPics;
+        const displayHeight = image.height / image.heightPics;
+
+        context.globalAlpha = 0.7;
+        context.drawImage(image,
+            item.play.shieldFrame * image.width / image.widthPics, 0,
+            image.width / image.widthPics, image.height / image.heightPics,
+            item.screenPoint.x - displayWidth / 2, item.screenPoint.y - displayHeight / 2,
+            displayWidth, displayHeight);
+        context.globalAlpha = 1.0;
     };
 
     const drawTeam = function (item, context) {

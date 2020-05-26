@@ -52,23 +52,9 @@ public class StageRoom extends BaseStage {
 
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
 
-    public StageRoom(RoomDto roomDto, MapMangerBo mapManger, MessageService messageService) {
-        super(messageService);
-        this.roomId = roomDto.getRoomId();
-        this.creator = roomDto.getCreator();
-        this.mapManger = mapManger;
-        init();
-    }
+    private static final int DEFAULT_SHIELD_TIME = 20 * 60;
 
-    public RoomDto convertToDto() {
-        RoomDto roomDto = new RoomDto();
-        roomDto.setRoomId(getRoomId());
-        roomDto.setCreator(getCreator());
-        roomDto.setMapId(getMapId());
-        roomDto.setRoomType(getRoomType());
-        roomDto.setUserCount(getUserCount());
-        return roomDto;
-    }
+    private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
 
     private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
 
@@ -95,13 +81,37 @@ public class StageRoom extends BaseStage {
      */
     private List<TankBo> syncTankList = new ArrayList<>();
 
+    /**
+     * 在通关后记录玩家属性
+     */
+    private Map<String, TankTypeBo> tankTypeSaveMap = new ConcurrentHashMap<>();
+
     @Getter
     private String roomId;
 
     @Getter
     private String creator;
 
+    public StageRoom(RoomDto roomDto, MapMangerBo mapManger, MessageService messageService) {
+        super(messageService);
+        this.roomId = roomDto.getRoomId();
+        this.creator = roomDto.getCreator();
+        this.mapManger = mapManger;
+        init();
+    }
+
+    public RoomDto convertToDto() {
+        RoomDto roomDto = new RoomDto();
+        roomDto.setRoomId(getRoomId());
+        roomDto.setCreator(getCreator());
+        roomDto.setMapId(getMapId());
+        roomDto.setRoomType(getRoomType());
+        roomDto.setUserCount(getUserCount());
+        return roomDto;
+    }
+
     private void init() {
+        saveTankType();
         this.tankMap.clear();
         this.bulletMap.clear();
         this.itemMap.clear();
@@ -113,6 +123,17 @@ public class StageRoom extends BaseStage {
         this.syncBulletList.clear();
 
         this.eventList.add(new CreateItemEvent());
+    }
+
+    private void saveTankType() {
+        this.tankTypeSaveMap.clear();
+        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
+            TankBo tankBo = kv.getValue();
+            if (tankBo.isBot()) {
+                continue;
+            }
+            this.tankTypeSaveMap.put(tankBo.getUserId(), tankBo.getType());
+        }
     }
 
     private String getMapId() {
@@ -174,8 +195,8 @@ public class StageRoom extends BaseStage {
         syncBullets();
     }
 
-    private void addSyncList(TankBo tankBo) {
-        if (System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TANK_TIME) {
+    private void addSyncList(TankBo tankBo, boolean forceUpdate) {
+        if (forceUpdate || System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TANK_TIME) {
             syncTankList.add(tankBo);
         }
     }
@@ -187,7 +208,7 @@ public class StageRoom extends BaseStage {
 
         List<ItemDto> dtoList = new ArrayList<>();
         for (TankBo tank : syncTankList) {
-            dtoList.add(tank.convertToDto());
+            dtoList.add(tank.toDto());
             tank.refreshSyncTime();
         }
         sendMessageToRoom(dtoList, MessageType.TANKS);
@@ -342,54 +363,98 @@ public class StageRoom extends BaseStage {
      * @param tankBo
      */
     private void updateTank(TankBo tankBo) {
+        boolean needUpdate = false;
+
+        //填装弹药计算
         if (tankBo.getReloadTime() > 0) {
             tankBo.setReloadTime(tankBo.getReloadTime() - 1);
-        }
-
-        if (tankBo.getActionType() == ActionType.STOP) {
-            return;
-        }
-
-        for (String key : tankBo.getGridKeyList()) {
-            CollideType type = collideWithAll(tankBo, key);
-            if (type != CollideType.COLLIDE_NONE) {
-                tankBo.setActionType(ActionType.STOP);
-                sendTankToRoom(tankBo, type.toString());
+            if (tankBo.getReloadTime() == 0) {
+                needUpdate = true;
             }
         }
 
-        catchItem(tankBo);
-        tankBo.run(tankBo.getType().getSpeed());
-        refreshTankGridMap(tankBo);
-        addSyncList(tankBo);
+        //护盾计算
+        if (tankBo.getShieldTimeout() > 0) {
+            tankBo.setShieldTimeout(tankBo.getShieldTimeout() - 1);
+            if (!tankBo.hasShield()) {
+                needUpdate = true;
+            }
+        }
+
+        //移动计算
+        if (tankBo.getActionType() == ActionType.RUN) {
+            boolean canRun = true;
+            //障碍物检测
+            for (String key : tankBo.getGridKeyList()) {
+                CollideType type = collideWithAll(tankBo, key);
+                if (type != CollideType.COLLIDE_NONE) {
+                    tankBo.setActionType(ActionType.STOP);
+                    sendTankToRoom(tankBo, type.toString());
+                    //已经发送了一次，重置标识
+                    needUpdate = false;
+                    canRun = false;
+                    break;
+                }
+            }
+
+            if (canRun) {
+                if (catchItem(tankBo)) {
+                    needUpdate = true;
+                }
+                tankBo.run(tankBo.getType().getSpeed());
+                refreshTankGridMap(tankBo);
+            }
+        }
+
+        addSyncList(tankBo, needUpdate);
     }
 
-    private void catchItem(TankBo tankBo) {
+    private boolean catchItem(TankBo tankBo) {
+        if (!canCatchItem(tankBo)) {
+            return false;
+        }
+
         for (String key : tankBo.getGridKeyList()) {
             if (!itemMap.containsKey(key)) {
-                return;
+                continue;
             }
 
             ItemBo itemBo = itemMap.get(key);
             double distance = Point.distance(tankBo.getX(), tankBo.getY(), itemBo.getPos().x, itemBo.getPos().y);
             if (distance <= CommonUtil.UNIT_SIZE) {
-                catchItem(tankBo, itemBo);
+                return catchItem(tankBo, itemBo);
             }
         }
+        return false;
     }
 
-    private void catchItem(TankBo tankBo, ItemBo itemBo) {
+    private boolean canCatchItem(TankBo tankBo) {
+        return getRoomType() != RoomType.PVE || tankBo.getTankId().equals(tankBo.getUserId());
+    }
+
+    private boolean catchItem(TankBo tankBo, ItemBo itemBo) {
         switch (itemBo.getType()) {
             case STAR:
                 if (!tankBo.levelUp()) {
-                    return;
+                    return false;
                 }
-                sendTankToRoom(tankBo);
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
-                break;
+                return true;
+            case RED_STAR:
+                if (!tankBo.levelUpToTop()) {
+                    return false;
+                }
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return true;
+            case SHIELD:
+                tankBo.setShieldTimeout(tankBo.getShieldTimeout() + DEFAULT_SHIELD_TIME);
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return true;
             default:
-                break;
+                return false;
         }
     }
 
@@ -430,11 +495,13 @@ public class StageRoom extends BaseStage {
         TankBo tankBo = collideWithTanks(bullet);
         if (tankBo != null) {
             addRemoveBulletIds(bullet.getId());
-            if (tankBo.levelDown()) {
-                sendTankToRoom(tankBo);
-            } else {
-                sendTankBombMessage(tankBo);
-                removeTankFromTankId(tankBo.getTankId());
+            if (!tankBo.hasShield()) {
+                if (tankBo.levelDown()) {
+                    sendTankToRoom(tankBo);
+                } else {
+                    sendTankBombMessage(tankBo);
+                    removeTankFromTankId(tankBo.getTankId());
+                }
             }
             return true;
         }
@@ -472,7 +539,7 @@ public class StageRoom extends BaseStage {
                 continue;
             }
             double distance = Point.distance(tankBo.getX(), tankBo.getY(), bulletBo.getX(), bulletBo.getY());
-            double minDistance = (CommonUtil.AMMO_SIZE + CommonUtil.UNIT_SIZE) / 2.0;
+            double minDistance = CommonUtil.UNIT_SIZE / 2.0;
             if (distance <= minDistance) {
                 return tankBo;
             }
@@ -532,13 +599,13 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        if (mapUnitType == MapUnitType.RED_KING) {
+        if (mapUnitType == MapUnitType.RED_KING && bulletBo.getTeamType() != TeamType.RED) {
             removeMap(key);
             processGameOver(TeamType.BLUE);
             return;
         }
 
-        if (mapUnitType == MapUnitType.BLUE_KING) {
+        if (mapUnitType == MapUnitType.BLUE_KING && bulletBo.getTeamType() != TeamType.BLUE) {
             removeMap(key);
             processGameOver(TeamType.RED);
         }
@@ -560,21 +627,26 @@ public class StageRoom extends BaseStage {
         }
         sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
 
-        if (!processNextMap) {
+        if (processNextMap && !mapManger.loadNextMap()) {
             return;
         }
 
-        if (!mapManger.loadNextMap()) {
+        if (!processNextMap && !mapManger.reload()) {
             return;
         }
 
         init();
         long loadTimeoutSeconds = 10;
-        long cleanMapTimeoutSeconds = 6;
-        this.pauseMessage = "正在加载下一张地图...";
-        sendMessageToRoom("10秒后加载下一张地图...", MessageType.SYSTEM_MESSAGE);
-        for (int i = 1; i < loadTimeoutSeconds; ++i) {
-            String content = String.format("%d秒后加载下一张地图...", i);
+        long cleanMapTimeoutSeconds = 8;
+        this.pauseMessage = "正在加载地图...";
+        String tips;
+        if (processNextMap) {
+            tips = "进入下一关";
+        } else {
+            tips = "重新开始本关";
+        }
+        for (int i = 1; i <= loadTimeoutSeconds; ++i) {
+            String content = String.format("%d秒后%s...", i, tips);
             MessageEvent messageEvent = new MessageEvent(content, MessageType.SYSTEM_MESSAGE);
             messageEvent.setTimeout((loadTimeoutSeconds - i) * 60);
             this.eventList.add(messageEvent);
@@ -589,7 +661,7 @@ public class StageRoom extends BaseStage {
         changeTitle.setTimeout(cleanMapTimeoutSeconds * 60);
         this.eventList.add(changeTitle);
 
-        //加载新地图
+        //加载地图
         LoadMapEvent loadEvent = new LoadMapEvent();
         loadEvent.setTimeout(loadTimeoutSeconds * 60);
         this.eventList.add(loadEvent);
@@ -818,12 +890,24 @@ public class StageRoom extends BaseStage {
         tankBo.setTankId(tankId);
         tankBo.setUserId(userBo.getUsername());
         tankBo.setTeamType(userBo.getTeamType());
-        tankBo.setType(getTankType(lifeMap));
+
+        //设定类型
+        TankTypeBo initType = getTankType(lifeMap);
+        TankTypeBo saveType = this.tankTypeSaveMap.get(userBo.getUsername());
+        if (saveType != null) {
+            tankBo.setType(saveType);
+            this.tankTypeSaveMap.remove(userBo.getUsername());
+        } else {
+            tankBo.setType(initType);
+        }
+
+        if (!tankBo.isBot()) {
+            tankBo.setShieldTimeout(DEFAULT_SHIELD_TIME_FOR_NEW_TANK);
+        }
         setStartPoint(tankBo);
         tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
         tankMap.put(tankBo.getTankId(), tankBo);
 
-        //即将向所有人同步信息
         sendTankToRoom(tankBo);
     }
 
@@ -873,7 +957,7 @@ public class StageRoom extends BaseStage {
     private List<ItemDto> getTankList() {
         List<ItemDto> tankDtoList = new ArrayList<>();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            tankDtoList.add(kv.getValue().convertToDto());
+            tankDtoList.add(kv.getValue().toDto());
         }
         return tankDtoList;
     }

@@ -38,7 +38,7 @@
 
         let rightCenterX = centerX * 7;
         let rightCenterY = centerY;
-        let rightRadius = radius * .5;
+        let rightRadius = radius * .6;
 
         if (centerX - radius < 20) {
             rightCenterX -= 20;
@@ -59,13 +59,13 @@
         this.controlMode.minRadius = radius / 3;
         this.controlMode.maxRadius = radius * 1.5;
 
-        this.controlMode.rightCenterX = rightCenterX - rightRadius * .4;
-        this.controlMode.rightCenterY = rightCenterY + rightRadius * .6;
+        this.controlMode.rightCenterX = rightCenterX;
+        this.controlMode.rightCenterY = rightCenterY;
         this.controlMode.rightRadius = rightRadius;
 
-        this.controlMode.hornCenterX = rightCenterX + rightRadius;
-        this.controlMode.hornCenterY = rightCenterY - rightRadius * .8;
-        this.controlMode.hornRadius = rightRadius * .7;
+        this.controlMode.hornCenterX = rightCenterX + rightRadius * 1.1;
+        this.controlMode.hornCenterY = rightCenterY - rightRadius;
+        this.controlMode.hornRadius = rightRadius * .4;
 
         this.controlMode.portrait = isPortrait;
     };

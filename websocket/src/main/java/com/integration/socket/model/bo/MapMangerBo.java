@@ -40,4 +40,13 @@ public class MapMangerBo {
         this.loadedMapIds.add(mapBo.getMapId());
         return true;
     }
+
+    public boolean reload() {
+        MapBo mapBo = mapService.loadMap(loadedMapIds.get(loadedMapIds.size() - 1), roomType);
+        if (mapBo == null) {
+            return false;
+        }
+        this.mapBo = mapBo;
+        return true;
+    }
 }

@@ -16,7 +16,7 @@ public class CreateItemEvent extends BaseEvent {
     }
 
     public void resetTimeout() {
-        refreshTimeout += 10;
+        refreshTimeout += 5;
         Random random = new Random();
         setTimeout((random.nextInt(refreshTimeout) + refreshTimeout) * 60);
     }

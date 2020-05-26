@@ -1,10 +1,13 @@
 package com.integration.bot.controller;
 
+import com.integration.bot.model.dto.BotDto;
 import com.integration.bot.service.BotService;
-import com.integration.bot.model.dto.RequestBotDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author 蒋文龙(Vin)
@@ -12,14 +15,22 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/5/15
  */
 
-@RestController("/")
+@Controller("/")
 public class MainController {
     @Autowired
     private BotService botService;
 
+    @GetMapping("/")
+    public ModelAndView tankGame() {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("index");
+        return mav;
+    }
+
     @PostMapping("requestBot")
-    public boolean requestBot(RequestBotDto requestBotDto) {
-        botService.createBot(requestBotDto);
+    @ResponseBody
+    public boolean requestBot(BotDto botDto) {
+        botService.createBot(botDto);
         return true;
     }
 }

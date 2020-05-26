@@ -9,7 +9,30 @@
         this.stompClient = null;
 
         this.username = null;
+
+        this.scale = null;
     }
+
+    Resource.getScale = function () {
+        return this.scale;
+    };
+
+    Resource.calculateScale = function (d1, d2) {
+        let width;
+        let height;
+        if (d1 > d2) {
+            width = d1;
+            height = d2;
+        } else {
+            width = d2;
+            height = d1;
+        }
+        let scaleX = width / 800;
+        let scaleY = height / 500;
+        this.scale = scaleX > scaleY ? scaleY : scaleX;
+        this.scale = this.scale < 1 ? this.scale : 1;
+        return this.scale;
+    };
 
     Resource.getImages = function () {
         if (this.images) {
@@ -30,12 +53,17 @@
             loadAnimationImage(id, this.images, 4);
         }
 
+        //animation
+        loadAnimationImage("shield", this.images, 4);
+        loadAnimationImage("bomb", this.images, 6);
+
         //item
         loadAnimationImage("item_star", this.images, 2);
+        loadAnimationImage("item_shield", this.images, 2);
+        loadAnimationImage("item_red_star", this.images, 2);
 
         //map unit
         loadAnimationImage("bullet", this.images, 4);
-        loadAnimationImage("bomb", this.images, 6);
         loadAnimationImage("brick", this.images, 2);
         loadAnimationImage("iron", this.images, 2);
         loadAnimationImage("river", this.images, 2);
