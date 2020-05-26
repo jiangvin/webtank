@@ -21,7 +21,7 @@ export default class Resource {
         return "generateClientId=" + Resource.instance.itemId++;
     }
 
-    static calculateScale(d1,d2) {
+    static calculateScale(d1, d2) {
         let width;
         let height;
         if (d1 > d2) {
