@@ -4,9 +4,9 @@
  * @date 2020/5/26
  */
 
-import Root from "../../share/js/root.js"
-import Resource from "../../share/js/tool/resource.js";
-import Menu from "../../share/js/stage/menu.js";
+import Root from "../share/root.js"
+import Resource from "../share/tool/resource.js";
+import Menu from "../share/stage/menu.js";
 
 export default class Index {
     constructor() {

@@ -6,7 +6,7 @@
 
 import Stage from "./stage.js";
 import Resource from "../tool/resource.js";
-import Button from "../stage/button.js"
+import Button from "./button.js"
 
 export default class Menu extends Stage {
     constructor() {

@@ -67,7 +67,7 @@ export default class Resource {
             if (!type) {
                 type = "png";
             }
-            img.src = 'share/image/' + id + '.' + type;
+            img.src = 'image/' + id + '.' + type;
             img.widthPics = widthPics;
             img.heightPics = heightPics;
             img.displayWidth = img.width / img.widthPics;
