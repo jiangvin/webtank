@@ -24,6 +24,12 @@ export default class Main {
     }
 
     restart() {
+        //设置缩放比例
+        const scale = Resource.calculateScale(canvas.width,canvas.height);
+        canvas.width = canvas.width / scale;
+        canvas.height = canvas.height / scale;
+
+        
         const root = this.root;
         setInterval(function () {
             root.update();
