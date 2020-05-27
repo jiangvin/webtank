@@ -13,7 +13,6 @@ export default class Main {
     constructor() {
         this.aniId = 0;
         this.root = Resource.getRoot();
-        this.root.addStage(new Menu());
         this.restart();
 
         wx.getUserInfo({
@@ -30,6 +29,8 @@ export default class Main {
         const scale = Resource.calculateScale(canvas.width,canvas.height);
         canvas.width = canvas.width / scale;
         canvas.height = canvas.height / scale;
+
+        this.root.addStage(new Menu());
 
         //计算层
         const root = this.root;

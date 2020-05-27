@@ -5,24 +5,38 @@
  */
 import Item from './item.js'
 import Resource from "../tool/resource.js";
+import ControlUnit from "./controlunit.js";
 
 export default class Button extends Item {
-    constructor(text, xScale, yScale) {
+    constructor(text, x, y, callBack) {
         super();
 
         this.text = text;
-        this.xScale = xScale;
-        this.yScale = yScale;
+        this.x = x;
+        this.y = y;
+
+        this.generateControlUnit(callBack);
+    }
+
+    generateControlUnit(callBack) {
+        const leftTop = {};
+        const rightBottom = {};
+        leftTop.x = this.x - 284 / 2;
+        leftTop.y = this.y - 72 / 2;
+        rightBottom.x = this.x + 284 / 2;
+        rightBottom.y = this.y + 72 / 2;
+        this.controlUnit = new ControlUnit(
+            Resource.generateClientId(),
+            leftTop,
+            rightBottom,
+            callBack);
     }
 
     draw(ctx) {
-
         //按钮框
-        const x = Resource.width() * this.xScale;
-        const y = Resource.height() * this.yScale;
         const buttonImage = Resource.getImage("button");
-        const offsetX = x - buttonImage.width / 2;
-        const offsetY = y - buttonImage.height / 2;
+        const offsetX = this.x - buttonImage.width / 2;
+        const offsetY = this.y - buttonImage.height / 2;
         ctx.drawImage(buttonImage,
             0, 0,
             buttonImage.width, buttonImage.height,
@@ -34,6 +48,6 @@ export default class Button extends Item {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#fff';
-        ctx.fillText(this.text, x, y);
+        ctx.fillText(this.text, this.x, this.y);
     }
 }

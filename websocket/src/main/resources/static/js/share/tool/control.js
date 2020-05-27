@@ -23,13 +23,11 @@ export default class Control {
             document.addEventListener('touchstart', function (e) {
                 const touchPoint = Control.getTouchPoint(e.touches[e.touches.length - 1]);
                 Resource.getRoot().pointDownEvent(touchPoint);
-                Common.addMessage(touchPoint.x + ":" + touchPoint.y);
             })
         } else {
             document.addEventListener('click', function (e) {
                 const touchPoint = Control.getTouchPoint(e);
                 Resource.getRoot().pointDownEvent(touchPoint);
-                Common.addMessage(touchPoint.x + ":" + touchPoint.y);
             })
         }
     }

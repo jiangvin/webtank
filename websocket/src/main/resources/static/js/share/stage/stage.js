@@ -26,7 +26,7 @@ export default class Stage {
     }
 
     pointDownEvent(point) {
-        for (let [,value] of this.controlUnits) {
+        for (let [, value] of this.controlUnits) {
             if (value.process(point)) {
                 break;
             }
@@ -40,10 +40,16 @@ export default class Stage {
     createItem(draw) {
         const item = new Item();
         item.draw = draw;
-        this.items.set(Resource.generateClientId(),item);
+        this.items.set(Resource.generateClientId(), item);
     }
 
     addItem(item) {
-        this.items.set(Resource.generateClientId(),item);
+        this.items.set(Resource.generateClientId(), item);
+    }
+
+    addButton(button) {
+        this.addItem(button);
+        const controlUnit = button.controlUnit;
+        this.controlUnits.set(controlUnit.id, controlUnit);
     }
 }
