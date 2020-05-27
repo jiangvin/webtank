@@ -64,6 +64,15 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
+            <!--for jooq generate code-->
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <configuration>
+                    <configurationFile>src/main/resources/jooq-codegen-config.xml</configurationFile>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

@@ -35,6 +35,7 @@ export default class Index {
 
         //绘制
         const draw = function () {
+            index.ctx.clearRect(0, 0, Resource.width(), Resource.height());
             root.draw(index.ctx);
             root.drawHandler = requestAnimationFrame(draw);
         };

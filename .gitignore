@@ -2,3 +2,4 @@
 **/target/**
 **.iml
 **/.mvn/**
+/websocket/src/main/resources/jooq-codegen-config.xml
