@@ -22,13 +22,24 @@ export default class Menu extends Stage {
                 Resource.width(), Resource.height());
         });
 
+        //标题
+        this.createItem(function (context) {
+            context.font = 'bold 55px Helvetica';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillStyle = '#FFF';
+            context.fillText('坦克世界', Resource.width() / 2, Resource.height() * .11);
+        });
+
         //名字
         this.createItem(function (ctx) {
             ctx.font = '30px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = '#fff';
-            ctx.fillText('你的名字: ' + Resource.getUser().username, Resource.width() / 2, 45);
+            ctx.fillText(Resource.getUser().username,
+                Resource.width() / 2,
+                Resource.height() * .2);
         });
 
         //按钮

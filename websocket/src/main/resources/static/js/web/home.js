@@ -43,7 +43,11 @@ export default class Home extends Stage {
                 return;
             }
 
-
-        }
+            Resource.setUsername(name);
+            $('#input-name-div').css("visibility", "hidden");
+            Common.nextStage();
+        };
+        $('#button1').bind('click', buttonEvent);
+        $('#button2').bind('click', buttonEvent);
     }
 }

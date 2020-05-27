@@ -6,6 +6,7 @@
 
 import Resource from "../share/tool/resource.js";
 import Home from "../web/home.js"
+import Menu from "../share/stage/menu.js";
 
 export default class Index {
     constructor() {
@@ -15,6 +16,7 @@ export default class Index {
 
         this.root = Resource.getRoot();
         this.root.addStage(new Home());
+        this.root.addStage(new Menu());
 
         this.start();
     }
