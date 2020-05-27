@@ -1,4 +1,3 @@
-
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -16,21 +15,25 @@ export default class Home extends Stage {
 
         //背景
         const bgImage = Resource.getImage("background_loading");
-        this.createItem(function (ctx) {
-            ctx.drawImage(bgImage,
-                0, 0,
-                bgImage.width, bgImage.height,
-                0, 0,
-                Resource.width(), Resource.height());
+        this.createItem({
+            draw: function (ctx) {
+                ctx.drawImage(bgImage,
+                    0, 0,
+                    bgImage.width, bgImage.height,
+                    0, 0,
+                    Resource.width(), Resource.height());
+            }
         });
 
         //标题
-        this.createItem(function (context) {
-            context.font = 'bold 55px Helvetica';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillStyle = '#FFF';
-            context.fillText('坦克世界', Resource.width() / 2, 40);
+        this.createItem({
+            draw: function (context) {
+                context.font = 'bold 55px Helvetica';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillStyle = '#FFF';
+                context.fillText('坦克世界', Resource.width() / 2, 40);
+            }
         });
 
         //绑定事件

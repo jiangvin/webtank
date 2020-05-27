@@ -15,32 +15,38 @@ export default class Menu extends Stage {
 
         //背景
         const bgImage = Resource.getImage("background_menu");
-        this.createItem(function (ctx) {
-            ctx.drawImage(bgImage,
-                0, 0,
-                bgImage.width, bgImage.height,
-                0, 0,
-                Resource.width(), Resource.height());
+        this.createItem({
+            draw: function (ctx) {
+                ctx.drawImage(bgImage,
+                    0, 0,
+                    bgImage.width, bgImage.height,
+                    0, 0,
+                    Resource.width(), Resource.height());
+            }
         });
 
         //标题
-        this.createItem(function (context) {
-            context.font = 'bold 55px Helvetica';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillStyle = '#FFF';
-            context.fillText('坦克世界', Resource.width() / 2, Resource.height() * .11);
+        this.createItem({
+            draw: function (context) {
+                context.font = 'bold 55px Helvetica';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillStyle = '#FFF';
+                context.fillText('坦克世界', Resource.width() / 2, Resource.height() * .11);
+            }
         });
 
         //名字
-        this.createItem(function (ctx) {
-            ctx.font = '30px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#fff';
-            ctx.fillText(Resource.getUser().username,
-                Resource.width() / 2,
-                Resource.height() * .2);
+        this.createItem({
+            draw: function (ctx) {
+                ctx.font = '30px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#fff';
+                ctx.fillText(Resource.getUser().username,
+                    Resource.width() / 2,
+                    Resource.height() * .2);
+            }
         });
 
         //按钮

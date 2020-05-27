@@ -35,12 +35,10 @@ export default class Stage {
 
     /**
      * 创建元素
-     * @param draw
      */
-    createItem(draw) {
-        const item = new Item();
-        item.draw = draw;
-        this.items.set(Resource.generateClientId(), item);
+    createItem(options) {
+        const item = new Item(options);
+        this.items.set(item.id, item);
     }
 
     createOrUpdateItem(draw, id) {
