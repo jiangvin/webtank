@@ -12,13 +12,14 @@ let ctx = canvas.getContext('2d');
  */
 export default class Main {
     constructor() {
-        this.aniId = 0;
-        this.restart();
+        const thisMain = this;
 
         //获取微信用户信息
         wx.getUserInfo({
             success: function(res) {
                 Resource.setUsername(res.userInfo.nickName);
+                thisMain.aniId = 0;
+                thisMain.restart();
             }
         })
     }
