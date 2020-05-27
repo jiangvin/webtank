@@ -1,7 +1,7 @@
 import Menu from "../share/stage/menu";
 import Resource from '../share/tool/resource'
 import Control from "../share/tool/control";
-import Loading from "../share/stage/loading";
+import Room from "../share/stage/room";
 
 Resource.setCanvas(canvas);
 let ctx = canvas.getContext('2d');
@@ -34,7 +34,7 @@ export default class Main {
 
         this.root = Resource.getRoot();
         this.root.addStage(new Menu());
-        this.root.addStage(new Loading());
+        this.root.addStage(new Room());
 
         //计算层
         const root = this.root;

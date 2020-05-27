@@ -3,15 +3,15 @@
  * @description
  * @date 2020/5/27
  */
-
-import Stage from "./stage.js";
+import stage from "./stage.js";
 import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
 
-
-export default class Loading extends Stage {
+export default class room extends stage {
     constructor() {
         super();
+
+        this.roomId = null;
 
         //背景
         const bgImage = Resource.getImage("background_loading");
@@ -25,7 +25,6 @@ export default class Loading extends Stage {
 
         //文字
         this.missionNum = 0;
-        this.updateMissionNum(0);
     }
 
     updateMissionNum(num) {
@@ -39,5 +38,8 @@ export default class Loading extends Stage {
         this.createOrUpdateItem(function (ctx) {
             Common.drawTitle(ctx, "MISSION " + displayNum);
         }, "title");
+        Common.getRequest("/user/getMapFromIndex?roomType=PVE&index=" + this.missionNum, function () {
+
+        })
     }
 }

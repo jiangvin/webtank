@@ -28,7 +28,32 @@ export default class Common {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
         ctx.fillText(message, Resource.width() / 2, Resource.height() * .4);
+    }
 
+    static getRequest(url, callBack) {
+        try {
+            const xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState !== 4) {
+                    return;
+                }
+                if (xmlHttp.status !== 200) {
+                    Common.addMessage(xmlHttp.responseText, "#ff0000");
+                    return;
+                }
+
+                const result = JSON.parse(xmlHttp.responseText);
+                if (result.success) {
+                    callBack(result.data);
+                } else {
+                    Common.addMessage(result.message, "#ff0000");
+                }
+            };
+            xmlHttp.open("GET", encodeURI(url), true); // true for asynchronous
+            xmlHttp.send(null);
+        } catch (e) {
+            Common.addMessage(e, "#ff0000");
+        }
     }
 }
 

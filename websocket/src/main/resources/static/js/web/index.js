@@ -3,12 +3,13 @@
  * @description 网页端入口
  * @date 2020/5/26
  */
+import './libs/jquery.js'
 
 import Resource from "../share/tool/resource.js";
 import Home from "../web/home.js"
 import Menu from "../share/stage/menu.js";
 import Control from "../share/tool/control.js";
-import Loading from "../share/stage/loading.js";
+import Room from "../share/stage/room.js"
 
 export default class Index {
     constructor() {
@@ -19,7 +20,7 @@ export default class Index {
         this.root = Resource.getRoot();
         this.root.addStage(new Home());
         this.root.addStage(new Menu());
-        this.root.addStage(new Loading());
+        this.root.addStage(new Room());
 
         this.start();
     }
