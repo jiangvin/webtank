@@ -91,10 +91,10 @@ public class UserController {
         return MapEditDto.convert(mapDao.queryFromId(id));
     }
 
-    @GetMapping("/getMapFromIndex")
-    public MapDto getMapFromIndex(@RequestParam(value = "index") int index,
-                                  @RequestParam(value = "roomType") RoomType roomType) {
-        return mapService.loadMapFromIndex(index, roomType).convertToDto();
+    @GetMapping("/getMapFromId")
+    public MapDto getMapFromId(@RequestParam(value = "id") String id,
+                               @RequestParam(value = "roomType") RoomType roomType) {
+        return mapService.loadMap(id, roomType).convertToDto();
     }
 
     @GetMapping("/getBotAddress")

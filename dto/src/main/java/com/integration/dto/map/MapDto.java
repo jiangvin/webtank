@@ -20,6 +20,7 @@ public class MapDto {
     private Integer playerLife;
     private Integer computerLife;
     private String mapId;
+    private String mapName;
     private List<ItemDto> itemList;
 
     public static MapDto convert(String key, MapUnitType type) {

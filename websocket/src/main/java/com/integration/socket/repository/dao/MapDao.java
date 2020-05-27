@@ -22,10 +22,6 @@ public class MapDao extends BaseDao {
         return create.selectFrom(MAP).where(MAP.ID.eq(id)).fetchOne();
     }
 
-    public MapRecord queryFromIndex(int start) {
-        return create.selectFrom(MAP).orderBy(DSL.length(MAP.DATA)).limit(start, 1).fetchOne();
-    }
-
     public void insertMap(String id, String secret, String data) {
         create.insertInto(MAP)
         .set(MAP.ID, id)

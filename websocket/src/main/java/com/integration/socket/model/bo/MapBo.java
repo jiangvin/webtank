@@ -35,6 +35,8 @@ public class MapBo {
 
     private String mapId;
 
+    private String mapName;
+
     private ConcurrentHashMap<String, Integer> playerLife = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<String, Integer> computerLife = new ConcurrentHashMap<>();
@@ -50,6 +52,7 @@ public class MapBo {
         mapDto.setWidth(getWidth());
         mapDto.setHeight(getHeight());
         mapDto.setMapId(getMapId());
+        mapDto.setMapName(getMapName());
         List<ItemDto> itemList = new ArrayList<>();
         for (Map.Entry<String, MapUnitType> kv : getUnitMap().entrySet()) {
             ItemDto item = new ItemDto();

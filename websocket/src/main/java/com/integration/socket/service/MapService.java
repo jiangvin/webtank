@@ -61,10 +61,6 @@ public class MapService {
         return loadMap(nextMapId, roomType);
     }
 
-    public MapBo loadMapFromIndex(int index, RoomType roomType) {
-        return loadMap(mapDao.queryFromIndex(index), roomType);
-    }
-
     private MapBo loadMap(MapRecord record, RoomType roomType) {
         if (record == null) {
             throw new CustomException("找不到地图资源!");
@@ -76,6 +72,8 @@ public class MapService {
 
         MapBo mapBo = readFile(content);
         mapBo.setMapId(record.getId());
+        mapBo.setMapName(record.getName());
+
         //根据类型调整数据
         if (roomType == RoomType.PVP) {
             mapBo.duplicatePlayer();
