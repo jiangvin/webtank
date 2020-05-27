@@ -237,24 +237,6 @@ function Game() {
             text += ' / 房间人数:' + _users.length;
         }
         context.fillText(text, 10, Common.height() - 5);
-
-        //是否显示蒙蔽
-        if (Status.getShowMask()) {
-            //先盖一层蒙版
-            context.globalAlpha = 0.5;
-            context.fillStyle = '#000000';
-            context.fillRect(0, 0, Common.width(), Common.height());
-            context.globalAlpha = 1;
-        }
-
-        //是否显示提示信息
-        if (Status.getMessage()) {
-            context.font = 'bold 55px Helvetica';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillStyle = '#FFF';
-            context.fillText(Status.getMessage(), Common.width() / 2, Common.height() * .4);
-        }
     };
     //触屏提示圆
     this.drawTouchCycle = function (context) {

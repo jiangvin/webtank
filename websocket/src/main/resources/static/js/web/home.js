@@ -15,7 +15,7 @@ export default class Home extends Stage {
         super();
 
         //背景
-        const bgImage = Resource.getImage("background_web");
+        const bgImage = Resource.getImage("background_loading");
         this.createItem(function (ctx) {
             ctx.drawImage(bgImage,
                 0, 0,

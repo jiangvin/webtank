@@ -43,6 +43,16 @@ export default class Stage {
         this.items.set(Resource.generateClientId(), item);
     }
 
+    createOrUpdateItem(draw, id) {
+        if (this.items.has(id)) {
+            this.items.get(id).draw = draw;
+        } else {
+            const item = new Item();
+            item.draw = draw;
+            this.items.set(id, item);
+        }
+    }
+
     addItem(item) {
         this.items.set(Resource.generateClientId(), item);
     }

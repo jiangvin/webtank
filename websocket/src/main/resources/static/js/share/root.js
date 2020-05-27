@@ -6,6 +6,8 @@
 
 import Frame from './tool/frame.js'
 import Resource from './tool/resource.js'
+import Status from "./tool/status.js";
+import Common from "./tool/common.js";
 
 export default class Root {
     constructor() {
@@ -43,6 +45,7 @@ export default class Root {
         this.currentStage().draw(ctx);
         this.drawMessage(ctx);
         this.drawTips(ctx);
+        this.drawStatus(ctx);
     }
 
     currentStage() {
@@ -52,6 +55,19 @@ export default class Root {
     nextStage() {
         if (this.stageIndex < this.stages.length - 1) {
             ++this.stageIndex;
+        }
+    }
+
+    drawStatus(ctx) {
+        if (Status.getShowMask()) {
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, Resource.width(), Resource.height());
+            ctx.globalAlpha = 1;
+        }
+
+        if (Status.getMessage()) {
+            Common.drawTitle(Status.getMessage());
         }
     }
 

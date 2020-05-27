@@ -1,20 +1,21 @@
 import Menu from "../share/stage/menu";
 import Resource from '../share/tool/resource'
 import Control from "../share/tool/control";
+import Loading from "../share/stage/loading";
 
 Resource.setCanvas(canvas);
 let ctx = canvas.getContext('2d');
 
 
 /**
- * 游戏主函数
+ * 游戏主函数，微信端入口
  */
 export default class Main {
     constructor() {
         this.aniId = 0;
-        this.root = Resource.getRoot();
         this.restart();
 
+        //获取微信用户信息
         wx.getUserInfo({
             success: function(res) {
                 Resource.setUsername(res.userInfo.nickName);
@@ -30,7 +31,9 @@ export default class Main {
         canvas.width = canvas.width / scale;
         canvas.height = canvas.height / scale;
 
+        this.root = Resource.getRoot();
         this.root.addStage(new Menu());
+        this.root.addStage(new Loading());
 
         //计算层
         const root = this.root;
