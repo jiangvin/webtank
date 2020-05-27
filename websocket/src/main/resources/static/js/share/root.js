@@ -93,6 +93,6 @@ export default class Root {
     }
 
     pointDownEvent(point) {
-
+        this.currentStage().pointDownEvent(point);
     }
 }

@@ -10,6 +10,7 @@ import Resource from "../tool/resource.js";
 export default class Stage {
     constructor() {
         this.items = new Map();
+        this.controlUnits = new Map();
     }
 
     update() {
@@ -22,6 +23,14 @@ export default class Stage {
         this.items.forEach(function (item) {
             item.draw(ctx);
         });
+    }
+
+    pointDownEvent(point) {
+        for (let [,value] of this.controlUnits) {
+            if (value.process(point)) {
+                break;
+            }
+        }
     }
 
     /**
