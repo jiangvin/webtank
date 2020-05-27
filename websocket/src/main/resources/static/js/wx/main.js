@@ -1,4 +1,3 @@
-import Root from '../share/root'
 import Menu from "../share/stage/menu";
 import Resource from '../share/tool/resource'
 
@@ -12,7 +11,7 @@ let ctx = canvas.getContext('2d');
 export default class Main {
     constructor() {
         this.aniId = 0;
-        this.root = new Root();
+        this.root = Resource.getRoot();
         this.root.addStage(new Menu());
         this.restart();
 
@@ -29,7 +28,7 @@ export default class Main {
         canvas.width = canvas.width / scale;
         canvas.height = canvas.height / scale;
 
-        
+
         const root = this.root;
         setInterval(function () {
             root.update();

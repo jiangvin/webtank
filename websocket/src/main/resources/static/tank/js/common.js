@@ -13,13 +13,6 @@ let _canvas;
 Common.getCanvas = function () {
     if (!_canvas) {
         _canvas = document.getElementById("canvas");
-
-        //自动跟随窗口变化
-        //先手动调用一次，再绑定事件
-        Common.windowChange();
-        window.addEventListener("resize", function () {
-            Common.windowChange();
-        });
     }
     return _canvas;
 };
@@ -32,33 +25,6 @@ Common.height = function () {
 Common.windowChange = function () {
     const width = document.documentElement.clientWidth;
     const height = document.documentElement.clientHeight;
-    const scale = Resource.calculateScale(width, height);
-
-    const newWidth = width / scale;
-    const newHeight = height / scale;
-    let style = "";
-    //变形的中心点为左上角
-    style += "-webkit-transform-origin: 0 0;";
-    style += "transform-origin: 0 0;";
-    if (width >= height) {
-        // 横屏
-        style += "width:" + newWidth + "px;";
-        style += "height:" + newHeight + "px;";
-        style += "-webkit-transform: rotate(0) scale(" + scale + ");";
-        style += "transform: rotate(0) scale(" + scale + ");";
-        _canvas.width = newWidth;
-        _canvas.height = newHeight;
-    } else {
-        // 竖屏
-        style += "width:" + newHeight + "px;";
-        style += "height:" + newWidth + "px;";
-        style += "-webkit-transform: rotate(90deg) scale(" + scale + ") translate(0px," + -newWidth + "px);";
-        style += "transform: rotate(90deg) scale(" + scale + ") translate(0px," + -newWidth + "px);";
-        _canvas.width = newHeight;
-        _canvas.height = newWidth;
-    }
-    let wrapper = document.getElementById("wrapper");
-    wrapper.style.cssText = style;
     Control.generateTouchModeInfo(height > width);
 };
 

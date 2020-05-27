@@ -4,12 +4,14 @@
  * @date 2020/5/25
  */
 
+import Root from "../root.js"
 import User from "./user.js"
 
 export default class Resource {
     static instance = new Resource();
 
     constructor() {
+        this.root = new Root();
         this.canvas = null;
         this.images = new Map();
         this.user = new User();
@@ -19,6 +21,10 @@ export default class Resource {
 
     static generateClientId() {
         return "generateClientId=" + Resource.instance.itemId++;
+    }
+
+    static getRoot() {
+        return Resource.instance.root;
     }
 
     static calculateScale(d1, d2) {

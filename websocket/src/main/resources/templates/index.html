@@ -6,18 +6,19 @@
     <meta name="viewport" content="width=device-width,maximum-scale=1.0,viewport-fit=cover,user-scalable=no">
     <title th:text="${name}"></title>
     <link rel="shortcut icon" href="tank/image/favicon.png">
-    <link rel="stylesheet" type="text/css" href="tank/css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 
 <body>
 <div id="wrapper">
     <canvas id="canvas">页面显示异常,请联系作者(WX: Jiang_Vin)</canvas>
-<!--    <input id="input" type="text" placeholder="请输入名字" class="input-name"/>-->
-<!--    <button id="button1" class="connect" style="LEFT: 34.5%;">键盘控制</button>-->
-<!--    <button id="button2" class="connect" style="LEFT: 50.5%;">触屏控制</button>-->
+    <div id="input-name">
+        <input id="input" type="text" placeholder="请输入名字" class="input-name"/>
+        <button id="button1" class="connect" style="top: 150px;">键盘控制</button>
+        <button id="button2" class="connect" style="top: 225px;">触屏控制</button>
+    </div>
 <!--    <div class="select-window" id="room-list" style="visibility: hidden;"></div>-->
 </div>
-<!--<script src="jquery.js"></script>-->
 <!--<script src="sockjs.js"></script>-->
 <!--<script src="stomp.js"></script>-->
 <!--<script src="tank/js/resource.js"></script>-->
@@ -32,6 +33,7 @@
 <!--<script src="tank/js/menu.js"></script>-->
 <!--<script src="tank/js/room.js"></script>-->
 <!--<script src="tank/js/index.js"></script>-->
+<script src="/js/web/libs/jquery.js"></script>
 <script type="module" src="/js/web/index.js"></script>
 </body>
 </html>

@@ -4,9 +4,8 @@
  * @date 2020/5/26
  */
 
-import Root from "../share/root.js"
 import Resource from "../share/tool/resource.js";
-import Menu from "../share/stage/menu.js";
+import Home from "../web/home.js"
 
 export default class Index {
     constructor() {
@@ -14,8 +13,8 @@ export default class Index {
         Resource.setCanvas(this.canvas);
         this.ctx = this.canvas.getContext('2d');
 
-        this.root = new Root();
-        this.root.addStage(new Menu());
+        this.root = Resource.getRoot();
+        this.root.addStage(new Home());
 
         this.start();
     }

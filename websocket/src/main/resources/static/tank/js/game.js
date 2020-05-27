@@ -122,9 +122,6 @@ function Game() {
             const stage = thisGame.currentStage();
             stage.draw(_context);
 
-            //聊天信息
-            thisGame.drawMessage(_context);
-
             //触控板信息 - 触控模式
             thisGame.drawTouchCycle(_context);
 
@@ -158,28 +155,6 @@ function Game() {
         message.context = context;
         message.color = color;
         _messages.unshift(message); //塞在头部
-    };
-    this.drawMessage = function (context) {
-        let height = Common.height() - 40;
-        context.font = '16px Helvetica';
-        context.textAlign = 'left';
-        context.textBaseline = 'bottom';
-        _messages.forEach(function (message) {
-            if (message.lifetime > 0) {
-                message.lifetime -= 1;
-            }
-            context.globalAlpha = (message.lifetime / 300);
-            context.fillStyle = message.color;
-            context.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context, 25, height);
-            height -= 18;
-        });
-
-        context.globalAlpha = 1;
-
-        //消息全部过期，清除
-        if (_messages.length !== 0 && _messages[0].lifetime <= 0) {
-            _messages = [];
-        }
     };
 
     //事件类
