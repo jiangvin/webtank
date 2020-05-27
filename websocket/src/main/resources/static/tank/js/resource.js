@@ -86,23 +86,6 @@
         if (id === "tankMenu") {
             return Common.getRandomTankImage();
         }
-
-        const images = Resource.getImages();
-        if (!images.has(id)) {
-            widthPics = widthPics ? widthPics : 1;
-            heightPics = heightPics ? heightPics : 1;
-            const img = document.createElement('img');
-            if (!type) {
-                type = "png";
-            }
-            img.src = 'tank/image/' + id + '.' + type;
-            img.widthPics = widthPics;
-            img.heightPics = heightPics;
-            img.displayWidth = img.width / img.widthPics;
-            img.displayHeight = img.height / img.heightPics;
-            images.set(id, img);
-        }
-        return images.get(id);
     };
 
     Resource.getGame = function () {
