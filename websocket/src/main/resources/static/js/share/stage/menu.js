@@ -45,7 +45,7 @@ export default class Menu extends Stage {
 
         //按钮
         this.addButton(new Button("单人游戏", Resource.width() * 0.5, Resource.height() * 0.35, function () {
-            Common.addMessage("功能开发中，敬请期待！");
+            Common.nextStage();
         }));
         this.addButton(new Button("多人游戏", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
             Common.addMessage("功能开发中，敬请期待！");

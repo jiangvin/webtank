@@ -5,7 +5,6 @@
  */
 
 import Resource from "./resource.js";
-import Status from "./status";
 
 export default class Common {
     constructor() {
@@ -19,12 +18,16 @@ export default class Common {
         Resource.getRoot().nextStage();
     }
 
+    static addTimeEvent(eventType, callBack, timeout, ignoreLog) {
+        Resource.getRoot().addTimeEvent(eventType, callBack, timeout, ignoreLog);
+    }
+
     static drawTitle(ctx, message) {
         ctx.font = 'bold 55px Helvetica';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
-        ctx.fillText(message, Resource.width() / 2,Resource.height() * .4);
+        ctx.fillText(message, Resource.width() / 2, Resource.height() * .4);
 
     }
 }

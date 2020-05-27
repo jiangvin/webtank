@@ -18,7 +18,18 @@ export default class Root {
         this.stageIndex = 0;
 
         this.messages = [];
+
+        this.timeEvents = [];
     }
+
+    addTimeEvent(eventType, callBack, timeout, ignoreLog) {
+        const event = {};
+        event.eventType = eventType;
+        event.callback = callBack;
+        event.timeout = timeout ? timeout : 100; //默认100帧倒计时，不到1.5秒
+        event.ignoreLog = ignoreLog;
+        this.timeEvents.push(event);
+    };
 
     addStage(stage) {
         this.stages[this.stages.length] = stage;
@@ -37,7 +48,25 @@ export default class Root {
 
     update() {
         this.backendFrame.calculate();
+        this.updateEvents();
         this.currentStage().update();
+    }
+
+    updateEvents() {
+        for (let i = 0; i < this.timeEvents.length; ++i) {
+            const event = this.timeEvents[i];
+            if (event.timeout > 0) {
+                --event.timeout;
+            } else {
+                if (event.ignoreLog !== true) {
+                    console.log("process time event:" + event.eventType);
+                }
+                event.callback();
+                //删除事件
+                this.timeEvents.splice(i, 1);
+                --i;
+            }
+        }
     }
 
     draw(ctx) {
