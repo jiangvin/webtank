@@ -61,18 +61,21 @@ public class MapService {
         return loadMap(nextMapId, roomType);
     }
 
-    public MapBo loadMap(String mapId, RoomType roomType) {
-        MapRecord record = mapDao.queryFromId(mapId);
+    public MapBo loadMapFromIndex(int index, RoomType roomType) {
+        return loadMap(mapDao.queryFromIndex(index), roomType);
+    }
+
+    private MapBo loadMap(MapRecord record, RoomType roomType) {
         if (record == null) {
             throw new CustomException("找不到地图资源!");
         }
-        String content = mapDao.queryFromId(mapId).getData();
+        String content = record.getData();
         if (StringUtils.isEmpty(content)) {
             throw new CustomException("找不到地图资源!");
         }
 
         MapBo mapBo = readFile(content);
-        mapBo.setMapId(mapId);
+        mapBo.setMapId(record.getId());
         //根据类型调整数据
         if (roomType == RoomType.PVP) {
             mapBo.duplicatePlayer();
@@ -82,6 +85,10 @@ public class MapService {
             mapBo.removeMapUnit(MapUnitType.BLUE_KING);
         }
         return mapBo;
+    }
+
+    public MapBo loadMap(String mapId, RoomType roomType) {
+        return loadMap(mapDao.queryFromId(mapId), roomType);
     }
 
     public void saveMap(MapEditDto mapEditDto) {

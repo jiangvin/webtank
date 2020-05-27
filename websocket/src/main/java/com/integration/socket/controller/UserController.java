@@ -1,7 +1,9 @@
 package com.integration.socket.controller;
 
+import com.integration.dto.map.MapDto;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
+import com.integration.dto.room.RoomType;
 import com.integration.socket.model.dto.MapEditDto;
 import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.repository.dao.MapDao;
@@ -87,6 +89,12 @@ public class UserController {
     @GetMapping("/getMap/{id}")
     public MapEditDto getMap(@PathVariable(value = "id") String id) {
         return MapEditDto.convert(mapDao.queryFromId(id));
+    }
+
+    @GetMapping("/getMapFromIndex")
+    public MapDto getMapFromIndex(@RequestParam(value = "index") int index,
+                                  @RequestParam(value = "roomType") RoomType roomType) {
+        return mapService.loadMapFromIndex(index, roomType).convertToDto();
     }
 
     @GetMapping("/getBotAddress")
