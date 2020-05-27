@@ -49,7 +49,7 @@ export default class Common {
                     Common.addMessage(result.message, "#ff0000");
                 }
             };
-            xmlHttp.open("GET", encodeURI(url), true); // true for asynchronous
+            xmlHttp.open("GET", Resource.getHost() + encodeURI(url), true); // true for asynchronous
             xmlHttp.send(null);
         } catch (e) {
             Common.addMessage(e, "#ff0000");

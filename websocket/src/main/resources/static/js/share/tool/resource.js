@@ -17,6 +17,7 @@ export default class Resource {
         this.user = new User();
         this.itemId = 1;
         this.scale = 1;
+        this.host = "http://localhost"
     }
 
     static generateClientId() {
@@ -29,6 +30,10 @@ export default class Resource {
 
     static getScale() {
         return Resource.instance.scale;
+    }
+
+    static getHost() {
+        return Resource.instance.host;
     }
 
     static calculateScale(d1, d2) {
