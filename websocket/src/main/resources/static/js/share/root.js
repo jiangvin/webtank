@@ -4,10 +4,13 @@
  * @date 2020/5/25
  */
 
+import './libs/stomp.js'
+import './libs/sockjs.js'
+
 import Frame from './tool/frame.js'
 import Resource from './tool/resource.js'
-import Status from "./tool/status.js";
-import Common from "./tool/common.js";
+import Status from "./tool/status.js"
+import Common from "./tool/common.js"
 
 export default class Root {
     constructor() {
