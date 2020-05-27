@@ -8,6 +8,7 @@
 import Resource from "../share/tool/resource.js";
 import Stage from "../share/stage/stage.js"
 import Common from "../share/tool/common.js";
+import Control from "../share/tool/control.js";
 
 export default class Home extends Stage {
     constructor() {
@@ -35,13 +36,15 @@ export default class Home extends Stage {
         //绑定事件
         const buttonEvent = function (e) {
             const name = $('#input').val();
-            const isTouch = e.currentTarget.id === "button2";
 
             //检测是否输入名字
             if (name === "") {
                 Common.addMessage("名字不能为空!", "#ff0000");
                 return;
             }
+
+            const isTouch = e.currentTarget.id === "button2";
+            Control.setControlMode(isTouch);
 
             Resource.setUsername(name);
             $('#input-name-div').css("visibility", "hidden");

@@ -28,31 +28,6 @@ Common.windowChange = function () {
     Control.generateTouchModeInfo(height > width);
 };
 
-//操控相关
-Common.getTouchPoint = function (eventPoint) {
-    let x = eventPoint.clientX;
-    let y = eventPoint.clientY;
-
-    //缩放处理
-    const scale = Resource.getScale();
-
-    const touchPoint = {};
-    if (Control.getControlMode().portrait) {
-        //竖屏
-        touchPoint.x = y;
-        touchPoint.y = Common.height() * scale - x;
-    } else {
-        //横屏
-        touchPoint.x = x;
-        touchPoint.y = y;
-    }
-
-    touchPoint.x /= scale;
-    touchPoint.y /= scale;
-
-    return touchPoint;
-};
-
 let _context;
 Common.getContext = function () {
     if (!_context) {

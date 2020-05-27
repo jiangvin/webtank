@@ -7,6 +7,7 @@
 import Resource from "../share/tool/resource.js";
 import Home from "../web/home.js"
 import Menu from "../share/stage/menu.js";
+import Control from "../share/tool/control.js";
 
 export default class Index {
     constructor() {
@@ -76,6 +77,7 @@ export default class Index {
         }
         let wrapper = document.getElementById("wrapper");
         wrapper.style.cssText = style;
+        Control.setPortrait(height > width);
     }
 }
 

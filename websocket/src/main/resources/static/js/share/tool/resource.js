@@ -27,6 +27,10 @@ export default class Resource {
         return Resource.instance.root;
     }
 
+    static getScale() {
+        return Resource.instance.scale;
+    }
+
     static calculateScale(d1, d2) {
         let width;
         let height;

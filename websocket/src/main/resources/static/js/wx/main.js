@@ -1,5 +1,6 @@
 import Menu from "../share/stage/menu";
 import Resource from '../share/tool/resource'
+import Control from "../share/tool/control";
 
 Resource.setCanvas(canvas);
 let ctx = canvas.getContext('2d');
@@ -23,22 +24,23 @@ export default class Main {
     }
 
     restart() {
+        Control.setControlMode(true);
+
         //设置缩放比例
         const scale = Resource.calculateScale(canvas.width,canvas.height);
         canvas.width = canvas.width / scale;
         canvas.height = canvas.height / scale;
 
-
+        //计算层
         const root = this.root;
         setInterval(function () {
             root.update();
         }, 17);
 
+        //渲染层
         this.bindLoop = this.loop.bind(this);
-
         // 清除上一局的动画
         window.cancelAnimationFrame(this.aniId);
-
         this.aniId = window.requestAnimationFrame(
             this.bindLoop,
             canvas

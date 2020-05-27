@@ -91,4 +91,8 @@ export default class Root {
         let text = '帧率:' + this.frontFrame.frames + '-' + this.backendFrame.frames;
         ctx.fillText(text, 10, Resource.height() - 5);
     }
+
+    pointDownEvent(point) {
+
+    }
 }
