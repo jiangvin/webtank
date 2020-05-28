@@ -33,30 +33,15 @@ export default class Stage {
         }
     }
 
-    /**
-     * 创建元素
-     */
     createItem(options) {
         const item = new Item(options);
+        item.stage = this;
         this.items.set(item.id, item);
-    }
-
-    createOrUpdateItem(draw, id) {
-        if (this.items.has(id)) {
-            this.items.get(id).draw = draw;
-        } else {
-            const item = new Item();
-            item.draw = draw;
-            this.items.set(id, item);
-        }
-    }
-
-    addItem(item) {
-        this.items.set(Resource.generateClientId(), item);
+        return item;
     }
 
     addButton(button) {
-        this.addItem(button);
+        this.items.set(Resource.generateClientId(), button);
         const controlUnit = button.controlUnit;
         this.controlUnits.set(controlUnit.id, controlUnit);
     }

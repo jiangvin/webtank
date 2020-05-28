@@ -38,49 +38,8 @@
         if (this.images) {
             return this.images;
         }
-
-        this.images = new Map();
-
-
-        //load all tank images
-        for (let i = 1; i <= 12; ++i) {
-            let id;
-            if (i < 10) {
-                id = "tank0" + i;
-            } else {
-                id = "tank" + i;
-            }
-            loadAnimationImage(id, this.images, 4);
-        }
-
-        //animation
-        loadAnimationImage("shield", this.images, 4);
-        loadAnimationImage("bomb", this.images, 6);
-
-        //item
-        loadAnimationImage("item_star", this.images, 2);
-        loadAnimationImage("item_shield", this.images, 2);
-        loadAnimationImage("item_red_star", this.images, 2);
-
-        //map unit
-        loadAnimationImage("bullet", this.images, 4);
-        loadAnimationImage("brick", this.images, 2);
-        loadAnimationImage("iron", this.images, 2);
-        loadAnimationImage("river", this.images, 2);
-        loadAnimationImage("red_king", this.images, 2);
-        loadAnimationImage("blue_king", this.images, 2);
-        return this.images;
     };
 
-    const loadAnimationImage = function (imageId, images, widthPics) {
-        const img = document.createElement('img');
-        img.src = 'tank/image/' + imageId + '.png';
-        img.widthPics = widthPics;
-        img.heightPics = 1;
-        img.displayWidth = img.width / img.widthPics;
-        img.displayHeight = img.height / img.heightPics;
-        images.set(imageId, img);
-    };
 
     Resource.getImage = function (id, type, widthPics, heightPics) {
         if (id === "tankMenu") {

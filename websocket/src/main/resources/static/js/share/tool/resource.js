@@ -17,7 +17,48 @@ export default class Resource {
         this.user = new User();
         this.itemId = 1;
         this.scale = 1;
-        this.host = "http://localhost"
+        this.host = "http://localhost";
+        this.initImage();
+    }
+
+    initImage() {
+        //load all tank images
+        for (let i = 1; i <= 12; ++i) {
+            let id;
+            if (i < 10) {
+                id = "tank0" + i;
+            } else {
+                id = "tank" + i;
+            }
+            this.loadAnimationImage(id, 4);
+        }
+
+        //animation
+        this.loadAnimationImage("shield", 4);
+        this.loadAnimationImage("bomb", 6);
+
+        //item
+        this.loadAnimationImage("item_star", 2);
+        this.loadAnimationImage("item_shield", 2);
+        this.loadAnimationImage("item_red_star", 2);
+
+        //map unit
+        this.loadAnimationImage("bullet", 4);
+        this.loadAnimationImage("brick", 2);
+        this.loadAnimationImage("iron", 2);
+        this.loadAnimationImage("river", 2);
+        this.loadAnimationImage("red_king", 2);
+        this.loadAnimationImage("blue_king", 2);
+    }
+
+    loadAnimationImage(imageId, widthPics) {
+        const img = document.createElement('img');
+        img.src = 'image/' + imageId + '.png';
+        img.widthPics = widthPics;
+        img.heightPics = 1;
+        img.displayWidth = img.width / img.widthPics;
+        img.displayHeight = img.height / img.heightPics;
+        this.images.set(imageId, img);
     }
 
     static generateClientId() {
@@ -91,4 +132,8 @@ export default class Resource {
         }
         return images.get(id);
     }
+
+    static getUnitSize = function () {
+        return 36;
+    };
 }
