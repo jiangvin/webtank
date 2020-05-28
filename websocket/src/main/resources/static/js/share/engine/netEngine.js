@@ -3,22 +3,28 @@
  * @description
  * @date 2020/5/28
  */
+
 import Engine from "./engine.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
+import Adapter from "../tool/adapter.js";
 
 export default class NetEngine extends Engine {
     constructor(room) {
         super(room);
-
-        this.stompClient = null;
+        
+        const thisEngine = this;
+        
         //连接超时调用
-        Common.addConnectTimeoutEvent(function () {
-            Common.lastStage();
-        });
-        this.setUserId(function () {
+        // Common.addConnectTimeoutEvent(function () {
+        //     Common.lastStage();
+        // });
 
+        thisEngine.setUserId(function () {
+            Adapter.socketConnect(Resource.getUser().userId, function () {
+
+            })
         })
     }
 
@@ -30,23 +36,23 @@ export default class NetEngine extends Engine {
     }
 
     stompConnect(name, callback) {
-        const socket = new SockJS(encodeURI('/websocket-simple?name=' + name));
-        const thisEngine = this;
-        thisEngine.stompClient = Stomp.over(socket);
-        thisEngine.stompClient.connect({}, function (frame) {
-            Common.addMessage("网络连接中: " + frame, "#ffffff");
+        // const socket = new SockJS(encodeURI(Resource.getHost() + '/websocket-simple?name=' + name));
+        // const thisEngine = this;
+        // thisEngine.stompClient = Stomp.over(socket);
+        // thisEngine.stompClient.connect({}, function (frame) {
+        //     Common.addMessage("网络连接中: " + frame, "#ffffff");
+        //
+        //     // 客户端订阅消息, 公共消息和私有消息
+        //     thisEngine.stompClient.subscribe('/topic/send', function (response) {
+        //         Resource.getRoot().receiveStompMessage(JSON.parse(response.body));
+        //     });
+        //     thisEngine.stompClient.subscribe('/user/queue/send', function (response) {
+        //         Resource.getRoot().receiveStompMessage(JSON.parse(response.body));
+        //     });
 
-            // 客户端订阅消息, 公共消息和私有消息
-            thisEngine.stompClient.subscribe('/topic/send', function (response) {
-                Resource.getRoot().receiveStompMessage(JSON.parse(response.body));
-            });
-            thisEngine.stompClient.subscribe('/user/queue/send', function (response) {
-                Resource.getRoot().receiveStompMessage(JSON.parse(response.body));
-            });
-
-            thisEngine.addConnectCheckEvent();
-            callback();
-        });
+            // thisEngine.addConnectCheckEvent();
+            // callback();
+        // });
     }
 
     /**

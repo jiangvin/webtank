@@ -2,7 +2,7 @@ import Menu from "../share/stage/menu";
 import Resource from '../share/tool/resource'
 import Control from "../share/tool/control";
 import Room from "../share/stage/room";
-
+import Adapter from "../share/tool/adapter";
 Resource.setCanvas(canvas);
 let ctx = canvas.getContext('2d');
 
@@ -25,6 +25,7 @@ export default class Main {
     }
 
     restart() {
+        Adapter.setPlatform(1);
         Control.setControlMode(true);
 
         //设置缩放比例
