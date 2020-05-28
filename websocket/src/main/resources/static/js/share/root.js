@@ -23,6 +23,8 @@ export default class Root {
         this.messages = [];
 
         this.timeEvents = [];
+
+        this.aiEngine = null;
     }
 
     addTimeEvent(eventType, callBack, timeout, ignoreLog) {
@@ -52,7 +54,15 @@ export default class Root {
     update() {
         this.backendFrame.calculate();
         this.updateEvents();
+        this.updateAiEngine();
         this.currentStage().update();
+    }
+
+    updateAiEngine() {
+        if (!this.aiEngine) {
+            return;
+        }
+        this.aiEngine.update();
     }
 
     updateEvents() {
