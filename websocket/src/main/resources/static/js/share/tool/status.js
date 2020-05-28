@@ -30,6 +30,10 @@ export default class Status {
         return Status.instance.message;
     }
 
+    static getValue() {
+        return Status.instance.value;
+    }
+
     static statusNormal() {
         return "normal";
     }

@@ -7,6 +7,7 @@ import stage from "./stage.js";
 import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
 import Play from "./play.js";
+import Status from "../tool/status.js";
 
 export default class room extends stage {
     constructor() {
@@ -16,9 +17,9 @@ export default class room extends stage {
         this.roomInfo.mapId = 1;
         this.roomInfo.roomType = "PVE";
         this.size = {};
-        this.view = {x: 0, y: 0};
+        this.view = {x: 0, y: 0, center: null};
 
-        this.backgroundImage = Resource.getImage("background","jpg");
+        this.backgroundImage = Resource.getImage("background", "jpg");
 
         this.mask = true;
         this.maskImage = Resource.getImage("background_loading");
@@ -42,6 +43,56 @@ export default class room extends stage {
             thisRoom.mask = false;
         })
     }
+
+    update() {
+        this.updateView();
+        super.update();
+    }
+
+    updateView() {
+        if (!this.size.width || !this.size.height) {
+            return;
+        }
+
+        if (Status.getValue() !== Status.statusNormal()) {
+            return;
+        }
+
+        let updateX = false;
+        let updateY = false;
+        if (this.size.width < Resource.width()) {
+            updateX = true;
+            this.view.x = (this.size.width - Resource.width()) / 2;
+        }
+        if (this.size.height < Resource.height()) {
+            updateY = true;
+            this.view.y = (this.size.height - Resource.height()) / 2;
+        }
+
+        if ((updateX && updateY) || !this.view.center) {
+            return;
+        }
+
+        if (!updateX) {
+            this.view.x = this.view.center.x - Resource.width() / 2;
+            if (this.view.x < 0) {
+                this.view.x = 0;
+            }
+            if (this.view.x > this.size.width - Resource.width()) {
+                this.view.x = this.size.width - Resource.width()
+            }
+        }
+
+        if (!updateY) {
+            this.view.y = this.view.center.y - Resource.height() / 2;
+            if (this.view.y < 0) {
+                this.view.y = 0;
+            }
+            if (this.view.y > this.size.height - Resource.height()) {
+                this.view.y = this.size.height - Resource.height()
+            }
+        }
+    };
 
     draw(ctx) {
         //每秒排序一次

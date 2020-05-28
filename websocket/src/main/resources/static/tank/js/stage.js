@@ -167,48 +167,7 @@ function Stage(params) {
     };
 
     this.updateView = function () {
-        if (!this.size.width || !this.size.height) {
-            return;
-        }
 
-        if (Status.getStatusValue() === Status.getStatusPause()) {
-            return;
-        }
-
-        let updateX = false;
-        let updateY = false;
-        if (this.size.width < Common.width()) {
-            updateX = true;
-            this.view.x = (this.size.width - Common.width()) / 2;
-        }
-        if (this.size.height < Common.height()) {
-            updateY = true;
-            this.view.y = (this.size.height - Common.height()) / 2;
-        }
-
-        if ((updateX && updateY) || !this.view.center) {
-            return;
-        }
-
-        if (!updateX) {
-            this.view.x = this.view.center.x - Common.width() / 2;
-            if (this.view.x < 0) {
-                this.view.x = 0;
-            }
-            if (this.view.x > this.size.width - Common.width()) {
-                this.view.x = this.size.width - Common.width()
-            }
-        }
-
-        if (!updateY) {
-            this.view.y = this.view.center.y - Common.height() / 2;
-            if (this.view.y < 0) {
-                this.view.y = 0;
-            }
-            if (this.view.y > this.size.height - Common.height()) {
-                this.view.y = this.size.height - Common.height()
-            }
-        }
     };
 
     this.update = function () {

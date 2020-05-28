@@ -55,6 +55,14 @@ export default class Common {
             Common.addMessage(e, "#ff0000");
         }
     }
+
+    static width() {
+        return Resource.width();
+    }
+
+    static height() {
+        return Resource.height();
+    }
 }
 
 Date.prototype.format = function (fmt) {
