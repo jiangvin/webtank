@@ -5,7 +5,7 @@
  */
 import Item from './item.js'
 import Resource from "../tool/resource.js";
-import ControlUnit from "./controlunit.js";
+import ControlUnit from "./controlUnit.js";
 
 export default class Button extends Item {
     constructor(text, x, y, callBack) {

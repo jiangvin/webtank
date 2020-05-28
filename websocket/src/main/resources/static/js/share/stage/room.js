@@ -38,7 +38,7 @@ export default class room extends stage {
         this.maskInfo = "MISSION " + displayNum;
 
         const thisRoom = this;
-        Common.getRequest("/user/getMapFromId?roomType=PVE&id=" + this.roomInfo.mapId, function (data) {
+        Common.getRequest("/singlePlayer/getMapFromId?roomType=PVE&id=" + this.roomInfo.mapId, function (data) {
             thisRoom.loadMap(data);
             thisRoom.mask = false;
         })
