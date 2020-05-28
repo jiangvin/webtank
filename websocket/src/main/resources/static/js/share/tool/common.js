@@ -23,7 +23,7 @@ export default class Common {
     }
 
     static drawTitle(ctx, message) {
-        ctx.font = 'bold 55px Helvetica';
+        ctx.font = 'bold 55px Microsoft YaHei UI';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
