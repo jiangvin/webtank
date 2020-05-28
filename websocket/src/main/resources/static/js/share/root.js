@@ -11,6 +11,8 @@ import Frame from './tool/frame.js'
 import Resource from './tool/resource.js'
 import Status from "./tool/status.js"
 import Common from "./tool/common.js"
+import netEngine from "./engine/netEngine";
+import aiEngine from "./engine/aiEngine";
 
 export default class Root {
     constructor() {
@@ -24,14 +26,15 @@ export default class Root {
 
         this.timeEvents = [];
 
-        this.aiEngine = null;
+        this.engine = null;
     }
 
     addTimeEvent(eventType, callBack, timeout, ignoreLog) {
         const event = {};
         event.eventType = eventType;
         event.callback = callBack;
-        event.timeout = timeout ? timeout : 100; //默认100帧倒计时，不到1.5秒
+        //默认100帧倒计时，不到1.5秒
+        event.timeout = timeout ? timeout : 100;
         event.ignoreLog = ignoreLog;
         this.timeEvents.push(event);
     };
@@ -51,18 +54,30 @@ export default class Root {
         this.messages.unshift(message);
     }
 
+    /**
+     * 初始化引擎
+     * @param isNetEngine
+     */
+    initEngine(isNetEngine) {
+        if (isNetEngine) {
+            this.engine = new netEngine(this.currentStage());
+        } else {
+            this.engine = new aiEngine(this.currentStage());
+        }
+    }
+
     update() {
         this.backendFrame.calculate();
         this.updateEvents();
-        this.updateAiEngine();
+        this.updateEngine();
         this.currentStage().update();
     }
 
-    updateAiEngine() {
-        if (!this.aiEngine) {
+    updateEngine() {
+        if (!this.engine) {
             return;
         }
-        this.aiEngine.update();
+        this.engine.update();
     }
 
     updateEvents() {

@@ -57,13 +57,6 @@ public class UserController {
         return onlineUserService.getUserList();
     }
 
-    @GetMapping("/checkName")
-    public boolean checkName(@RequestParam(value = "name") String name) {
-        if (onlineUserService.exists(name)) {
-            throw new CustomException("输入的名字重复: " + name);
-        }
-        return true;
-    }
 
     @GetMapping("/getRooms")
     public RoomListDto getRooms(@RequestParam(value = "start", defaultValue = "0") int start,

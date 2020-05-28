@@ -13,9 +13,11 @@ export default class room extends stage {
     constructor() {
         super();
 
+        /**
+         *
+         * @type {{roomId,roomType,mapId}}
+         */
         this.roomInfo = {};
-        this.roomInfo.mapId = 1;
-        this.roomInfo.roomType = "PVE";
         this.size = {};
         this.view = {x: 0, y: 0, center: null};
 
@@ -26,8 +28,8 @@ export default class room extends stage {
         this.maskInfo = null;
     }
 
-    initSinglePlayer() {
-        this.roomInfo.roomId = Resource.getUser().username + "的房间";
+    init(roomInfo) {
+        this.roomInfo = roomInfo;
 
         let displayNum;
         if (this.roomInfo.mapId < 10) {
@@ -36,12 +38,6 @@ export default class room extends stage {
             displayNum = "" + this.roomInfo.mapId;
         }
         this.maskInfo = "MISSION " + displayNum;
-
-        const thisRoom = this;
-        Common.getRequest("/singlePlayer/getMapFromId?roomType=PVE&id=" + this.roomInfo.mapId, function (data) {
-            thisRoom.loadMap(data);
-            thisRoom.mask = false;
-        })
     }
 
     update() {

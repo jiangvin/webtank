@@ -102,6 +102,10 @@ export default class Resource {
         Resource.instance.user.username = username;
     }
 
+    static setUserId(userId) {
+        Resource.instance.user.userId = userId;
+    }
+
     static getUser() {
         return Resource.instance.user;
     }

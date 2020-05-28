@@ -8,6 +8,7 @@ import Stage from "./stage.js";
 import Resource from "../tool/resource.js";
 import Button from "./button.js"
 import Common from "../tool/common.js";
+import Status from "../tool/status.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -50,12 +51,32 @@ export default class Menu extends Stage {
         });
 
         //按钮
+        const thisMenu = this;
         this.addButton(new Button("单人游戏", Resource.width() * 0.5, Resource.height() * 0.35, function () {
-            Common.nextStage();
-            Resource.getRoot().currentStage().initSinglePlayer();
+            const roomInfo = {
+                mapId: 1,
+                roomType: "PVE",
+                roomId: Resource.getUser().username + "的房间",
+                joinTeamType: "RED"
+            };
+            thisMenu.initRoom(roomInfo);
+            Resource.getRoot().initEngine(false);
         }));
         this.addButton(new Button("多人游戏", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
-            Common.addMessage("功能开发中，敬请期待！");
+            const roomInfo = {
+                mapId: 1,
+                roomType: "PVE",
+                roomId: Resource.getUser().username + "的房间",
+                joinTeamType: "RED"
+            };
+            thisMenu.initRoom(roomInfo);
+            Resource.getRoot().initEngine(true);
         }));
+    }
+
+    initRoom(roomInfo) {
+        Status.setStatus(Status.statusPause());
+        Common.nextStage();
+        Resource.getRoot().currentStage().init(roomInfo);
     }
 }

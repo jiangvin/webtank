@@ -17,6 +17,8 @@ public class UserBo {
     @NonNull private String userId;
     @NonNull private String socketSessionId;
 
+    private String userName;
+
     final private List<String> subscribeList = new ArrayList<>();
 
     /**
