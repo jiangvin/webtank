@@ -26,9 +26,6 @@ function Game() {
     //用户类
     let _users = [];
 
-    //左下角消息类
-    let _messages = [];
-
     //布景相关
     const _stages = [];
     let _index = 0;
@@ -38,40 +35,6 @@ function Game() {
     //运算控制
     let _updateHandler;
 
-    //网络连接
-    this.receiveStompMessage = function (messageDto) {
-        //处理消息事件
-        if (_messageEvents[messageDto.messageType]) {
-            console.log("process message event:" + messageDto.messageType);
-            _messageEvents[messageDto.messageType].callback();
-            delete _messageEvents[messageDto.messageType];
-        }
-
-        switch (messageDto.messageType) {
-            case "USER_MESSAGE":
-                Common.addMessage(messageDto.message, "#FFF");
-                break;
-            case "SYSTEM_MESSAGE":
-                Common.addMessage(messageDto.message, "#FF0");
-                break;
-            case "ERROR_MESSAGE":
-                Common.addMessage(messageDto.message, "#F00");
-                break;
-            case "SERVER_READY":
-                serverReady();
-                break;
-            case "USERS":
-                _users = messageDto.message;
-                break;
-            case "GAME_STATUS":
-                Status.setStatus(Status.getStatusPause(), messageDto.message, false);
-                break;
-            default:
-                break;
-        }
-        //给当前场景处理服务消息
-        this.currentStage().receiveStompMessage(messageDto);
-    };
 
     //控制相关
     this.controlEvent = function (event) {
@@ -176,31 +139,6 @@ function Game() {
         _messageEvents[eventType] = messageEvent;
     };
 
-    /**
-     * 每两秒确认一次连接是否失效
-     */
-    this.addConnectCheckEvent = function () {
-        const callBack = function () {
-            if (Common.getStompStatus() === true) {
-                const start = new Date().getTime();
-                Common.getRequest("/user/ping", function () {
-                    _netDelay = new Date().getTime() - start;
-                });
-                thisGame.addTimeEvent("CONNECT_CHECK", callBack, 120, true);
-            } else {
-                Status.setStatus(Status.getStatusPause(), "与服务器断开！");
-
-                //TODO 断线重连
-                //5秒后关闭游戏
-                thisGame.addTimeEvent("CLOSE", function () {
-                    Status.setStatus(Status.getStatusClose());
-                }, 60 * 5);
-            }
-        };
-
-        console.log("connect status will be checked per 120 frames...");
-        thisGame.addTimeEvent("CONNECT_CHECK", callBack, 120);
-    };
     this.updateEvents = function () {
         for (let i = 0; i < _timeEvents.length; ++i) {
             const event = _timeEvents[i];

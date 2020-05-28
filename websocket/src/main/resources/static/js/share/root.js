@@ -4,15 +4,12 @@
  * @date 2020/5/25
  */
 
-import './libs/stomp.js'
-import './libs/sockjs.js'
-
 import Frame from './tool/frame.js'
 import Resource from './tool/resource.js'
 import Status from "./tool/status.js"
 import Common from "./tool/common.js"
-import netEngine from "./engine/netEngine";
-import aiEngine from "./engine/aiEngine";
+import netEngine from "./engine/netEngine.js";
+import aiEngine from "./engine/aiEngine.js";
 
 export default class Root {
     constructor() {
@@ -25,8 +22,19 @@ export default class Root {
         this.messages = [];
 
         this.timeEvents = [];
+        this.messageEvents = new Map();
 
         this.engine = null;
+
+        /**
+         * 房间的用户
+         */
+        this.users = null;
+
+        /**
+         * 网络延迟测试
+         */
+        this.netDelay = 0;
     }
 
     addTimeEvent(eventType, callBack, timeout, ignoreLog) {
@@ -68,7 +76,7 @@ export default class Root {
 
     update() {
         this.backendFrame.calculate();
-        this.updateEvents();
+        this.updateTimeEvents();
         this.updateEngine();
         this.currentStage().update();
     }
@@ -80,7 +88,17 @@ export default class Root {
         this.engine.update();
     }
 
-    updateEvents() {
+    updateMessageEvents(messageType) {
+        if (!this.messageEvents.has(messageType)) {
+            return;
+        }
+
+        console.log("process message event:" + messageType);
+        this.messageEvents.get(messageType).callback();
+        this.messageEvents.delete(messageType);
+    }
+
+    updateTimeEvents() {
         for (let i = 0; i < this.timeEvents.length; ++i) {
             const event = this.timeEvents[i];
             if (event.timeout > 0) {
@@ -112,6 +130,12 @@ export default class Root {
     nextStage() {
         if (this.stageIndex < this.stages.length - 1) {
             ++this.stageIndex;
+        }
+    }
+
+    lastStage() {
+        if (this.stageIndex > 0) {
+            --this.stageIndex;
         }
     }
 
@@ -162,10 +186,57 @@ export default class Root {
         //帧率信息
         ctx.textAlign = 'left';
         let text = '帧率:' + this.frontFrame.frames + '-' + this.backendFrame.frames;
+        if (this.netDelay) {
+            text += ' / 延迟:' + this.netDelay + 'ms';
+        }
+        if (this.users) {
+            text += ' / 房间人数:' + this.users.length;
+        }
         ctx.fillText(text, 10, Resource.height() - 5);
     }
 
     pointDownEvent(point) {
         this.currentStage().pointDownEvent(point);
+    }
+
+    /**
+     * 网络连接相关
+     * @param messageDto
+     */
+    receiveStompMessage (messageDto) {
+        //处理消息事件
+        this.updateMessageEvents(messageDto.messageType);
+
+        switch (messageDto.messageType) {
+            case "USER_MESSAGE":
+                Common.addMessage(messageDto.message, "#FFF");
+                break;
+            case "SYSTEM_MESSAGE":
+                Common.addMessage(messageDto.message, "#FF0");
+                break;
+            case "ERROR_MESSAGE":
+                Common.addMessage(messageDto.message, "#F00");
+                break;
+            case "SERVER_READY":
+                this.serverReady();
+                break;
+            case "USERS":
+                this.users = messageDto.message;
+                break;
+            case "GAME_STATUS":
+                Status.setStatus(Status.getStatusPause(), messageDto.message, false);
+                break;
+            default:
+                break;
+        }
+        //给当前场景处理服务消息
+        this.currentStage().receiveStompMessage(messageDto);
+    };
+
+    serverReady() {
+        if (Status.getValue() !== Status.statusPause()) {
+            return;
+        }
+        Status.setStatus(Status.statusNormal());
     }
 }

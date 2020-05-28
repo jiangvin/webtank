@@ -5,6 +5,7 @@
  */
 
 import Resource from "./resource.js";
+import Status from "./status.js";
 
 export default class Common {
     constructor() {
@@ -16,6 +17,10 @@ export default class Common {
 
     static nextStage() {
         Resource.getRoot().nextStage();
+    }
+
+    static lastStage() {
+        Resource.getRoot().lastStage();
     }
 
     static addTimeEvent(eventType, callBack, timeout, ignoreLog) {
@@ -33,7 +38,7 @@ export default class Common {
     static getRequest(url, callBack) {
         try {
             const xmlHttp = new XMLHttpRequest();
-            xmlHttp.onreadystatechange = function() {
+            xmlHttp.onreadystatechange = function () {
                 if (xmlHttp.readyState !== 4) {
                     return;
                 }
@@ -63,6 +68,20 @@ export default class Common {
     static height() {
         return Resource.height();
     }
+
+    static addConnectTimeoutEvent(callback) {
+        Resource.getRoot().addTimeEvent("TIMEOUT_CALLBACK", function () {
+            if (Status.getValue() !== Status.statusPause()) {
+                return;
+            }
+
+            Common.addMessage("与服务器连接超时！", "#F00");
+            Status.setStatus(Status.statusNormal());
+            if (callback !== undefined) {
+                callback();
+            }
+        }, 300);
+    };
 }
 
 Date.prototype.format = function (fmt) {

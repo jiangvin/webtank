@@ -133,23 +133,6 @@ Common.getStompStatus = function () {
     }
     return stompClient.connected;
 };
-Common.stompConnect = function (name, callback) {
-    const socket = new SockJS(encodeURI('/websocket-simple?name=' + name));
-    const stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
-        Common.addMessage("网络连接中: " + frame, "#ffffff");
-
-        // 客户端订阅消息, 公共消息和私有消息
-        stompClient.subscribe('/topic/send', function (response) {
-            Resource.getGame().receiveStompMessage(JSON.parse(response.body));
-        });
-        stompClient.subscribe('/user/queue/send', function (response) {
-            Resource.getGame().receiveStompMessage(JSON.parse(response.body));
-        });
-        Resource.setStompClient(stompClient);
-        callback();
-    });
-};
 Common.sendStompMessage = function (message, messageType, sendTo) {
     const stompClient = Resource.getStompClient();
     if (!stompClient) {
@@ -169,19 +152,6 @@ Common.sendStompMessage = function (message, messageType, sendTo) {
 };
 
 //game tools
-Common.addConnectTimeoutEvent = function (callback) {
-    Resource.getGame().addTimeEvent("TIMEOUT_CALLBACK", function () {
-        if (Status.getStatusValue() !== Status.getStatusPause()) {
-            return;
-        }
-
-        Common.addMessage("与服务器连接超时！", "#F00");
-        Status.setStatus(Status.getStatusNormal());
-        if (callback !== undefined) {
-            callback();
-        }
-    }, 300);
-};
 Common.addMessage = function (context, color) {
     Resource.getGame().addMessage(context, color);
 };
