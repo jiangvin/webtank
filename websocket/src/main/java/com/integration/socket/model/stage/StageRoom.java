@@ -800,7 +800,7 @@ public class StageRoom extends BaseStage {
     }
 
     private String generateUsernameWithTeam(UserBo userBo) {
-        return String.format("%s[%s]", userBo.getUsername(), getTeam(userBo.getTeamType()));
+        return String.format("%s[%s]", userBo.getUserId(), getTeam(userBo.getTeamType()));
     }
 
     private String getTeam(TeamType teamType) {
@@ -838,23 +838,23 @@ public class StageRoom extends BaseStage {
     }
 
     public void addUser(UserBo userBo, TeamType teamType) {
-        userMap.put(userBo.getUsername(), userBo);
+        userMap.put(userBo.getUserId(), userBo);
         userBo.setRoomId(this.roomId);
         userBo.setTeamType(teamType);
         sendStatusAndMessage(userBo, false);
 
         //发送场景信息
         if (this.isPause) {
-            sendMessageToUser(this.pauseMessage, MessageType.GAME_STATUS, userBo.getUsername());
+            sendMessageToUser(this.pauseMessage, MessageType.GAME_STATUS, userBo.getUserId());
         }
-        sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUsername());
-        sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
-        sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
+        sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUserId());
+        sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUserId());
+        sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUserId());
 
         createTankForUser(userBo, teamType, 60 * 3);
 
         //通知前端数据传输完毕
-        sendReady(userBo.getUsername());
+        sendReady(userBo.getUserId());
     }
 
     private void createTankForUser(UserBo userBo, TeamType teamType, int timeoutForPlayer) {
@@ -881,22 +881,22 @@ public class StageRoom extends BaseStage {
             if (!isBot(userBo.getTeamType())) {
                 sendMessageToRoom(
                     String.format("没有剩余生命值，玩家 %s 将变成观看模式",
-                                  userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
+                                  userBo.getUserId()), MessageType.SYSTEM_MESSAGE);
             }
             return;
         }
 
         TankBo tankBo = new TankBo();
         tankBo.setTankId(tankId);
-        tankBo.setUserId(userBo.getUsername());
+        tankBo.setUserId(userBo.getUserId());
         tankBo.setTeamType(userBo.getTeamType());
 
         //设定类型
         TankTypeBo initType = getTankType(lifeMap);
-        TankTypeBo saveType = this.tankTypeSaveMap.get(userBo.getUsername());
+        TankTypeBo saveType = this.tankTypeSaveMap.get(userBo.getUserId());
         if (saveType != null) {
             tankBo.setType(saveType);
-            this.tankTypeSaveMap.remove(userBo.getUsername());
+            this.tankTypeSaveMap.remove(userBo.getUserId());
         } else {
             tankBo.setType(initType);
         }

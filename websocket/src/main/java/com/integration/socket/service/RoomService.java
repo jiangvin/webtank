@@ -96,7 +96,7 @@ public class RoomService {
             note = "CREAT_ROOM";
         }
         messageService.sendMessage(new MessageDto(String.format("%s 创建了房间 %s",
-                                                                creator.getUsername(),
+                                                                creator.getUserId(),
                                                                 roomDto.getRoomId()),
                                                   MessageType.SYSTEM_MESSAGE,
                                                   null,

@@ -38,17 +38,17 @@ public class OnlineUserService {
             return false;
         }
 
-        userMap.put(userBo.getUsername(), userBo);
+        userMap.put(userBo.getUserId(), userBo);
         log.info("user:{} add into userMap(count:{})", username, userMap.size());
         return true;
     }
 
     public void addNewUserCache(UserBo userBo) {
-        if (newUserCache.containsKey(userBo.getUsername())) {
+        if (newUserCache.containsKey(userBo.getUserId())) {
             return;
         }
-        newUserCache.put(userBo.getUsername(), userBo);
-        log.info("user:{} add into the cache(count:{})", userBo.getUsername(), newUserCache.size());
+        newUserCache.put(userBo.getUserId(), userBo);
+        log.info("user:{} add into the cache(count:{})", userBo.getUserId(), newUserCache.size());
     }
 
     public void subscribeInUserCache(String username, String destination) {

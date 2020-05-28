@@ -156,7 +156,7 @@ public class GameService {
         StageRoom room = roomService.create(roomDto, userBo);
 
         //remove from old stage
-        currentStage(userBo).removeUser(userBo.getUsername());
+        currentStage(userBo).removeUser(userBo.getUserId());
 
         //add into new stage
         room.addUser(userBo, roomDto.getJoinTeamType());
@@ -180,7 +180,7 @@ public class GameService {
         }
 
         //remove from old stage
-        currentStage(userBo).removeUser(userBo.getUsername());
+        currentStage(userBo).removeUser(userBo.getUserId());
 
         //add into new stage
         roomService.get(roomDto.getRoomId()).addUser(userBo, roomDto.getJoinTeamType());
@@ -195,7 +195,7 @@ public class GameService {
     private BaseStage currentStage(UserBo userBo) {
         if (!StringUtils.isEmpty(userBo.getRoomId())) {
             if (!roomService.roomNameExists(userBo.getRoomId())) {
-                log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUsername());
+                log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUserId());
             }
             return roomService.get(userBo.getRoomId());
         } else {
