@@ -13,9 +13,9 @@ import Adapter from "../tool/adapter.js";
 export default class NetEngine extends Engine {
     constructor(room) {
         super(room);
-        
+
         const thisEngine = this;
-        
+
         //连接超时调用
         Common.addConnectTimeoutEvent(function () {
             Common.lastStage();
@@ -29,15 +29,15 @@ export default class NetEngine extends Engine {
                     Adapter.socketSend("CLIENT_READY", {
                         username: Resource.getUser().username
                     })
-                },40);
+                }, 40);
 
                 Common.addTimeEvent("CREATE_ROOM", function () {
-                   Adapter.socketSend("CREATE_ROOM", {
-                       "roomId": thisEngine.room.roomInfo.roomId,
-                       "mapId": thisEngine.room.roomInfo.mapId,
-                       "roomType": thisEngine.room.roomInfo.roomType,
-                       "joinTeamType": thisEngine.room.roomInfo.joinTeamType
-                   })
+                    Adapter.socketSend("CREATE_ROOM", {
+                        "roomId": thisEngine.room.roomInfo.roomId,
+                        "mapId": thisEngine.room.roomInfo.mapId,
+                        "roomType": thisEngine.room.roomInfo.roomType,
+                        "joinTeamType": thisEngine.room.roomInfo.joinTeamType
+                    })
                 }, 80);
 
                 //注册消息事件
@@ -82,10 +82,34 @@ export default class NetEngine extends Engine {
         Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120);
     }
 
-    getStompStatus() {
-        if (!this.stompClient) {
-            return false;
+    processControlEvent(control) {
+        super.processControlEvent(control);
+        switch (control) {
+            case "FIRE":
+                Adapter.socketSend("UPDATE_TANK_FIRE");
+                break;
+            default:
+                break;
         }
-        return this.stompClient.connected;
     }
+
+    sendSyncMessage(send, center) {
+        if (center.x === send.x
+            && center.y === send.y
+            && center.orientation === send.orientation
+            && center.action === send.action) {
+            return;
+        }
+        send.x = center.x;
+        send.y = center.y;
+        send.orientation = center.orientation;
+        send.action = center.action;
+        Adapter.socketSend("UPDATE_TANK_CONTROL",
+            {
+                orientation: send.orientation,
+                action: send.action,
+                x: send.x,
+                y: send.y
+            });
+    };
 }

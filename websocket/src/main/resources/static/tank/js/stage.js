@@ -67,42 +67,6 @@ function Stage(params) {
         }, "UPDATE_TANK_CONTROL");
     };
 
-    this.controlView = function (event) {
-        if (this.view.center !== null && Status.getStatusValue() !== Status.getStatusPause()) {
-            return;
-        }
-
-        if (!this.size.width || !this.size.height) {
-            return;
-        }
-
-        const speed = 5.0;
-        switch (event) {
-            case "Up":
-                if (this.size.height > Common.height()) {
-                    this.view.y = this.view.y > speed ? this.view.y - speed : 0;
-                }
-                break;
-            case "Down":
-                if (this.size.height > Common.height()) {
-                    const maxY = this.size.height - Common.height();
-                    this.view.y = this.view.y + speed < maxY ? this.view.y + speed : maxY;
-                }
-                break;
-            case "Left":
-                if (this.size.width > Common.width()) {
-                    this.view.x = this.view.x > speed ? this.view.x - speed : 0;
-                }
-                break;
-            case "Right":
-                if (this.size.width > Common.width()) {
-                    const maxX = this.size.width - Common.width();
-                    this.view.x = this.view.x + speed < maxX ? this.view.x + speed : maxX;
-                }
-                break;
-        }
-    };
-
     /**
      * @param messageDto {{note,roomId,message,messageType}}
      */

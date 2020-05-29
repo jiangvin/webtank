@@ -27,6 +27,19 @@ export default class room extends stage {
         this.mask = true;
         this.maskImage = Resource.getImage("background_loading");
         this.maskInfo = null;
+
+        this.control = {
+            orientation: 0,
+            action: 0,
+            cache: {}
+        };
+
+        this.send = {
+            orientation: 0,
+            action: 0,
+            x: 0,
+            y: 0
+        };
     }
 
     init(roomInfo) {
@@ -511,13 +524,14 @@ export default class room extends stage {
         item.scale = bombScale;
         item.z = 10;
         item.image = Resource.getImage("bomb");
+        const thisRoom = this;
         item.play = new Play(
             6,
             3,
             function () {
                 item.orientation = 6 - this.frames;
             }, function () {
-                this.items.delete(item.id);
+                thisRoom.items.delete(item.id);
             });
 
         //删除重加，确保在最上层绘制
