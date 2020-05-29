@@ -214,22 +214,6 @@ function Stage(params) {
         this.items.set(newId, item);
     };
 
-    this.createTank = function (options) {
-        const item = this.createItem(options);
-        item.update = function () {
-            generalUpdateEvent(item);
-        };
-
-        //set center
-        if (!this.view.center && Resource.getUsername()) {
-            if (item.id === Resource.getUsername()) {
-                this.view.center = item;
-            }
-        }
-        this.createTankExtension(item);
-        return item;
-    };
-
     /**
      * 在room中重载
      * @param item
@@ -246,77 +230,6 @@ function Stage(params) {
             generalUpdateEvent(item);
         };
         return item;
-    };
-    this.itemBomb = function (data, bombScale) {
-        if (bombScale === undefined) {
-            bombScale = 1;
-        }
-
-        if (!this.items.has(data.id)) {
-            return;
-        }
-
-        generalUpdateAttribute(this, data);
-        const item = this.items.get(data.id);
-        item.action = 0;
-        item.orientation = 0;
-        item.scale = bombScale;
-        item.z = 10;
-        item.image = Resource.getImage("bomb");
-        item.play = new Play(
-            6,
-            3,
-            function () {
-                item.orientation = 6 - this.frames;
-            }, function () {
-                thisStage.removeItem(item.id);
-            });
-
-        //删除重加，确保在最上层绘制
-        this.items.delete(item.id);
-        this.items.set(item.id, item);
-
-        //remove center
-        if (item === this.view.center) {
-            this.view.center = null;
-        }
-    };
-
-    const generalUpdateEvent = function (item) {
-        if (item.play) {
-            item.play.update();
-        }
-
-        if (item.action === 0) {
-            return;
-        }
-
-        switch (item.orientation) {
-            case 0:
-                item.y -= item.speed;
-                break;
-            case 1:
-                item.y += item.speed;
-                break;
-            case 2:
-                item.x -= item.speed;
-                break;
-            case 3:
-                item.x += item.speed;
-                break;
-        }
-    };
-
-    const generalUpdateAttribute = function (thisStage, newAttr) {
-        //没有坐标则什么也不更新
-        if (newAttr.x === undefined || newAttr.y === undefined) {
-            return;
-        }
-        thisStage.items.get(newAttr.id).x = newAttr.x;
-        thisStage.items.get(newAttr.id).y = newAttr.y;
-        thisStage.items.get(newAttr.id).orientation = newAttr.orientation;
-        thisStage.items.get(newAttr.id).speed = newAttr.speed;
-        thisStage.items.get(newAttr.id).action = newAttr.action;
     };
 
     const updateTankProperty = function (stage, tankData) {
@@ -335,63 +248,4 @@ function Stage(params) {
         tankItem.orientation = tankData.orientation;
         tankItem.action = tankData.action;
     };
-
-    const createOrUpdateTanks = function (thisStage, tanks, force) {
-        /**
-         * @param tank {{typeId}}
-         */
-        const center = thisStage.view.center;
-        tanks.forEach(function (tank) {
-            if (thisStage.items.has(tank.id)) {
-                updateTankProperty(thisStage, tank);
-                //普通模式除非撞上tank，否则过滤自己
-                if (!force && center && center.id === tank.id) {
-                    return;
-                }
-                //已存在
-                updateTankControl(thisStage, tank);
-            } else {
-                let tankImage;
-                tankImage = Resource.getImage(tank.typeId);
-                const tankItem = thisStage.createTank({
-                    id: tank.id,
-                    showId: true,
-                    teamId: tank.teamId,
-                    image: tankImage,
-                    scale: 0.1
-                });
-                updateTankProperty(thisStage, tank);
-                updateTankControl(thisStage, tank);
-                tankItem.play = new Play(30, 1,
-                    function () {
-                        tankItem.scale += this.animationScale;
-                    },
-                    function () {
-                        tankItem.scale = 1;
-                    });
-                tankItem.play.animationScale = 0.03;
-            }
-        });
-    };
-    const createOrUpdateBullets = function (thisStage, ammoList) {
-        let addNew = false;
-        ammoList.forEach(function (ammo) {
-            if (thisStage.items.has(ammo.id)) {
-                //已存在
-                generalUpdateAttribute(thisStage, ammo);
-            } else {
-                addNew = true;
-                thisStage.createBullet({
-                    id: ammo.id,
-                    x: ammo.x,
-                    y: ammo.y,
-                    orientation: ammo.orientation,
-                    speed: ammo.speed
-                });
-            }
-        });
-        if (addNew) {
-            thisStage.sortItems();
-        }
-    }
 }

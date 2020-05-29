@@ -77,9 +77,6 @@ public class GameService {
         //新用户加入时处理，不需要检查用户是否存在
         if (messageDto.getMessageType() == MessageType.CLIENT_READY) {
             onlineUserService.processNewUserReady(sendFrom);
-
-            //TODO 测试用，之后删除
-            messageService.sendReady(sendFrom, null);
             return;
         }
 

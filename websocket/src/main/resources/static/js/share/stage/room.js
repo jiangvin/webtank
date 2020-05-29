@@ -346,4 +346,250 @@ export default class room extends stage {
         screenPoint.y = point.y - this.view.y;
         return screenPoint;
     };
+
+    processSocketMessage(messageDto) {
+        switch (messageDto.messageType) {
+            case "SERVER_READY":
+                this.mask = false;
+                break;
+            case "TANKS":
+                //除了坦克之间的碰撞以外其他情况不更新自己，否则会和客户端的自动避让起冲突
+                const updateSelf = messageDto.note === "COLLIDE_TANK";
+                this.createOrUpdateTanks(messageDto.message, updateSelf);
+                break;
+            case "REMOVE_TANK":
+                this.itemBomb(messageDto.message);
+                break;
+            case "BULLET":
+                this.createOrUpdateBullets(messageDto.message);
+                break;
+            case "REMOVE_BULLET":
+                this.itemBomb(messageDto.message, 0.5);
+                break;
+            case "MAP":
+                this.loadMap(messageDto.message);
+                this.sortItems();
+                break;
+            case "REMOVE_MAP":
+                this.itemBomb({id: messageDto.message});
+                break;
+            case "ITEM":
+                this.createGameItem(messageDto.message);
+                break;
+            case "REMOVE_ITEM":
+                this.items.delete(messageDto.message);
+                break;
+            case "CLEAR_MAP":
+                this.items.clear();
+                this.view.center = null;
+                break;
+            default:
+                break;
+        }
+    }
+
+    createOrUpdateTanks(tanks, force) {
+        const thisStage = this;
+        const center = thisStage.view.center;
+        tanks.forEach(function (tank) {
+            if (thisStage.items.has(tank.id)) {
+                thisStage.updateTankProperty(tank);
+                //普通模式除非撞上tank，否则过滤自己
+                if (!force && center && center.id === tank.id) {
+                    return;
+                }
+                //已存在
+                thisStage.updateTankControl(tank);
+            } else {
+                let tankImage;
+                tankImage = Resource.getImage(tank.typeId);
+                const tankItem = thisStage.createTank({
+                    id: tank.id,
+                    showId: true,
+                    teamId: tank.teamId,
+                    image: tankImage,
+                    scale: 0.1
+                });
+                thisStage.updateTankProperty(tank);
+                thisStage.updateTankControl(tank);
+                tankItem.play = new Play(30, 1,
+                    function () {
+                        tankItem.scale += this.animationScale;
+                    },
+                    function () {
+                        tankItem.scale = 1;
+                    });
+                tankItem.play.animationScale = 0.03;
+            }
+        });
+    };
+
+    /**
+     *
+     * @param tankData {{typeId,speed,hasShield,id}}
+     */
+    updateTankProperty(tankData) {
+        const tankItem = this.items.get(tankData.id);
+        tankItem.speed = tankData.speed;
+        tankItem.hasShield = tankData.hasShield;
+        tankItem.image = Resource.getImage(tankData.typeId);
+    };
+
+    updateTankControl(tankData) {
+        const tankItem = this.items.get(tankData.id);
+        tankItem.x = tankData.x;
+        tankItem.y = tankData.y;
+        tankItem.orientation = tankData.orientation;
+        tankItem.action = tankData.action;
+    };
+
+    createTank(options) {
+        const item = this.createItem(options);
+        const thisRoom = this;
+        item.update = function () {
+            thisRoom.generalUpdateEvent(item);
+        };
+
+        //set center
+        if (!this.view.center && Resource.getUser().userId) {
+            if (item.id === Resource.getUser().userId) {
+                this.view.center = item;
+            }
+        }
+
+        if (thisRoom.roomInfo.roomType === "PVE" && item.teamId === 2) {
+            item.showId = false;
+            return;
+        }
+
+        if (thisRoom.roomInfo.roomType === "EVE") {
+            item.showId = false;
+        }
+        return item;
+    };
+
+    generalUpdateEvent(item) {
+        if (item.play) {
+            item.play.update();
+        }
+
+        if (item.action === 0) {
+            return;
+        }
+
+        switch (item.orientation) {
+            case 0:
+                item.y -= item.speed;
+                break;
+            case 1:
+                item.y += item.speed;
+                break;
+            case 2:
+                item.x -= item.speed;
+                break;
+            case 3:
+                item.x += item.speed;
+                break;
+        }
+    };
+
+    itemBomb(data, bombScale) {
+        if (bombScale === undefined) {
+            bombScale = 1;
+        }
+
+        if (!this.items.has(data.id)) {
+            return;
+        }
+
+        this.generalUpdateAttribute(data);
+        const item = this.items.get(data.id);
+        item.action = 0;
+        item.orientation = 0;
+        item.scale = bombScale;
+        item.z = 10;
+        item.image = Resource.getImage("bomb");
+        item.play = new Play(
+            6,
+            3,
+            function () {
+                item.orientation = 6 - this.frames;
+            }, function () {
+                this.items.delete(item.id);
+            });
+
+        //删除重加，确保在最上层绘制
+        this.items.delete(item.id);
+        this.items.set(item.id, item);
+
+        //remove center
+        if (item === this.view.center) {
+            this.view.center = null;
+        }
+    };
+
+    generalUpdateAttribute(newAttr) {
+        //没有坐标则什么也不更新
+        if (newAttr.x === undefined || newAttr.y === undefined) {
+            return;
+        }
+        this.items.get(newAttr.id).x = newAttr.x;
+        this.items.get(newAttr.id).y = newAttr.y;
+        this.items.get(newAttr.id).orientation = newAttr.orientation;
+        this.items.get(newAttr.id).speed = newAttr.speed;
+        this.items.get(newAttr.id).action = newAttr.action;
+    };
+
+    createOrUpdateBullets(ammoList) {
+        let addNew = false;
+        const thisStage = this;
+        ammoList.forEach(function (ammo) {
+            if (thisStage.items.has(ammo.id)) {
+                //已存在
+                thisStage.generalUpdateAttribute(ammo);
+            } else {
+                addNew = true;
+                thisStage.createBullet({
+                    id: ammo.id,
+                    x: ammo.x,
+                    y: ammo.y,
+                    orientation: ammo.orientation,
+                    speed: ammo.speed
+                });
+            }
+        });
+        if (addNew) {
+            thisStage.sortItems();
+        }
+    }
+
+    createBullet(options) {
+        const item = this.createItem(options);
+        item.action = 1;
+        item.image = Resource.getImage("bullet");
+        const thisStage = this;
+        item.update = function () {
+            thisStage.generalUpdateEvent(item);
+        };
+        return item;
+    };
+
+    createGameItem(itemData) {
+        if (this.items.has(itemData.id)) {
+            return;
+        }
+        const imageId = "item_" + itemData.typeId.toLowerCase();
+        const gameItem = this.createItem({
+            id: itemData.id,
+            x: itemData.x,
+            y: itemData.y,
+            image: Resource.getImage(imageId)
+        });
+        gameItem.play = new Play(1, 15,
+            function () {
+                gameItem.orientation = (gameItem.orientation + 1) % 2;
+            }, function () {
+                this.frames = 1;
+            });
+    };
 }

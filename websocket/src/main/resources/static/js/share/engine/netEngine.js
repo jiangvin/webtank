@@ -31,6 +31,15 @@ export default class NetEngine extends Engine {
                     })
                 },40);
 
+                Common.addTimeEvent("CREATE_ROOM", function () {
+                   Adapter.socketSend("CREATE_ROOM", {
+                       "roomId": thisEngine.room.roomInfo.roomId,
+                       "mapId": thisEngine.room.roomInfo.mapId,
+                       "roomType": thisEngine.room.roomInfo.roomType,
+                       "joinTeamType": thisEngine.room.roomInfo.joinTeamType
+                   })
+                }, 80);
+
                 //注册消息事件
                 Common.addMessageEvent("SERVER_READY", function () {
                     if (Status.getValue() !== Status.statusPause()) {

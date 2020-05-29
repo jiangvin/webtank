@@ -113,25 +113,6 @@
         thisRoom.drawTitle(thisStage);
     };
 
-    const createGameItem = function (stage, itemData) {
-        if (stage.items.has(itemData.id)) {
-            return;
-        }
-        const imageId = "item_" + itemData.typeId.toLowerCase();
-        const gameItem = stage.createItem({
-            id: itemData.id,
-            x: itemData.x,
-            y: itemData.y,
-            image: Resource.getImage(imageId)
-        });
-        gameItem.play = new Play(1, 15,
-            function () {
-                gameItem.orientation = (gameItem.orientation + 1) % 2;
-            }, function () {
-                this.frames = 1;
-            });
-    };
-
     const reloadCreateTankExtension = function (thisRoom, item) {
         if (thisRoom.roomInfo.roomType === "PVE" && item.teamId === 2) {
             item.showId = false;

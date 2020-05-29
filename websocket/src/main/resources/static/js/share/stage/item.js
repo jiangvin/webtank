@@ -127,16 +127,17 @@ export default class Item {
             return;
         }
 
-        if (!this.play || this.play.isFinish()) {
-            this.play = new Play(1, 15,
+        const thisItem = this;
+        if (!thisItem.play || thisItem.play.isFinish()) {
+            thisItem.play = new Play(1, 15,
                 function () {
-                    this.play.shieldFrame = (this.play.shieldFrame + 1) % 4;
+                    thisItem.play.shieldFrame = (thisItem.play.shieldFrame + 1) % 4;
                 }, function () {
                     this.frames = 1;
                 });
-            this.play.shieldFrame = 0;
+            thisItem.play.shieldFrame = 0;
         }
-        if (this.play.shieldFrame === undefined) {
+        if (thisItem.play.shieldFrame === undefined) {
             return;
         }
 
