@@ -12,4 +12,8 @@ export default class Engine {
     update() {
 
     }
+
+    processControlEvent(control) {
+
+    }
 }

@@ -31,106 +31,9 @@
     };
 
     const bindTouchEvent = function (controlMode) {
-        window.addEventListener('touchstart', function (e) {
-            const touchPoint = Common.getTouchPoint(e.touches[e.touches.length - 1]);
-            let x = touchPoint.x;
-            let y = touchPoint.y;
-
-            let distance = Common.distance(x, y, controlMode.rightCenterX, controlMode.rightCenterY);
-            if (distance < controlMode.rightRadius) {
-                Resource.getGame().controlEvent("FIRE");
-                return;
-            }
-
-            distance = Common.distance(x, y, controlMode.centerX, controlMode.centerY);
-            if (distance > controlMode.radius) {
-                //超过外圆
-                return;
-            }
-
-            controlMode.touchX = x;
-            controlMode.touchY = y;
-
-            //排除细微控制带来的干扰
-            if (distance >= controlMode.minRadius) {
-                Resource.getGame().controlEvent(getControlEventFromTouch(controlMode));
-            }
-        });
         window.addEventListener('touchend', function (e) {
-            let stop = true;
-            for (let i = 0; i < e.touches.length; ++i) {
-                const touchPoint = Common.getTouchPoint(e.touches[i]);
-                const distance = Common.distance(touchPoint.x, touchPoint.y, controlMode.centerX, controlMode.centerY);
-                //还有手指在方向盘上，不停止
-                if (distance >= controlMode.minRadius && distance <= controlMode.maxRadius) {
-                    stop = false;
-                    break;
-                }
-            }
-
-            if (stop) {
-                controlMode.touchX = null;
-                controlMode.touchY = null;
-                Resource.getGame().controlEvent("Stop");
-            }
         });
         window.addEventListener('touchmove', function (e) {
-            let touchMovePoint;
-            let distance;
-            for (let i = 0; i < e.touches.length; ++i) {
-                const touchPoint = Common.getTouchPoint(e.touches[i]);
-                distance = Common.distance(touchPoint.x, touchPoint.y, controlMode.centerX, controlMode.centerY);
-                if (distance <= controlMode.maxRadius) {
-                    touchMovePoint = touchPoint;
-                    break;
-                }
-            }
-            if (!touchMovePoint) {
-                return;
-            }
-
-            let x = touchMovePoint.x;
-            let y = touchMovePoint.y;
-
-            const radius = controlMode.radius;
-            if (distance <= radius) {
-                controlMode.touchX = x;
-                controlMode.touchY = y;
-            } else {
-                if (controlMode.touchX == null || controlMode.touchY == null) {
-                    //从头到尾都超过外圆，不做任何操作
-                    return;
-                }
-                //开始计算圆外的点和圆心连线的交点
-                //先将圆心移动到坐标原点
-                x = x - controlMode.centerX;
-                y = y - controlMode.centerY;
-
-                if (x === 0) {
-                    //x在坐标轴上，特殊处理，不能当公式分母
-                    y = y >= 0 ? radius : -radius;
-                } else {
-                    let newX;
-                    let newY;
-                    newX = Math.sqrt(radius * radius * x * x / (x * x + y * y));
-                    newY = y * newX / x;
-                    if (x < 0) {
-                        newX = -newX;
-                        newY = -newY;
-                    }
-                    x = newX;
-                    y = newY;
-                }
-
-                //再将圆心移回去
-                controlMode.touchX = x + controlMode.centerX;
-                controlMode.touchY = y + controlMode.centerY;
-            }
-
-            //排除细微控制带来的干扰
-            if (distance >= controlMode.minRadius) {
-                Resource.getGame().controlEvent(getControlEventFromTouch(controlMode));
-            }
         });
     };
 
@@ -194,22 +97,4 @@
             }
         });
     };
-
-    const getControlEventFromTouch = function (controlMode) {
-        let xLength = Math.abs(controlMode.touchX - controlMode.centerX);
-        let yLength = Math.abs(controlMode.touchY - controlMode.centerY);
-        if (xLength > yLength) {
-            if (controlMode.touchX < controlMode.centerX) {
-                return "Left";
-            } else {
-                return "Right";
-            }
-        } else {
-            if (controlMode.touchY < controlMode.centerY) {
-                return "Up";
-            } else {
-                return "Down";
-            }
-        }
-    }
 }

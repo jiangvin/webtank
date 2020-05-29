@@ -244,6 +244,12 @@ export default class Root {
         this.currentStage().processSocketMessage(messageDto);
     };
 
+    processControlEvent(control) {
+        if (this.engine) {
+            this.engine.processControlEvent(control);
+        }
+    }
+
     serverReady() {
         if (Status.getValue() !== Status.statusPause()) {
             return;
