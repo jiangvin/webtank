@@ -17,7 +17,7 @@ export default class Main {
         //获取微信用户信息
         wx.getUserInfo({
             success: function(res) {
-                Resource.setUsername(res.userInfo.nickName);
+                Resource.setUserId(res.userInfo.nickName);
                 thisMain.aniId = 0;
                 thisMain.restart();
             }

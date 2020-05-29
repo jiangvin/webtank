@@ -6,7 +6,6 @@
 
 export default class User {
     constructor() {
-        this.username = null;
         this.userId = null;
     }
 }

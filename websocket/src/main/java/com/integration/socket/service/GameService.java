@@ -4,7 +4,6 @@ import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
 import com.integration.dto.room.RoomDto;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.model.stage.BaseStage;
 import com.integration.socket.model.stage.StageRoom;
 import com.integration.util.CommonUtil;
@@ -77,7 +76,7 @@ public class GameService {
     public void receiveMessage(MessageDto messageDto, String sendFrom) {
         //新用户加入时处理，不需要检查用户是否存在
         if (messageDto.getMessageType() == MessageType.CLIENT_READY) {
-            processNewUserReady(messageDto, sendFrom);
+            onlineUserService.processNewUserReady(sendFrom);
 
             //TODO 测试用，之后删除
             messageService.sendReady(sendFrom, null);
@@ -209,11 +208,5 @@ public class GameService {
 
         //检查发送方
         return onlineUserService.get(sendFrom);
-    }
-
-    private void processNewUserReady(MessageDto messageDto, String sendFrom) {
-        UserDto userDto = ObjectUtil.readValue(messageDto.getMessage(), UserDto.class);
-        userDto.setUserId(sendFrom);
-        onlineUserService.processNewUserReady(userDto);
     }
 }

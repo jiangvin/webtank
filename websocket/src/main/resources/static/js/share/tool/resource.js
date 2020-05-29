@@ -98,10 +98,6 @@ export default class Resource {
         Resource.instance.canvas = canvas;
     }
 
-    static setUsername(username) {
-        Resource.instance.user.username = username;
-    }
-
     static setUserId(userId) {
         Resource.instance.user.userId = userId;
     }

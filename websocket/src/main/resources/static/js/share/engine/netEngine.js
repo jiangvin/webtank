@@ -45,7 +45,7 @@ export default class NetEngine extends Engine {
     }
 
     setUserId(callback) {
-        Common.getRequest("/multiplePlayers/getUserId", function (userId) {
+        Common.getRequest("/multiplePlayers/getUserId?userId=" + Resource.getUser().userId, function (userId) {
             Resource.setUserId(userId);
             callback();
         })

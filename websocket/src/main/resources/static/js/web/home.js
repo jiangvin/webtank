@@ -49,7 +49,7 @@ export default class Home extends Stage {
             const isTouch = e.currentTarget.id === "button2";
             Control.setControlMode(isTouch);
 
-            Resource.setUsername(name);
+            Resource.setUserId(name);
             $('#input-name-div').css("visibility", "hidden");
             Common.nextStage();
         };

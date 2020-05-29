@@ -15,7 +15,7 @@ public class CommonUtil {
     private static long id = 0;
 
     public static String getId() {
-        return "GSI_" + id++;
+        return "generatedServerId=" + id++;
     }
 
     public static final int UNIT_SIZE = 36;

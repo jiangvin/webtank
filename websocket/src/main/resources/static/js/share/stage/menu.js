@@ -44,7 +44,7 @@ export default class Menu extends Stage {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#fff';
-                ctx.fillText(Resource.getUser().username,
+                ctx.fillText(Resource.getUser().userId,
                     Resource.width() / 2,
                     Resource.height() * .2);
             }
