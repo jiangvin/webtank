@@ -13,13 +13,7 @@ import Adapter from "../tool/adapter.js";
 export default class NetEngine extends Engine {
     constructor(room) {
         super(room);
-
         const thisEngine = this;
-
-        //连接超时调用
-        Common.addConnectTimeoutEvent(function () {
-            Common.lastStage();
-        });
 
         thisEngine.setUserId(function () {
             Adapter.socketConnect(Resource.getUser().userId, function () {

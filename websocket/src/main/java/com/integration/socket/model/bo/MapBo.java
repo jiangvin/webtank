@@ -1,8 +1,9 @@
 package com.integration.socket.model.bo;
 
 import com.integration.dto.map.ItemDto;
-import com.integration.dto.map.MapUnitType;
 import com.integration.dto.map.MapDto;
+import com.integration.dto.map.MapUnitType;
+import com.integration.socket.model.dto.StringCountDto;
 import com.integration.util.model.CustomException;
 import lombok.Data;
 
@@ -37,9 +38,9 @@ public class MapBo {
 
     private String mapName;
 
-    private ConcurrentHashMap<String, Integer> playerLife = new ConcurrentHashMap<>();
+    private List<StringCountDto> playerLife = new ArrayList<>();
 
-    private ConcurrentHashMap<String, Integer> computerLife = new ConcurrentHashMap<>();
+    private List<StringCountDto> computerLife = new ArrayList<>();
 
     private ConcurrentHashMap<String, MapUnitType> unitMap = new ConcurrentHashMap<>();
 
@@ -99,10 +100,10 @@ public class MapBo {
         }
     }
 
-    private void duplicate(ConcurrentHashMap<String, Integer> map, ConcurrentHashMap<String, Integer> target) {
-        map.clear();
-        for (Map.Entry<String, Integer> kv : target.entrySet()) {
-            map.put(kv.getKey(), kv.getValue());
+    private void duplicate(List<StringCountDto> list, List<StringCountDto> target) {
+        list.clear();
+        for (StringCountDto kv : target) {
+            list.add(StringCountDto.copy(kv));
         }
     }
 
@@ -128,9 +129,9 @@ public class MapBo {
         }
     }
 
-    private int getCount(Map<String, Integer> lifeMap) {
+    private int getCount(List<StringCountDto> lifeList) {
         int life = 0;
-        for (Map.Entry<String, Integer> kv : lifeMap.entrySet()) {
+        for (StringCountDto kv : lifeList) {
             life += kv.getValue();
         }
         return life;

@@ -4,6 +4,7 @@ import com.integration.dto.map.MapUnitType;
 import com.integration.dto.room.RoomType;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.dto.MapEditDto;
+import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.repository.jooq.tables.records.MapRecord;
 import com.integration.util.CommonUtil;
@@ -134,7 +135,7 @@ public class MapService {
                             mapBo.setHeight(mapBo.getMaxGridY() * CommonUtil.UNIT_SIZE);
                             break;
                         case PLAYERS:
-                            mapBo.getPlayerLife().put(PLAYER_DEFAULT_TYPE, Integer.parseInt(kv.value));
+                            mapBo.getPlayerLife().add(new StringCountDto(PLAYER_DEFAULT_TYPE, Integer.parseInt(kv.value)));
                             break;
                         case COMPUTERS:
                             parseComputers(mapBo, kv.value);
@@ -221,7 +222,7 @@ public class MapService {
         String[] infos = line.split(",");
         for (String info : infos) {
             String[] kv = info.split(":");
-            mapBo.getComputerLife().put(kv[0], Integer.parseInt(kv[1]));
+            mapBo.getComputerLife().add(new StringCountDto(kv[0], Integer.parseInt(kv[1])));
         }
     }
 }

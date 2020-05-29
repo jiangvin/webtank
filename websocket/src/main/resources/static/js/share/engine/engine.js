@@ -11,6 +11,11 @@ import Resource from "../tool/resource.js";
 export default class Engine {
     constructor(room) {
         this.room = room;
+
+        //连接超时调用
+        Common.addConnectTimeoutEvent(function () {
+            Common.lastStage();
+        });
     }
 
     update() {

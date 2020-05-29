@@ -1,11 +1,14 @@
 package com.integration.socket.model.stage;
 
-import com.integration.dto.message.MessageType;
 import com.integration.dto.map.ActionType;
-import com.integration.socket.model.CollideType;
+import com.integration.dto.map.ItemDto;
+import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
+import com.integration.dto.message.MessageType;
+import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
 import com.integration.dto.room.TeamType;
+import com.integration.socket.model.CollideType;
 import com.integration.socket.model.ItemType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.ItemBo;
@@ -14,9 +17,7 @@ import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.TankTypeBo;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.dto.map.ItemDto;
-import com.integration.dto.map.MapDto;
-import com.integration.dto.room.RoomDto;
+import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.model.event.BaseEvent;
 import com.integration.socket.model.event.CreateItemEvent;
 import com.integration.socket.model.event.CreateTankEvent;
@@ -876,7 +877,7 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        Map<String, Integer> lifeMap = getLifeMap(userBo.getTeamType());
+        List<StringCountDto> lifeMap = getLifeMap(userBo.getTeamType());
         if (lifeMap.isEmpty()) {
             if (!isBot(userBo.getTeamType())) {
                 sendMessageToRoom(
@@ -917,36 +918,19 @@ public class StageRoom extends BaseStage {
      * @param lifeMap
      * @return
      */
-    private TankTypeBo getTankType(Map<String, Integer> lifeMap) {
-        List<String> types = new ArrayList<>();
-        List<Integer> min = new ArrayList<>();
-        List<Integer> max = new ArrayList<>();
-        int totalCount = 0;
-        for (Map.Entry<String, Integer> kv : lifeMap.entrySet()) {
-            types.add(kv.getKey());
-            min.add(totalCount);
-            totalCount += kv.getValue();
-            max.add(totalCount - 1);
-        }
-        int index = random.nextInt(totalCount);
-        String selectType = null;
-        for (int i = 0; i < types.size(); ++i) {
-            if (CommonUtil.betweenAnd(index, min.get(i), max.get(i))) {
-                selectType = types.get(i);
-                break;
-            }
-        }
-        int lastCount = lifeMap.get(selectType) - 1;
+    private TankTypeBo getTankType(List<StringCountDto> lifeMap) {
+        StringCountDto pair = lifeMap.get(0);
+        int lastCount = pair.getValue() - 1;
         if (lastCount == 0) {
-            lifeMap.remove(selectType);
+            lifeMap.remove(0);
         } else {
-            lifeMap.put(selectType, lastCount);
+            pair.setValue(lastCount);
         }
         sendMessageToRoom(getMapBo().convertLifeCountToDto(), MessageType.MAP);
-        return TankTypeBo.getTankType(selectType);
+        return TankTypeBo.getTankType(pair.getKey());
     }
 
-    private Map<String, Integer> getLifeMap(TeamType teamType) {
+    private List<StringCountDto> getLifeMap(TeamType teamType) {
         if (teamType == TeamType.RED) {
             return getMapBo().getPlayerLife();
         } else {
