@@ -1,7 +1,8 @@
-package com.integration.bot.model.dto;
+package com.integration.dto.bot;
 
 import com.integration.dto.room.TeamType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 /**
@@ -11,6 +12,7 @@ import lombok.NonNull;
  */
 
 @Data
+@NoArgsConstructor
 public class BotDto {
     private String name;
     @NonNull private String roomId;

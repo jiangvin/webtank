@@ -1,6 +1,6 @@
 package com.integration.bot.model;
 
-import com.integration.bot.model.dto.BotDto;
+import com.integration.dto.bot.BotDto;
 import com.integration.bot.model.map.Tank;
 import com.integration.dto.map.ActionType;
 import com.integration.dto.map.MapUnitType;

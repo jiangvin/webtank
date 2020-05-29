@@ -474,10 +474,7 @@ export default class room extends stage {
 
         if (thisRoom.roomInfo.roomType === "PVE" && item.teamId === 2) {
             item.showId = false;
-            return;
-        }
-
-        if (thisRoom.roomInfo.roomType === "EVE") {
+        } else if (thisRoom.roomInfo.roomType === "EVE") {
             item.showId = false;
         }
         return item;

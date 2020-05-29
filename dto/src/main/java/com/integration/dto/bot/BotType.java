@@ -1,4 +1,4 @@
-package com.integration.bot.model.dto;
+package com.integration.dto.bot;
 
 /**
  * @author 蒋文龙(Vin)

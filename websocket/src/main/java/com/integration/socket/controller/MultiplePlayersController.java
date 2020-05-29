@@ -1,5 +1,7 @@
 package com.integration.socket.controller;
 
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
 import com.integration.socket.service.OnlineUserService;
 import com.integration.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,11 @@ public class MultiplePlayersController {
         }
 
         return CommonUtil.getId();
+    }
+
+    @GetMapping("/ping")
+    public MessageDto ping() {
+        return new MessageDto("Hello World", MessageType.SYSTEM_MESSAGE, "Player");
     }
 
 }

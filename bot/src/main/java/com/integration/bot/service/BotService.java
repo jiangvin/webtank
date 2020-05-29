@@ -2,7 +2,7 @@ package com.integration.bot.service;
 
 import com.integration.bot.model.BaseBot;
 import com.integration.bot.model.SimpleBot;
-import com.integration.bot.model.dto.BotDto;
+import com.integration.dto.bot.BotDto;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

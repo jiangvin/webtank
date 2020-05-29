@@ -67,7 +67,7 @@ export default class NetEngine extends Engine {
         const callBack = function () {
             if (Adapter.getSocketStatus() === true) {
                 const start = new Date().getTime();
-                Common.getRequest("/user/ping", function () {
+                Common.getRequest("/multiplePlayers/ping", function () {
                     Resource.getRoot().netDelay = new Date().getTime() - start;
                 });
                 Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120, true);
