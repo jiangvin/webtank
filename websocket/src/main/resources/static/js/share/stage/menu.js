@@ -60,7 +60,7 @@ export default class Menu extends Stage {
                 joinTeamType: "RED"
             };
             thisMenu.initRoom(roomInfo);
-            Resource.getRoot().initEngine(false);
+            Resource.getRoot().addEngine(false);
         }));
         this.addButton(new Button("多人游戏", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
             const roomInfo = {
@@ -70,7 +70,7 @@ export default class Menu extends Stage {
                 joinTeamType: "RED"
             };
             thisMenu.initRoom(roomInfo);
-            Resource.getRoot().initEngine(true);
+            Resource.getRoot().addEngine(true);
         }));
     }
 

@@ -17,13 +17,28 @@ export default class NetEngine extends Engine {
         const thisEngine = this;
         
         //连接超时调用
-        // Common.addConnectTimeoutEvent(function () {
-        //     Common.lastStage();
-        // });
+        Common.addConnectTimeoutEvent(function () {
+            Common.lastStage();
+        });
 
         thisEngine.setUserId(function () {
             Adapter.socketConnect(Resource.getUser().userId, function () {
 
+                //注册延时事件
+                Common.addTimeEvent("CLIENT_READY", function () {
+                    Adapter.socketSend("CLIENT_READY", {
+                        username: Resource.getUser().username
+                    })
+                },40);
+
+                //注册消息事件
+                Common.addMessageEvent("SERVER_READY", function () {
+                    if (Status.getValue() !== Status.statusPause()) {
+                        return;
+                    }
+
+                    Status.setStatus(Status.statusNormal());
+                })
             })
         })
     }

@@ -25,7 +25,7 @@ export default class Stage {
         });
     }
 
-    pointDownEvent(point) {
+    processPointDownEvent(point) {
         for (let [, value] of this.controlUnits) {
             if (value.process(point)) {
                 break;

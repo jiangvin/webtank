@@ -27,6 +27,10 @@ export default class Common {
         Resource.getRoot().addTimeEvent(eventType, callBack, timeout, ignoreLog);
     }
 
+    static addMessageEvent(eventType, callBack) {
+        Resource.getRoot().addMessageEvent(eventType, callBack);
+    }
+
     static drawTitle(ctx, message) {
         ctx.font = 'bold 55px Microsoft YaHei UI';
         ctx.textAlign = 'center';

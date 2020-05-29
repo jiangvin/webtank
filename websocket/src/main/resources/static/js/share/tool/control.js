@@ -22,12 +22,12 @@ export default class Control {
         if (isTouch) {
             document.addEventListener('touchstart', function (e) {
                 const touchPoint = Control.getTouchPoint(e.touches[e.touches.length - 1]);
-                Resource.getRoot().pointDownEvent(touchPoint);
+                Resource.getRoot().processPointDownEvent(touchPoint);
             })
         } else {
             document.addEventListener('click', function (e) {
                 const touchPoint = Control.getTouchPoint(e);
-                Resource.getRoot().pointDownEvent(touchPoint);
+                Resource.getRoot().processPointDownEvent(touchPoint);
             })
         }
     }

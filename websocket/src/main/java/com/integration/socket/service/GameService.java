@@ -49,8 +49,8 @@ public class GameService {
 
     }
 
-    public void removeUser(String username) {
-        UserBo userBo = onlineUserService.get(username);
+    public void removeUser(String userId) {
+        UserBo userBo = onlineUserService.remove(userId);
         if (userBo == null) {
             return;
         }
@@ -59,9 +59,7 @@ public class GameService {
         if (stage == null) {
             return;
         }
-
-        onlineUserService.remove(username);
-        stage.removeUser(username);
+        stage.removeUser(userId);
 
         //房间为空时删除房间
         if (!(stage instanceof StageRoom)) {
@@ -80,6 +78,9 @@ public class GameService {
         //新用户加入时处理，不需要检查用户是否存在
         if (messageDto.getMessageType() == MessageType.CLIENT_READY) {
             processNewUserReady(messageDto, sendFrom);
+
+            //TODO 测试用，之后删除
+            messageService.sendReady(sendFrom, null);
             return;
         }
 

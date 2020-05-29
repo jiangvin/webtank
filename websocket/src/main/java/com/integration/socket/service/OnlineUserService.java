@@ -66,9 +66,9 @@ public class OnlineUserService {
         userBo.getSubscribeList().add(destination);
     }
 
-    void remove(String key) {
+    UserBo remove(String key) {
         removeInCache(key);
-        removeInUserMap(key);
+        return removeInUserMap(key);
     }
 
     UserBo get(String key) {
@@ -92,12 +92,14 @@ public class OnlineUserService {
         return userBo;
     }
 
-    private void removeInUserMap(String key) {
+    private UserBo removeInUserMap(String key) {
         if (!userMap.containsKey(key)) {
-            return;
+            return null;
         }
 
+        UserBo userBo = userMap.get(key);
         userMap.remove(key);
         log.info("user:{} remove in userMap(count:{})", key, userMap.size());
+        return userBo;
     }
 }

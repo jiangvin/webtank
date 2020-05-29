@@ -47,6 +47,17 @@ export default class Root {
         this.timeEvents.push(event);
     };
 
+    addMessageEvent(eventType, callBack) {
+        //消息已存在
+        if (this.messageEvents[eventType]) {
+            return;
+        }
+
+        const messageEvent = {};
+        messageEvent.callback = callBack;
+        this.messageEvents[eventType] = messageEvent;
+    }
+
     addStage(stage) {
         this.stages[this.stages.length] = stage;
     }
@@ -66,7 +77,7 @@ export default class Root {
      * 初始化引擎
      * @param isNetEngine
      */
-    initEngine(isNetEngine) {
+    addEngine(isNetEngine) {
         if (isNetEngine) {
             this.engine = new netEngine(this.currentStage());
         } else {
@@ -195,15 +206,15 @@ export default class Root {
         ctx.fillText(text, 10, Resource.height() - 5);
     }
 
-    pointDownEvent(point) {
-        this.currentStage().pointDownEvent(point);
+    processPointDownEvent(point) {
+        this.currentStage().processPointDownEvent(point);
     }
 
     /**
      * 网络连接相关
      * @param messageDto
      */
-    receiveStompMessage (messageDto) {
+    processSocketMessage(messageDto) {
         //处理消息事件
         this.updateMessageEvents(messageDto.messageType);
 
@@ -230,7 +241,7 @@ export default class Root {
                 break;
         }
         //给当前场景处理服务消息
-        this.currentStage().receiveStompMessage(messageDto);
+        this.currentStage().processSocketMessage(messageDto);
     };
 
     serverReady() {
