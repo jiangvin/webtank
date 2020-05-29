@@ -29,21 +29,20 @@ public class OnlineUserService {
         return userMap.containsKey(key);
     }
 
-    boolean processNewUserReady(UserDto userDto) {
+    void processNewUserReady(UserDto userDto) {
         if (userMap.containsKey(userDto.getUserId())) {
-            return false;
+            return;
         }
 
         UserBo userBo = removeInCache(userDto.getUserId());
         if (userBo == null) {
-            return false;
+            return;
         }
 
         userBo.setUserName(userDto.getUsername());
         userMap.put(userBo.getUserId(), userBo);
         log.info("userId:{} -> username:{}", userBo.getUserId(), userBo.getUserName());
         log.info("user:{} add into userMap(count:{})", userBo.getUserName(), userMap.size());
-        return true;
     }
 
     public void addNewUserCache(UserBo userBo) {
@@ -67,9 +66,9 @@ public class OnlineUserService {
         userBo.getSubscribeList().add(destination);
     }
 
-    boolean remove(String key) {
+    void remove(String key) {
         removeInCache(key);
-        return removeInUserMap(key);
+        removeInUserMap(key);
     }
 
     UserBo get(String key) {
@@ -93,13 +92,12 @@ public class OnlineUserService {
         return userBo;
     }
 
-    private boolean removeInUserMap(String key) {
+    private void removeInUserMap(String key) {
         if (!userMap.containsKey(key)) {
-            return false;
+            return;
         }
 
         userMap.remove(key);
         log.info("user:{} remove in userMap(count:{})", key, userMap.size());
-        return true;
     }
 }

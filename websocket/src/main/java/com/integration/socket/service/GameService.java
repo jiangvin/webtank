@@ -62,7 +62,6 @@ public class GameService {
 
         onlineUserService.remove(username);
         stage.removeUser(username);
-        sendUserStatusAndMessage(username, true);
 
         //房间为空时删除房间
         if (!(stage instanceof StageRoom)) {
@@ -214,28 +213,6 @@ public class GameService {
     private void processNewUserReady(MessageDto messageDto, String sendFrom) {
         UserDto userDto = ObjectUtil.readValue(messageDto.getMessage(), UserDto.class);
         userDto.setUserId(sendFrom);
-        if (onlineUserService.processNewUserReady(userDto)) {
-            sendUserStatusAndMessage(sendFrom, false);
-        }
-    }
-
-    private void sendUserStatusAndMessage(String username, boolean isLeave) {
-        //没人了，不用更新状态
-        if (onlineUserService.getUserList().isEmpty()) {
-            log.info("no user in service, no need to send message");
-            return;
-        }
-
-        if (isLeave) {
-            messageService.sendMessage(new MessageDto(String.format("%s 离开了! 当前总人数: %d",
-                                                                    username,
-                                                                    onlineUserService.getUserList().size()),
-                                                      MessageType.SYSTEM_MESSAGE));
-        } else {
-            messageService.sendMessage(new MessageDto(String.format("%s 加入了! 当前总人数: %d",
-                                                                    username,
-                                                                    onlineUserService.getUserList().size()),
-                                                      MessageType.SYSTEM_MESSAGE));
-        }
+        onlineUserService.processNewUserReady(userDto);
     }
 }
