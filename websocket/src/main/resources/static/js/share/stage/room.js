@@ -8,6 +8,7 @@ import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
 import Play from "./play.js";
 import Status from "../tool/status.js";
+import Control from "../tool/control.js";
 
 export default class room extends stage {
     constructor() {
@@ -98,6 +99,7 @@ export default class room extends stage {
 
         this.drawBackground(ctx);
         super.draw(ctx);
+        Control.draw(ctx);
         this.drawMask(ctx);
         this.drawRoomInfo(ctx);
     }

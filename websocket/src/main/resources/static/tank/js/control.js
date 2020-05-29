@@ -30,46 +30,6 @@
 
     };
 
-    Control.generateTouchModeInfo = function (isPortrait) {
-        let centerX = Common.width() / 4 / 2;
-        let centerY = Common.height() / 2 / 2;
-        let radius = centerX > centerY ? centerY : centerX;
-        centerY *= 3;
-
-        let rightCenterX = centerX * 7;
-        let rightCenterY = centerY;
-        let rightRadius = radius * .6;
-
-        if (centerX - radius < 20) {
-            rightCenterX -= 20;
-            centerX += 20;
-        }
-        if (Common.height() - centerY - radius < 20) {
-            rightCenterY -= 20;
-            centerY -= 20;
-        }
-
-        if (!this.controlMode) {
-            this.controlMode = {};
-        }
-
-        this.controlMode.centerX = centerX;
-        this.controlMode.centerY = centerY;
-        this.controlMode.radius = radius;
-        this.controlMode.minRadius = radius / 3;
-        this.controlMode.maxRadius = radius * 1.5;
-
-        this.controlMode.rightCenterX = rightCenterX;
-        this.controlMode.rightCenterY = rightCenterY;
-        this.controlMode.rightRadius = rightRadius;
-
-        this.controlMode.hornCenterX = rightCenterX + rightRadius * 1.1;
-        this.controlMode.hornCenterY = rightCenterY - rightRadius;
-        this.controlMode.hornRadius = rightRadius * .4;
-
-        this.controlMode.portrait = isPortrait;
-    };
-
     const bindTouchEvent = function (controlMode) {
         window.addEventListener('touchstart', function (e) {
             const touchPoint = Common.getTouchPoint(e.touches[e.touches.length - 1]);

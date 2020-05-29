@@ -25,13 +25,13 @@ export default class Main {
     }
 
     restart() {
-        Adapter.setPlatform(1);
-        Control.setControlMode(true);
-
         //设置缩放比例
         const scale = Resource.calculateScale(canvas.width,canvas.height);
         canvas.width = canvas.width / scale;
         canvas.height = canvas.height / scale;
+
+        Adapter.setPlatform(1);
+        Control.setControlMode(true);
 
         this.root = Resource.getRoot();
         this.root.addStage(new Menu());
