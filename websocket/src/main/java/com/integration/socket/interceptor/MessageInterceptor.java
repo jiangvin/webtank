@@ -44,17 +44,17 @@ public class MessageInterceptor implements ChannelInterceptor {
             return;
         }
 
-        String username = principal.getName();
+        String userId = principal.getName();
         if (StompCommand.CONNECT.equals(command)) {
-            onlineUserService.addNewUserCache(new UserBo(username, accessor.getSessionId()));
+            onlineUserService.addNewUserCache(new UserBo(userId, accessor.getSessionId()));
         } else if (StompCommand.SUBSCRIBE.equals(command)) {
             String destination = accessor.getDestination();
-            onlineUserService.subscribeInUserCache(username, destination);
+            onlineUserService.subscribeInUserCache(userId, destination);
         } else if (StompCommand.DISCONNECT.equals(command)) {
-            gameService.removeUser(username);
+            gameService.removeUser(userId);
         } else if (!StompCommand.SEND.equals(command)) {
             //send类型在controller里面单独处理
-            log.info("user:{} send nonsupport command:{}", username, command);
+            log.info("user:{} send nonsupport command:{}", userId, command);
         }
     }
 }

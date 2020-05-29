@@ -20,6 +20,8 @@ export default class Adapter {
 
 
         this.stompClient = null;
+
+        this.wxSocketStatus = false;
     }
 
     static setPlatform(platform) {
@@ -29,6 +31,8 @@ export default class Adapter {
     static getSocketStatus() {
         if (this.instance.platform === 0) {
             return Adapter.getSocketStatusWeb();
+        } else {
+            return Adapter.getSocketStatusWx();
         }
     }
 
@@ -39,9 +43,15 @@ export default class Adapter {
         return Adapter.instance.stompClient.connected;
     }
 
+    static getSocketStatusWx() {
+        return Adapter.instance.wxSocketStatus;
+    }
+
     static socketSend(type, value, sendTo) {
         if (this.instance.platform === 0) {
             Adapter.socketSendWeb(type, value, sendTo);
+        } else {
+            Adapter.socketSendWx(type, value, sendTo);
         }
     }
 
@@ -62,6 +72,26 @@ export default class Adapter {
             }));
     }
 
+    static socketSendWx(type, value, sendTo) {
+        if (!Adapter.getSocketStatusWx()) {
+            return;
+        }
+
+        if (!type) {
+            type = "USER_MESSAGE";
+        }
+
+        let msg = JSON.stringify({
+            "message": value,
+            "messageType": type,
+            "sendTo": sendTo
+        });
+
+        wx.sendSocketMessage({
+            data: msg
+        })
+    }
+
     static socketConnect(id, callBack) {
         if (this.instance.platform === 0) {
             Adapter.socketConnectWeb(id, callBack);
@@ -71,7 +101,7 @@ export default class Adapter {
     }
 
     static socketConnectWeb(id, callback) {
-        const socket = new SockJS(encodeURI(Resource.getHost() + '/websocket-simple?name=' + id));
+        const socket = new SockJS(encodeURI("http://" + Resource.getHost() + '/websocket-simple?name=' + id));
         const thisAdapter = Adapter.instance;
         thisAdapter.stompClient = Stomp.over(socket);
         thisAdapter.stompClient.connect({}, function (frame) {
@@ -91,15 +121,20 @@ export default class Adapter {
 
     static socketConnectWx(id, callback) {
         wx.connectSocket({
-            url: 'ws://localhost/ws?name=' + id
-        })
-        wx.onSocketOpen(function (res) {
-            console.log('WebSocket连接已打开！')
-            wx.sendSocketMessage({data: "hello wx"})
-        })
+            url: 'ws://' + Resource.getHost() + '/ws?name=' + id
+        });
 
-        wx.onSocketMessage(function (res) {
-            console.log('收到onmessage事件:', res)
+        wx.onSocketOpen(function () {
+            Adapter.instance.wxSocketStatus = true;
+            callback();
+        });
+
+        wx.onSocketMessage(function (response) {
+            Resource.getRoot().processSocketMessage(JSON.parse(response.data));
+        });
+
+        wx.onSocketClose(function () {
+            Adapter.instance.wxSocketStatus = false;
         })
     }
 }

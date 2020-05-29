@@ -17,7 +17,7 @@ export default class Resource {
         this.user = new User();
         this.itemId = 1;
         this.scale = 1;
-        this.host = "http://localhost";
+        this.host = "localhost";
         this.initImage();
     }
 
