@@ -33,11 +33,78 @@ export default class Control {
                 Control.touchEndControl(e);
             });
         } else {
+            Control.generateKeyModeInfo();
             document.addEventListener('click', function (e) {
                 const touchPoint = Control.getTouchPoint(e);
                 Resource.getRoot().processPointDownEvent(touchPoint);
             });
+            document.addEventListener("keydown", function (e) {
+                Control.keyDownControl(e.key)
+            });
+            document.addEventListener("keyup", function (e) {
+                Control.keyUpControl(e.key)
+            });
+        }
+    }
 
+    static keyUpControl(key) {
+        const controlMode = Control.instance.controlMode;
+        let event;
+        switch (key) {
+            case "ArrowUp":
+            case "ArrowDown":
+            case "ArrowLeft":
+            case "ArrowRight":
+            case "Up":
+            case "Down":
+            case "Left":
+            case "Right":
+                event = "Stop";
+                break;
+            default:
+                break;
+        }
+        if (event !== undefined) {
+            controlMode.keyDownSet.delete(key);
+            //所有方向按键都松开才算停止
+            if (controlMode.keyDownSet.size === 0) {
+                Resource.getRoot().processControlEvent(event);
+            }
+        }
+    }
+
+    static keyDownControl(key) {
+        const controlMode = Control.instance.controlMode;
+        let event;
+        switch (key) {
+            case "Up":
+            case "ArrowUp":
+                event = "Up";
+                break;
+            case "Down":
+            case "ArrowDown":
+                event = "Down";
+                break;
+            case "Left":
+            case "ArrowLeft":
+                event = "Left";
+                break;
+            case "Right":
+            case "ArrowRight":
+                event = "Right";
+                break;
+            case " ":
+            case "Spacebar":
+                event = "FIRE";
+                break;
+            default:
+                break;
+        }
+        if (event !== undefined) {
+            if (event !== "FIRE" && !controlMode.keyDownSet.has(key)) {
+                controlMode.keyDownSet.add(key);
+            }
+            Resource.getRoot().processControlEvent(event);
         }
     }
 
@@ -163,6 +230,11 @@ export default class Control {
                 return "Down";
             }
         }
+    }
+
+    static generateKeyModeInfo() {
+        Control.instance.controlMode = {};
+        Control.instance.controlMode.keyDownSet = new Set();
     }
 
     static generateTouchModeInfo() {

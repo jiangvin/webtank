@@ -40,37 +40,6 @@
     const bindKeyboardEvent = function (controlMode) {
         controlMode.keyDownSet = new Set();
         window.addEventListener("keydown", function (e) {
-            let event;
-            switch (e.key) {
-                case "Up":
-                case "ArrowUp":
-                    event = "Up";
-                    break;
-                case "Down":
-                case "ArrowDown":
-                    event = "Down";
-                    break;
-                case "Left":
-                case "ArrowLeft":
-                    event = "Left";
-                    break;
-                case "Right":
-                case "ArrowRight":
-                    event = "Right";
-                    break;
-                case " ":
-                case "Spacebar":
-                    event = "FIRE";
-                    break;
-                default:
-                    break;
-            }
-            if (event !== undefined) {
-                if (event !== "FIRE" && !controlMode.keyDownSet.has(e.key)) {
-                    controlMode.keyDownSet.add(e.key);
-                }
-                Resource.getGame().controlEvent(event);
-            }
         });
         window.addEventListener('keyup', function (e) {
             let event = null;
