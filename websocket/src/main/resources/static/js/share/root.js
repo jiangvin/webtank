@@ -88,6 +88,11 @@ export default class Root {
     update() {
         this.backendFrame.calculate();
         this.updateTimeEvents();
+
+        if (Status.getValue() !== Status.statusNormal()) {
+            return;
+        }
+
         this.updateEngine();
         this.currentStage().update();
     }
@@ -159,7 +164,7 @@ export default class Root {
         }
 
         if (Status.getMessage()) {
-            Common.drawTitle(Status.getMessage());
+            Common.drawTitle(ctx, Status.getMessage());
         }
     }
 

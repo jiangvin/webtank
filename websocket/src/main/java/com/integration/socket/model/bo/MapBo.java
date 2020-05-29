@@ -128,7 +128,7 @@ public class MapBo {
         }
     }
 
-    public int getCount(Map<String, Integer> lifeMap) {
+    private int getCount(Map<String, Integer> lifeMap) {
         int life = 0;
         for (Map.Entry<String, Integer> kv : lifeMap.entrySet()) {
             life += kv.getValue();
