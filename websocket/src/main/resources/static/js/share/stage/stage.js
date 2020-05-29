@@ -45,4 +45,8 @@ export default class Stage {
         const controlUnit = button.controlUnit;
         this.controlUnits.set(controlUnit.id, controlUnit);
     }
+
+    processSocketMessage(messageDto) {
+
+    }
 }

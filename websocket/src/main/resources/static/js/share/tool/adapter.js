@@ -26,13 +26,13 @@ export default class Adapter {
         this.instance.platform = platform;
     }
 
-    static socketEnable() {
+    static getSocketStatus() {
         if (this.instance.platform === 0) {
-            return Adapter.socketEnableWeb();
+            return Adapter.getSocketStatusWeb();
         }
     }
 
-    static socketEnableWeb() {
+    static getSocketStatusWeb() {
         if (!Adapter.instance.stompClient) {
             return false;
         }
@@ -46,7 +46,7 @@ export default class Adapter {
     }
 
     static socketSendWeb(type, value, sendTo) {
-        if (!Adapter.socketEnableWeb()) {
+        if (!Adapter.getSocketStatusWeb()) {
             return;
         }
 

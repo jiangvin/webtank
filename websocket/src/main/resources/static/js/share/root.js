@@ -49,13 +49,13 @@ export default class Root {
 
     addMessageEvent(eventType, callBack) {
         //消息已存在
-        if (this.messageEvents[eventType]) {
+        if (this.messageEvents.has(eventType)) {
             return;
         }
 
         const messageEvent = {};
         messageEvent.callback = callBack;
-        this.messageEvents[eventType] = messageEvent;
+        this.messageEvents.set(eventType, messageEvent);
     }
 
     addStage(stage) {

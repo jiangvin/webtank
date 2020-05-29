@@ -37,6 +37,7 @@ export default class NetEngine extends Engine {
                         return;
                     }
 
+                    thisEngine.addConnectCheckEvent();
                     Status.setStatus(Status.statusNormal());
                 })
             })
@@ -50,33 +51,12 @@ export default class NetEngine extends Engine {
         })
     }
 
-    stompConnect(name, callback) {
-        // const socket = new SockJS(encodeURI(Resource.getHost() + '/websocket-simple?name=' + name));
-        // const thisEngine = this;
-        // thisEngine.stompClient = Stomp.over(socket);
-        // thisEngine.stompClient.connect({}, function (frame) {
-        //     Common.addMessage("网络连接中: " + frame, "#ffffff");
-        //
-        //     // 客户端订阅消息, 公共消息和私有消息
-        //     thisEngine.stompClient.subscribe('/topic/send', function (response) {
-        //         Resource.getRoot().receiveStompMessage(JSON.parse(response.body));
-        //     });
-        //     thisEngine.stompClient.subscribe('/user/queue/send', function (response) {
-        //         Resource.getRoot().receiveStompMessage(JSON.parse(response.body));
-        //     });
-
-            // thisEngine.addConnectCheckEvent();
-            // callback();
-        // });
-    }
-
     /**
      * 每两秒确认一次连接是否失效
      */
     addConnectCheckEvent() {
-        const thisEngine = this;
         const callBack = function () {
-            if (thisEngine.getStompStatus() === true) {
+            if (Adapter.getSocketStatus() === true) {
                 const start = new Date().getTime();
                 Common.getRequest("/user/ping", function () {
                     Resource.getRoot().netDelay = new Date().getTime() - start;
