@@ -170,37 +170,38 @@ export default class Engine {
         const speed = center.speed;
         const size = Resource.getUnitSize();
         const half = size / 2;
+        const halfLight = half - 1;
         //获取前方的两个角的坐标（顺时针获取）
         const corner1 = {};
         const corner2 = {};
         switch (orientation) {
             case 0:
                 y -= speed;
-                corner1.x = x - half + 1;
-                corner1.y = y - half + 1;
-                corner2.x = x + half - 1;
-                corner2.y = y - half + 1;
+                corner1.x = x - halfLight;
+                corner1.y = y - halfLight;
+                corner2.x = x + halfLight;
+                corner2.y = y - halfLight;
                 break;
             case 1:
                 y += speed;
-                corner1.x = x + half - 1;
-                corner1.y = y + half - 1;
-                corner2.x = x - half + 1;
-                corner2.y = y + half - 1;
+                corner1.x = x + halfLight;
+                corner1.y = y + halfLight;
+                corner2.x = x - halfLight;
+                corner2.y = y + halfLight;
                 break;
             case 2:
                 x -= speed;
-                corner1.x = x - half + 1;
-                corner1.y = y + half - 1;
-                corner2.x = x - half + 1;
-                corner2.y = y - half + 1;
+                corner1.x = x - halfLight;
+                corner1.y = y + halfLight;
+                corner2.x = x - halfLight;
+                corner2.y = y - halfLight;
                 break;
             case 3:
                 x += speed;
-                corner1.x = x + half - 1;
-                corner1.y = y - half + 1;
-                corner2.x = x + half - 1;
-                corner2.y = y + half - 1;
+                corner1.x = x + halfLight;
+                corner1.y = y - halfLight;
+                corner2.x = x + halfLight;
+                corner2.y = y + halfLight;
                 break;
         }
 

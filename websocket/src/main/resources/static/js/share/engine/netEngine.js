@@ -72,7 +72,7 @@ export default class NetEngine extends Engine {
                 });
                 Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120, true);
             } else {
-                Status.setStatus(Status.getStatusPause(), "与服务器断开！");
+                Status.setStatus(Status.statusPause(), "与服务器断开！");
 
                 //TODO 断线重连
             }
