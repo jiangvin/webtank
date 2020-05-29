@@ -1,4 +1,4 @@
-package com.integration.socket.model.bo;
+package com.integration.socket.model.dto;
 
 import com.integration.util.model.CustomException;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TankTypeBo {
+public class TankTypeDto {
     private String typeId;
     private double speed;
 
@@ -30,10 +30,10 @@ public class TankTypeBo {
     private String downId;
     private String upId;
 
-    private static ConcurrentHashMap<String, TankTypeBo> tankTypeMap;
+    private static ConcurrentHashMap<String, TankTypeDto> tankTypeMap;
 
-    public static TankTypeBo getTankType(String id) {
-        ConcurrentHashMap<String, TankTypeBo> map = getTypeMap();
+    public static TankTypeDto getTankType(String id) {
+        ConcurrentHashMap<String, TankTypeDto> map = getTypeMap();
 
         if (!map.containsKey(id)) {
             throw new CustomException(String.format("tank type:%s can not be found! ", id));
@@ -41,7 +41,7 @@ public class TankTypeBo {
         return map.get(id);
     }
 
-    private static ConcurrentHashMap<String, TankTypeBo> getTypeMap() {
+    private static ConcurrentHashMap<String, TankTypeDto> getTypeMap() {
         if (tankTypeMap == null) {
             initTypeMap();
         }
@@ -52,7 +52,7 @@ public class TankTypeBo {
         tankTypeMap = new ConcurrentHashMap<>(16);
 
         //menu
-        tankTypeMap.put("tankMenu", new TankTypeBo(
+        tankTypeMap.put("tankMenu", new TankTypeDto(
                             "tankMenu",
                             1.0,
                             1,
@@ -64,7 +64,7 @@ public class TankTypeBo {
                             null));
 
         //player
-        tankTypeMap.put("tank01", new TankTypeBo(
+        tankTypeMap.put("tank01", new TankTypeDto(
                             "tank01",
                             1.5,
                             1,
@@ -74,7 +74,7 @@ public class TankTypeBo {
                             false,
                             null,
                             "tank02"));
-        tankTypeMap.put("tank02", new TankTypeBo(
+        tankTypeMap.put("tank02", new TankTypeDto(
                             "tank02",
                             2.0,
                             1,
@@ -84,7 +84,7 @@ public class TankTypeBo {
                             false,
                             null,
                             "tank03"));
-        tankTypeMap.put("tank03", new TankTypeBo(
+        tankTypeMap.put("tank03", new TankTypeDto(
                             "tank03",
                             2.5,
                             2,
@@ -94,7 +94,7 @@ public class TankTypeBo {
                             false,
                             "tank01",
                             "tank04"));
-        tankTypeMap.put("tank04", new TankTypeBo(
+        tankTypeMap.put("tank04", new TankTypeDto(
                             "tank04",
                             2.5,
                             2,
@@ -110,13 +110,13 @@ public class TankTypeBo {
     }
 
     private static void initComType() {
-        TankTypeBo com = comCopyType(
-                             "tank05",
-                             "tank01",
-                             null,
-                             30,
-                             "tank06",
-                             null);
+        TankTypeDto com = comCopyType(
+                              "tank05",
+                              "tank01",
+                              null,
+                              30,
+                              "tank06",
+                              null);
         tankTypeMap.put(com.getTypeId(), com);
 
         com = comCopyType(
@@ -183,13 +183,13 @@ public class TankTypeBo {
         tankTypeMap.put(com.getTypeId(), com);
     }
 
-    private static TankTypeBo comCopyType(String newId,
-                                          String oldId,
-                                          Double speed,
-                                          int ammoReloadTime,
-                                          String upId,
-                                          String downId) {
-        TankTypeBo com = new TankTypeBo();
+    private static TankTypeDto comCopyType(String newId,
+                                           String oldId,
+                                           Double speed,
+                                           int ammoReloadTime,
+                                           String upId,
+                                           String downId) {
+        TankTypeDto com = new TankTypeDto();
         BeanUtils.copyProperties(tankTypeMap.get(oldId), com);
         com.ammoReloadTime = ammoReloadTime;
         com.typeId = newId;

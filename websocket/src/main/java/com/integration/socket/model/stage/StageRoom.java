@@ -15,7 +15,7 @@ import com.integration.socket.model.bo.ItemBo;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
-import com.integration.socket.model.bo.TankTypeBo;
+import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.model.event.BaseEvent;
@@ -85,7 +85,7 @@ public class StageRoom extends BaseStage {
     /**
      * 在通关后记录玩家属性
      */
-    private Map<String, TankTypeBo> tankTypeSaveMap = new ConcurrentHashMap<>();
+    private Map<String, TankTypeDto> tankTypeSaveMap = new ConcurrentHashMap<>();
 
     @Getter
     private String roomId;
@@ -893,8 +893,8 @@ public class StageRoom extends BaseStage {
         tankBo.setTeamType(userBo.getTeamType());
 
         //设定类型
-        TankTypeBo initType = getTankType(lifeMap);
-        TankTypeBo saveType = this.tankTypeSaveMap.get(userBo.getUserId());
+        TankTypeDto initType = getTankType(lifeMap);
+        TankTypeDto saveType = this.tankTypeSaveMap.get(userBo.getUserId());
         if (saveType != null) {
             tankBo.setType(saveType);
             this.tankTypeSaveMap.remove(userBo.getUserId());
@@ -918,7 +918,7 @@ public class StageRoom extends BaseStage {
      * @param lifeMap
      * @return
      */
-    private TankTypeBo getTankType(List<StringCountDto> lifeMap) {
+    private TankTypeDto getTankType(List<StringCountDto> lifeMap) {
         StringCountDto pair = lifeMap.get(0);
         int lastCount = pair.getValue() - 1;
         if (lastCount == 0) {
@@ -927,7 +927,7 @@ public class StageRoom extends BaseStage {
             pair.setValue(lastCount);
         }
         sendMessageToRoom(getMapBo().convertLifeCountToDto(), MessageType.MAP);
-        return TankTypeBo.getTankType(pair.getKey());
+        return TankTypeDto.getTankType(pair.getKey());
     }
 
     private List<StringCountDto> getLifeMap(TeamType teamType) {
