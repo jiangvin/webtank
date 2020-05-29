@@ -2,10 +2,10 @@ package com.integration.socket.service;
 
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
-import com.integration.socket.model.bo.UserBo;
 import com.integration.dto.room.RoomDto;
+import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.model.stage.BaseStage;
-import com.integration.socket.model.stage.StageMenu;
 import com.integration.socket.model.stage.StageRoom;
 import com.integration.util.CommonUtil;
 import com.integration.util.model.CustomException;
@@ -44,18 +44,9 @@ public class GameService {
     @Autowired
     private RoomService roomService;
 
-    /**
-     * 布景管理
-     */
-    private StageMenu menu;
-
     @PostConstruct
     private void init() {
-        initStage();
-    }
 
-    private void initStage() {
-        menu = new StageMenu(messageService);
     }
 
     public void removeUser(String username) {
@@ -109,7 +100,10 @@ public class GameService {
             case JOIN_ROOM:
                 joinRoom(messageDto, sendFrom);
             default:
-                currentStage(userBo).processMessage(messageDto, sendFrom);
+                BaseStage stage = currentStage(userBo);
+                if (stage != null) {
+                    stage.processMessage(messageDto, sendFrom);
+                }
                 break;
         }
     }
@@ -155,9 +149,6 @@ public class GameService {
 
         StageRoom room = roomService.create(roomDto, userBo);
 
-        //remove from old stage
-        currentStage(userBo).removeUser(userBo.getUserId());
-
         //add into new stage
         room.addUser(userBo, roomDto.getJoinTeamType());
     }
@@ -179,16 +170,12 @@ public class GameService {
             throw new CustomException("房间不存在:" + roomDto.getRoomId());
         }
 
-        //remove from old stage
-        currentStage(userBo).removeUser(userBo.getUserId());
-
         //add into new stage
         roomService.get(roomDto.getRoomId()).addUser(userBo, roomDto.getJoinTeamType());
     }
 
     @Scheduled(fixedRate = 17)
     public void update() {
-        menu.update();
         roomService.update();
     }
 
@@ -199,7 +186,7 @@ public class GameService {
             }
             return roomService.get(userBo.getRoomId());
         } else {
-            return menu;
+            return null;
         }
     }
 
@@ -225,10 +212,11 @@ public class GameService {
     }
 
     private void processNewUserReady(MessageDto messageDto, String sendFrom) {
-        if (onlineUserService.processNewUserReady(sendFrom)) {
+        UserDto userDto = ObjectUtil.readValue(messageDto.getMessage(), UserDto.class);
+        userDto.setUserId(sendFrom);
+        if (onlineUserService.processNewUserReady(userDto)) {
             sendUserStatusAndMessage(sendFrom, false);
         }
-        menu.addTank(messageDto, sendFrom);
     }
 
     private void sendUserStatusAndMessage(String username, boolean isLeave) {

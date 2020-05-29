@@ -19,9 +19,6 @@ import java.util.List;
 @Service
 @Slf4j
 public class MessageService {
-
-    private static final String TOPIC_PATH = "/topic/send";
-
     private static final String QUEUE_PATH = "/queue/send";
 
     private static final int MAX_LOG_LENGTH = 256;
@@ -34,7 +31,7 @@ public class MessageService {
 
     public void sendMessage(MessageDto messageDto) {
         List<String> sendToList = messageDto.getSendToList();
-        if (sendToList != null && sendToList.isEmpty()) {
+        if (sendToList == null || sendToList.isEmpty()) {
             return;
         }
 
@@ -44,19 +41,13 @@ public class MessageService {
         }
         log.info("send message:{}", msg);
 
-        if (sendToList == null) {
-            simpMessagingTemplate.convertAndSend(
-                TOPIC_PATH,
+        //清空原有人数，减少数据量
+        messageDto.setSendToList(null);
+        for (String sendTo : sendToList) {
+            simpMessagingTemplate.convertAndSendToUser(
+                sendTo,
+                QUEUE_PATH,
                 messageDto);
-        } else {
-            //清空原有人数，减少数据量
-            messageDto.setSendToList(null);
-            for (String sendTo : sendToList) {
-                simpMessagingTemplate.convertAndSendToUser(
-                    sendTo,
-                    QUEUE_PATH,
-                    messageDto);
-            }
         }
     }
 

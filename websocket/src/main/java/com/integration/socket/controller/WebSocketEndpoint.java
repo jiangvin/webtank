@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 @ServerEndpoint("/ws")
 @Component
-public class WsEndpoint {
+public class WebSocketEndpoint {
     /**
      * 连接成功
      *
@@ -44,7 +44,7 @@ public class WsEndpoint {
      * @param text
      */
     @OnMessage
-    public String onMsg(Session session, String text) throws IOException {
+    public String onMsg(Session session, String text) {
         return "servet 发送：" + text;
     }
 }

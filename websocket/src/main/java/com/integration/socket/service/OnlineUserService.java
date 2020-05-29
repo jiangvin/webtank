@@ -1,6 +1,7 @@
 package com.integration.socket.service;
 
 import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.dto.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -28,18 +29,20 @@ public class OnlineUserService {
         return userMap.containsKey(key);
     }
 
-    boolean processNewUserReady(String username) {
-        if (userMap.containsKey(username)) {
+    boolean processNewUserReady(UserDto userDto) {
+        if (userMap.containsKey(userDto.getUserId())) {
             return false;
         }
 
-        UserBo userBo = removeInCache(username);
+        UserBo userBo = removeInCache(userDto.getUserId());
         if (userBo == null) {
             return false;
         }
 
+        userBo.setUserName(userDto.getUsername());
         userMap.put(userBo.getUserId(), userBo);
-        log.info("user:{} add into userMap(count:{})", username, userMap.size());
+        log.info("userId:{} -> username:{}", userBo.getUserId(), userBo.getUserName());
+        log.info("user:{} add into userMap(count:{})", userBo.getUserName(), userMap.size());
         return true;
     }
 
