@@ -233,7 +233,7 @@ export default class room extends stage {
         }
 
         this.setBarrier(item, typeId);
-        const position = this.getPositionFromId(data.id);
+        const position = Common.getPositionFromId(data.id);
         item.x = position.x;
         item.y = position.y;
 
@@ -295,15 +295,6 @@ export default class room extends stage {
             item.isBarrier = true;
         }
     }
-
-    getPositionFromId(id) {
-        const position = {};
-        const infos = id.split("_");
-        const size = Resource.getUnitSize();
-        position.x = parseInt(infos[0]) * size + size / 2;
-        position.y = parseInt(infos[1]) * size + size / 2;
-        return position;
-    };
 
     sortItems() {
         //支援ES5的兼容写法

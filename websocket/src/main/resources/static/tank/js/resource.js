@@ -55,51 +55,6 @@
         //初始化
         this.game = new Game("canvas");
 
-        //在手机上禁用滑动
-        window.addEventListener('touchmove', function (e) {
-            // 判断默认行为是否可以被禁用
-            if (e.cancelable) {
-                // 判断默认行为是否已经被禁用
-                if (!e.defaultPrevented) {
-                    e.preventDefault();
-                }
-            }
-        }, false);
-        window.addEventListener('touchstart', function (e) {
-            if (e.touches.length > 1) {
-                // 判断默认行为是否可以被禁用
-                if (e.cancelable) {
-                    // 判断默认行为是否已经被禁用
-                    if (!e.defaultPrevented) {
-                        e.preventDefault();
-                    }
-                }
-            }
-        });
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function (e) {
-            let now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                // 判断默认行为是否可以被禁用
-                if (e.cancelable) {
-                    // 判断默认行为是否已经被禁用
-                    if (!e.defaultPrevented) {
-                        e.preventDefault();
-                    }
-                }
-            }
-            lastTouchEnd = now;
-        }, false);
-        document.addEventListener('gesturestart', function (e) {
-            // 判断默认行为是否可以被禁用
-            if (e.cancelable) {
-                // 判断默认行为是否已经被禁用
-                if (!e.defaultPrevented) {
-                    e.preventDefault();
-                }
-            }
-        });
-
         return this.game;
     };
 

@@ -77,6 +77,15 @@ export default class Common {
         return Resource.height();
     }
 
+    static getPositionFromId(id) {
+        const position = {};
+        const infos = id.split("_");
+        const size = Resource.getUnitSize();
+        position.x = parseInt(infos[0]) * size + size / 2;
+        position.y = parseInt(infos[1]) * size + size / 2;
+        return position;
+    };
+
     static addConnectTimeoutEvent(callback) {
         Resource.getRoot().addTimeEvent("TIMEOUT_CALLBACK", function () {
             if (Status.getValue() !== Status.statusPause()) {

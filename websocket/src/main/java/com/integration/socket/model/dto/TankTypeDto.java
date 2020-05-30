@@ -41,7 +41,7 @@ public class TankTypeDto {
         return map.get(id);
     }
 
-    private static ConcurrentHashMap<String, TankTypeDto> getTypeMap() {
+    public static ConcurrentHashMap<String, TankTypeDto> getTypeMap() {
         if (tankTypeMap == null) {
             initTypeMap();
         }

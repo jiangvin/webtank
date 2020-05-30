@@ -3,6 +3,7 @@ package com.integration.socket.model.bo;
 import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
+import com.integration.socket.model.dto.MapDetailDto;
 import com.integration.socket.model.dto.StringCountDto;
 import com.integration.util.model.CustomException;
 import lombok.Data;
@@ -49,7 +50,13 @@ public class MapBo {
     private List<String> computerStartPoints = new ArrayList<>();
 
     public MapDto convertToDto() {
-        MapDto mapDto = convertLifeCountToDto();
+        MapDto mapDto = new MapDto();
+        copyProperties(mapDto);
+        return mapDto;
+    }
+
+    private void copyProperties(MapDto mapDto) {
+        copyLifeCountProperties(mapDto);
         mapDto.setWidth(getWidth());
         mapDto.setHeight(getHeight());
         mapDto.setMapId(getMapId());
@@ -62,14 +69,29 @@ public class MapBo {
             itemList.add(item);
         }
         mapDto.setItemList(itemList);
-        return mapDto;
+    }
+
+    public MapDetailDto toDetailDto() {
+        MapDetailDto mapDetailDto = new MapDetailDto();
+        copyProperties(mapDetailDto);
+
+        mapDetailDto.setPlayerStartPos(this.playerStartPoints);
+        mapDetailDto.setComputerStartPos(this.computerStartPoints);
+        mapDetailDto.setComputerTypeCountList(this.computerLife);
+        mapDetailDto.setComputerStartCount(this.computerStartCount);
+
+        return mapDetailDto;
     }
 
     public MapDto convertLifeCountToDto() {
         MapDto mapDto = new MapDto();
+        copyLifeCountProperties(mapDto);
+        return mapDto;
+    }
+
+    private void copyLifeCountProperties(MapDto mapDto) {
         mapDto.setPlayerLife(getCount(getPlayerLife()));
         mapDto.setComputerLife(getCount(getComputerLife()));
-        return mapDto;
     }
 
 

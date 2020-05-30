@@ -17,6 +17,6 @@ import java.util.List;
 public class MapDetailDto extends MapDto {
     private List<String> playerStartPos;
     private List<String> computerStartPos;
-    private List<StringCountDto> computerLife;
-    private List<TankTypeDto> tankTypes;
+    private List<StringCountDto> computerTypeCountList;
+    private int computerStartCount;
 }
