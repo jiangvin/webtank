@@ -197,7 +197,9 @@ public class StageRoom extends BaseStage {
     }
 
     private void addSyncList(TankBo tankBo, boolean forceUpdate) {
-        if (forceUpdate || System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TANK_TIME) {
+
+        if (forceUpdate ||
+                (System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TANK_TIME && tankBo.getActionType() == ActionType.RUN)) {
             syncTankList.add(tankBo);
         }
     }
