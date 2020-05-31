@@ -3,3 +3,5 @@
 **.iml
 **/.mvn/**
 /websocket/src/main/resources/jooq-codegen-config.xml
+/websocket/src/main/resources/static/node_modules/**
+/websocket/src/main/resources/static/package-lock.json
