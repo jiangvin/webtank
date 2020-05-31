@@ -17,7 +17,7 @@ export default class Resource {
         this.user = new User();
         this.itemId = 1;
         this.scale = 1;
-        this.host = "localhost";
+        this.host = "";
         this.initImage();
     }
 
@@ -71,6 +71,10 @@ export default class Resource {
 
     static getScale() {
         return Resource.instance.scale;
+    }
+
+    static setHost(host) {
+        Resource.instance.host = host;
     }
 
     static getHost() {

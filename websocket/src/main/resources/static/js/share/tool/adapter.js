@@ -101,7 +101,7 @@ export default class Adapter {
     }
 
     static socketConnectWeb(id, callback) {
-        const socket = new SockJS(encodeURI("http://" + Resource.getHost() + '/websocket-simple?name=' + id));
+        const socket = new SockJS(encodeURI(Common.generateHttpHost() + '/websocket-simple?name=' + id));
         const thisAdapter = Adapter.instance;
         thisAdapter.stompClient = Stomp.over(socket);
         thisAdapter.stompClient.connect({}, function (frame) {

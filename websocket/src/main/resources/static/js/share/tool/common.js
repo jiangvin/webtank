@@ -58,11 +58,15 @@ export default class Common {
                     Common.addMessage(result.message, "#ff0000");
                 }
             };
-            xmlHttp.open("GET", "http://" + Resource.getHost() + encodeURI(url), true); // true for asynchronous
+            xmlHttp.open("GET", Common.generateHttpHost() + encodeURI(url), true); // true for asynchronous
             xmlHttp.send(null);
         } catch (e) {
             Common.addMessage(e, "#ff0000");
         }
+    }
+
+    static generateHttpHost() {
+        return Resource.getHost() === "" ? "" : "http://" + Resource.getHost();
     }
 
     static distance = function (x1, y1, x2, y2) {

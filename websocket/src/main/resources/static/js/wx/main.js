@@ -25,6 +25,8 @@ export default class Main {
     }
 
     restart() {
+        Resource.setHost("localhost");
+
         //设置缩放比例
         const scale = Resource.calculateScale(canvas.width,canvas.height);
         canvas.width = canvas.width / scale;

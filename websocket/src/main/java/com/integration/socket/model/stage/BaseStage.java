@@ -170,7 +170,7 @@ public abstract class BaseStage {
         messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId()));
     }
 
-    void sendMessageToRoom(Object object, MessageType messageType, String note) {
+    private void sendMessageToRoom(Object object, MessageType messageType, String note) {
         messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId(), note));
     }
 
