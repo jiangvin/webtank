@@ -232,6 +232,7 @@ export default class room extends stage {
             return;
         }
 
+        item.typeId = typeId;
         this.setBarrier(item, typeId);
         const position = Common.getPositionFromId(data.id);
         item.x = position.x;
@@ -507,6 +508,10 @@ export default class room extends stage {
 
         this.generalUpdateAttribute(data);
         const item = this.items.get(data.id);
+
+        //防止再做碰撞
+        item.typeId = -1;
+
         item.action = 0;
         item.orientation = 0;
         item.scale = bombScale;

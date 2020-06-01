@@ -90,6 +90,11 @@ export default class Common {
         return position;
     };
 
+    static getIdFromPosition(pos) {
+        const size = Resource.getUnitSize();
+        return Math.floor(pos.x / size) + "_" + Math.floor(pos.y / size);
+    }
+
     static addConnectTimeoutEvent(callback) {
         Resource.getRoot().addTimeEvent("TIMEOUT_CALLBACK", function () {
             if (Status.getValue() !== Status.statusPause()) {
