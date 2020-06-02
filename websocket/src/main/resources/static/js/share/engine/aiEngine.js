@@ -6,6 +6,7 @@
 import Engine from "./engine.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
+import Status from "../tool/status.js";
 
 export default class AiEngine extends Engine {
     static playerTypeId = "tank01";
@@ -428,7 +429,7 @@ export default class AiEngine extends Engine {
         const thisEngine = this;
         this.addTimeEvent(Math.random() * 60 * 3 + 60, function () {
             --thisEngine.room.roomInfo.playerLife;
-            thisEngine.createTank(this.mapInfo.playerStartPos,
+            thisEngine.createTank(thisEngine.mapInfo.playerStartPos,
                 Resource.getUser().userId,
                 AiEngine.playerTypeId,
                 1);
@@ -450,7 +451,7 @@ export default class AiEngine extends Engine {
         const thisEngine = this;
         this.addTimeEvent(Math.random() * 60 * 3 + 60, function () {
             --thisEngine.room.roomInfo.computerLife;
-            thisEngine.createTank(this.mapInfo.computerStartPos,
+            thisEngine.createTank(thisEngine.mapInfo.computerStartPos,
                 Resource.generateClientId(),
                 typeId,
                 2);
