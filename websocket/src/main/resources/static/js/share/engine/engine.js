@@ -47,7 +47,7 @@ export default class Engine {
             needSend = true;
         }
 
-        const newControl = this.generateNewControl(room, center.orientation, center.action);
+        const newControl = this.generateNewControl(room, room.view.center, center.orientation, center.action);
         if (!newControl.action) {
             //不能通行
             center.action = 0;
@@ -135,7 +135,7 @@ export default class Engine {
             orientation = center.orientation;
         }
         const room = this.room;
-        const newControl = this.generateNewControl(room, orientation, action);
+        const newControl = this.generateNewControl(room, room.view.center, orientation, action);
         //新命令和旧命令一样，返回
         if (newControl.action === room.control.action && newControl.orientation === room.control.orientation) {
             return;
@@ -159,7 +159,7 @@ export default class Engine {
     sendSyncMessage(send, center) {
     };
 
-    generateNewControl(stage, orientation, action) {
+    generateNewControl(stage, tank, orientation, action) {
         const newControl = {
             orientation: orientation,
             action: 0
@@ -167,12 +167,11 @@ export default class Engine {
         if (action === 0) {
             return newControl;
         }
-        const center = stage.view.center;
 
         //action为1，开始碰撞检测
-        let x = center.x;
-        let y = center.y;
-        const speed = center.speed;
+        let x = tank.x;
+        let y = tank.y;
+        const speed = tank.speed;
         const size = Resource.getUnitSize();
         const half = size / 2;
         const halfLight = half - 1;

@@ -10,6 +10,10 @@ import Resource from "../tool/resource.js";
 export default class AiEngine extends Engine {
     static playerTypeId = "tank01";
 
+    static keepGoingRate = 120;
+
+    static keepTryRate = 30;
+
     constructor(room) {
         super(room);
 
@@ -22,7 +26,7 @@ export default class AiEngine extends Engine {
         thisEngine.tankTypes = {};
 
         /**
-         * @type {{playerStartPos}}
+         * @type {{playerStartPos,computerStartPos,computerStartCount,computerTypeCountList}}
          */
         thisEngine.mapInfo = {};
         thisEngine.timeEvents = [];
@@ -39,6 +43,9 @@ export default class AiEngine extends Engine {
                 });
 
                 thisEngine.createPlayerTank();
+                for (let i = 0; i < thisEngine.mapInfo.computerStartCount; ++i) {
+                    thisEngine.createComputerTank();
+                }
 
                 Resource.getRoot().processSocketMessage({
                     messageType: "SERVER_READY"
@@ -56,10 +63,11 @@ export default class AiEngine extends Engine {
     }
 
     update() {
+        super.update();
+
         this.updateTimeEvents();
         this.updateBullets();
         this.updateTanks();
-        super.update();
     }
 
     updateBullets() {
@@ -130,8 +138,7 @@ export default class AiEngine extends Engine {
                 }
                 return true;
             case 6:
-                return true;
-            case 7:
+                //TODO - GAME OVER
                 return true;
         }
     }
@@ -154,9 +161,6 @@ export default class AiEngine extends Engine {
         const thisEngine = this;
         this.tanks.forEach(function (tank) {
             if (!tank.item) {
-                tank.item = thisEngine.room.items.get(tank.id);
-            }
-            if (!tank.item) {
                 return;
             }
 
@@ -169,7 +173,123 @@ export default class AiEngine extends Engine {
             if (tank.bulletReloadTime > 0) {
                 --tank.bulletReloadTime;
             }
+
+            if (tank.item.teamId !== 2) {
+                return;
+            }
+
+            thisEngine.updateTankAi(tank);
         })
+    }
+
+    updateTankAi(tank) {
+        if (tank.bulletReloadTime === 0 && tank.bulletCount !== 0) {
+            this.tankFire(tank.id);
+        }
+
+        tank.item.action = 1;
+        const forward = this.canPass(tank, tank.item.orientation);
+        if (forward && Math.floor(Math.random() * AiEngine.keepGoingRate) !== 0) {
+            return;
+        }
+
+        const sideList = [];
+        if (tank.item.orientation === 0 || tank.item.orientation === 1) {
+            if (this.canPass(tank, 2)) {
+                sideList[sideList.length] = 2;
+            }
+            if (this.canPass(tank, 3)) {
+                sideList[sideList.length] = 3;
+            }
+        } else {
+            if (this.canPass(tank, 0)) {
+                sideList[sideList.length] = 0;
+            }
+            if (this.canPass(tank, 1)) {
+                sideList[sideList.length] = 1;
+            }
+        }
+
+        if (sideList.length !== 0) {
+            tank.item.orientation = sideList[Math.floor(Math.random() * sideList.length)];
+            return;
+        }
+
+        if (forward) {
+            return;
+        }
+
+        const back = this.getBack(tank.item.orientation);
+        if (this.canPass(tank, back)) {
+            tank.item.orientation = back;
+            return;
+        }
+
+        tank.item.action = 0;
+        if (Math.floor(Math.random() * AiEngine.keepTryRate) !== 0) {
+            return;
+        }
+        tank.item.orientation = Math.floor(Math.random() * 4);
+    }
+
+
+    canPass(tank, orientation) {
+        if (this.collideWithTanks(tank.item,orientation)) {
+            return false;
+        }
+
+        const control = super.generateNewControl(this.room, tank.item, orientation, 1);
+        return !(control.action === 0 || control.cache);
+    }
+
+    collideWithTanks(tank, orientation) {
+        for (let [,v] of this.tanks) {
+            const target = v.item;
+            if (target.id === tank.id) {
+                continue;
+            }
+            const distance = Common.distance(target.x, target.y, tank.x, tank.y);
+            if (distance <= Resource.getUnitSize()) {
+                switch (orientation) {
+                    case 0:
+                        if (tank.y > target.y) {
+                            return true;
+                        }
+                        break;
+                    case 1:
+                        if (tank.y < target.y) {
+                            return true;
+                        }
+                        break;
+                    case 2:
+                        if (tank.x > target.x) {
+                            return true;
+                        }
+                        break;
+                    case 3:
+                        if (tank.x < target.x) {
+                            return true;
+                        }
+                        break;
+                }
+            }
+        }
+        return false;
+    }
+
+    getBack(orientation) {
+        switch (orientation) {
+            case 0:
+                return 1;
+            case 1:
+                return 0;
+            case 2:
+                return 3;
+            case 3:
+                return 2;
+            default:
+                return orientation;
+        }
     }
 
     updateTimeEvents() {
@@ -193,34 +313,59 @@ export default class AiEngine extends Engine {
         this.timeEvents.push(event);
     }
 
-    createPlayerTank() {
+    createTank(startPosList, id, typeId, teamId) {
         const thisEngine = this;
         this.addTimeEvent(Math.random() * 60 * 3 + 60, function () {
-            const startPosList = thisEngine.mapInfo.playerStartPos;
             const startPos = startPosList[Math.floor(Math.random() * startPosList.length)];
             const point = Common.getPositionFromId(startPos);
-            thisEngine.tanks.set(Resource.getUser().userId, {
-                id: Resource.getUser().userId,
+            thisEngine.tanks.set(id, {
+                id: id,
                 shieldTimeout: 60 * 3,
-                typeId: AiEngine.playerTypeId,
-                bulletCount: thisEngine.tankTypes[AiEngine.playerTypeId].ammoMaxCount,
-                bulletReloadTime: thisEngine.tankTypes[AiEngine.playerTypeId].ammoReloadTime
+                typeId: typeId,
+                bulletCount: thisEngine.tankTypes[typeId].ammoMaxCount,
+                bulletReloadTime: thisEngine.tankTypes[typeId].ammoReloadTime
             });
             Resource.getRoot().processSocketMessage({
                 messageType: "TANKS",
                 message: [{
-                    id: Resource.getUser().userId,
-                    typeId: AiEngine.playerTypeId,
-                    teamId: 1,
+                    id: id,
+                    typeId: typeId,
+                    teamId: teamId,
                     hasShield: true,
                     x: point.x,
                     y: point.y,
                     orientation: 0,
                     action: 0,
-                    speed: thisEngine.tankTypes[AiEngine.playerTypeId].speed
+                    speed: thisEngine.tankTypes[typeId].speed
                 }]
             });
+            thisEngine.tanks.get(id).item = thisEngine.room.items.get(id);
         });
+    }
+
+    createPlayerTank() {
+        this.createTank(this.mapInfo.playerStartPos,
+            Resource.getUser().userId,
+            AiEngine.playerTypeId,
+            1);
+    }
+
+    createComputerTank() {
+        if (this.mapInfo.computerTypeCountList.length === 0) {
+            return;
+        }
+
+        const typeCount = this.mapInfo.computerTypeCountList[0];
+        const typeId = typeCount.key;
+        --typeCount.value;
+        if (typeCount.value <= 0) {
+            this.mapInfo.computerTypeCountList.splice(0, 1);
+        }
+
+        this.createTank(this.mapInfo.computerStartPos,
+            Resource.generateClientId(),
+            typeId,
+            2);
     }
 
     processControlEvent(control) {

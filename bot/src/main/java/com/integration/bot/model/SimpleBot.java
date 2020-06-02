@@ -81,10 +81,6 @@ public class SimpleBot extends BaseBot {
                 sideList.add(OrientationType.DOWN);
             }
         }
-        OrientationType back = tank.getOrientationType().getBack();
-        if (!canPass(tank, back)) {
-            back = null;
-        }
 
         if (!sideList.isEmpty()) {
             int index = random.nextInt(sideList.size());
@@ -95,6 +91,11 @@ public class SimpleBot extends BaseBot {
         //如果是因为随机掉头到这里要特殊处理
         if (forward) {
             return;
+        }
+
+        OrientationType back = tank.getOrientationType().getBack();
+        if (!canPass(tank, back)) {
+            back = null;
         }
 
         if (back != null) {
