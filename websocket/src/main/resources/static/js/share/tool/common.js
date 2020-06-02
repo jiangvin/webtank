@@ -66,7 +66,7 @@ export default class Common {
     }
 
     static generateHttpHost() {
-        return (Resource.getHost() === "" ? "" : "http://" + Resource.getHost()) + "/tank";
+        return Resource.getHost() === "" ? "" : "http://" + Resource.getHost();
     }
 
     static distance = function (x1, y1, x2, y2) {
