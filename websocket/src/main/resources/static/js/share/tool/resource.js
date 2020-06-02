@@ -140,4 +140,8 @@ export default class Resource {
     static getUnitSize = function () {
         return 36;
     };
+
+    static getBulletSize = function () {
+        return 14;
+    }
 }

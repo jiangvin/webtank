@@ -98,8 +98,55 @@ export default class AiEngine extends Engine {
             //与场景碰撞
             if (thisEngine.collideWithMapForBullet(bullet)) {
                 thisEngine.removeBullet(bullet);
+                return;
             }
+
+            //与子弹碰撞
+            if (thisEngine.collideWithBulletForBullet(bullet)) {
+                thisEngine.removeBullet(bullet);
+                return;
+            }
+
+            //与坦克碰撞
+            if (thisEngine.collideWithTankForBullet(bullet)) {
+                thisEngine.removeBullet(bullet);
+            }
+
         })
+    }
+
+    collideWithBulletForBullet(bullet) {
+        for (let [, target] of this.bullets) {
+            if (target.id === bullet.id) {
+                continue;
+            }
+
+            if (target.teamId === bullet.teamId) {
+                continue;
+            }
+
+            const distance = Common.distance(target.item.x, target.item.y, bullet.item.x, bullet.item.y);
+            if (distance <= Resource.getBulletSize()) {
+                this.removeBullet(target);
+                return true;
+            }
+        }
+    }
+
+    collideWithTankForBullet(bullet) {
+        for (let [, tank] of this.tanks) {
+            if (tank.item.teamId === bullet.teamId) {
+                continue;
+            }
+
+            const distance = Common.distance(tank.item.x, tank.item.y, bullet.item.x, bullet.item.y);
+            if (distance <= (Resource.getBulletSize() + Resource.getUnitSize()) / 2) {
+                if (!tank.item.hasShield) {
+                    this.removeTank(tank);
+                }
+                return true;
+            }
+        }
     }
 
     collideWithMapForBullet(bullet) {
@@ -153,6 +200,16 @@ export default class AiEngine extends Engine {
             messageType: "REMOVE_BULLET",
             message: {
                 id: bullet.id,
+            }
+        });
+    }
+
+    removeTank(tank) {
+        this.tanks.delete(tank.id);
+        Resource.getRoot().processSocketMessage({
+            messageType: "REMOVE_TANK",
+            message: {
+                id: tank.id,
             }
         });
     }
@@ -234,7 +291,7 @@ export default class AiEngine extends Engine {
 
 
     canPass(tank, orientation) {
-        if (this.collideWithTanks(tank.item,orientation)) {
+        if (this.collideWithTanks(tank.item, orientation)) {
             return false;
         }
 
@@ -243,7 +300,7 @@ export default class AiEngine extends Engine {
     }
 
     collideWithTanks(tank, orientation) {
-        for (let [,v] of this.tanks) {
+        for (let [, v] of this.tanks) {
             const target = v.item;
             if (target.id === tank.id) {
                 continue;
@@ -416,6 +473,7 @@ export default class AiEngine extends Engine {
                 speed: tankType.ammoSpeed,
             }]
         });
+        this.bullets.get(id).item = this.room.items.get(id);
     }
 
     generateBulletPos(tank) {
