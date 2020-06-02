@@ -19,6 +19,7 @@ export default class AiEngine extends Engine {
 
         const thisEngine = this;
         thisEngine.playerLifeCount = 10;
+        thisEngine.computerLifeCount = 0;
 
         /**
          * @type {{ammoMaxCount,ammoReloadTime,ammoSpeed,ammoMaxLifeTime}}
@@ -58,6 +59,8 @@ export default class AiEngine extends Engine {
         const thisEngine = this;
         Common.getRequest("/singlePlayer/getMapFromId?id=" + this.room.roomInfo.mapId, function (data) {
             thisEngine.mapInfo = data;
+            thisEngine.mapInfo.playerLife = thisEngine.playerLifeCount;
+            thisEngine.computerLifeCount = thisEngine.mapInfo.computerLife;
             callback();
         });
     }
@@ -372,39 +375,41 @@ export default class AiEngine extends Engine {
 
     createTank(startPosList, id, typeId, teamId) {
         const thisEngine = this;
-        this.addTimeEvent(Math.random() * 60 * 3 + 60, function () {
-            const startPos = startPosList[Math.floor(Math.random() * startPosList.length)];
-            const point = Common.getPositionFromId(startPos);
-            thisEngine.tanks.set(id, {
-                id: id,
-                shieldTimeout: 60 * 3,
-                typeId: typeId,
-                bulletCount: thisEngine.tankTypes[typeId].ammoMaxCount,
-                bulletReloadTime: thisEngine.tankTypes[typeId].ammoReloadTime
-            });
-            Resource.getRoot().processSocketMessage({
-                messageType: "TANKS",
-                message: [{
-                    id: id,
-                    typeId: typeId,
-                    teamId: teamId,
-                    hasShield: true,
-                    x: point.x,
-                    y: point.y,
-                    orientation: 0,
-                    action: 0,
-                    speed: thisEngine.tankTypes[typeId].speed
-                }]
-            });
-            thisEngine.tanks.get(id).item = thisEngine.room.items.get(id);
+        const startPos = startPosList[Math.floor(Math.random() * startPosList.length)];
+        const point = Common.getPositionFromId(startPos);
+        thisEngine.tanks.set(id, {
+            id: id,
+            shieldTimeout: 60 * 3,
+            typeId: typeId,
+            bulletCount: thisEngine.tankTypes[typeId].ammoMaxCount,
+            bulletReloadTime: thisEngine.tankTypes[typeId].ammoReloadTime
         });
+        Resource.getRoot().processSocketMessage({
+            messageType: "TANKS",
+            message: [{
+                id: id,
+                typeId: typeId,
+                teamId: teamId,
+                hasShield: true,
+                x: point.x,
+                y: point.y,
+                orientation: 0,
+                action: 0,
+                speed: thisEngine.tankTypes[typeId].speed
+            }]
+        });
+        thisEngine.tanks.get(id).item = thisEngine.room.items.get(id);
     }
 
     createPlayerTank() {
-        this.createTank(this.mapInfo.playerStartPos,
-            Resource.getUser().userId,
-            AiEngine.playerTypeId,
-            1);
+        const thisEngine = this;
+        this.addTimeEvent(Math.random() * 60 * 3 + 60, function () {
+            --thisEngine.room.roomInfo.playerLife;
+            thisEngine.createTank(this.mapInfo.playerStartPos,
+                Resource.getUser().userId,
+                AiEngine.playerTypeId,
+                1);
+        });
     }
 
     createComputerTank() {
@@ -419,10 +424,14 @@ export default class AiEngine extends Engine {
             this.mapInfo.computerTypeCountList.splice(0, 1);
         }
 
-        this.createTank(this.mapInfo.computerStartPos,
-            Resource.generateClientId(),
-            typeId,
-            2);
+        const thisEngine = this;
+        this.addTimeEvent(Math.random() * 60 * 3 + 60, function () {
+            --thisEngine.room.roomInfo.computerLife;
+            thisEngine.createTank(this.mapInfo.computerStartPos,
+                Resource.generateClientId(),
+                typeId,
+                2);
+        });
     }
 
     processControlEvent(control) {

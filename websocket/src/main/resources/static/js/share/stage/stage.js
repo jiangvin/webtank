@@ -6,8 +6,6 @@
 
 import Item from './item.js'
 import Resource from "../tool/resource.js";
-import Common from "../tool/common.js";
-import Status from "../tool/status.js";
 
 export default class Stage {
     constructor() {
