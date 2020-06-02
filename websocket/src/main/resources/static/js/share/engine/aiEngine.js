@@ -188,7 +188,13 @@ export default class AiEngine extends Engine {
                 }
                 return true;
             case 6:
-                //TODO - GAME OVER
+                if (bullet.teamId === 2) {
+                    Resource.getRoot().processSocketMessage({
+                        messageType: "REMOVE_MAP",
+                        message: mapItemId
+                    });
+                    Status.setStatus(Status.statusPause(), "游戏失败", false);
+                }
                 return true;
         }
     }
@@ -215,6 +221,23 @@ export default class AiEngine extends Engine {
                 id: tank.id,
             }
         });
+
+        if (tank.item.teamId === 1) {
+            --this.playerLifeCount;
+            if (this.playerLifeCount === 0) {
+                Status.setStatus(Status.statusPause(), "游戏失败", false);
+            } else {
+                this.createPlayerTank();
+            }
+            return;
+        }
+
+        --this.computerLifeCount;
+        if (this.computerLifeCount === 0) {
+            Status.setStatus(Status.statusPause(), "恭喜过关", false);
+        } else {
+            this.createComputerTank();
+        }
     }
 
     updateTanks() {
