@@ -120,6 +120,10 @@ export default class Adapter {
     }
 
     static socketConnectWx(id, callback) {
+        if (Adapter.instance.wxSocketStatus) {
+            wx.closeSocket();
+        }
+
         wx.connectSocket({
             url: 'ws://' + Resource.getHost() + '/ws?name=' + id
         });
@@ -127,6 +131,10 @@ export default class Adapter {
         wx.onSocketOpen(function () {
             Adapter.instance.wxSocketStatus = true;
             callback();
+        });
+
+        wx.onSocketError(function (response) {
+            Common.addMessage(response.errMsg,"#F00");
         });
 
         wx.onSocketMessage(function (response) {

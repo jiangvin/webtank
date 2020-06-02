@@ -25,12 +25,21 @@ export default class Main {
     }
 
     restart() {
-        Resource.setHost("localhost");
+        Resource.setHost("116.63.170.134:8201");
 
         //设置缩放比例
-        const scale = Resource.calculateScale(canvas.width,canvas.height);
-        canvas.width = canvas.width / scale;
-        canvas.height = canvas.height / scale;
+        let width;
+        let height;
+        if (canvas.width > canvas.height) {
+            width = canvas.width;
+            height = canvas.height;
+        } else {
+            width = canvas.height;
+            height = canvas.width;
+        }
+        const scale = Resource.calculateScale(width, height);
+        canvas.width = width / scale;
+        canvas.height = height / scale;
 
         Adapter.setPlatform(1);
         Control.setControlMode(true);
@@ -38,12 +47,6 @@ export default class Main {
         this.root = Resource.getRoot();
         this.root.addStage(new Menu());
         this.root.addStage(new Room());
-
-        //计算层
-        const root = this.root;
-        setInterval(function () {
-            root.update();
-        }, 17);
 
         //渲染层
         this.bindLoop = this.loop.bind(this);
@@ -61,6 +64,8 @@ export default class Main {
      */
     render() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //计算层和绘图层在一起
+        this.root.update();
         this.root.draw(ctx);
     }
 
