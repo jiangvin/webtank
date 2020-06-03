@@ -8,6 +8,7 @@ import com.integration.socket.service.GameService;
 import com.integration.socket.service.MessageService;
 import com.integration.socket.service.OnlineUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.OnClose;
@@ -24,6 +25,7 @@ import javax.websocket.server.ServerEndpoint;
 @ServerEndpoint("/ws")
 @Component
 @Slf4j
+@Lazy
 public class WebSocketEndpoint {
 
     private OnlineUserService onlineUserService = (OnlineUserService) WebSocketContextAware.getApplicationContext().getBean("onlineUserService");

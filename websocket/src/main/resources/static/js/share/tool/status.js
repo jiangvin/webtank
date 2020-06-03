@@ -8,18 +8,21 @@ export default class Status {
     static instance = new Status();
 
     constructor() {
-        this.value = Status.statusNormal();
+        this.value = Status.statusPause();
         this.message = null;
         this.showMask = false;
     }
 
     static setStatus(value, message, showMask) {
-        if (showMask === undefined) {
-            showMask = !!message;
+        if (value !== null) {
+            Status.instance.value = value;
         }
-        Status.instance.value = value;
-        Status.instance.message = message;
-        Status.instance.showMask = showMask;
+        if (message !== undefined) {
+            Status.instance.message = message;
+        }
+        if (showMask !== undefined) {
+            Status.instance.showMask = showMask;
+        }
     }
 
     static getShowMask() {

@@ -75,7 +75,6 @@ export default class Menu extends Stage {
     }
 
     initRoom(roomInfo) {
-        Status.setStatus(Status.statusPause());
         Common.nextStage();
         Resource.getRoot().currentStage().init(roomInfo);
     }

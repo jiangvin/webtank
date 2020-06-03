@@ -39,7 +39,6 @@ export default class NetEngine extends Engine {
                     if (Status.getValue() !== Status.statusPause()) {
                         return;
                     }
-
                     thisEngine.addConnectCheckEvent();
                     Status.setStatus(Status.statusNormal());
                 })
@@ -66,7 +65,7 @@ export default class NetEngine extends Engine {
                 });
                 Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120, true);
             } else {
-                Status.setStatus(Status.statusPause(), "与服务器断开！");
+                Status.setStatus(Status.statusPause(), "与服务器断开！", true);
 
                 //TODO 断线重连
             }

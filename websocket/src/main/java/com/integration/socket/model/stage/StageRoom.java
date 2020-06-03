@@ -45,9 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StageRoom extends BaseStage {
 
-    private static final long SYNC_BULLET_TIME = 1000;
-
-    private static final long SYNC_TANK_TIME = 2000;
+    private static final long SYNC_TIME = 1000;
 
     private static final int MAX_ITEM_LIMIT = 3;
 
@@ -197,9 +195,8 @@ public class StageRoom extends BaseStage {
     }
 
     private void addSyncList(TankBo tankBo, boolean forceUpdate) {
-
         if (forceUpdate ||
-                (System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TANK_TIME && tankBo.getActionType() == ActionType.RUN)) {
+                (tankBo.getActionType() == ActionType.RUN && System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TIME)) {
             syncTankList.add(tankBo);
         }
     }
@@ -344,7 +341,7 @@ public class StageRoom extends BaseStage {
         bullet.run();
 
         //超过1秒没和客户端同步，需要同步一次
-        if (System.currentTimeMillis() - bullet.getLastSyncTime() > SYNC_BULLET_TIME) {
+        if (System.currentTimeMillis() - bullet.getLastSyncTime() > SYNC_TIME) {
             syncBulletList.add(bullet);
         }
 
@@ -641,7 +638,7 @@ public class StageRoom extends BaseStage {
         init();
         long loadTimeoutSeconds = 10;
         long cleanMapTimeoutSeconds = 8;
-        this.pauseMessage = "正在加载地图...";
+        this.pauseMessage = String.format("MISSION %02d", getMapId());
         String tips;
         if (processNextMap) {
             tips = "进入下一关";

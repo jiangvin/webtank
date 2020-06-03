@@ -26,6 +26,8 @@ export default class room extends stage {
 
         this.mask = true;
         this.maskImage = Resource.getImage("background_loading", "jpg");
+        this.maskStartTime = 0;
+        this.minMaskTime = 3000;
 
         this.control = {
             orientation: 0,
@@ -44,11 +46,27 @@ export default class room extends stage {
     init(roomInfo) {
         this.roomInfo = roomInfo;
         this.showMask();
+        Status.setStatus(Status.statusPause(), this.generateMaskInfo(), false);
     }
 
     showMask() {
+        this.maskStartTime = new Date().getTime();
         this.mask = true;
-        Status.setStatus(Status.statusPause(), this.generateMaskInfo(), false);
+    }
+
+    hideMask() {
+        let frames = (this.minMaskTime - (new Date().getTime() - this.maskStartTime)) / 1000 * 60;
+        if (frames < 0) {
+            frames = 0;
+        }
+        if (frames > 180) {
+            frames = 180;
+        }
+        const thisRoom = this;
+        Common.addTimeEvent("hide_mask", function () {
+            Status.setStatus(null, null, false);
+            thisRoom.mask = false;
+        }, frames);
     }
 
     generateMaskInfo() {
@@ -369,9 +387,6 @@ export default class room extends stage {
      */
     processSocketMessage(messageDto) {
         switch (messageDto.messageType) {
-            case "SERVER_READY":
-                this.mask = false;
-                break;
             case "TANKS":
                 //除了坦克之间的碰撞以外其他情况不更新自己，否则会和客户端的自动避让起冲突
                 const updateSelf = messageDto.note === "COLLIDE_TANK";
@@ -403,6 +418,9 @@ export default class room extends stage {
                 this.showMask();
                 this.items.clear();
                 this.view.center = null;
+                break;
+            case "SERVER_READY":
+                this.hideMask();
                 break;
             default:
                 break;

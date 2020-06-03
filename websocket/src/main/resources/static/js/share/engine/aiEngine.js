@@ -31,7 +31,6 @@ export default class AiEngine extends Engine {
          * @type {{playerStartPos,computerStartPos,computerStartCount,computerTypeCountList}}
          */
         thisEngine.mapInfo = {};
-        thisEngine.timeEvents = [];
 
         thisEngine.tanks = new Map();
         thisEngine.bullets = new Map();
@@ -51,7 +50,7 @@ export default class AiEngine extends Engine {
 
                 Resource.getRoot().processSocketMessage({
                     messageType: "SERVER_READY"
-                })
+                });
             })
         })
     }
@@ -69,7 +68,6 @@ export default class AiEngine extends Engine {
     update() {
         super.update();
 
-        this.updateTimeEvents();
         this.updateBullets();
         this.updateTanks();
     }
@@ -376,25 +374,8 @@ export default class AiEngine extends Engine {
         }
     }
 
-    updateTimeEvents() {
-        for (let i = 0; i < this.timeEvents.length; ++i) {
-            const event = this.timeEvents[i];
-            if (event.timeout > 0) {
-                --event.timeout;
-                continue;
-            }
-
-            event.callback();
-            this.timeEvents.splice(i, 1);
-            --i;
-        }
-    }
-
     addTimeEvent(timeout, callback) {
-        const event = {};
-        event.timeout = timeout;
-        event.callback = callback;
-        this.timeEvents.push(event);
+        Common.addTimeEvent("AI_ENGINE", callback, timeout);
     }
 
     createTank(startPosList, id, typeId, teamId, hasShield) {

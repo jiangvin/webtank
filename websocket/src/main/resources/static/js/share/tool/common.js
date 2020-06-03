@@ -102,7 +102,6 @@ export default class Common {
             }
 
             Common.addMessage("与服务器连接超时！", "#F00");
-            Status.setStatus(Status.statusNormal());
             if (callback !== undefined) {
                 callback();
             }
