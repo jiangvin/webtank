@@ -91,6 +91,8 @@ public class MapService {
                 throw new CustomException("密码校验出错,请重新输入密码或者修改地图名存为新地图");
             }
             mapRecord.setData(mapEditDto.getData());
+            mapRecord.setWidth(mapBo.getMaxGridX());
+            mapRecord.setHeight(mapBo.getMaxGridY());
             mapRecord.update();
             mapDao.resetId();
             return;

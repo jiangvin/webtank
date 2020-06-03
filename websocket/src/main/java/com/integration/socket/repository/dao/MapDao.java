@@ -38,7 +38,7 @@ public class MapDao extends BaseDao {
         List<MapRecord> list = create.fetch("SELECT * FROM map order by width * height;").into(MapRecord.class);
         for (int i = 0; i < list.size(); ++i) {
             MapRecord record = list.get(i);
-            if (record.getId() != i + 1) {
+            if (record.getId() == null || record.getId() != i + 1) {
                 record.setId(i + 1);
                 record.update();
             }

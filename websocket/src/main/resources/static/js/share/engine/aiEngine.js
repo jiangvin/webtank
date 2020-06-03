@@ -19,7 +19,7 @@ export default class AiEngine extends Engine {
         super(room);
 
         const thisEngine = this;
-        thisEngine.playerLifeCount = 10;
+        thisEngine.playerLifeCount = 5;
         thisEngine.computerLifeCount = 0;
 
         /**
