@@ -39,6 +39,6 @@ public class Indexes {
 
     private static class Indexes0 {
         public static Index MAP_NAME_UNIQUE = Internal.createIndex("name_UNIQUE", Map.MAP, new OrderField[] { Map.MAP.NAME }, true);
-        public static Index MAP_PRIMARY = Internal.createIndex("PRIMARY", Map.MAP, new OrderField[] { Map.MAP.ID }, true);
+        public static Index MAP_PRIMARY = Internal.createIndex("PRIMARY", Map.MAP, new OrderField[] { Map.MAP.NAME }, true);
     }
 }

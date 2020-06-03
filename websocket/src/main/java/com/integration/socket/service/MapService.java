@@ -83,7 +83,7 @@ public class MapService {
         if (StringUtils.isEmpty(mapEditDto.getName())) {
             throw new CustomException("名字不能为空");
         }
-        readFile(mapEditDto.getData());
+        MapBo mapBo = readFile(mapEditDto.getData());
 
         MapRecord mapRecord = mapDao.queryFromName(mapEditDto.getName());
         if (mapRecord != null) {
@@ -92,6 +92,7 @@ public class MapService {
             }
             mapRecord.setData(mapEditDto.getData());
             mapRecord.update();
+            mapDao.resetId();
             return;
         }
 
@@ -99,7 +100,8 @@ public class MapService {
         if (!StringUtils.isEmpty(mapEditDto.getPw())) {
             secret = mapEditDto.getPw();
         }
-        mapDao.insertMap(mapEditDto.getName(), secret, mapEditDto.getData());
+        mapDao.insertMap(mapEditDto.getName(), secret, mapBo.getMaxGridX(), mapBo.getMaxGridY(), mapEditDto.getData());
+        mapDao.resetId();
     }
 
     private MapBo readFile(String content) {

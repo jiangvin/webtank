@@ -49,7 +49,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     private static class UniqueKeys0 {
-        public static final UniqueKey<MapRecord> KEY_MAP_PRIMARY = Internal.createUniqueKey(Map.MAP, "KEY_map_PRIMARY", Map.MAP.ID);
+        public static final UniqueKey<MapRecord> KEY_MAP_PRIMARY = Internal.createUniqueKey(Map.MAP, "KEY_map_PRIMARY", Map.MAP.NAME);
         public static final UniqueKey<MapRecord> KEY_MAP_NAME_UNIQUE = Internal.createUniqueKey(Map.MAP, "KEY_map_name_UNIQUE", Map.MAP.NAME);
     }
 }
