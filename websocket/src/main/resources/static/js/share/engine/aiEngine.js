@@ -397,13 +397,13 @@ export default class AiEngine extends Engine {
         this.timeEvents.push(event);
     }
 
-    createTank(startPosList, id, typeId, teamId) {
+    createTank(startPosList, id, typeId, teamId, hasShield) {
         const thisEngine = this;
         const startPos = startPosList[Math.floor(Math.random() * startPosList.length)];
         const point = Common.getPositionFromId(startPos);
         thisEngine.tanks.set(id, {
             id: id,
-            shieldTimeout: 60 * 3,
+            shieldTimeout: hasShield ? 60 * 3 : 0,
             typeId: typeId,
             bulletCount: thisEngine.tankTypes[typeId].ammoMaxCount,
             bulletReloadTime: thisEngine.tankTypes[typeId].ammoReloadTime
@@ -414,7 +414,7 @@ export default class AiEngine extends Engine {
                 id: id,
                 typeId: typeId,
                 teamId: teamId,
-                hasShield: true,
+                hasShield: hasShield,
                 x: point.x,
                 y: point.y,
                 orientation: 0,
@@ -432,7 +432,7 @@ export default class AiEngine extends Engine {
             thisEngine.createTank(thisEngine.mapInfo.playerStartPos,
                 Resource.getUser().userId,
                 AiEngine.playerTypeId,
-                1);
+                1, true);
         });
     }
 
@@ -454,7 +454,7 @@ export default class AiEngine extends Engine {
             thisEngine.createTank(thisEngine.mapInfo.computerStartPos,
                 Resource.generateClientId(),
                 typeId,
-                2);
+                2, false);
         });
     }
 
