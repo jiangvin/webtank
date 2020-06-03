@@ -191,6 +191,10 @@ export default class room extends stage {
         ctx.fillText(tips, x, y);
     }
 
+    /**
+     *
+     * @param data {{mapId,playerLife,computerLife,width,height,itemList}}
+     */
     loadMap(data) {
         if (data.mapId !== undefined) {
             this.roomInfo.mapId = data.mapId;
@@ -354,6 +358,10 @@ export default class room extends stage {
         return screenPoint;
     };
 
+    /**
+     *
+     * @param messageDto {{note,message,messageType}}
+     */
     processSocketMessage(messageDto) {
         switch (messageDto.messageType) {
             case "SERVER_READY":
@@ -389,6 +397,7 @@ export default class room extends stage {
             case "CLEAR_MAP":
                 this.items.clear();
                 this.view.center = null;
+                this.mask = true;
                 break;
             default:
                 break;

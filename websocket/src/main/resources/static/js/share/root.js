@@ -240,7 +240,7 @@ export default class Root {
                 this.users = messageDto.message;
                 break;
             case "GAME_STATUS":
-                Status.setStatus(Status.getStatusPause(), messageDto.message, false);
+                Status.setStatus(Status.statusPause(), messageDto.message, false);
                 break;
             default:
                 break;
