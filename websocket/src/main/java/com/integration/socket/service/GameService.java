@@ -43,12 +43,6 @@ public class GameService {
     @Autowired
     private OnlineUserService onlineUserService;
 
-    /**
-     * 消息发送，接收管理
-     */
-    @Autowired
-    private MessageService messageService;
-
     @Autowired
     private RoomService roomService;
 
@@ -96,9 +90,6 @@ public class GameService {
 
         log.info("receive:{} from user:{}", CommonUtil.ignoreNull(messageDto.toString()), sendFrom);
         switch (messageDto.getMessageType()) {
-            case USER_MESSAGE:
-                processUserMessage(messageDto, sendFrom);
-                break;
             case CREATE_ROOM:
                 createRoom(messageDto, sendFrom);
                 break;
@@ -110,32 +101,6 @@ public class GameService {
                     stage.processMessage(messageDto, sendFrom);
                 }
                 break;
-        }
-    }
-
-    private void processUserMessage(MessageDto messageDto, String sendFrom) {
-        List<String> sendToList = messageDto.getSendToList();
-        if (sendToList != null && sendToList.isEmpty()) {
-            return;
-        }
-
-        if (sendToList == null) {
-            messageDto.setMessage(String.format("%s: %s", sendFrom, messageDto.getMessage()));
-            messageService.sendMessage(messageDto);
-        } else {
-            //先给发送方回复一份
-            String messageToSendFrom = String.format("%s → %s: %s", sendFrom, messageDto.getSendToList().toString(), messageDto.getMessage());
-            messageService.sendMessage(new MessageDto(messageToSendFrom, messageDto.getMessageType(), sendFrom));
-
-            //再给所有接送者发送一份
-            for (String sendTo : messageDto.getSendToList()) {
-                if (sendFrom.equals(sendTo)) {
-                    continue;
-                }
-
-                String sendMessage = String.format("%s → %s: %s", sendFrom, sendTo, messageDto.getMessage());
-                messageService.sendMessage(new MessageDto(sendMessage, messageDto.getMessageType(), sendTo));
-            }
         }
     }
 

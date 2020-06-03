@@ -49,6 +49,9 @@ public abstract class BaseStage {
             case UPDATE_TANK_FIRE:
                 processTankFire((String) messageDto.getMessage(), sendFrom);
                 break;
+            case USER_MESSAGE:
+                sendMessageToRoom(String.format("%s: %s", sendFrom, messageDto.getMessage()), messageDto.getMessageType());
+                break;
             default:
                 break;
         }

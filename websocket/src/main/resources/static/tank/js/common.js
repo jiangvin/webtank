@@ -103,28 +103,6 @@ Common.inputBindTouch = function () {
         Common.inputMessageEvent();
     });
 };
-Common.inputMessageEvent = function (inputFocus) {
-    const input = $('#input');
-    if (_inputEnable) {
-        //关闭输入框
-        //关闭输入框前先处理文字信息
-        const text = input.val();
-        if (text !== "") {
-            Common.sendStompMessage(text);
-            input.val("");
-        }
-        _inputEnable = !_inputEnable;
-        Common.inputEnable(_inputEnable);
-    } else {
-        //打开输入框
-        _inputEnable = !_inputEnable;
-        Common.inputEnable(_inputEnable);
-        if (inputFocus) {
-            input.focus();
-        }
-    }
-};
-
 //stomp connect
 Common.getStompStatus = function () {
     const stompClient = Resource.getStompClient();
