@@ -4,9 +4,6 @@ import com.integration.dto.room.RoomType;
 import com.integration.socket.service.MapService;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -22,27 +19,26 @@ public class MapMangerBo {
     /**
      * 加载过的地图
      */
-    private List<String> loadedMapIds = new ArrayList<>();
+    private int mapId;
 
-    public MapMangerBo(MapService mapService, String mapId, RoomType roomType) {
+    public MapMangerBo(MapService mapService, int mapId, RoomType roomType) {
         this.mapService = mapService;
         this.roomType = roomType;
         this.mapBo = mapService.loadMap(mapId, roomType);
-        this.loadedMapIds.add(mapBo.getMapId());
+        this.mapId = mapId;
     }
 
     public boolean loadNextMap() {
-        MapBo mapBo = mapService.loadNextMap(loadedMapIds, roomType);
+        MapBo mapBo = mapService.loadNextMap(++mapId, roomType);
         if (mapBo == null) {
             return false;
         }
         this.mapBo = mapBo;
-        this.loadedMapIds.add(mapBo.getMapId());
         return true;
     }
 
     public boolean reload() {
-        MapBo mapBo = mapService.loadMap(loadedMapIds.get(loadedMapIds.size() - 1), roomType);
+        MapBo mapBo = mapService.loadMap(mapId, roomType);
         if (mapBo == null) {
             return false;
         }

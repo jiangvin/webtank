@@ -26,7 +26,7 @@ public class SinglePlayerController {
     private MapService mapService;
 
     @GetMapping("/getMapFromId")
-    public MapDetailDto getMapFromId(@RequestParam(value = "id") String id) {
+    public MapDetailDto getMapFromId(@RequestParam(value = "id") int id) {
         return mapService.loadMap(id, RoomType.PVE).toDetailDto();
     }
 

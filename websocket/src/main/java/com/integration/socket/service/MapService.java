@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -46,20 +44,11 @@ public class MapService {
 
     private static final String PLAYER_DEFAULT_TYPE = "tank01";
 
-    public MapBo loadNextMap(List<String> loadedMapIds, RoomType roomType) {
-        List<String> mapIds = mapDao.queryMapIdList();
-        String nextMapId = null;
-        for (String mapId : mapIds) {
-            if (!loadedMapIds.contains(mapId)) {
-                nextMapId = mapId;
-                break;
-            }
-        }
-        if (nextMapId == null) {
+    public MapBo loadNextMap(int mapId, RoomType roomType) {
+        if (mapDao.queryFromId(mapId) == null) {
             return null;
         }
-
-        return loadMap(nextMapId, roomType);
+        return loadMap(mapId, roomType);
     }
 
     private MapBo loadMap(MapRecord record, RoomType roomType) {
@@ -86,28 +75,31 @@ public class MapService {
         return mapBo;
     }
 
-    public MapBo loadMap(String mapId, RoomType roomType) {
+    public MapBo loadMap(int mapId, RoomType roomType) {
         return loadMap(mapDao.queryFromId(mapId), roomType);
     }
 
     public void saveMap(MapEditDto mapEditDto) {
-        if (StringUtils.isEmpty(mapEditDto.getId())) {
+        if (StringUtils.isEmpty(mapEditDto.getName())) {
             throw new CustomException("名字不能为空");
         }
         readFile(mapEditDto.getData());
-        if (mapDao.queryMapIdList().contains(mapEditDto.getId())) {
-            //地图已存在
-            MapRecord mapRecord = mapDao.queryFromId(mapEditDto.getId());
+
+        MapRecord mapRecord = mapDao.queryFromName(mapEditDto.getName());
+        if (mapRecord != null) {
             if (mapRecord.getSecret() != null && !mapRecord.getSecret().equals(mapEditDto.getPw())) {
                 throw new CustomException("密码校验出错,请重新输入密码或者修改地图名存为新地图");
             }
+            mapRecord.setData(mapEditDto.getData());
+            mapRecord.update();
+            return;
         }
 
         String secret = null;
         if (!StringUtils.isEmpty(mapEditDto.getPw())) {
             secret = mapEditDto.getPw();
         }
-        mapDao.insertMap(mapEditDto.getId(), secret, mapEditDto.getData());
+        mapDao.insertMap(mapEditDto.getName(), secret, mapEditDto.getData());
     }
 
     private MapBo readFile(String content) {

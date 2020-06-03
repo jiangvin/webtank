@@ -30,6 +30,7 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index MAP_NAME_UNIQUE = Indexes0.MAP_NAME_UNIQUE;
     public static final Index MAP_PRIMARY = Indexes0.MAP_PRIMARY;
 
     // -------------------------------------------------------------------------
@@ -37,6 +38,7 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     private static class Indexes0 {
+        public static Index MAP_NAME_UNIQUE = Internal.createIndex("name_UNIQUE", Map.MAP, new OrderField[] { Map.MAP.NAME }, true);
         public static Index MAP_PRIMARY = Internal.createIndex("PRIMARY", Map.MAP, new OrderField[] { Map.MAP.ID }, true);
     }
 }

@@ -18,7 +18,6 @@ export default class Adapter {
          */
         this.platform = 0;
 
-
         this.stompClient = null;
 
         this.wxSocketStatus = false;

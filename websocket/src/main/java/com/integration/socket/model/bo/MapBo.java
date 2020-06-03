@@ -35,7 +35,7 @@ public class MapBo {
 
     private int computerLifeTotalCount = 0;
 
-    private String mapId;
+    private int mapId;
 
     private String mapName;
 
@@ -57,9 +57,9 @@ public class MapBo {
 
     private void copyProperties(MapDto mapDto) {
         copyLifeCountProperties(mapDto);
+        mapDto.setMapId(getMapId());
         mapDto.setWidth(getWidth());
         mapDto.setHeight(getHeight());
-        mapDto.setMapId(getMapId());
         mapDto.setMapName(getMapName());
         List<ItemDto> itemList = new ArrayList<>();
         for (Map.Entry<String, MapUnitType> kv : getUnitMap().entrySet()) {

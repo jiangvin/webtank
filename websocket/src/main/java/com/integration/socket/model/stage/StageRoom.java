@@ -137,7 +137,7 @@ public class StageRoom extends BaseStage {
         }
     }
 
-    private String getMapId() {
+    private int getMapId() {
         return mapManger.getMapBo().getMapId();
     }
 

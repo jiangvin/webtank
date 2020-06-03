@@ -62,11 +62,11 @@ public class UserController {
 
     @GetMapping("/getMaps")
     public List<String> getMaps() {
-        return mapDao.queryMapIdList();
+        return mapDao.queryMapNameList();
     }
 
     @GetMapping("/getMap/{id}")
-    public MapEditDto getMap(@PathVariable(value = "id") String id) {
+    public MapEditDto getMap(@PathVariable(value = "id") int id) {
         return MapEditDto.convert(mapDao.queryFromId(id));
     }
 

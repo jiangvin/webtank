@@ -15,11 +15,11 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 public class MapDto {
+    private Integer mapId;
     private Integer width;
     private Integer height;
     private Integer playerLife;
     private Integer computerLife;
-    private String mapId;
     private String mapName;
     private List<ItemDto> itemList;
 

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class RoomDto {
     private String roomId;
     private String creator;
-    private String mapId;
+    private int mapId;
     private RoomType roomType;
     private TeamType joinTeamType;
     private Integer userCount;
