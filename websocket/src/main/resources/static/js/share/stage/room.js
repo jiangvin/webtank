@@ -25,7 +25,7 @@ export default class room extends stage {
         this.backgroundImage = Resource.getImage("background", "jpg");
 
         this.mask = true;
-        this.maskImage = Resource.getImage("background_loading");
+        this.maskImage = Resource.getImage("background_loading","jpg");
         this.maskInfo = null;
 
         this.control = {
