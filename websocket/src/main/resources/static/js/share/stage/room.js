@@ -25,8 +25,7 @@ export default class room extends stage {
         this.backgroundImage = Resource.getImage("background", "jpg");
 
         this.mask = true;
-        this.maskImage = Resource.getImage("background_loading","jpg");
-        this.maskInfo = null;
+        this.maskImage = Resource.getImage("background_loading", "jpg");
 
         this.control = {
             orientation: 0,
@@ -44,14 +43,22 @@ export default class room extends stage {
 
     init(roomInfo) {
         this.roomInfo = roomInfo;
+        this.showMask();
+    }
 
+    showMask() {
+        this.mask = true;
+        Status.setStatus(Status.statusPause(), this.generateMaskInfo(), false);
+    }
+
+    generateMaskInfo() {
         let displayNum;
         if (this.roomInfo.mapId < 10) {
             displayNum = "0" + this.roomInfo.mapId;
         } else {
             displayNum = "" + this.roomInfo.mapId;
         }
-        this.maskInfo = "MISSION " + displayNum;
+        return "MISSION " + displayNum;
     }
 
     update() {
@@ -179,8 +186,6 @@ export default class room extends stage {
             this.maskImage.width, this.maskImage.height,
             0, 0,
             Resource.width(), Resource.height());
-
-        Common.drawTitle(ctx, this.maskInfo);
     }
 
     drawTips(ctx, tips, x, y) {
@@ -395,9 +400,9 @@ export default class room extends stage {
                 this.items.delete(messageDto.message);
                 break;
             case "CLEAR_MAP":
+                this.showMask();
                 this.items.clear();
                 this.view.center = null;
-                this.mask = true;
                 break;
             default:
                 break;

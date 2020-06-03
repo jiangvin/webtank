@@ -32,7 +32,7 @@ export default class NetEngine extends Engine {
                         "roomType": thisEngine.room.roomInfo.roomType,
                         "joinTeamType": thisEngine.room.roomInfo.joinTeamType
                     })
-                }, 80);
+                }, 50);
 
                 //注册消息事件
                 Common.addMessageEvent("SERVER_READY", function () {
