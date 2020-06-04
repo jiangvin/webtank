@@ -8,7 +8,6 @@ import Stage from "./stage.js";
 import Resource from "../tool/resource.js";
 import Button from "./button.js"
 import Common from "../tool/common.js";
-import Status from "../tool/status.js";
 
 export default class Menu extends Stage {
     constructor() {

@@ -19,9 +19,13 @@ export default class Adapter {
         this.platform = 0;
 
         this.stompClient = null;
+        this.socketClient = null;
+        this.webConnectRule = null;
 
-        this.wxSocketStatus = false;
-
+        /**
+         * input
+         * @type {boolean}
+         */
         this.inputEnable = false;
     }
 
@@ -70,10 +74,16 @@ export default class Adapter {
         }
     }
 
-
     static getSocketStatus() {
         if (this.instance.platform === 0) {
-            return Adapter.getSocketStatusWeb();
+            switch (this.instance.webConnectRule) {
+                case 1:
+                    return Adapter.getSocketStatusWeb();
+                case 2:
+                    return Adapter.getSocketStatusWx();
+                default:
+                    return false;
+            }
         } else {
             return Adapter.getSocketStatusWx();
         }
@@ -87,12 +97,23 @@ export default class Adapter {
     }
 
     static getSocketStatusWx() {
-        return Adapter.instance.wxSocketStatus;
+        if (!Adapter.instance.socketClient) {
+            return false;
+        }
+
+        return Adapter.instance.socketClient.readyState === WebSocket.OPEN;
     }
 
     static socketSend(type, value, sendTo) {
         if (this.instance.platform === 0) {
-            Adapter.socketSendWeb(type, value, sendTo);
+            switch (this.instance.webConnectRule) {
+                case 1:
+                    Adapter.socketSendWeb(type, value, sendTo);
+                    break;
+                case 2:
+                    Adapter.socketSendWx(type, value, sendTo);
+                    break;
+            }
         } else {
             Adapter.socketSendWx(type, value, sendTo);
         }
@@ -130,14 +151,31 @@ export default class Adapter {
             "sendTo": sendTo
         });
 
-        wx.sendSocketMessage({
-            data: msg
-        })
+        Adapter.instance.socketClient.send(msg);
     }
 
     static socketConnect(id, callBack) {
+        if (Adapter.getSocketStatusWx()) {
+            Adapter.instance.socketClient.close();
+        }
+        if (Adapter.getSocketStatusWeb()) {
+            Adapter.instance.stompClient.disconnect();
+        }
+
         if (this.instance.platform === 0) {
-            Adapter.socketConnectWeb(id, callBack);
+            if (this.instance.webConnectRule === null) {
+                this.instance.webConnectRule = 2;
+            } else {
+                this.instance.webConnectRule = this.instance.webConnectRule % 2 + 1;
+            }
+            switch (this.instance.webConnectRule) {
+                case 1:
+                    Adapter.socketConnectWeb(id, callBack);
+                    break;
+                case 2:
+                    Adapter.socketConnectWx(id, callBack);
+                    break;
+            }
         } else {
             Adapter.socketConnectWx(id, callBack);
         }
@@ -162,30 +200,32 @@ export default class Adapter {
         });
     }
 
-    static socketConnectWx(id, callback) {
-        if (Adapter.instance.wxSocketStatus) {
-            wx.closeSocket();
+    static generateSocketHost() {
+        if (Resource.getHost() === "") {
+            return "ws://" + document.location.host;
+        } else {
+            return 'ws://' + Resource.getHost();
         }
+    }
 
-        wx.connectSocket({
-            url: 'ws://' + Resource.getHost() + '/ws?name=' + id
-        });
+    static socketConnectWx(id, callback) {
+        Adapter.instance.socketClient = new WebSocket(Adapter.generateSocketHost() + '/ws?name=' + id);
 
-        wx.onSocketOpen(function () {
-            Adapter.instance.wxSocketStatus = true;
+        Adapter.instance.socketClient.onopen = function () {
+            Common.addMessage("与服务器连接中...", "#ffffff");
             callback();
-        });
+        };
 
-        wx.onSocketError(function (response) {
-            Common.addMessage(response.errMsg, "#F00");
-        });
+        Adapter.instance.socketClient.onerror = function (response) {
+            Common.addMessage("websocket error:" + response, "#F00");
+        };
 
-        wx.onSocketMessage(function (response) {
+        Adapter.instance.socketClient.onmessage = function (response) {
             Resource.getRoot().processSocketMessage(JSON.parse(response.data));
-        });
+        };
 
-        wx.onSocketClose(function () {
-            Adapter.instance.wxSocketStatus = false;
-        })
+        Adapter.instance.socketClient.onclose = function () {
+
+        };
     }
 }
