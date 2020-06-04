@@ -136,7 +136,6 @@ export default class Root {
         this.currentStage().draw(ctx);
         this.drawMessage(ctx);
         this.drawTips(ctx);
-        this.drawStatus(ctx);
     }
 
     currentStage() {
@@ -152,19 +151,6 @@ export default class Root {
     lastStage() {
         if (this.stageIndex > 0) {
             --this.stageIndex;
-        }
-    }
-
-    drawStatus(ctx) {
-        if (Status.getShowMask()) {
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, Resource.width(), Resource.height());
-            ctx.globalAlpha = 1;
-        }
-
-        if (Status.getMessage()) {
-            Common.drawTitle(ctx, Status.getMessage());
         }
     }
 

@@ -139,6 +139,7 @@ export default class room extends stage {
         super.draw(ctx);
         Control.draw(ctx);
         this.drawMask(ctx);
+        this.drawStatus(ctx);
         this.drawRoomInfo(ctx);
     }
 
@@ -204,6 +205,19 @@ export default class room extends stage {
             this.maskImage.width, this.maskImage.height,
             0, 0,
             Resource.width(), Resource.height());
+    }
+
+    drawStatus(ctx) {
+        if (Status.getShowMask()) {
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, Resource.width(), Resource.height());
+            ctx.globalAlpha = 1;
+        }
+
+        if (Status.getMessage()) {
+            Common.drawTitle(ctx, Status.getMessage());
+        }
     }
 
     drawTips(ctx, tips, x, y) {
