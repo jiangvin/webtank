@@ -3,6 +3,8 @@ package com.integration.socket.model.bo;
 import lombok.Getter;
 
 import javax.websocket.Session;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 /**
  * @author 蒋文龙(Vin)
@@ -22,15 +24,15 @@ public class WxUserBo extends UserBo {
         this.session = session;
     }
 
-    public static String getUserIdFromSession(Session session) {
+    public static String getUserIdFromSession(Session session) throws UnsupportedEncodingException {
         if (!session.getQueryString().startsWith(USER_ID_PREFIX)) {
             return null;
         }
 
-        return session.getQueryString().substring(USER_ID_PREFIX.length());
+        return URLDecoder.decode(session.getQueryString().substring(USER_ID_PREFIX.length()), "utf-8");
     }
 
-    public static WxUserBo convertWxUserBo(Session session) {
+    public static WxUserBo convertWxUserBo(Session session) throws UnsupportedEncodingException {
         String userId = getUserIdFromSession(session);
         if (userId == null) {
             return null;

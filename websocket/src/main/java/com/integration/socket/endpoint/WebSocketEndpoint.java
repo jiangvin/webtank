@@ -16,6 +16,7 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author 蒋文龙(Vin)
@@ -42,7 +43,7 @@ public class WebSocketEndpoint {
      * @param session
      */
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(Session session) throws UnsupportedEncodingException {
         WxUserBo userBo = WxUserBo.convertWxUserBo(session);
         if (userBo == null) {
             return;
@@ -56,7 +57,7 @@ public class WebSocketEndpoint {
      * @param session
      */
     @OnClose
-    public void onClose(Session session) {
+    public void onClose(Session session) throws UnsupportedEncodingException {
         String userId = WxUserBo.getUserIdFromSession(session);
         if (userId == null) {
             return;
@@ -71,7 +72,7 @@ public class WebSocketEndpoint {
      * @param text
      */
     @OnMessage
-    public void onMsg(Session session, String text) {
+    public void onMsg(Session session, String text) throws UnsupportedEncodingException {
         String userId = WxUserBo.getUserIdFromSession(session);
         if (userId == null) {
             return;
