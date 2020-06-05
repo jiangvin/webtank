@@ -111,7 +111,6 @@ public class StageRoom extends BaseStage {
     }
 
     private void init() {
-        saveTankType();
         this.tankMap.clear();
         this.bulletMap.clear();
         this.itemMap.clear();
@@ -125,7 +124,7 @@ public class StageRoom extends BaseStage {
         this.eventList.add(new CreateItemEvent());
     }
 
-    private void saveTankType() {
+    private int saveTankType() {
         this.tankTypeSaveMap.clear();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
@@ -134,6 +133,7 @@ public class StageRoom extends BaseStage {
             }
             this.tankTypeSaveMap.put(tankBo.getUserId(), tankBo.getType());
         }
+        return this.tankTypeSaveMap.size();
     }
 
     private int getMapId() {
@@ -196,8 +196,12 @@ public class StageRoom extends BaseStage {
     }
 
     private void addSyncList(TankBo tankBo, boolean forceUpdate) {
-        if (forceUpdate ||
-                (tankBo.getActionType() == ActionType.RUN && System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TIME)) {
+        if (forceUpdate) {
+            syncTankList.add(tankBo);
+            return;
+        }
+
+        if (tankBo.getActionType() == ActionType.RUN && System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TIME) {
             syncTankList.add(tankBo);
         }
     }
@@ -614,37 +618,20 @@ public class StageRoom extends BaseStage {
 
     private void processGameOver(TeamType winTeam) {
         this.isPause = true;
-        boolean processNextMap = true;
-
-        if (getRoomType() == RoomType.PVE) {
-            if (winTeam == TeamType.RED) {
-                this.pauseMessage = "恭喜通关";
-            } else {
-                this.pauseMessage = "游戏失败";
-                processNextMap = false;
-            }
-        } else {
-            this.pauseMessage = getTeam(winTeam) + "胜利!";
-        }
-        sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
-
-        if (processNextMap && !mapManger.loadNextMap()) {
+        if (getRoomType() == RoomType.PVE && !processGameOverPve(winTeam)) {
             return;
-        }
-
-        if (!processNextMap && !mapManger.reload()) {
+        } else if (!processGameOverPvp(winTeam)) {
             return;
         }
 
         init();
         long loadTimeoutSeconds = 10;
-        long cleanMapTimeoutSeconds = 8;
-        this.pauseMessage = String.format("MISSION %02d", getMapId());
+        long cleanMapTimeoutSeconds = 7;
         String tips;
-        if (processNextMap) {
-            tips = "进入下一关";
+        if (getRoomType() == RoomType.PVE && winTeam == TeamType.BLUE) {
+            tips = "重新开始";
         } else {
-            tips = "重新开始本关";
+            tips = "进入下一关";
         }
         for (int i = 1; i <= loadTimeoutSeconds; ++i) {
             String content = String.format("%d秒后%s...", i, tips);
@@ -666,6 +653,36 @@ public class StageRoom extends BaseStage {
         LoadMapEvent loadEvent = new LoadMapEvent();
         loadEvent.setTimeout(loadTimeoutSeconds * 60);
         this.eventList.add(loadEvent);
+    }
+
+    private boolean processGameOverPve(TeamType winTeam) {
+        int saveLife = saveTankType();
+        if (winTeam == TeamType.RED) {
+            this.pauseMessage = "恭喜通关";
+            if (!mapManger.loadNextMap(saveLife)) {
+                return false;
+            }
+        } else {
+            this.pauseMessage = "游戏失败";
+            if (!mapManger.reload()) {
+                return false;
+            }
+        }
+        sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
+        this.pauseMessage = String.format("MISSION %02d", getMapId());
+        return true;
+    }
+
+    private boolean processGameOverPvp(TeamType winTeam) {
+        this.pauseMessage = getTeam(winTeam) + "胜利!";
+        sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
+
+        if (!mapManger.loadNextMap(0)) {
+            return false;
+        }
+
+        this.pauseMessage = String.format("MISSION %02d", getMapId());
+        return true;
     }
 
     private void changeMap(String key, MapUnitType type) {

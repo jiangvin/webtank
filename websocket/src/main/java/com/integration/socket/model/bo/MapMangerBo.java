@@ -33,7 +33,7 @@ public class MapMangerBo {
         this.mapId = mapId;
     }
 
-    public boolean loadNextMap() {
+    public boolean loadNextMap(int saveLife) {
         List<StringCountDto> lastPlayerLife = mapBo.getPlayerLife();
         MapBo mapBo = mapService.loadNextMap(++mapId, roomType);
         if (mapBo == null) {
@@ -42,7 +42,9 @@ public class MapMangerBo {
 
         //继承之前的属性
         if (roomType == RoomType.PVE) {
+            lastPlayerLife.get(0).addValue(saveLife);
             mapBo.setPlayerLife(lastPlayerLife);
+            mapBo.setPlayerLifeTotalCount(lastPlayerLife.get(0).getValue());
         }
 
         this.mapBo = mapBo;

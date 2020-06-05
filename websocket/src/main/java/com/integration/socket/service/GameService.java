@@ -21,7 +21,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
@@ -45,11 +44,6 @@ public class GameService {
 
     @Autowired
     private RoomService roomService;
-
-    @PostConstruct
-    private void init() {
-
-    }
 
     public void removeUser(String userId) {
         UserBo userBo = onlineUserService.remove(userId);
@@ -164,14 +158,11 @@ public class GameService {
     }
 
     private BaseStage currentStage(UserBo userBo) {
-        if (!StringUtils.isEmpty(userBo.getRoomId())) {
-            if (!roomService.roomNameExists(userBo.getRoomId())) {
-                log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUserId());
-            }
-            return roomService.get(userBo.getRoomId());
-        } else {
+        if (StringUtils.isEmpty(userBo.getRoomId()) || !roomService.roomNameExists(userBo.getRoomId())) {
+            log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUserId());
             return null;
         }
+        return roomService.get(userBo.getRoomId());
     }
 
     private UserBo userCheckAndGetSendFrom(MessageDto messageDto, String sendFrom) {

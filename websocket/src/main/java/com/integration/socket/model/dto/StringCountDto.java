@@ -23,4 +23,8 @@ public class StringCountDto {
         dto.setValue(target.getValue());
         return dto;
     }
+
+    public void addValue(int value) {
+        this.value += value;
+    }
 }
