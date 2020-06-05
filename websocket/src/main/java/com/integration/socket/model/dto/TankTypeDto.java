@@ -51,18 +51,6 @@ public class TankTypeDto {
     private static void initTypeMap() {
         tankTypeMap = new ConcurrentHashMap<>(16);
 
-        //menu
-        tankTypeMap.put("tankMenu", new TankTypeDto(
-                            "tankMenu",
-                            1.0,
-                            1,
-                            5.0,
-                            60,
-                            0,
-                            false,
-                            null,
-                            null));
-
         //player
         tankTypeMap.put("tank01", new TankTypeDto(
                             "tank01",
@@ -114,7 +102,7 @@ public class TankTypeDto {
                               "tank05",
                               "tank01",
                               null,
-                              30,
+                              60,
                               "tank06",
                               null);
         tankTypeMap.put(com.getTypeId(), com);
@@ -123,7 +111,7 @@ public class TankTypeDto {
                   "tank06",
                   "tank02",
                   null,
-                  20,
+                  40,
                   null,
                   null);
         tankTypeMap.put(com.getTypeId(), com);
@@ -132,7 +120,7 @@ public class TankTypeDto {
                   "tank07",
                   "tank02",
                   2.5,
-                  20,
+                  30,
                   null,
                   null);
         tankTypeMap.put(com.getTypeId(), com);
@@ -141,7 +129,7 @@ public class TankTypeDto {
                   "tank08",
                   "tank03",
                   3.0,
-                  20,
+                  30,
                   null,
                   null);
         tankTypeMap.put(com.getTypeId(), com);
@@ -150,7 +138,7 @@ public class TankTypeDto {
                   "tank09",
                   "tank04",
                   null,
-                  30,
+                  60,
                   null,
                   "tank10");
         tankTypeMap.put(com.getTypeId(), com);
@@ -159,7 +147,7 @@ public class TankTypeDto {
                   "tank10",
                   "tank04",
                   2.5,
-                  20,
+                  50,
                   null,
                   "tank11");
         tankTypeMap.put(com.getTypeId(), com);
@@ -168,7 +156,7 @@ public class TankTypeDto {
                   "tank11",
                   "tank03",
                   3.0,
-                  20,
+                  35,
                   null,
                   "tank12");
         tankTypeMap.put(com.getTypeId(), com);
@@ -177,7 +165,7 @@ public class TankTypeDto {
                   "tank12",
                   "tank02",
                   4.0,
-                  10,
+                  20,
                   null,
                   null);
         tankTypeMap.put(com.getTypeId(), com);
