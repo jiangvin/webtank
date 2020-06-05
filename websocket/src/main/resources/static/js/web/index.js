@@ -30,7 +30,7 @@ export default class Index {
 
     initEvent() {
         //在手机上禁用滑动
-        document.addEventListener('touchmove', function (e) {
+        document.body.addEventListener('touchmove', function (e) {
             // 判断默认行为是否可以被禁用
             if (e.cancelable) {
                 // 判断默认行为是否已经被禁用
@@ -38,7 +38,7 @@ export default class Index {
                     e.preventDefault();
                 }
             }
-        }, false);
+        }, {passive: false});
         document.addEventListener('touchstart', function (e) {
             if (e.touches.length > 1) {
                 // 判断默认行为是否可以被禁用
