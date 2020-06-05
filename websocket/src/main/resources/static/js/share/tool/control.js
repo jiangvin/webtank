@@ -9,7 +9,6 @@ import Common from "./common.js";
 import Adapter from "./adapter.js";
 
 export default class Control {
-    static instance = new Control();
 
     constructor() {
         this.isTouchMode = null;
@@ -337,3 +336,4 @@ export default class Control {
         Control.instance.portrait = isPorTrait;
     }
 }
+Control.instance = new Control();

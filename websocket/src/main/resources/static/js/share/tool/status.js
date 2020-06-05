@@ -5,8 +5,6 @@
  */
 
 export default class Status {
-    static instance = new Status();
-
     constructor() {
         this.value = Status.statusPause();
         this.message = null;
@@ -45,3 +43,4 @@ export default class Status {
         return "pause";
     }
 }
+Status.instance = new Status();

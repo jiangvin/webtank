@@ -9,12 +9,6 @@ import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
 
 export default class AiEngine extends Engine {
-    static playerTypeId = "tank01";
-
-    static keepGoingRate = 120;
-
-    static keepTryRate = 30;
-
     constructor(room) {
         super(room);
 
@@ -510,5 +504,7 @@ export default class AiEngine extends Engine {
         }
         return {x: x, y: y};
     }
-
 }
+AiEngine.playerTypeId = "tank01";
+AiEngine.keepGoingRate = 120;
+AiEngine.keepTryRate = 30;

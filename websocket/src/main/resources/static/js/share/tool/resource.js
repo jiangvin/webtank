@@ -8,8 +8,6 @@ import Root from "../root.js"
 import User from "./user.js"
 
 export default class Resource {
-    static instance = new Resource();
-
     constructor() {
         this.root = new Root();
         this.canvas = null;
@@ -137,11 +135,12 @@ export default class Resource {
         return images.get(id);
     }
 
-    static getUnitSize = function () {
+    static getUnitSize() {
         return 36;
     };
 
-    static getBulletSize = function () {
+    static getBulletSize() {
         return 14;
     }
 }
+Resource.instance = new Resource();

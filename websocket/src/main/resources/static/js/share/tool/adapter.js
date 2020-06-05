@@ -8,7 +8,6 @@ import Resource from "./resource.js";
 import Common from "./common.js";
 
 export default class Adapter {
-    static instance = new Adapter();
 
     constructor() {
 
@@ -229,3 +228,4 @@ export default class Adapter {
         };
     }
 }
+Adapter.instance = new Adapter();
