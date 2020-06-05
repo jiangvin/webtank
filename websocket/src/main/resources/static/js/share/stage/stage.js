@@ -41,9 +41,14 @@ export default class Stage {
     }
 
     addButton(button) {
-        this.items.set(Resource.generateClientId(), button);
+        this.items.set(button.id, button);
         const controlUnit = button.controlUnit;
         this.controlUnits.set(controlUnit.id, controlUnit);
+    }
+
+    removeButton(button) {
+        this.items.delete(button.id);
+        this.controlUnits.delete(button.controlUnit.id);
     }
 
     processSocketMessage(messageDto) {

@@ -45,6 +45,7 @@ export default class room extends stage {
 
     init(roomInfo) {
         this.roomInfo = roomInfo;
+        this.showTeam = roomInfo.showTeam;
         this.showMask();
         Status.setStatus(Status.statusPause(), this.generateMaskInfo(), false);
     }
@@ -629,22 +630,25 @@ export default class room extends stage {
         return item;
     };
 
-    createGameItem(itemData) {
-        if (this.items.has(itemData.id)) {
-            return;
-        }
-        const imageId = "item_" + itemData.typeId.toLowerCase();
-        const gameItem = this.createItem({
-            id: itemData.id,
-            x: itemData.x,
-            y: itemData.y,
-            image: Resource.getImage(imageId)
-        });
-        gameItem.play = new Play(1, 15,
-            function () {
-                gameItem.orientation = (gameItem.orientation + 1) % 2;
-            }, function () {
-                this.frames = 1;
+    createGameItem(itemList) {
+        const thisRoom = this;
+        itemList.forEach(function (itemData) {
+            if (thisRoom.items.has(itemData.id)) {
+                return;
+            }
+            const imageId = "item_" + itemData.typeId.toLowerCase();
+            const gameItem = thisRoom.createItem({
+                id: itemData.id,
+                x: itemData.x,
+                y: itemData.y,
+                image: Resource.getImage(imageId)
             });
+            gameItem.play = new Play(1, 15,
+                function () {
+                    gameItem.orientation = (gameItem.orientation + 1) % 2;
+                }, function () {
+                    this.frames = 1;
+                });
+        });
     };
 }

@@ -1,10 +1,8 @@
 package com.integration.socket.service;
 
-import com.integration.dto.message.MessageDto;
-import com.integration.dto.message.MessageType;
+import com.integration.dto.room.RoomDto;
 import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.dto.room.RoomDto;
 import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.model.stage.StageRoom;
 import com.integration.util.model.CustomException;
@@ -91,17 +89,6 @@ public class RoomService {
         StageRoom stageRoom = new StageRoom(roomDto, mapMangerBo, messageService);
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
-        String note = null;
-        if (roomList.size() <= 6) {
-            note = "CREAT_ROOM";
-        }
-        messageService.sendMessage(new MessageDto(String.format("%s 创建了房间 %s",
-                                                                creator.getUserId(),
-                                                                roomDto.getRoomId()),
-                                                  MessageType.SYSTEM_MESSAGE,
-                                                  null,
-                                                  null,
-                                                  note));
         return stageRoom;
     }
 }

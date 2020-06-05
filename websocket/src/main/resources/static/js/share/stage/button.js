@@ -11,6 +11,7 @@ export default class Button extends Item {
     constructor(text, x, y, callBack) {
         super();
 
+        this.id = Resource.generateClientId();
         this.text = text;
         this.x = x;
         this.y = y;
@@ -26,7 +27,7 @@ export default class Button extends Item {
         rightBottom.x = this.x + 284 / 2;
         rightBottom.y = this.y + 72 / 2;
         this.controlUnit = new ControlUnit(
-            Resource.generateClientId(),
+            this.id,
             leftTop,
             rightBottom,
             callBack);

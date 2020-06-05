@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -293,7 +294,7 @@ public class StageRoom extends BaseStage {
                     Point pos = CommonUtil.getPointFromKey(key);
                     ItemBo itemBo = new ItemBo(key, pos, CommonUtil.getId(), itemType);
                     itemMap.put(key, itemBo);
-                    sendMessageToRoom(itemBo.toDto(), MessageType.ITEM);
+                    sendMessageToRoom(Collections.singletonList(itemBo.toDto()), MessageType.ITEM);
                     break;
                 }
             }
@@ -850,6 +851,7 @@ public class StageRoom extends BaseStage {
         sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUserId());
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUserId());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUserId());
+        sendMessageToUser(getGameItemList(), MessageType.ITEM, userBo.getUserId());
 
         createTankForUser(userBo, teamType, 60 * 3);
 
@@ -951,6 +953,14 @@ public class StageRoom extends BaseStage {
             bulletDtoList.add(kv.getValue().convertToDto());
         }
         return bulletDtoList;
+    }
+
+    private List<ItemDto> getGameItemList() {
+        List<ItemDto> itemDtoList = new ArrayList<>();
+        for (Map.Entry<String, ItemBo> kv : itemMap.entrySet()) {
+            itemDtoList.add(kv.getValue().toDto());
+        }
+        return itemDtoList;
     }
 
     private void setStartPoint(TankBo tankBo) {

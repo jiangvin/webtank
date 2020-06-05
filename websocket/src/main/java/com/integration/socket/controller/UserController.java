@@ -1,7 +1,6 @@
 package com.integration.socket.controller;
 
 import com.integration.socket.model.dto.MapEditDto;
-import com.integration.socket.model.dto.RoomListDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.service.MapService;
 import com.integration.socket.service.OnlineUserService;
@@ -43,12 +42,6 @@ public class UserController {
     @GetMapping("/getUsers")
     public List<String> getUsers() {
         return onlineUserService.getUserList();
-    }
-
-    @GetMapping("/getRooms")
-    public RoomListDto getRooms(@RequestParam(value = "start", defaultValue = "0") int start,
-                                @RequestParam(value = "limit", defaultValue = "5") int limit) {
-        return roomService.getRoomListDto(start, limit);
     }
 
     @GetMapping("/checkRoomName")
