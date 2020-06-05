@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+import java.util.Random;
+
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -31,6 +34,8 @@ public class MapService {
 
     @Autowired
     private MapDao mapDao;
+
+    private Random random = new Random();
 
     private static final String MAP_SIZE = "map_size";
 
@@ -67,6 +72,8 @@ public class MapService {
         //根据类型调整数据
         if (roomType == RoomType.PVP) {
             mapBo.duplicatePlayer();
+            mapBo.removeMapUnit(MapUnitType.RED_KING);
+            mapBo.removeMapUnit(MapUnitType.BLUE_KING);
         } else if (roomType == RoomType.EVE) {
             mapBo.duplicateComputer();
         } else if (roomType == RoomType.PVE) {
@@ -77,6 +84,21 @@ public class MapService {
 
     public MapBo loadMap(int mapId, RoomType roomType) {
         return loadMap(mapDao.queryFromId(mapId), roomType);
+    }
+
+    public MapBo loadRandomMap(List<String> loadedMapNames, RoomType roomType) {
+        List<String> mapNames = mapDao.queryMapNameList();
+        for (String name : loadedMapNames) {
+            mapNames.remove(name);
+        }
+
+        if (mapNames.isEmpty()) {
+            return null;
+        }
+
+        String mapName = mapNames.get(random.nextInt(mapNames.size()));
+        loadedMapNames.add(mapName);
+        return loadMap(mapDao.queryFromName(mapName), roomType);
     }
 
     public void saveMap(MapEditDto mapEditDto) {

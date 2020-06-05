@@ -23,30 +23,44 @@ public class MapMangerBo {
     /**
      * 加载过的地图
      */
+    List<String> loadedMapNames = new ArrayList<>();
+
     private int mapId;
 
     public MapMangerBo(MapService mapService, int mapId, RoomType roomType) {
         this.mapService = mapService;
         this.roomType = roomType;
-        this.mapBo = mapService.loadMap(mapId, roomType);
+        if (roomType == RoomType.PVE) {
+            this.mapBo = mapService.loadMap(mapId, roomType);
+        } else {
+            this.mapBo = mapService.loadRandomMap(loadedMapNames, roomType);
+        }
         initPlayerLife();
         this.mapId = mapId;
     }
 
-    public boolean loadNextMap(int saveLife) {
+    public boolean loadNextMapPve(int saveLife) {
         List<StringCountDto> lastPlayerLife = mapBo.getPlayerLife();
+
         MapBo mapBo = mapService.loadNextMap(++mapId, roomType);
         if (mapBo == null) {
             return false;
         }
 
         //继承之前的属性
-        if (roomType == RoomType.PVE) {
-            lastPlayerLife.get(0).addValue(saveLife);
-            mapBo.setPlayerLife(lastPlayerLife);
-            mapBo.setPlayerLifeTotalCount(lastPlayerLife.get(0).getValue());
-        }
+        lastPlayerLife.get(0).addValue(saveLife);
+        mapBo.setPlayerLife(lastPlayerLife);
+        mapBo.setPlayerLifeTotalCount(lastPlayerLife.get(0).getValue());
 
+        this.mapBo = mapBo;
+        return true;
+    }
+
+    public boolean loadRandomMapPvp() {
+        MapBo mapBo = mapService.loadRandomMap(this.loadedMapNames, roomType);
+        if (mapBo == null) {
+            return false;
+        }
         this.mapBo = mapBo;
         return true;
     }

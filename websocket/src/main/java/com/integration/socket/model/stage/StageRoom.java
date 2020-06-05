@@ -620,7 +620,7 @@ public class StageRoom extends BaseStage {
         this.isPause = true;
         if (getRoomType() == RoomType.PVE && !processGameOverPve(winTeam)) {
             return;
-        } else if (!processGameOverPvp(winTeam)) {
+        } else if (getRoomType() != RoomType.PVE && !processGameOverPvp(winTeam)) {
             return;
         }
 
@@ -659,7 +659,7 @@ public class StageRoom extends BaseStage {
         int saveLife = saveTankType();
         if (winTeam == TeamType.RED) {
             this.pauseMessage = "恭喜通关";
-            if (!mapManger.loadNextMap(saveLife)) {
+            if (!mapManger.loadNextMapPve(saveLife)) {
                 return false;
             }
         } else {
@@ -677,11 +677,11 @@ public class StageRoom extends BaseStage {
         this.pauseMessage = getTeam(winTeam) + "胜利!";
         sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
 
-        if (!mapManger.loadNextMap(0)) {
+        if (!mapManger.loadRandomMapPvp()) {
             return false;
         }
 
-        this.pauseMessage = String.format("MISSION %02d", getMapId());
+        this.pauseMessage = "RED vs BLUE";
         return true;
     }
 

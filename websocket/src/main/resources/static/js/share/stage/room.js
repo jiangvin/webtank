@@ -71,6 +71,10 @@ export default class room extends stage {
     }
 
     generateMaskInfo() {
+        if (this.roomInfo.roomType === "PVP") {
+            return "RED vs BLUE";
+        }
+        
         let displayNum;
         if (this.roomInfo.mapId < 10) {
             displayNum = "0" + this.roomInfo.mapId;
