@@ -23,10 +23,18 @@ export default class Sound {
 
         this.itemSound = new Audio();
         this.itemSound.src = 'audio/item.mp3';
+
+        this.bgmSound = new Audio();
+        this.bgmSound.loop = true;
+        this.bgmSound.src = 'audio/bgm.mp3';
     }
 
     static catchItem() {
         Sound.playSound(Sound.instance.itemSound);
+    }
+
+    static bgm() {
+        Sound.playSound(Sound.instance.bgmSound);
     }
 
     static click() {
@@ -42,10 +50,12 @@ export default class Sound {
     }
 
     static win() {
+        Sound.instance.bgmSound.pause();
         Sound.playSound(Sound.instance.winSound);
     }
 
     static lose() {
+        Sound.instance.bgmSound.pause();
         Sound.playSound(Sound.instance.loseSound);
     }
 

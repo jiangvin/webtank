@@ -231,6 +231,7 @@ export default class AiEngine extends Engine {
 
                 //进入下一关
                 thisEngine.initStage();
+                Sound.bgm();
             });
             thisEngine.room.addButton(next);
         } else {

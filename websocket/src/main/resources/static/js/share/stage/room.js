@@ -51,6 +51,7 @@ export default class room extends stage {
         this.showTeam = roomInfo.showTeam;
         this.clear();
         Status.setStatus(Status.statusPause(), this.generateMaskInfo(), false);
+        Sound.bgm();
     }
 
     clear() {
@@ -487,6 +488,8 @@ export default class room extends stage {
             Sound.lose();
         } else if (status.message.indexOf("恭喜") >= 0 || status.message.indexOf("胜利") >= 0) {
             Sound.win();
+        } else {
+            Sound.bgm();
         }
     }
 
