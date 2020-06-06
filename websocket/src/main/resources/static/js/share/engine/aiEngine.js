@@ -224,7 +224,6 @@ export default class AiEngine extends Engine {
                 Status.setStatus(null,thisEngine.room.generateMaskInfo());
 
                 //保存坦克类型和数量
-                ++thisEngine.playerLifeCount;
                 AiEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
 
                 //清空场景

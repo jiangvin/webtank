@@ -874,7 +874,9 @@ public class StageRoom extends BaseStage {
         sendStatusAndMessage(userBo, false);
 
         //每有一个玩家加入，玩家生命+1
-        getMapBo().getPlayerLife().get(0).addValue(1);
+        if (getRoomType() == RoomType.PVE && teamType == TeamType.RED) {
+            getMapBo().getPlayerLife().get(0).addValue(1);
+        }
 
         //发送场景信息
         if (this.isPause) {
