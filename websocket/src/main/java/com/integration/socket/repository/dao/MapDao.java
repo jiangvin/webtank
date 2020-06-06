@@ -44,4 +44,8 @@ public class MapDao extends BaseDao {
             }
         }
     }
+
+    public int queryMaxMapId() {
+        return create.fetchOne("Select max(id) from map").into(Integer.class);
+    }
 }

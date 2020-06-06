@@ -7,14 +7,21 @@ import Engine from "./engine.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
+import Button from "../stage/button.js";
 
 export default class AiEngine extends Engine {
     constructor(room) {
         super(room);
 
         const thisEngine = this;
+
         thisEngine.playerLifeCount = 5;
         thisEngine.computerLifeCount = 0;
+
+        thisEngine.maxMapId = 0;
+        Common.getRequest("/singlePlayer/getMaxMapId", function (data) {
+            thisEngine.maxMapId = data;
+        });
 
         /**
          * @type {{ammoMaxCount,ammoReloadTime,ammoSpeed,ammoMaxLifeTime}}
@@ -31,21 +38,26 @@ export default class AiEngine extends Engine {
 
         Common.getRequest("/singlePlayer/getTankTypes", function (data) {
             thisEngine.tankTypes = data;
-            thisEngine.loadMapDetail(function () {
-                Resource.getRoot().processSocketMessage({
-                    messageType: "MAP",
-                    message: thisEngine.mapInfo
-                });
+            thisEngine.initStage();
+        })
+    }
 
-                thisEngine.createPlayerTank();
-                for (let i = 0; i < thisEngine.mapInfo.computerStartCount; ++i) {
-                    thisEngine.createComputerTank();
-                }
+    initStage() {
+        const thisEngine = this;
+        thisEngine.loadMapDetail(function () {
+            Resource.getRoot().processSocketMessage({
+                messageType: "MAP",
+                message: thisEngine.mapInfo
+            });
 
-                Resource.getRoot().processSocketMessage({
-                    messageType: "SERVER_READY"
-                });
-            })
+            thisEngine.createPlayerTank();
+            for (let i = 0; i < thisEngine.mapInfo.computerStartCount; ++i) {
+                thisEngine.createComputerTank();
+            }
+
+            Resource.getRoot().processSocketMessage({
+                messageType: "SERVER_READY"
+            });
         })
     }
 
@@ -186,9 +198,45 @@ export default class AiEngine extends Engine {
                         messageType: "REMOVE_MAP",
                         message: mapItemId
                     });
-                    Status.setStatus(Status.statusPause(), "游戏失败", false);
+                    this.processGameOver(false);
                 }
                 return true;
+        }
+    }
+
+    processGameOver(win) {
+        const thisEngine = this;
+        if (win) {
+            if (thisEngine.room.roomInfo.mapId >= thisEngine.maxMapId) {
+                this.room.gameStatus({
+                    message: "恭喜全部通关",
+                    type: "OVER"
+                });
+                return;
+            }
+
+            Status.setStatus(Status.statusPause(), "恭喜通关", false);
+            const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.5, function () {
+                //进入下一关
+                ++thisEngine.room.roomInfo.mapId;
+                Status.setStatus(null,thisEngine.room.generateMaskInfo());
+
+                //保存坦克类型和数量
+                ++thisEngine.playerLifeCount;
+                AiEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
+
+                //清空场景
+                thisEngine.room.clear();
+
+                //进入下一关
+                thisEngine.initStage();
+            });
+            thisEngine.room.addButton(next);
+        } else {
+            this.room.gameStatus({
+                message: "游戏失败",
+                type: "OVER"
+            });
         }
     }
 
@@ -218,7 +266,7 @@ export default class AiEngine extends Engine {
         if (tank.item.teamId === 1) {
             --this.playerLifeCount;
             if (this.playerLifeCount === 0) {
-                Status.setStatus(Status.statusPause(), "游戏失败", false);
+                this.processGameOver(false);
             } else {
                 this.createPlayerTank();
             }
@@ -227,7 +275,7 @@ export default class AiEngine extends Engine {
 
         --this.computerLifeCount;
         if (this.computerLifeCount === 0) {
-            Status.setStatus(Status.statusPause(), "恭喜过关", false);
+            this.processGameOver(true);
         } else {
             this.createComputerTank();
         }
@@ -409,6 +457,8 @@ export default class AiEngine extends Engine {
                 AiEngine.playerTypeId,
                 1, true);
         });
+        //恢复玩家保存的类型
+        AiEngine.playerTypeId = "tank01";
     }
 
     createComputerTank() {

@@ -506,7 +506,6 @@ public class StageRoom extends BaseStage {
                 if (tankBo.levelDown()) {
                     sendTankToRoom(tankBo);
                 } else {
-                    sendTankBombMessage(tankBo);
                     removeTankFromTankId(tankBo.getTankId());
                 }
             }
@@ -663,9 +662,11 @@ public class StageRoom extends BaseStage {
         gameStatusDto.setType(GameStatusType.PAUSE);
 
         if (winTeam == TeamType.RED) {
-            gameStatusDto.setMessage("恭喜通关");
             if (!mapManger.loadNextMapPve(saveLife)) {
+                gameStatusDto.setMessage("恭喜全部通关");
                 gameStatusDto.setType(GameStatusType.OVER);
+            } else {
+                gameStatusDto.setMessage("恭喜通关");
             }
         } else {
             gameStatusDto.setMessage("游戏失败");
@@ -777,6 +778,7 @@ public class StageRoom extends BaseStage {
             return;
         }
 
+        sendTankBombMessage(tankBo);
         //recreate
         UserBo userBo = this.userMap.get(tankBo.getUserId());
         if (userBo != null) {

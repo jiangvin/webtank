@@ -3,6 +3,7 @@ package com.integration.socket.controller;
 import com.integration.dto.room.RoomType;
 import com.integration.socket.model.dto.MapDetailDto;
 import com.integration.socket.model.dto.TankTypeDto;
+import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.service.MapService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,9 @@ public class SinglePlayerController {
     @Autowired
     private MapService mapService;
 
+    @Autowired
+    private MapDao mapDao;
+
     @GetMapping("/getMapFromId")
     public MapDetailDto getMapFromId(@RequestParam(value = "id") int id) {
         return mapService.loadMap(id, RoomType.PVE).toDetailDto();
@@ -33,5 +37,10 @@ public class SinglePlayerController {
     @GetMapping("getTankTypes")
     public Map<String, TankTypeDto> getTankTypes() {
         return TankTypeDto.getTypeMap();
+    }
+
+    @GetMapping("getMaxMapId")
+    public int getMaxMapId() {
+        return mapDao.queryMaxMapId();
     }
 }
