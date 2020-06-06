@@ -87,7 +87,7 @@ button:active {
 }
 button.connect {
     width: 26%;
-    height: 3em;
+    height: 4em;
     position: absolute;
     left: 37%;
 }
