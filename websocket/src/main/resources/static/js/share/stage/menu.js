@@ -99,7 +99,6 @@ export default class Menu extends Stage {
             const roomInfo = {
                 mapId: 1,
                 roomType: "PVE",
-                roomId: Resource.getUser().userId + "的房间",
                 joinTeamType: "RED"
             };
             thisMenu.initRoom(roomInfo);
@@ -118,7 +117,6 @@ export default class Menu extends Stage {
             const roomInfo = {
                 mapId: 1,
                 roomType: "PVP",
-                roomId: Resource.getUser().userId + "的房间",
                 joinTeamType: "RED",
                 showTeam: true
             };
@@ -129,7 +127,6 @@ export default class Menu extends Stage {
             const roomInfo = {
                 mapId: 1,
                 roomType: "PVP",
-                roomId: Resource.getUser().userId + "的房间",
                 joinTeamType: "BLUE",
                 showTeam: true
             };

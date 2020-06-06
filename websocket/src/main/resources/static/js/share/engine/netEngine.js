@@ -27,6 +27,9 @@ export default class NetEngine extends Engine {
 
                 //create room
                 if (!room.roomInfo.joinRoom) {
+                    //set room id
+                    thisEngine.room.roomInfo.roomId = Resource.getUser().userId + "的房间";
+
                     Common.addTimeEvent("CREATE_ROOM", function () {
                         Adapter.socketSend("CREATE_ROOM", {
                             "roomId": thisEngine.room.roomInfo.roomId,

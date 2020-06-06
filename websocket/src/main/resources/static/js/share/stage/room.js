@@ -46,8 +46,15 @@ export default class room extends stage {
     init(roomInfo) {
         this.roomInfo = roomInfo;
         this.showTeam = roomInfo.showTeam;
-        this.showMask();
+        this.clear();
         Status.setStatus(Status.statusPause(), this.generateMaskInfo(), false);
+    }
+
+    clear() {
+        this.showMask();
+        this.items.clear();
+        this.controlUnits.clear();
+        this.view.center = null;
     }
 
     showMask() {
@@ -434,9 +441,7 @@ export default class room extends stage {
                 this.items.delete(messageDto.message);
                 break;
             case "CLEAR_MAP":
-                this.showMask();
-                this.items.clear();
-                this.view.center = null;
+                this.clear();
                 break;
             case "SERVER_READY":
                 this.hideMask();
