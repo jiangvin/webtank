@@ -94,6 +94,13 @@ public class StageRoom extends BaseStage {
     @Getter
     private String creator;
 
+    private MapMangerBo mapManger;
+
+    private Random random = new Random();
+
+    private boolean isPause = false;
+    private String pauseMessage;
+
     public StageRoom(RoomDto roomDto, MapMangerBo mapManger, MessageService messageService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
@@ -149,13 +156,6 @@ public class StageRoom extends BaseStage {
     private MapBo getMapBo() {
         return mapManger.getMapBo();
     }
-
-    private MapMangerBo mapManger;
-
-    private Random random = new Random();
-
-    private boolean isPause = false;
-    private String pauseMessage;
 
     public int getUserCount() {
         return userMap.size();
@@ -872,6 +872,9 @@ public class StageRoom extends BaseStage {
         userBo.setRoomId(this.roomId);
         userBo.setTeamType(teamType);
         sendStatusAndMessage(userBo, false);
+
+        //每有一个玩家加入，玩家生命+1
+        getMapBo().getPlayerLife().get(0).addValue(1);
 
         //发送场景信息
         if (this.isPause) {

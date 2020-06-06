@@ -32,7 +32,7 @@ export default class Home extends Stage {
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
                 context.fillStyle = '#FFF';
-                context.fillText('坦克世界', Resource.width() / 2, 40);
+                context.fillText('欢迎光临', Resource.width() / 2, 40);
             }
         });
 

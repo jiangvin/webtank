@@ -78,7 +78,7 @@ public class MapMangerBo {
 
     private static List<StringCountDto> initPlayerLifeInPve() {
         List<StringCountDto> list = new ArrayList<>();
-        list.add(new StringCountDto("tank01", 5));
+        list.add(new StringCountDto("tank01", 4));
         return list;
     }
 
