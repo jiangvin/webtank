@@ -15,9 +15,11 @@ import com.integration.socket.model.bo.ItemBo;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
-import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.dto.GameStatusDto;
+import com.integration.socket.model.dto.GameStatusType;
 import com.integration.socket.model.dto.StringCountDto;
+import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.event.BaseEvent;
 import com.integration.socket.model.event.CreateItemEvent;
 import com.integration.socket.model.event.CreateTankEvent;
@@ -645,7 +647,7 @@ public class StageRoom extends BaseStage {
         this.eventList.add(cleanEvent);
 
         //更改标题
-        MessageEvent changeTitle = new MessageEvent(this.pauseMessage, MessageType.GAME_STATUS);
+        MessageEvent changeTitle = new MessageEvent(new GameStatusDto(GameStatusType.PAUSE, this.pauseMessage), MessageType.GAME_STATUS);
         changeTitle.setTimeout(cleanMapTimeoutSeconds * 60);
         this.eventList.add(changeTitle);
 
@@ -657,32 +659,40 @@ public class StageRoom extends BaseStage {
 
     private boolean processGameOverPve(TeamType winTeam) {
         int saveLife = saveTankType();
+        GameStatusDto gameStatusDto = new GameStatusDto();
+        gameStatusDto.setType(GameStatusType.PAUSE);
+
         if (winTeam == TeamType.RED) {
-            this.pauseMessage = "恭喜通关";
+            gameStatusDto.setMessage("恭喜通关");
             if (!mapManger.loadNextMapPve(saveLife)) {
-                return false;
+                gameStatusDto.setType(GameStatusType.OVER);
             }
         } else {
-            this.pauseMessage = "游戏失败";
-            if (!mapManger.reload()) {
-                return false;
-            }
+            gameStatusDto.setMessage("游戏失败");
+            gameStatusDto.setType(GameStatusType.OVER);
         }
-        sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
+
+        sendMessageToRoom(gameStatusDto, MessageType.GAME_STATUS);
+
         this.pauseMessage = String.format("MISSION %02d", getMapId());
-        return true;
+        return gameStatusDto.getType() == GameStatusType.PAUSE;
     }
 
     private boolean processGameOverPvp(TeamType winTeam) {
         this.pauseMessage = getTeam(winTeam) + "胜利!";
-        sendMessageToRoom(this.pauseMessage, MessageType.GAME_STATUS);
+
+        GameStatusDto gameStatusDto = new GameStatusDto();
+        gameStatusDto.setMessage(this.pauseMessage);
 
         if (!mapManger.loadRandomMapPvp()) {
-            return false;
+            gameStatusDto.setType(GameStatusType.OVER);
+        } else {
+            gameStatusDto.setType(GameStatusType.PAUSE);
         }
 
+        sendMessageToRoom(gameStatusDto, MessageType.GAME_STATUS);
         this.pauseMessage = "RED vs BLUE";
-        return true;
+        return gameStatusDto.getType() == GameStatusType.PAUSE;
     }
 
     private void changeMap(String key, MapUnitType type) {
@@ -863,7 +873,7 @@ public class StageRoom extends BaseStage {
 
         //发送场景信息
         if (this.isPause) {
-            sendMessageToUser(this.pauseMessage, MessageType.GAME_STATUS, userBo.getUserId());
+            sendMessageToUser(new GameStatusDto(GameStatusType.PAUSE, this.pauseMessage), MessageType.GAME_STATUS, userBo.getUserId());
         }
         sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUserId());
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUserId());

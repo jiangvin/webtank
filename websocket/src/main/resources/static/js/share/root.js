@@ -225,9 +225,6 @@ export default class Root {
             case "USERS":
                 this.users = messageDto.message;
                 break;
-            case "GAME_STATUS":
-                Status.setStatus(Status.statusPause(), messageDto.message, false);
-                break;
             default:
                 break;
         }

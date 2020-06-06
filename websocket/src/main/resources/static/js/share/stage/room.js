@@ -9,6 +9,8 @@ import Common from "../tool/common.js";
 import Play from "./play.js";
 import Status from "../tool/status.js";
 import Control from "../tool/control.js";
+import Button from "./button.js";
+import Adapter from "../tool/adapter.js";
 
 export default class room extends stage {
     constructor() {
@@ -446,8 +448,22 @@ export default class room extends stage {
             case "SERVER_READY":
                 this.hideMask();
                 break;
+            case "GAME_STATUS":
+                this.gameStatus(messageDto.message);
+                break;
             default:
                 break;
+        }
+    }
+
+    gameStatus(status) {
+        Status.setStatus(Status.statusPause(), status.message, false);
+        if (status.type === "OVER") {
+            const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.5, function () {
+                Adapter.stopConnect();
+                Resource.getRoot().lastStage();
+            });
+            this.addButton(back);
         }
     }
 

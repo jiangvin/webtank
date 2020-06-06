@@ -153,13 +153,17 @@ export default class Adapter {
         Adapter.instance.socketClient.send(msg);
     }
 
-    static socketConnect(id, callBack) {
+    static stopConnect() {
         if (Adapter.getSocketStatusWx()) {
             Adapter.instance.socketClient.close();
         }
         if (Adapter.getSocketStatusWeb()) {
             Adapter.instance.stompClient.disconnect();
         }
+    }
+
+    static socketConnect(id, callBack) {
+        Adapter.stopConnect();
 
         if (this.instance.platform === 0) {
             if (this.instance.webConnectRule === null) {
