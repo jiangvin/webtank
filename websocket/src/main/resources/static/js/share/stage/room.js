@@ -11,6 +11,7 @@ import Status from "../tool/status.js";
 import Control from "../tool/control.js";
 import Button from "./button.js";
 import Adapter from "../tool/adapter.js";
+import Sound from "../tool/sound.js";
 
 export default class room extends stage {
     constructor() {
@@ -421,7 +422,7 @@ export default class room extends stage {
                 this.createOrUpdateTanks(messageDto.message, updateSelf);
                 break;
             case "REMOVE_TANK":
-                this.itemBomb(messageDto.message);
+                this.boomTank(messageDto.message);
                 break;
             case "BULLET":
                 this.createOrUpdateBullets(messageDto.message);
@@ -440,7 +441,7 @@ export default class room extends stage {
                 this.createGameItem(messageDto.message);
                 break;
             case "REMOVE_ITEM":
-                this.items.delete(messageDto.message);
+                this.removeGameItem(messageDto.message);
                 break;
             case "CLEAR_MAP":
                 this.clear();
@@ -456,14 +457,36 @@ export default class room extends stage {
         }
     }
 
+    removeGameItem(id) {
+        if (!this.items.has(id)) {
+            return;
+        }
+
+        const item = this.items.get(id);
+        this.items.delete(id);
+
+        if (this.view.center) {
+            const center = this.view.center;
+            if (Common.distance(center.x,center.y,item.x,item.y) <= Resource.getUnitSize() + 5) {
+                Sound.catchItem();
+            }
+        }
+    }
+
     gameStatus(status) {
         Status.setStatus(Status.statusPause(), status.message, false);
         if (status.type === "OVER") {
-            const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.5, function () {
+            const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
                 Adapter.stopConnect();
                 Resource.getRoot().lastStage();
             });
             this.addButton(back);
+        }
+
+        if (status.message.indexOf("失败") >= 0) {
+            Sound.lose();
+        } else if (status.message.indexOf("恭喜") >= 0 || status.message.indexOf("胜利") >= 0) {
+            Sound.win();
         }
     }
 
@@ -480,13 +503,10 @@ export default class room extends stage {
                 //已存在
                 thisStage.updateTankControl(tank);
             } else {
-                let tankImage;
-                tankImage = Resource.getImage(tank.typeId);
                 const tankItem = thisStage.createTank({
                     id: tank.id,
                     showId: true,
                     teamId: tank.teamId,
-                    image: tankImage,
                     scale: 0.1
                 });
                 thisStage.updateTankProperty(tank);
@@ -569,13 +589,29 @@ export default class room extends stage {
         }
     };
 
+    boomTank(data) {
+        const tank = this.itemBomb(data);
+        if (tank.id === Resource.getUser().userId) {
+            Sound.boom();
+            return;
+        }
+
+        if (this.view.center) {
+            const center = this.view.center;
+            const distance = Common.distance(tank.x,tank.y,center.x,center.y);
+            if (distance <= Resource.getUnitSize() * 8) {
+                Sound.boom();
+            }
+        }
+    }
+
     itemBomb(data, bombScale) {
         if (bombScale === undefined) {
             bombScale = 1;
         }
 
         if (!this.items.has(data.id)) {
-            return;
+            return null;
         }
 
         this.generalUpdateAttribute(data);
@@ -607,6 +643,8 @@ export default class room extends stage {
         if (item === this.view.center) {
             this.view.center = null;
         }
+
+        return item;
     };
 
     generalUpdateAttribute(newAttr) {
@@ -630,13 +668,21 @@ export default class room extends stage {
                 thisStage.generalUpdateAttribute(ammo);
             } else {
                 addNew = true;
-                thisStage.createBullet({
+                const bullet = thisStage.createBullet({
                     id: ammo.id,
                     x: ammo.x,
                     y: ammo.y,
                     orientation: ammo.orientation,
                     speed: ammo.speed
                 });
+
+                if (thisStage.view.center) {
+                    const center = thisStage.view.center;
+                    const distance = Common.distance(bullet.x,bullet.y,center.x,center.y);
+                    if (distance <= Resource.getUnitSize() + 5) {
+                        Sound.fire();
+                    }
+                }
             }
         });
         if (addNew) {

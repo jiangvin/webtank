@@ -4,6 +4,8 @@
  * @date 2020/5/27
  */
 
+import Sound from "../tool/sound.js";
+
 export default class ControlUnit {
     constructor(id, leftTop, rightBottom, callBack) {
         this.id = id;
@@ -17,6 +19,7 @@ export default class ControlUnit {
             point.x <= this.rightBottom.x &&
             point.y >= this.leftTop.y &&
             point.y <= this.rightBottom.y) {
+            Sound.click();
             this.callBack();
             return true;
         } else {

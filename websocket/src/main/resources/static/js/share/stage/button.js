@@ -15,6 +15,7 @@ export default class Button extends Item {
         this.text = text;
         this.x = x;
         this.y = y;
+        this.z = 10;
 
         this.generateControlUnit(callBack);
     }

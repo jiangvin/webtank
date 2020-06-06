@@ -8,6 +8,7 @@ import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
 import Button from "../stage/button.js";
+import Sound from "../tool/sound.js";
 
 export default class AiEngine extends Engine {
     constructor(room) {
@@ -215,8 +216,9 @@ export default class AiEngine extends Engine {
                 return;
             }
 
+            Sound.win();
             Status.setStatus(Status.statusPause(), "恭喜通关", false);
-            const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.5, function () {
+            const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.55, function () {
                 //进入下一关
                 ++thisEngine.room.roomInfo.mapId;
                 Status.setStatus(null,thisEngine.room.generateMaskInfo());
