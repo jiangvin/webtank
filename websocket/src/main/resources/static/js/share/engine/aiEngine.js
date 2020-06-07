@@ -44,6 +44,7 @@ export default class AiEngine extends Engine {
         Common.getRequest("/singlePlayer/getTankTypes", function (data) {
             thisEngine.tankTypes = data;
             thisEngine.initStage();
+            thisEngine.createGameItem();
         })
     }
 
@@ -60,7 +61,7 @@ export default class AiEngine extends Engine {
                 thisEngine.createComputerTank();
             }
 
-            thisEngine.createGameItem();
+            thisEngine.createItemTimeout = 25;
 
             Resource.getRoot().processSocketMessage({
                 messageType: "SERVER_READY"
@@ -70,7 +71,6 @@ export default class AiEngine extends Engine {
 
     createGameItem() {
         const thisEngine = this;
-        thisEngine.createItemTimeout = 20;
 
         const createItemEvent = function () {
             if (thisEngine.items.size >= AiEngine.maxItemLimit) {
