@@ -79,7 +79,8 @@ public class MapBo {
         mapDetailDto.setComputerStartPos(this.computerStartPoints);
         mapDetailDto.setComputerTypeCountList(this.computerLife);
         mapDetailDto.setComputerStartCount(this.computerStartCount);
-
+        mapDetailDto.setMaxGridX(this.maxGridX);
+        mapDetailDto.setMaxGridY(this.maxGridY);
         return mapDetailDto;
     }
 

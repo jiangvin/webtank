@@ -19,23 +19,27 @@ export default class AiEngine extends Engine {
         thisEngine.playerLifeCount = 5;
         thisEngine.computerLifeCount = 0;
 
+        thisEngine.playerTypeId = "tank01";
+        thisEngine.itemTypes = ["star", "shield", "red_star"];
+
         thisEngine.maxMapId = 0;
         Common.getRequest("/singlePlayer/getMaxMapId", function (data) {
             thisEngine.maxMapId = data;
         });
 
         /**
-         * @type {{ammoMaxCount,ammoReloadTime,ammoSpeed,ammoMaxLifeTime}}
+         * @type {{ammoMaxCount,ammoReloadTime,ammoSpeed,ammoMaxLifeTime,downId,upId}}
          */
         thisEngine.tankTypes = {};
 
         /**
-         * @type {{playerStartPos,computerStartPos,computerStartCount,computerTypeCountList}}
+         * @type {{playerStartPos,computerStartPos,computerStartCount,computerTypeCountList,maxGridX,maxGridY}}
          */
         thisEngine.mapInfo = {};
 
         thisEngine.tanks = new Map();
         thisEngine.bullets = new Map();
+        thisEngine.items = new Map();
 
         Common.getRequest("/singlePlayer/getTankTypes", function (data) {
             thisEngine.tankTypes = data;
@@ -56,11 +60,58 @@ export default class AiEngine extends Engine {
                 thisEngine.createComputerTank();
             }
 
+            thisEngine.createGameItem();
+
             Resource.getRoot().processSocketMessage({
                 messageType: "SERVER_READY"
             });
         })
     }
+
+    createGameItem() {
+        const thisEngine = this;
+        thisEngine.createItemTimeout = 20;
+
+        const createItemEvent = function () {
+            if (thisEngine.items.size >= AiEngine.maxItemLimit) {
+                return;
+            }
+            const index = Math.floor(Math.random() * thisEngine.itemTypes.length);
+            const typeId = thisEngine.itemTypes[index];
+            const id = Resource.generateClientId();
+            const size = Resource.getUnitSize();
+            for (let i = 0; i < 10; ++i) {
+                const gridX = Math.floor(Math.random() * thisEngine.mapInfo.maxGridX);
+                const gridY = Math.floor(Math.random() * thisEngine.mapInfo.maxGridY);
+                const key = gridX + '_' + gridY;
+                if (thisEngine.room.items.has(key)) {
+                    continue;
+                }
+
+                Resource.getRoot().processSocketMessage({
+                    messageType: "ITEM",
+                    message: [{
+                        id: id,
+                        x: gridX * size + size / 2,
+                        y: gridY * size + size / 2,
+                        typeId: typeId
+                    }]
+                });
+                thisEngine.items.set(id, thisEngine.room.items.get(id));
+                break;
+            }
+
+            //重复创建道具事件
+            thisEngine.createItemTimeout += 5;
+            Common.addTimeEvent("create_item", function () {
+                createItemEvent();
+            }, thisEngine.createItemTimeout * 60);
+        };
+
+        Common.addTimeEvent("create_item", function () {
+            createItemEvent();
+        }, thisEngine.createItemTimeout * 60);
+    };
 
     loadMapDetail(callback) {
         const thisEngine = this;
@@ -150,7 +201,7 @@ export default class AiEngine extends Engine {
 
             const distance = Common.distance(tank.item.x, tank.item.y, bullet.item.x, bullet.item.y);
             if (distance <= (Resource.getBulletSize() + Resource.getUnitSize()) / 2) {
-                if (!tank.item.hasShield) {
+                if (!tank.item.hasShield && !this.downLevel(tank)) {
                     this.removeTank(tank);
                 }
                 return true;
@@ -221,10 +272,10 @@ export default class AiEngine extends Engine {
             const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.55, function () {
                 //进入下一关
                 ++thisEngine.room.roomInfo.mapId;
-                Status.setStatus(null,thisEngine.room.generateMaskInfo());
+                Status.setStatus(null, thisEngine.room.generateMaskInfo());
 
                 //保存坦克类型和数量
-                AiEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
+                thisEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
 
                 //清空场景
                 thisEngine.room.clear();
@@ -300,6 +351,8 @@ export default class AiEngine extends Engine {
                 --tank.bulletReloadTime;
             }
 
+            thisEngine.catchItem(tank);
+
             if (tank.item.teamId !== 2) {
                 return;
             }
@@ -308,8 +361,97 @@ export default class AiEngine extends Engine {
         })
     }
 
+    catchItem(tank) {
+        if (tank.item.teamId !== 1) {
+            return;
+        }
+
+        for (let [k, v] of this.items) {
+            const item = v;
+
+            const distance = Common.distance(tank.item.x, tank.item.y, item.x, item.y);
+            if (distance > Resource.getUnitSize()) {
+                continue;
+            }
+
+            switch (item.typeId) {
+                case "star":
+                    if (this.upLevel(tank)) {
+                        this.removeGameItem(k);
+                    }
+                    break;
+                case "red_star":
+                    if (this.upToTopLevel(tank)) {
+                        this.removeGameItem(k);
+                    }
+                    break;
+                case "shield":
+                    tank.shieldTimeout += 20 * 60;
+                    tank.item.hasShield = true;
+                    this.removeGameItem(k);
+                    break;
+            }
+        }
+    }
+
+    removeGameItem(id) {
+        this.items.delete(id);
+        this.room.removeGameItem(id);
+    }
+
+    upLevel(tank) {
+        if (!this.tankTypes[tank.typeId].upId) {
+            return false;
+        }
+        this.changeType(tank, this.tankTypes[tank.typeId].upId);
+        return true;
+    }
+
+    downLevel(tank) {
+        if (!this.tankTypes[tank.typeId].downId) {
+            return false;
+        }
+        this.changeType(tank, this.tankTypes[tank.typeId].downId);
+        return true;
+    }
+
+    upToTopLevel(tank) {
+        if (!this.tankTypes[tank.typeId].upId) {
+            return false;
+        }
+        let typeId = tank.typeId;
+        while (this.tankTypes[typeId].upId) {
+            typeId = this.tankTypes[typeId].upId;
+        }
+        this.changeType(tank, typeId);
+        return true;
+    }
+
+    changeType(tank, typeId) {
+        const oldType = this.tankTypes[tank.typeId];
+        const newType = this.tankTypes[typeId];
+
+        tank.bulletReloadTime += newType.ammoReloadTime - oldType.ammoReloadTime;
+        tank.bulletCount += newType.ammoMaxCount - oldType.ammoMaxCount;
+        tank.typeId = typeId;
+
+        Resource.getRoot().processSocketMessage({
+            messageType: "TANKS",
+            message: [{
+                id: tank.id,
+                typeId: tank.typeId,
+                hasShield: tank.item.hasShield,
+                x: tank.item.x,
+                y: tank.item.y,
+                orientation: tank.item.orientation,
+                action: tank.item.action,
+                speed: newType.speed
+            }]
+        });
+    }
+
     updateTankAi(tank) {
-        if (tank.bulletReloadTime === 0 && tank.bulletCount !== 0) {
+        if (tank.bulletReloadTime <= 0 && tank.bulletCount !== 0) {
             this.tankFire(tank.id);
         }
 
@@ -456,11 +598,11 @@ export default class AiEngine extends Engine {
             --thisEngine.room.roomInfo.playerLife;
             thisEngine.createTank(thisEngine.mapInfo.playerStartPos,
                 Resource.getUser().userId,
-                AiEngine.playerTypeId,
+                thisEngine.playerTypeId,
                 1, true);
+            //恢复玩家保存的类型
+            thisEngine.playerTypeId = "tank01";
         });
-        //恢复玩家保存的类型
-        AiEngine.playerTypeId = "tank01";
     }
 
     createComputerTank() {
@@ -557,6 +699,6 @@ export default class AiEngine extends Engine {
         return {x: x, y: y};
     }
 }
-AiEngine.playerTypeId = "tank01";
 AiEngine.keepGoingRate = 120;
 AiEngine.keepTryRate = 30;
+AiEngine.maxItemLimit = 3;

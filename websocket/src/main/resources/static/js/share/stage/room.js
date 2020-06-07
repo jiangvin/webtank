@@ -715,6 +715,7 @@ export default class room extends stage {
                 id: itemData.id,
                 x: itemData.x,
                 y: itemData.y,
+                typeId: itemData.typeId.toLowerCase(),
                 image: Resource.getImage(imageId)
             });
             gameItem.play = new Play(1, 15,

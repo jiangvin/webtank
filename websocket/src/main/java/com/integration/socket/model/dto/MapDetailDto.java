@@ -19,4 +19,6 @@ public class MapDetailDto extends MapDto {
     private List<String> computerStartPos;
     private List<StringCountDto> computerTypeCountList;
     private int computerStartCount;
+    private int maxGridX;
+    private int maxGridY;
 }
