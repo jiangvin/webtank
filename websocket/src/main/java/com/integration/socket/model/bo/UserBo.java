@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Data
 public class UserBo {
-    @NonNull private String username;
+    @NonNull private String userId;
     @NonNull private String socketSessionId;
 
     final private List<String> subscribeList = new ArrayList<>();

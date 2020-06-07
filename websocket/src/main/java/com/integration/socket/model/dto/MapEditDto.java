@@ -13,13 +13,13 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 public class MapEditDto {
-    private String id;
+    private String name;
     private String pw;
     private String data;
 
     public static MapEditDto convert(MapRecord mapRecord) {
         MapEditDto mapEditDto = new MapEditDto();
-        mapEditDto.setId(mapRecord.getId());
+        mapEditDto.setName(mapRecord.getName());
         mapEditDto.setData(mapRecord.getData());
         return mapEditDto;
     }

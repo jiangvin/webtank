@@ -1,22 +1,26 @@
 package com.integration.socket.service;
 
+import com.integration.dto.bot.BotDto;
+import com.integration.dto.bot.BotType;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
-import com.integration.socket.model.bo.UserBo;
 import com.integration.dto.room.RoomDto;
+import com.integration.dto.room.RoomType;
+import com.integration.dto.room.TeamType;
+import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.stage.BaseStage;
-import com.integration.socket.model.stage.StageMenu;
 import com.integration.socket.model.stage.StageRoom;
 import com.integration.util.CommonUtil;
+import com.integration.util.http.HttpUtil;
 import com.integration.util.model.CustomException;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
@@ -29,37 +33,20 @@ import java.util.List;
 @Slf4j
 public class GameService {
 
+    @Value("${bot.host:localhost:8200}")
+    private String botHost;
+
     /**
      * 用户管理
      */
     @Autowired
     private OnlineUserService onlineUserService;
 
-    /**
-     * 消息发送，接收管理
-     */
-    @Autowired
-    private MessageService messageService;
-
     @Autowired
     private RoomService roomService;
 
-    /**
-     * 布景管理
-     */
-    private StageMenu menu;
-
-    @PostConstruct
-    private void init() {
-        initStage();
-    }
-
-    private void initStage() {
-        menu = new StageMenu(messageService);
-    }
-
-    public void removeUser(String username) {
-        UserBo userBo = onlineUserService.get(username);
+    public void removeUser(String userId) {
+        UserBo userBo = onlineUserService.remove(userId);
         if (userBo == null) {
             return;
         }
@@ -68,10 +55,7 @@ public class GameService {
         if (stage == null) {
             return;
         }
-
-        onlineUserService.remove(username);
-        stage.removeUser(username);
-        sendUserStatusAndMessage(username, true);
+        stage.removeUser(userId);
 
         //房间为空时删除房间
         if (!(stage instanceof StageRoom)) {
@@ -89,7 +73,7 @@ public class GameService {
     public void receiveMessage(MessageDto messageDto, String sendFrom) {
         //新用户加入时处理，不需要检查用户是否存在
         if (messageDto.getMessageType() == MessageType.CLIENT_READY) {
-            processNewUserReady(messageDto, sendFrom);
+            onlineUserService.processNewUserReady(sendFrom);
             return;
         }
 
@@ -100,43 +84,17 @@ public class GameService {
 
         log.info("receive:{} from user:{}", CommonUtil.ignoreNull(messageDto.toString()), sendFrom);
         switch (messageDto.getMessageType()) {
-            case USER_MESSAGE:
-                processUserMessage(messageDto, sendFrom);
-                break;
             case CREATE_ROOM:
                 createRoom(messageDto, sendFrom);
                 break;
             case JOIN_ROOM:
                 joinRoom(messageDto, sendFrom);
             default:
-                currentStage(userBo).processMessage(messageDto, sendFrom);
-                break;
-        }
-    }
-
-    private void processUserMessage(MessageDto messageDto, String sendFrom) {
-        List<String> sendToList = messageDto.getSendToList();
-        if (sendToList != null && sendToList.isEmpty()) {
-            return;
-        }
-
-        if (sendToList == null) {
-            messageDto.setMessage(String.format("%s: %s", sendFrom, messageDto.getMessage()));
-            messageService.sendMessage(messageDto);
-        } else {
-            //先给发送方回复一份
-            String messageToSendFrom = String.format("%s → %s: %s", sendFrom, messageDto.getSendToList().toString(), messageDto.getMessage());
-            messageService.sendMessage(new MessageDto(messageToSendFrom, messageDto.getMessageType(), sendFrom));
-
-            //再给所有接送者发送一份
-            for (String sendTo : messageDto.getSendToList()) {
-                if (sendFrom.equals(sendTo)) {
-                    continue;
+                BaseStage stage = currentStage(userBo);
+                if (stage != null) {
+                    stage.processMessage(messageDto, sendFrom);
                 }
-
-                String sendMessage = String.format("%s → %s: %s", sendFrom, sendTo, messageDto.getMessage());
-                messageService.sendMessage(new MessageDto(sendMessage, messageDto.getMessageType(), sendTo));
-            }
+                break;
         }
     }
 
@@ -155,11 +113,22 @@ public class GameService {
 
         StageRoom room = roomService.create(roomDto, userBo);
 
-        //remove from old stage
-        currentStage(userBo).removeUser(userBo.getUsername());
-
         //add into new stage
         room.addUser(userBo, roomDto.getJoinTeamType());
+
+        addBot(roomDto);
+    }
+
+    private void addBot(RoomDto roomDto) {
+        if (roomDto.getRoomType() != RoomType.PVE) {
+            return;
+        }
+
+        BotDto botDto = new BotDto();
+        botDto.setBotType(BotType.SIMPLE);
+        botDto.setRoomId(roomDto.getRoomId());
+        botDto.setTeamType(TeamType.BLUE);
+        HttpUtil.postJsonRequest(String.format("http://%s/requestBot", botHost), String.class, botDto);
     }
 
     private void joinRoom(MessageDto messageDto, String sendFrom) {
@@ -179,28 +148,21 @@ public class GameService {
             throw new CustomException("房间不存在:" + roomDto.getRoomId());
         }
 
-        //remove from old stage
-        currentStage(userBo).removeUser(userBo.getUsername());
-
         //add into new stage
         roomService.get(roomDto.getRoomId()).addUser(userBo, roomDto.getJoinTeamType());
     }
 
     @Scheduled(fixedRate = 17)
     public void update() {
-        menu.update();
         roomService.update();
     }
 
     private BaseStage currentStage(UserBo userBo) {
-        if (!StringUtils.isEmpty(userBo.getRoomId())) {
-            if (!roomService.roomNameExists(userBo.getRoomId())) {
-                log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUsername());
-            }
-            return roomService.get(userBo.getRoomId());
-        } else {
-            return menu;
+        if (StringUtils.isEmpty(userBo.getRoomId()) || !roomService.roomNameExists(userBo.getRoomId())) {
+            log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUserId());
+            return null;
         }
+        return roomService.get(userBo.getRoomId());
     }
 
     private UserBo userCheckAndGetSendFrom(MessageDto messageDto, String sendFrom) {
@@ -222,32 +184,5 @@ public class GameService {
 
         //检查发送方
         return onlineUserService.get(sendFrom);
-    }
-
-    private void processNewUserReady(MessageDto messageDto, String sendFrom) {
-        if (onlineUserService.processNewUserReady(sendFrom)) {
-            sendUserStatusAndMessage(sendFrom, false);
-        }
-        menu.addTank(messageDto, sendFrom);
-    }
-
-    private void sendUserStatusAndMessage(String username, boolean isLeave) {
-        //没人了，不用更新状态
-        if (onlineUserService.getUserList().isEmpty()) {
-            log.info("no user in service, no need to send message");
-            return;
-        }
-
-        if (isLeave) {
-            messageService.sendMessage(new MessageDto(String.format("%s 离开了! 当前总人数: %d",
-                                                                    username,
-                                                                    onlineUserService.getUserList().size()),
-                                                      MessageType.SYSTEM_MESSAGE));
-        } else {
-            messageService.sendMessage(new MessageDto(String.format("%s 加入了! 当前总人数: %d",
-                                                                    username,
-                                                                    onlineUserService.getUserList().size()),
-                                                      MessageType.SYSTEM_MESSAGE));
-        }
     }
 }

@@ -4,6 +4,7 @@ import com.integration.dto.map.MapUnitType;
 import com.integration.dto.room.RoomType;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.dto.MapEditDto;
+import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.repository.jooq.tables.records.MapRecord;
 import com.integration.util.CommonUtil;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author 蒋文龙(Vin)
@@ -33,6 +35,8 @@ public class MapService {
     @Autowired
     private MapDao mapDao;
 
+    private Random random = new Random();
+
     private static final String MAP_SIZE = "map_size";
 
     private static final String PLAYERS = "players";
@@ -45,37 +49,31 @@ public class MapService {
 
     private static final String PLAYER_DEFAULT_TYPE = "tank01";
 
-    public MapBo loadNextMap(List<String> loadedMapIds, RoomType roomType) {
-        List<String> mapIds = mapDao.queryMapIdList();
-        String nextMapId = null;
-        for (String mapId : mapIds) {
-            if (!loadedMapIds.contains(mapId)) {
-                nextMapId = mapId;
-                break;
-            }
-        }
-        if (nextMapId == null) {
+    public MapBo loadNextMap(int mapId, RoomType roomType) {
+        if (mapDao.queryFromId(mapId) == null) {
             return null;
         }
-
-        return loadMap(nextMapId, roomType);
+        return loadMap(mapId, roomType);
     }
 
-    public MapBo loadMap(String mapId, RoomType roomType) {
-        MapRecord record = mapDao.queryFromId(mapId);
+    private MapBo loadMap(MapRecord record, RoomType roomType) {
         if (record == null) {
             throw new CustomException("找不到地图资源!");
         }
-        String content = mapDao.queryFromId(mapId).getData();
+        String content = record.getData();
         if (StringUtils.isEmpty(content)) {
             throw new CustomException("找不到地图资源!");
         }
 
         MapBo mapBo = readFile(content);
-        mapBo.setMapId(mapId);
+        mapBo.setMapId(record.getId());
+        mapBo.setMapName(record.getName());
+
         //根据类型调整数据
         if (roomType == RoomType.PVP) {
             mapBo.duplicatePlayer();
+            mapBo.removeMapUnit(MapUnitType.RED_KING);
+            mapBo.removeMapUnit(MapUnitType.BLUE_KING);
         } else if (roomType == RoomType.EVE) {
             mapBo.duplicateComputer();
         } else if (roomType == RoomType.PVE) {
@@ -84,24 +82,50 @@ public class MapService {
         return mapBo;
     }
 
+    public MapBo loadMap(int mapId, RoomType roomType) {
+        return loadMap(mapDao.queryFromId(mapId), roomType);
+    }
+
+    public MapBo loadRandomMap(List<String> loadedMapNames, RoomType roomType) {
+        List<String> mapNames = mapDao.queryMapNameList();
+        for (String name : loadedMapNames) {
+            mapNames.remove(name);
+        }
+
+        if (mapNames.isEmpty()) {
+            return null;
+        }
+
+        String mapName = mapNames.get(random.nextInt(mapNames.size()));
+        loadedMapNames.add(mapName);
+        return loadMap(mapDao.queryFromName(mapName), roomType);
+    }
+
     public void saveMap(MapEditDto mapEditDto) {
-        if (StringUtils.isEmpty(mapEditDto.getId())) {
+        if (StringUtils.isEmpty(mapEditDto.getName())) {
             throw new CustomException("名字不能为空");
         }
-        readFile(mapEditDto.getData());
-        if (mapDao.queryMapIdList().contains(mapEditDto.getId())) {
-            //地图已存在
-            MapRecord mapRecord = mapDao.queryFromId(mapEditDto.getId());
+        MapBo mapBo = readFile(mapEditDto.getData());
+
+        MapRecord mapRecord = mapDao.queryFromName(mapEditDto.getName());
+        if (mapRecord != null) {
             if (mapRecord.getSecret() != null && !mapRecord.getSecret().equals(mapEditDto.getPw())) {
                 throw new CustomException("密码校验出错,请重新输入密码或者修改地图名存为新地图");
             }
+            mapRecord.setData(mapEditDto.getData());
+            mapRecord.setWidth(mapBo.getMaxGridX());
+            mapRecord.setHeight(mapBo.getMaxGridY());
+            mapRecord.update();
+            mapDao.resetId();
+            return;
         }
 
         String secret = null;
         if (!StringUtils.isEmpty(mapEditDto.getPw())) {
             secret = mapEditDto.getPw();
         }
-        mapDao.insertMap(mapEditDto.getId(), secret, mapEditDto.getData());
+        mapDao.insertMap(mapEditDto.getName(), secret, mapBo.getMaxGridX(), mapBo.getMaxGridY(), mapEditDto.getData());
+        mapDao.resetId();
     }
 
     private MapBo readFile(String content) {
@@ -129,7 +153,7 @@ public class MapService {
                             mapBo.setHeight(mapBo.getMaxGridY() * CommonUtil.UNIT_SIZE);
                             break;
                         case PLAYERS:
-                            mapBo.getPlayerLife().put(PLAYER_DEFAULT_TYPE, Integer.parseInt(kv.value));
+                            mapBo.getPlayerLife().add(new StringCountDto(PLAYER_DEFAULT_TYPE, Integer.parseInt(kv.value)));
                             break;
                         case COMPUTERS:
                             parseComputers(mapBo, kv.value);
@@ -216,7 +240,7 @@ public class MapService {
         String[] infos = line.split(",");
         for (String info : infos) {
             String[] kv = info.split(":");
-            mapBo.getComputerLife().put(kv[0], Integer.parseInt(kv[1]));
+            mapBo.getComputerLife().add(new StringCountDto(kv[0], Integer.parseInt(kv[1])));
         }
     }
 }

@@ -28,7 +28,7 @@ public class ExceptionAdvice {
             httpStatus = ((CustomException) e).getHttpStatus();
         } else {
             log.error("catch controller error:", e);
-            msg = e.getClass().getName() + ":" + e.getMessage();
+            msg = e.getMessage();
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
         return new ResponseEntity(new ResultDto(msg), httpStatus);

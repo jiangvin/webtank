@@ -1,7 +1,6 @@
 package com.integration.socket.repository.dao;
 
 import com.integration.socket.repository.jooq.tables.records.MapRecord;
-import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,21 +13,39 @@ import java.util.List;
 
 @Repository
 public class MapDao extends BaseDao {
-    public List<String> queryMapIdList() {
-        return create.select(MAP.ID).from(MAP).orderBy(DSL.length(MAP.DATA)).fetchInto(String.class);
+    public List<String> queryMapNameList() {
+        return create.select(MAP.NAME).from(MAP).fetchInto(String.class);
     }
 
-    public MapRecord queryFromId(String id) {
+    public MapRecord queryFromId(int id) {
         return create.selectFrom(MAP).where(MAP.ID.eq(id)).fetchOne();
     }
 
-    public void insertMap(String id, String secret, String data) {
+    public MapRecord queryFromName(String name) {
+        return create.selectFrom(MAP).where(MAP.NAME.eq(name)).fetchOne();
+    }
+
+    public void insertMap(String name, String secret, int width, int height, String data) {
         create.insertInto(MAP)
-        .set(MAP.ID, id)
+        .set(MAP.NAME, name)
         .set(MAP.DATA, data)
-        .set(MAP.SECRET, secret)
-        .onDuplicateKeyUpdate()
-        .set(MAP.DATA, data)
-        .set(MAP.UPDATE_TIME, DSL.currentTimestamp()).execute();
+        .set(MAP.WIDTH, width)
+        .set(MAP.HEIGHT, height)
+        .set(MAP.SECRET, secret).execute();
+    }
+
+    public void resetId() {
+        List<MapRecord> list = create.fetch("SELECT * FROM map order by width * height;").into(MapRecord.class);
+        for (int i = 0; i < list.size(); ++i) {
+            MapRecord record = list.get(i);
+            if (record.getId() == null || record.getId() != i + 1) {
+                record.setId(i + 1);
+                record.update();
+            }
+        }
+    }
+
+    public int queryMaxMapId() {
+        return create.fetchOne("Select max(id) from map").into(Integer.class);
     }
 }

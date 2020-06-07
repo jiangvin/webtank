@@ -49,6 +49,9 @@ public abstract class BaseStage {
             case UPDATE_TANK_FIRE:
                 processTankFire((String) messageDto.getMessage(), sendFrom);
                 break;
+            case USER_MESSAGE:
+                sendMessageToRoom(String.format("%s: %s", sendFrom, messageDto.getMessage()), messageDto.getMessageType());
+                break;
             default:
                 break;
         }
@@ -170,7 +173,7 @@ public abstract class BaseStage {
         messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId()));
     }
 
-    void sendMessageToRoom(Object object, MessageType messageType, String note) {
+    private void sendMessageToRoom(Object object, MessageType messageType, String note) {
         messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId(), note));
     }
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>地图编辑界面</title>
 </head>
-<script src="jquery.js"></script>
+<script src="js/web/libs/jquery.js"></script>
 <body>
 <div>
     <div>
@@ -61,7 +61,7 @@
     
     function loadMap() {
         const selectOpt = $('#mapSelector')[0].selectedOptions[0];
-        $.getJSON('/user/getMap/' + selectOpt.text, function(result) {
+        $.getJSON('/edit/getMapFromName/' + selectOpt.text, function(result) {
             if (result.success) {
                 setMapData(result.data);
             }
@@ -69,7 +69,7 @@
     }
 
     function setMapData(data) {
-        $('#name')[0].value = data.id;
+        $('#name')[0].value = data.name;
         $('#content')[0].value = data.data;
     }
     
@@ -78,7 +78,7 @@
             url: encodeURI('/user/setMap'),
             type: 'post',
             data: {
-                id:$('#name')[0].value,
+                name:$('#name')[0].value,
                 pw:$('#pw')[0].value,
                 data:$('#content')[0].value
             },

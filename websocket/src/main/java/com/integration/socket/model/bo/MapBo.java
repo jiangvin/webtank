@@ -1,8 +1,10 @@
 package com.integration.socket.model.bo;
 
 import com.integration.dto.map.ItemDto;
-import com.integration.dto.map.MapUnitType;
 import com.integration.dto.map.MapDto;
+import com.integration.dto.map.MapUnitType;
+import com.integration.socket.model.dto.MapDetailDto;
+import com.integration.socket.model.dto.StringCountDto;
 import com.integration.util.model.CustomException;
 import lombok.Data;
 
@@ -33,11 +35,13 @@ public class MapBo {
 
     private int computerLifeTotalCount = 0;
 
-    private String mapId;
+    private int mapId;
 
-    private ConcurrentHashMap<String, Integer> playerLife = new ConcurrentHashMap<>();
+    private String mapName;
 
-    private ConcurrentHashMap<String, Integer> computerLife = new ConcurrentHashMap<>();
+    private List<StringCountDto> playerLife = new ArrayList<>();
+
+    private List<StringCountDto> computerLife = new ArrayList<>();
 
     private ConcurrentHashMap<String, MapUnitType> unitMap = new ConcurrentHashMap<>();
 
@@ -46,10 +50,17 @@ public class MapBo {
     private List<String> computerStartPoints = new ArrayList<>();
 
     public MapDto convertToDto() {
-        MapDto mapDto = convertLifeCountToDto();
+        MapDto mapDto = new MapDto();
+        copyProperties(mapDto);
+        return mapDto;
+    }
+
+    private void copyProperties(MapDto mapDto) {
+        copyLifeCountProperties(mapDto);
+        mapDto.setMapId(getMapId());
         mapDto.setWidth(getWidth());
         mapDto.setHeight(getHeight());
-        mapDto.setMapId(getMapId());
+        mapDto.setMapName(getMapName());
         List<ItemDto> itemList = new ArrayList<>();
         for (Map.Entry<String, MapUnitType> kv : getUnitMap().entrySet()) {
             ItemDto item = new ItemDto();
@@ -58,14 +69,30 @@ public class MapBo {
             itemList.add(item);
         }
         mapDto.setItemList(itemList);
-        return mapDto;
+    }
+
+    public MapDetailDto toDetailDto() {
+        MapDetailDto mapDetailDto = new MapDetailDto();
+        copyProperties(mapDetailDto);
+
+        mapDetailDto.setPlayerStartPos(this.playerStartPoints);
+        mapDetailDto.setComputerStartPos(this.computerStartPoints);
+        mapDetailDto.setComputerTypeCountList(this.computerLife);
+        mapDetailDto.setComputerStartCount(this.computerStartCount);
+        mapDetailDto.setMaxGridX(this.maxGridX);
+        mapDetailDto.setMaxGridY(this.maxGridY);
+        return mapDetailDto;
     }
 
     public MapDto convertLifeCountToDto() {
         MapDto mapDto = new MapDto();
+        copyLifeCountProperties(mapDto);
+        return mapDto;
+    }
+
+    private void copyLifeCountProperties(MapDto mapDto) {
         mapDto.setPlayerLife(getCount(getPlayerLife()));
         mapDto.setComputerLife(getCount(getComputerLife()));
-        return mapDto;
     }
 
 
@@ -96,10 +123,10 @@ public class MapBo {
         }
     }
 
-    private void duplicate(ConcurrentHashMap<String, Integer> map, ConcurrentHashMap<String, Integer> target) {
-        map.clear();
-        for (Map.Entry<String, Integer> kv : target.entrySet()) {
-            map.put(kv.getKey(), kv.getValue());
+    private void duplicate(List<StringCountDto> list, List<StringCountDto> target) {
+        list.clear();
+        for (StringCountDto kv : target) {
+            list.add(StringCountDto.copy(kv));
         }
     }
 
@@ -125,9 +152,9 @@ public class MapBo {
         }
     }
 
-    public int getCount(Map<String, Integer> lifeMap) {
+    private int getCount(List<StringCountDto> lifeList) {
         int life = 0;
-        for (Map.Entry<String, Integer> kv : lifeMap.entrySet()) {
+        for (StringCountDto kv : lifeList) {
             life += kv.getValue();
         }
         return life;

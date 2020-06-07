@@ -1,10 +1,14 @@
 package com.integration.socket.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
+import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.bo.WxUserBo;
 import com.integration.util.CommonUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +23,14 @@ import java.util.List;
 @Service
 @Slf4j
 public class MessageService {
-
-    private static final String TOPIC_PATH = "/topic/send";
-
     private static final String QUEUE_PATH = "/queue/send";
 
     private static final int MAX_LOG_LENGTH = 256;
+
+    @Autowired
+    private OnlineUserService onlineUserService;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     private final SimpMessagingTemplate simpMessagingTemplate;
 
@@ -34,7 +40,7 @@ public class MessageService {
 
     public void sendMessage(MessageDto messageDto) {
         List<String> sendToList = messageDto.getSendToList();
-        if (sendToList != null && sendToList.isEmpty()) {
+        if (sendToList == null || sendToList.isEmpty()) {
             return;
         }
 
@@ -44,19 +50,30 @@ public class MessageService {
         }
         log.info("send message:{}", msg);
 
-        if (sendToList == null) {
-            simpMessagingTemplate.convertAndSend(
-                TOPIC_PATH,
-                messageDto);
-        } else {
-            //清空原有人数，减少数据量
-            messageDto.setSendToList(null);
-            for (String sendTo : sendToList) {
+        //清空原有人数，减少数据量
+        messageDto.setSendToList(null);
+        for (String sendTo : sendToList) {
+            sendMessage(messageDto, sendTo);
+        }
+    }
+
+    private void sendMessage(MessageDto messageDto, String userId) {
+        UserBo userBo = onlineUserService.get(userId);
+        if (userBo == null) {
+            return;
+        }
+
+        try {
+            if (userBo instanceof WxUserBo) {
+                ((WxUserBo)userBo).getSession().getBasicRemote().sendText(objectMapper.writeValueAsString(messageDto));
+            } else {
                 simpMessagingTemplate.convertAndSendToUser(
-                    sendTo,
+                    userId,
                     QUEUE_PATH,
                     messageDto);
             }
+        } catch (Exception e) {
+            log.error("catch send user message error:", e);
         }
     }
 

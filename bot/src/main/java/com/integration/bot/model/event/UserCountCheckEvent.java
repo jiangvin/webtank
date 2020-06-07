@@ -7,6 +7,6 @@ package com.integration.bot.model.event;
  */
 public class UserCountCheckEvent extends BaseLoopEvent {
     public UserCountCheckEvent() {
-        super(60, 5);
+        super(60, 3);
     }
 }

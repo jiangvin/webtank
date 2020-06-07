@@ -28,27 +28,26 @@ public class OnlineUserService {
         return userMap.containsKey(key);
     }
 
-    boolean processNewUserReady(String username) {
-        if (userMap.containsKey(username)) {
-            return false;
+    void processNewUserReady(String userId) {
+        if (userMap.containsKey(userId)) {
+            return;
         }
 
-        UserBo userBo = removeInCache(username);
+        UserBo userBo = removeInCache(userId);
         if (userBo == null) {
-            return false;
+            return;
         }
 
-        userMap.put(userBo.getUsername(), userBo);
-        log.info("user:{} add into userMap(count:{})", username, userMap.size());
-        return true;
+        userMap.put(userBo.getUserId(), userBo);
+        log.info("user:{} add into userMap(count:{})", userBo.getUserId(), userMap.size());
     }
 
     public void addNewUserCache(UserBo userBo) {
-        if (newUserCache.containsKey(userBo.getUsername())) {
+        if (newUserCache.containsKey(userBo.getUserId())) {
             return;
         }
-        newUserCache.put(userBo.getUsername(), userBo);
-        log.info("user:{} add into the cache(count:{})", userBo.getUsername(), newUserCache.size());
+        newUserCache.put(userBo.getUserId(), userBo);
+        log.info("user:{} add into the cache(count:{})", userBo.getUserId(), newUserCache.size());
     }
 
     public void subscribeInUserCache(String username, String destination) {
@@ -64,7 +63,7 @@ public class OnlineUserService {
         userBo.getSubscribeList().add(destination);
     }
 
-    boolean remove(String key) {
+    UserBo remove(String key) {
         removeInCache(key);
         return removeInUserMap(key);
     }
@@ -90,13 +89,14 @@ public class OnlineUserService {
         return userBo;
     }
 
-    private boolean removeInUserMap(String key) {
+    private UserBo removeInUserMap(String key) {
         if (!userMap.containsKey(key)) {
-            return false;
+            return null;
         }
 
+        UserBo userBo = userMap.get(key);
         userMap.remove(key);
         log.info("user:{} remove in userMap(count:{})", key, userMap.size());
-        return true;
+        return userBo;
     }
 }

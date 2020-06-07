@@ -4,6 +4,7 @@ import com.integration.dto.map.ActionType;
 import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.OrientationType;
 import com.integration.dto.room.TeamType;
+import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.util.CommonUtil;
 import lombok.Data;
 
@@ -26,7 +27,7 @@ public class TankBo {
     private TeamType teamType;
     private double x;
     private double y;
-    private TankTypeBo type;
+    private TankTypeDto type;
     private int reloadTime;
     private int bulletCount;
     private long lastSyncTime = System.currentTimeMillis();
@@ -66,7 +67,7 @@ public class TankBo {
         tankBo.setActionType(ActionType.convert(tankDto.getAction()));
         tankBo.setX(tankDto.getX());
         tankBo.setY(tankDto.getY());
-        tankBo.setType(TankTypeBo.getTankType(tankDto.getTypeId()));
+        tankBo.setType(TankTypeDto.getTankType(tankDto.getTypeId()));
         tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
 
         //bo的team type不能为空
@@ -111,7 +112,7 @@ public class TankBo {
     }
 
     private boolean changeType(String typeId) {
-        TankTypeBo newType = TankTypeBo.getTankType(typeId);
+        TankTypeDto newType = TankTypeDto.getTankType(typeId);
         if (newType == null) {
             return false;
         }

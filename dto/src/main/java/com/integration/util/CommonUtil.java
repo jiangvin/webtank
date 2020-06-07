@@ -38,17 +38,13 @@ public class CommonUtil {
         return String.format("%d_%d", x, y);
     }
 
-    public static boolean betweenAnd(double target, int min, int max) {
-        return target >= min && target <= max;
-    }
-
     public static String ignoreNull(String lombokToString) {
         return lombokToString != null ? lombokToString
                .replaceAll("(?<=(, |\\())[^\\s(]+?=null(?:, )?", "")
                .replaceFirst(", \\)$", ")") : null;
     }
 
-    public static Point generateGridPoint(double x, double y) {
+    private static Point generateGridPoint(double x, double y) {
         return new Point((int)(x / CommonUtil.UNIT_SIZE), (int)(y / CommonUtil.UNIT_SIZE));
     }
 
