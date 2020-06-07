@@ -12,6 +12,7 @@ import Home from "../web/home.js"
 import Menu from "../share/stage/menu.js";
 import Control from "../share/tool/control.js";
 import Room from "../share/stage/room.js"
+import Root from "../share/root.js";
 
 export default class Index {
     constructor() {
@@ -19,7 +20,8 @@ export default class Index {
         Resource.setCanvas(this.canvas);
         this.ctx = this.canvas.getContext('2d');
 
-        this.root = Resource.getRoot();
+        this.root = new Root();
+        Resource.setRoot(this.root);
         this.root.addStage(new Home());
         this.root.addStage(new Menu());
         this.root.addStage(new Room());

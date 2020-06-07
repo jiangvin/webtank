@@ -16,6 +16,8 @@ export default class AiEngine extends Engine {
 
         const thisEngine = this;
 
+        thisEngine.createItemTimeout = 25;
+
         thisEngine.playerLifeCount = 5;
         thisEngine.computerLifeCount = 0;
 
