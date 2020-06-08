@@ -16,7 +16,7 @@ export default class AiEngine extends Engine {
 
         const thisEngine = this;
 
-        thisEngine.createItemTimeout = 25;
+        thisEngine.events = [];
 
         thisEngine.playerLifeCount = 5;
         thisEngine.computerLifeCount = 0;
@@ -46,7 +46,6 @@ export default class AiEngine extends Engine {
         Common.getRequest("/singlePlayer/getTankTypes", function (data) {
             thisEngine.tankTypes = data;
             thisEngine.initStage();
-            thisEngine.createGameItem();
         })
     }
 
@@ -63,7 +62,7 @@ export default class AiEngine extends Engine {
                 thisEngine.createComputerTank();
             }
 
-            thisEngine.createItemTimeout = 25;
+            thisEngine.createGameItem();
 
             Resource.getRoot().processSocketMessage({
                 messageType: "SERVER_READY"
@@ -73,6 +72,7 @@ export default class AiEngine extends Engine {
 
     createGameItem() {
         const thisEngine = this;
+        thisEngine.createItemTimeout = 25;
 
         const createItemEvent = function () {
             if (thisEngine.items.size >= AiEngine.maxItemLimit) {
@@ -105,14 +105,14 @@ export default class AiEngine extends Engine {
 
             //重复创建道具事件
             thisEngine.createItemTimeout += 5;
-            Common.addTimeEvent("create_item", function () {
+            thisEngine.addTimeEvent(thisEngine.createItemTimeout * 60, function () {
                 createItemEvent();
-            }, thisEngine.createItemTimeout * 60);
+            });
         };
 
-        Common.addTimeEvent("create_item", function () {
+        thisEngine.addTimeEvent( thisEngine.createItemTimeout * 60, function () {
             createItemEvent();
-        }, thisEngine.createItemTimeout * 60);
+        });
     };
 
     loadMapDetail(callback) {
@@ -127,10 +127,26 @@ export default class AiEngine extends Engine {
     }
 
     update() {
+        this.updateEvent();
+
         super.update();
 
         this.updateBullets();
         this.updateTanks();
+    }
+
+    updateEvent() {
+        for (let i = 0; i < this.events.length; ++i) {
+            const event = this.events[i];
+            if (event.timeout > 0) {
+                --event.timeout;
+            } else {
+                event.callback();
+                //删除事件
+                this.events.splice(i, 1);
+                --i;
+            }
+        }
     }
 
     updateBullets() {
@@ -281,6 +297,7 @@ export default class AiEngine extends Engine {
                 thisEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
 
                 //清空场景
+                thisEngine.events = [];
                 thisEngine.tanks.clear();
                 thisEngine.bullets.clear();
                 thisEngine.items.clear();
@@ -567,7 +584,10 @@ export default class AiEngine extends Engine {
     }
 
     addTimeEvent(timeout, callback) {
-        Common.addTimeEvent("AI_ENGINE", callback, timeout);
+        const event = {};
+        event.callback = callback;
+        event.timeout = timeout ? timeout : 100;
+        this.events.push(event);
     }
 
     createTank(startPosList, id, typeId, teamId, hasShield) {
