@@ -122,10 +122,6 @@ export default class AiEngine extends Engine {
             thisEngine.mapInfo.playerLife = thisEngine.playerLifeCount;
             thisEngine.computerLifeCount = thisEngine.mapInfo.computerLife;
 
-            thisEngine.tanks.clear();
-            thisEngine.bullets.clear();
-            thisEngine.items.clear();
-
             callback();
         });
     }
@@ -285,6 +281,9 @@ export default class AiEngine extends Engine {
                 thisEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
 
                 //清空场景
+                thisEngine.tanks.clear();
+                thisEngine.bullets.clear();
+                thisEngine.items.clear();
                 thisEngine.room.clear();
 
                 //进入下一关
