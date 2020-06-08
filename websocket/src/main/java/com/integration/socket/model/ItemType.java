@@ -8,5 +8,7 @@ package com.integration.socket.model;
 public enum ItemType {
     STAR,
     SHIELD,
-    RED_STAR
+    RED_STAR,
+    LIFE,
+    KING
 }

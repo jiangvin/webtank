@@ -38,6 +38,8 @@ export default class Resource {
         this.loadAnimationImage("item_star", 2);
         this.loadAnimationImage("item_shield", 2);
         this.loadAnimationImage("item_red_star", 2);
+        this.loadAnimationImage("item_king", 2);
+        this.loadAnimationImage("item_life", 2);
 
         //map unit
         this.loadAnimationImage("bullet", 4);

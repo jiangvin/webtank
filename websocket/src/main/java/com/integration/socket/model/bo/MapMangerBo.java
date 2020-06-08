@@ -50,7 +50,6 @@ public class MapMangerBo {
         //继承之前的属性
         lastPlayerLife.get(0).addValue(saveLife);
         mapBo.setPlayerLife(lastPlayerLife);
-        mapBo.setPlayerLifeTotalCount(lastPlayerLife.get(0).getValue());
 
         this.mapBo = mapBo;
         return true;

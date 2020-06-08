@@ -5,7 +5,6 @@ import com.integration.bot.handler.MessageReceiveHandler;
 import com.integration.bot.model.event.BaseEvent;
 import com.integration.bot.model.event.PauseCheckEvent;
 import com.integration.bot.model.event.SendMessageEvent;
-import com.integration.bot.model.event.UserCountCheckEvent;
 import com.integration.bot.model.map.Tank;
 import com.integration.bot.service.BotService;
 import com.integration.dto.bot.BotDto;
@@ -66,11 +65,6 @@ public abstract class BaseBot {
      * 最多存活90分钟
      */
     private long startTime = System.currentTimeMillis();
-
-    /**
-     * 当只剩BOT一个人时结束
-     */
-    private Integer userCount;
 
     /**
      * 结束标记，控制结束逻辑
@@ -136,16 +130,6 @@ public abstract class BaseBot {
         if (event instanceof SendMessageEvent) {
             SendMessageEvent sendMessageEvent = (SendMessageEvent) event;
             sendMessage(sendMessageEvent.getMessage());
-        } else if (event instanceof UserCountCheckEvent) {
-            if (this.userCount <= 1) {
-                UserCountCheckEvent userCountCheckEvent = (UserCountCheckEvent) event;
-                if (userCountCheckEvent.isFinished()) {
-                    log.info("bot:{} will be closed because no user in room.", this.name);
-                    this.deadFlag = true;
-                } else {
-                    this.eventList.add(userCountCheckEvent);
-                }
-            }
         } else if (event instanceof PauseCheckEvent) {
             PauseCheckEvent pauseCheckEvent = (PauseCheckEvent) event;
             if (isPause) {
@@ -168,9 +152,10 @@ public abstract class BaseBot {
 
         switch (messageDto.getMessageType()) {
             case USERS:
-                this.userCount = ((List) messageDto.getMessage()).size();
-                if (this.userCount <= 1) {
-                    eventList.add(new UserCountCheckEvent());
+                int userCount = ((List) messageDto.getMessage()).size();
+                if (userCount <= 1) {
+                    log.info("bot:{} will be closed because no user in room.", this.name);
+                    this.deadFlag = true;
                 }
                 break;
             case MAP:

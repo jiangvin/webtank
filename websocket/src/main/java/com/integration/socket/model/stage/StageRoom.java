@@ -23,6 +23,7 @@ import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.event.BaseEvent;
 import com.integration.socket.model.event.CreateItemEvent;
 import com.integration.socket.model.event.CreateTankEvent;
+import com.integration.socket.model.event.IronKingEvent;
 import com.integration.socket.model.event.LoadMapEvent;
 import com.integration.socket.model.event.MessageEvent;
 import com.integration.socket.service.MessageService;
@@ -282,6 +283,22 @@ public class StageRoom extends BaseStage {
             return;
         }
 
+        if (event instanceof IronKingEvent) {
+            IronKingEvent ironKingEvent = (IronKingEvent) event;
+            List<String> keys = ironKingEvent.getKeys();
+            for (int i = 0; i < keys.size(); ++i) {
+                String key = keys.get(i);
+                if (!getMapBo().getUnitMap().containsKey(key)) {
+                    keys.remove(i);
+                    --i;
+                } else {
+                    getMapBo().getUnitMap().put(key, MapUnitType.BRICK);
+                }
+            }
+            sendMessageToRoom(getMapBo().toDto(keys), MessageType.MAP);
+            return;
+        }
+
         if (event instanceof CreateItemEvent) {
             CreateItemEvent createItemEvent = (CreateItemEvent) event;
             if (itemMap.size() < MAX_ITEM_LIMIT) {
@@ -460,9 +477,94 @@ public class StageRoom extends BaseStage {
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return true;
+            case LIFE:
+                addLife(tankBo.getTeamType());
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return true;
+            case KING:
+                kingShield(tankBo.getTeamType());
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return true;
             default:
                 return false;
         }
+    }
+
+    private void kingShield(TeamType teamType) {
+        MapUnitType kingType;
+        if (teamType == TeamType.RED) {
+            kingType = MapUnitType.RED_KING;
+        } else {
+            kingType = MapUnitType.BLUE_KING;
+        }
+
+        //寻找king
+        List<String> kingKeys = new ArrayList<>();
+        Map<String, MapUnitType> unitMap = getMapBo().getUnitMap();
+        for (Map.Entry<String, MapUnitType> kv : unitMap.entrySet()) {
+            if (kv.getValue() == kingType) {
+                kingKeys.add(kv.getKey());
+            }
+        }
+
+        //寻找要替换的key
+        List<String> changeKeys = new ArrayList<>();
+        for (String key : kingKeys) {
+            Point p = CommonUtil.getGridPointFromKey(key);
+            for (int x = p.x - 1; x <= p.x + 1; ++x) {
+                for (int y = p.y - 1; y <= p.y + 1; ++y) {
+                    if (x < 0 || x >= getMapBo().getMaxGridX()) {
+                        continue;
+                    }
+
+                    if (y < 0 || y >= getMapBo().getMaxGridY()) {
+                        continue;
+                    }
+
+                    String changeKey = CommonUtil.generateKey(x, y);
+                    MapUnitType changeType = unitMap.getOrDefault(changeKey, MapUnitType.BRICK);
+                    if (changeType == MapUnitType.BRICK || changeType == MapUnitType.BROKEN_BRICK) {
+                        unitMap.put(changeKey, MapUnitType.IRON);
+                        changeKeys.add(changeKey);
+                    }
+                }
+            }
+        }
+        if (changeKeys.isEmpty()) {
+            return;
+        }
+
+        sendMessageToRoom(getMapBo().toDto(changeKeys), MessageType.MAP);
+        this.eventList.add(new IronKingEvent(changeKeys));
+    }
+
+    private void addLife(TeamType teamType) {
+        List<StringCountDto> life = getLifeMap(teamType);
+
+        if (!life.isEmpty()) {
+            life.get(0).addValue(1);
+        } else {
+            life.add(new StringCountDto("tank01", 1));
+
+            //将观看模式的用户加入战场
+            for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
+                UserBo userBo = kv.getValue();
+                if (userBo.getTeamType() != teamType) {
+                    continue;
+                }
+
+                if (tankMap.containsKey(userBo.getUserId())) {
+                    continue;
+                }
+
+                this.eventList.add(new CreateTankEvent(userBo, 60 * 3));
+                break;
+            }
+        }
+
+        sendMessageToRoom(getMapBo().convertLifeCountToDto(), MessageType.MAP);
     }
 
     private CollideType collideWithAll(TankBo tankBo, String key) {
@@ -774,7 +876,7 @@ public class StageRoom extends BaseStage {
             removeToGridTankMap(tankBo, key);
         }
         //check status
-        if (checkGameStatusAfterTankBomb(tankBo)) {
+        if (checkGameStatusAfterTankBomb()) {
             return;
         }
 
@@ -786,18 +888,29 @@ public class StageRoom extends BaseStage {
         }
     }
 
-    private boolean checkGameStatusAfterTankBomb(TankBo tankBo) {
-        if (tankBo.getTeamType() == TeamType.RED) {
-            getMapBo().setPlayerLifeTotalCount(getMapBo().getPlayerLifeTotalCount() - 1);
-        } else {
-            getMapBo().setComputerLifeTotalCount(getMapBo().getComputerLifeTotalCount() - 1);
+    private boolean checkGameStatusAfterTankBomb() {
+        //先判断候补
+        boolean redAlive = !getMapBo().getPlayerLife().isEmpty();
+        boolean blueAlive = !getMapBo().getComputerLife().isEmpty();
+
+        //再判断在场
+        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
+            if (kv.getValue().getTeamType() == TeamType.RED) {
+                redAlive = true;
+            } else {
+                blueAlive = true;
+            }
+
+            if (redAlive && blueAlive) {
+                break;
+            }
         }
 
-        if (getMapBo().getPlayerLifeTotalCount() <= 0) {
+        if (!redAlive) {
             processGameOver(TeamType.BLUE);
             return true;
         }
-        if (getMapBo().getComputerLifeTotalCount() <= 0) {
+        if (!blueAlive) {
             processGameOver(TeamType.RED);
             return true;
         }
