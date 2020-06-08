@@ -321,6 +321,7 @@ export default class room extends stage {
         switch (typeId) {
             case 0:
                 item.image = Resource.getImage("brick");
+                item.orientation = 0;
                 break;
             case 1:
                 item.image = Resource.getImage("brick");
@@ -328,6 +329,7 @@ export default class room extends stage {
                 break;
             case 2:
                 item.image = Resource.getImage("iron");
+                item.orientation = 0;
                 break;
             case 3:
                 item.image = Resource.getImage("iron");
