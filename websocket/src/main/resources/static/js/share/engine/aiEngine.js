@@ -121,6 +121,11 @@ export default class AiEngine extends Engine {
             thisEngine.mapInfo = data;
             thisEngine.mapInfo.playerLife = thisEngine.playerLifeCount;
             thisEngine.computerLifeCount = thisEngine.mapInfo.computerLife;
+
+            thisEngine.tanks.clear();
+            thisEngine.bullets.clear();
+            thisEngine.items.clear();
+
             callback();
         });
     }
