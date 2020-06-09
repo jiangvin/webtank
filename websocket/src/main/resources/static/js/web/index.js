@@ -78,15 +78,13 @@ export default class Index {
     }
 
     start() {
-        //运算
         const index = this;
         const root = this.root;
-        setInterval(function () {
-            root.update();
-        }, 17);
 
-        //绘制
+        //运算&绘制
         const draw = function () {
+            root.update();
+
             index.ctx.clearRect(0, 0, Resource.width(), Resource.height());
             root.draw(index.ctx);
             root.drawHandler = requestAnimationFrame(draw);
