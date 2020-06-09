@@ -482,6 +482,7 @@ export default class room extends stage {
             const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
                 Adapter.stopConnect();
                 Resource.getRoot().lastStage();
+                Resource.getRoot().currentStage().resetButtons();
             });
             this.addButton(back);
         }

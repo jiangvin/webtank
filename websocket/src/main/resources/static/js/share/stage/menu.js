@@ -176,6 +176,12 @@ export default class Menu extends Stage {
         this.loadButtons();
     }
 
+    resetButtons() {
+        this.removeButtons();
+        this.buttonIndex = 0;
+        this.loadButtons();
+    }
+
     joinRoomEvent() {
         const thisMenu = this;
         thisMenu.buttons[4] = [];

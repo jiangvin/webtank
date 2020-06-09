@@ -15,6 +15,7 @@ export default class Engine {
         //连接超时调用
         Common.addConnectTimeoutEvent(function () {
             Common.lastStage();
+            Resource.getRoot().currentStage().resetButtons();
         });
     }
 
