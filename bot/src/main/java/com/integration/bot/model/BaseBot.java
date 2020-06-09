@@ -53,7 +53,6 @@ public abstract class BaseBot {
     private List<BaseEvent> eventList = new ArrayList<>();
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
-    private TeamType teamType;
 
     @Getter
     String name;
@@ -74,7 +73,7 @@ public abstract class BaseBot {
     BaseBot(BotDto botDto) {
         this.name = botDto.getName();
         this.roomId = botDto.getRoomId();
-        this.teamType = botDto.getTeamType();
+        TeamType teamType = botDto.getTeamType();
         connect();
         if (isDead()) {
             return;
@@ -82,7 +81,7 @@ public abstract class BaseBot {
         sendMessage(new MessageDto(null, MessageType.CLIENT_READY));
         RoomDto roomDto = new RoomDto();
         roomDto.setRoomId(this.roomId);
-        roomDto.setJoinTeamType(this.teamType);
+        roomDto.setJoinTeamType(teamType);
         MessageDto messageDto = new MessageDto(roomDto, MessageType.JOIN_ROOM);
         this.eventList.add(new SendMessageEvent(5 * 60, messageDto));
         this.eventList.add(new PauseCheckEvent());
@@ -191,7 +190,7 @@ public abstract class BaseBot {
     private void processTank(List<Object> dtoList) {
         for (Object dto : dtoList) {
             Tank tank = Tank.convert(objectMapper.convertValue(dto, ItemDto.class));
-            if (tankMap.containsKey(tank.getId()) && tankMap.get(tank.getId()).getTeamType() == this.teamType) {
+            if (tankMap.containsKey(tank.getId()) && tankMap.get(tank.getId()).getUserId().equals(this.name)) {
                 tankMap.get(tank.getId()).copyPropertyFromServer(tank);
             } else {
                 tankMap.put(tank.getId(), tank);
