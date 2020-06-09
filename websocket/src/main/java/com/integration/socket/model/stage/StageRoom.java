@@ -674,7 +674,7 @@ public class StageRoom extends BaseStage {
             }
 
             BulletBo target = bulletMap.get(id);
-            if (target.getTeamType() == ammo.getTeamType()) {
+            if (target == null || target.getTeamType() == ammo.getTeamType()) {
                 continue;
             }
 
