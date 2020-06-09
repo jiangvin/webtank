@@ -40,16 +40,14 @@ public class MapMangerBo {
     }
 
     public boolean loadNextMapPve(int saveLife) {
-        List<StringCountDto> lastPlayerLife = mapBo.getPlayerLife();
-
         MapBo mapBo = mapService.loadNextMap(++mapId, roomType);
         if (mapBo == null) {
             return false;
         }
 
         //继承之前的属性
-        lastPlayerLife.get(0).addValue(saveLife);
-        mapBo.setPlayerLife(lastPlayerLife);
+        this.mapBo.addPlayerLife(saveLife);
+        mapBo.setPlayerLife(this.mapBo.getPlayerLife());
 
         this.mapBo = mapBo;
         return true;

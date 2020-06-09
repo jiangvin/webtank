@@ -48,7 +48,7 @@ public class MessageService {
         if (msg.length() > MAX_LOG_LENGTH) {
             msg = msg.substring(0, MAX_LOG_LENGTH) + "...";
         }
-        log.info("send message:{}", msg);
+        log.debug("send message:{}", msg);
 
         //清空原有人数，减少数据量
         messageDto.setSendToList(null);
@@ -65,7 +65,9 @@ public class MessageService {
 
         try {
             if (userBo instanceof WxUserBo) {
-                ((WxUserBo)userBo).getSession().getBasicRemote().sendText(objectMapper.writeValueAsString(messageDto));
+                synchronized (onlineUserService.get(userId)) {
+                    ((WxUserBo)userBo).getSession().getBasicRemote().sendText(objectMapper.writeValueAsString(messageDto));
+                }
             } else {
                 simpMessagingTemplate.convertAndSendToUser(
                     userId,

@@ -82,7 +82,7 @@ public class GameService {
             return;
         }
 
-        log.info("receive:{} from user:{}", CommonUtil.ignoreNull(messageDto.toString()), sendFrom);
+        log.debug("receive:{} from user:{}", CommonUtil.ignoreNull(messageDto.toString()), sendFrom);
         switch (messageDto.getMessageType()) {
             case CREATE_ROOM:
                 createRoom(messageDto, sendFrom);

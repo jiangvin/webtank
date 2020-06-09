@@ -664,6 +664,10 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean collideWithBullets(BulletBo ammo, String key) {
+        if (gridBulletMap.get(key) == null) {
+            return false;
+        }
+
         for (String id : gridBulletMap.get(key)) {
             if (id.equals(ammo.getId())) {
                 continue;
@@ -988,7 +992,7 @@ public class StageRoom extends BaseStage {
 
         //每有一个玩家加入，玩家生命+1
         if (getRoomType() == RoomType.PVE && teamType == TeamType.RED) {
-            getMapBo().getPlayerLife().get(0).addValue(1);
+            getMapBo().addPlayerLife(1);
         }
 
         //发送场景信息

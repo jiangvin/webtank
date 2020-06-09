@@ -170,4 +170,15 @@ public class MapBo {
         }
         return life;
     }
+
+    public void addPlayerLife(int lifeCount) {
+        if (lifeCount == 0) {
+            return;
+        }
+
+        if (playerLife.isEmpty()) {
+            playerLife.add(new StringCountDto("tank01", 0));
+        }
+        playerLife.get(0).addValue(lifeCount);
+    }
 }
