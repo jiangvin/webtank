@@ -239,6 +239,10 @@ export default class Control {
     }
 
     static generateTouchModeInfo() {
+        if (!Control.instance.isTouchMode) {
+            return;
+        }
+
         let centerX = Common.width() / 4 / 2;
         let centerY = Common.height() / 2 / 2;
         let radius = centerX > centerY ? centerY : centerX;

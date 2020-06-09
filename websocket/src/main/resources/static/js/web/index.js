@@ -134,6 +134,8 @@ export default class Index {
         let wrapper = document.getElementById("wrapper");
         wrapper.style.cssText = style;
         Control.setPortrait(height > width);
+        //窗口变化时重新计算触控栏位置
+        Control.generateTouchModeInfo();
     }
 }
 
