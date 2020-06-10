@@ -85,7 +85,7 @@ export default class room extends stage {
         if (this.roomInfo.roomType === "PVP") {
             return "RED vs BLUE";
         }
-        
+
         let displayNum;
         if (this.roomInfo.mapId < 10) {
             displayNum = "0" + this.roomInfo.mapId;
@@ -470,7 +470,7 @@ export default class room extends stage {
 
         if (this.view.center) {
             const center = this.view.center;
-            if (Common.distance(center.x,center.y,item.x,item.y) <= Resource.getUnitSize() + 5) {
+            if (Common.distance(center.x, center.y, item.x, item.y) <= Resource.getUnitSize() + 5) {
                 Sound.catchItem();
             }
         }
@@ -516,7 +516,7 @@ export default class room extends stage {
                     scale: 0.1
                 });
                 thisStage.updateTankProperty(tank);
-                thisStage.updateTankControl(tank);
+                thisStage.updateTankControl(tank, true);
                 tankItem.play = new Play(30, 1,
                     function () {
                         tankItem.scale += this.animationScale;
@@ -540,12 +540,16 @@ export default class room extends stage {
         tankItem.image = Resource.getImage(tankData.typeId);
     };
 
-    updateTankControl(tankData) {
+    updateTankControl(tankData, force) {
         const tankItem = this.items.get(tankData.id);
-        tankItem.x = tankData.x;
-        tankItem.y = tankData.y;
+        //优化前端闪烁显示
+        if (!force && tankItem.orientation === tankData.orientation && tankItem.action === tankData.action) {
+            return;
+        }
         tankItem.orientation = tankData.orientation;
         tankItem.action = tankData.action;
+        tankItem.x = tankData.x;
+        tankItem.y = tankData.y;
     };
 
     createTank(options) {
@@ -604,7 +608,7 @@ export default class room extends stage {
 
         if (this.view.center) {
             const center = this.view.center;
-            const distance = Common.distance(tank.x,tank.y,center.x,center.y);
+            const distance = Common.distance(tank.x, tank.y, center.x, center.y);
             if (distance <= Resource.getUnitSize() * 8) {
                 Sound.boom();
             }
@@ -684,7 +688,7 @@ export default class room extends stage {
 
                 if (thisStage.view.center) {
                     const center = thisStage.view.center;
-                    const distance = Common.distance(bullet.x,bullet.y,center.x,center.y);
+                    const distance = Common.distance(bullet.x, bullet.y, center.x, center.y);
                     if (distance <= Resource.getUnitSize() + 5) {
                         Sound.fire();
                     }
