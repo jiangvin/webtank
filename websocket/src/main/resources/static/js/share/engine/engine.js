@@ -247,6 +247,15 @@ export default class Engine {
             return newControl;
         }
 
+        //增加中间点二次判断，减少灵活性
+        const center = {};
+        center.x = (corner1.x + corner2.x) / 2;
+        center.y = (corner1.y + corner2.y) / 2;
+        if (this.isBarrier(stage, center)) {
+            newControl.action = 0;
+            return newControl;
+        }
+
         //增加中转点(单边阻碍的情况)
         const transferGrid = {};
         newControl.cache = {};
