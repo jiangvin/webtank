@@ -9,6 +9,7 @@ import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
 import Adapter from "../tool/adapter.js";
+import Button from "../stage/button.js";
 
 export default class NetEngine extends Engine {
     constructor(room) {
@@ -71,6 +72,7 @@ export default class NetEngine extends Engine {
      * 每两秒确认一次连接是否失效
      */
     addConnectCheckEvent() {
+        const thisEngine = this;
         const callBack = function () {
             if (Adapter.getSocketStatus() === true) {
                 const start = new Date().getTime();
@@ -80,8 +82,12 @@ export default class NetEngine extends Engine {
                 Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120, true);
             } else {
                 Status.setStatus(Status.statusPause(), "与服务器断开！", true);
-
-                //TODO 断线重连
+                const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
+                    Adapter.stopConnect();
+                    Resource.getRoot().lastStage();
+                    Resource.getRoot().currentStage().resetButtons();
+                });
+                thisEngine.room.addButton(back);
             }
         };
 

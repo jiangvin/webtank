@@ -177,6 +177,7 @@ export default class Menu extends Stage {
     }
 
     resetButtons() {
+        Resource.getRoot().netDelay = 0;
         this.removeButtons();
         this.buttonIndex = 0;
         this.loadButtons();
