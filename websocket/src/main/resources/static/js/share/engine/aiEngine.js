@@ -20,7 +20,7 @@ export default class AiEngine extends Engine {
         thisEngine.computerLifeCount = 0;
 
         thisEngine.playerTypeId = "tank01";
-        thisEngine.itemTypes = ["star", "shield", "red_star", "life"];
+        thisEngine.itemTypes = ["star", "shield", "red_star", "life", "king"];
 
         thisEngine.maxMapId = 0;
         Common.getRequest("/singlePlayer/getMaxMapId", function (data) {
@@ -55,11 +55,13 @@ export default class AiEngine extends Engine {
                 message: thisEngine.mapInfo
             });
 
+            //create tanks
             thisEngine.createPlayerTank();
             for (let i = 0; i < thisEngine.mapInfo.computerStartCount; ++i) {
                 thisEngine.createComputerTank();
             }
 
+            //create item
             thisEngine.createGameItem();
 
             Resource.getRoot().processSocketMessage({
@@ -70,9 +72,15 @@ export default class AiEngine extends Engine {
 
     createGameItem() {
         const thisEngine = this;
-        thisEngine.createItemTimeout = 25;
+        thisEngine.createItemTimeout = 15;
 
         const createItemEvent = function () {
+            //重复创建道具事件
+            thisEngine.createItemTimeout += 5;
+            thisEngine.addTimeEvent(thisEngine.createItemTimeout * 60, function () {
+                createItemEvent();
+            });
+
             if (thisEngine.items.size >= AiEngine.maxItemLimit) {
                 return;
             }
@@ -100,12 +108,6 @@ export default class AiEngine extends Engine {
                 thisEngine.items.set(id, thisEngine.room.items.get(id));
                 break;
             }
-
-            //重复创建道具事件
-            thisEngine.createItemTimeout += 5;
-            thisEngine.addTimeEvent(thisEngine.createItemTimeout * 60, function () {
-                createItemEvent();
-            });
         };
 
         thisEngine.addTimeEvent(thisEngine.createItemTimeout * 60, function () {
@@ -400,8 +402,73 @@ export default class AiEngine extends Engine {
                     ++this.room.roomInfo.playerLife;
                     this.removeGameItem(k);
                     break;
+                case "king":
+                    this.createKingShield();
+                    this.removeGameItem(k);
+                    break;
             }
         }
+    }
+
+    createKingShield() {
+        const thisEngine = this;
+        const kingKeys = [];
+        this.mapInfo.itemList.forEach(function (item) {
+            if (item.typeId === "6") {
+                kingKeys[kingKeys.length] = item.id;
+            }
+        });
+        const changeKeys = [];
+        kingKeys.forEach(function (key) {
+            const infos = key.split("_");
+            const point = {};
+            point.x = parseInt(infos[0]);
+            point.y = parseInt(infos[1]);
+            for (let x = point.x - 1; x <= point.x + 1; ++x) {
+                for (let y = point.y - 1; y <= point.y + 1; ++y) {
+                    if (x < 0 || x >= thisEngine.mapInfo.maxGridX) {
+                        continue;
+                    }
+                    if (y < 0 || y >= thisEngine.mapInfo.maxGridY) {
+                        continue;
+                    }
+
+                    const changeKey = x + "_" + y;
+                    if (thisEngine.room.items.has(changeKey)) {
+                        const item = thisEngine.room.items.get(changeKey);
+                        if (item.typeId === 0 || item.typeId === 1) {
+                            changeKeys[changeKeys.length] = changeKey;
+                        }
+                    } else {
+                        changeKeys[changeKeys.length] = changeKey;
+                    }
+                }
+            }
+        });
+
+        if (changeKeys.length === 0) {
+            return;
+        }
+
+        //替换成铁
+        changeKeys.forEach(function (key) {
+            thisEngine.room.createOrUpdateMapItem({
+                id: key,
+                typeId: 2
+            });
+        });
+
+        //换回来
+        thisEngine.addTimeEvent(30 * 60, function () {
+            changeKeys.forEach(function (key) {
+                if (thisEngine.room.items.has(key)) {
+                    thisEngine.room.createOrUpdateMapItem({
+                        id: key,
+                        typeId: 0
+                    });
+                }
+            });
+        });
     }
 
     removeGameItem(id) {
