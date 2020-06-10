@@ -26,7 +26,6 @@ public class BulletBo {
     OrientationType orientationType;
     private String startGridKey;
     private String endGridKey;
-    private long lastSyncTime;
 
     public ItemDto convertToDto() {
         ItemDto ammoDto = new ItemDto();
@@ -37,10 +36,6 @@ public class BulletBo {
         ammoDto.setSpeed(getSpeed());
         ammoDto.setTeamId(getTeamType().getValue());
         return ammoDto;
-    }
-
-    public void refreshSyncTime() {
-        this.lastSyncTime = System.currentTimeMillis();
     }
 
     public void run() {

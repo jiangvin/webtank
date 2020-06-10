@@ -49,8 +49,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StageRoom extends BaseStage {
 
-    private static final long SYNC_TIME = 1000;
-
     private static final int MAX_ITEM_LIMIT = 3;
 
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
@@ -73,11 +71,6 @@ public class StageRoom extends BaseStage {
      * 要删除的子弹列表，每帧刷新
      */
     private List<String> removeBulletIds = new ArrayList<>();
-
-    /**
-     * 要更新的子弹列表，保证子弹每秒和客户端同步一次
-     */
-    private List<BulletBo> syncBulletList = new ArrayList<>();
 
     /**
      * 要更新的坦克列表，保证坦克每秒和客户端同步一次
@@ -129,7 +122,6 @@ public class StageRoom extends BaseStage {
         this.removeBulletIds.clear();
         this.eventList.clear();
         this.syncTankList.clear();
-        this.syncBulletList.clear();
 
         this.eventList.add(new CreateItemEvent());
     }
@@ -195,18 +187,6 @@ public class StageRoom extends BaseStage {
             updateBullet(kv.getValue());
         }
         removeBullets();
-        syncBullets();
-    }
-
-    private void addSyncList(TankBo tankBo, boolean forceUpdate) {
-        if (forceUpdate) {
-            syncTankList.add(tankBo);
-            return;
-        }
-
-        if (tankBo.getActionType() == ActionType.RUN && System.currentTimeMillis() - tankBo.getLastSyncTime() > SYNC_TIME) {
-            syncTankList.add(tankBo);
-        }
     }
 
     private void syncTanks() {
@@ -217,24 +197,9 @@ public class StageRoom extends BaseStage {
         List<ItemDto> dtoList = new ArrayList<>();
         for (TankBo tank : syncTankList) {
             dtoList.add(tank.toDto());
-            tank.refreshSyncTime();
         }
         sendMessageToRoom(dtoList, MessageType.TANKS);
         syncTankList.clear();
-    }
-
-    private void syncBullets() {
-        if (syncBulletList.isEmpty()) {
-            return;
-        }
-
-        List<ItemDto> dtoList = new ArrayList<>();
-        for (BulletBo bullet : syncBulletList) {
-            dtoList.add(bullet.convertToDto());
-            bullet.refreshSyncTime();
-        }
-        sendMessageToRoom(dtoList, MessageType.BULLET);
-        syncBulletList.clear();
     }
 
     private void processEvent() {
@@ -364,11 +329,6 @@ public class StageRoom extends BaseStage {
         bullet.setLifeTime(bullet.getLifeTime() - 1);
         bullet.run();
 
-        //超过1秒没和客户端同步，需要同步一次
-        if (System.currentTimeMillis() - bullet.getLastSyncTime() > SYNC_TIME) {
-            syncBulletList.add(bullet);
-        }
-
         String newStart = CommonUtil.generateGridKey(bullet.getX(), bullet.getY());
         if (newStart.equals(bullet.getStartGridKey())) {
             return;
@@ -430,7 +390,9 @@ public class StageRoom extends BaseStage {
             }
         }
 
-        addSyncList(tankBo, needUpdate);
+        if (needUpdate) {
+            syncTankList.add(tankBo);
+        }
     }
 
     private boolean catchItem(TankBo tankBo) {
@@ -481,12 +443,12 @@ public class StageRoom extends BaseStage {
                 addLife(tankBo.getTeamType());
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
-                return true;
+                return false;
             case KING:
                 kingShield(tankBo.getTeamType());
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
-                return true;
+                return false;
             default:
                 return false;
         }

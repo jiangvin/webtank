@@ -143,7 +143,7 @@ public abstract class BaseStage {
     }
 
     /**
-     * 每一帧的更新数据 （17ms 一帧，模拟1秒60帧刷新模式）
+     * 每一帧的更新数据 （16ms 一帧，模拟1秒60帧刷新模式）
      */
     public abstract void update();
 
@@ -182,7 +182,6 @@ public abstract class BaseStage {
     }
 
     void sendTankToRoom(TankBo tankBo, String note) {
-        tankBo.refreshSyncTime();
         sendMessageToRoom(Collections.singletonList(tankBo.toDto()), MessageType.TANKS, note);
     }
 
