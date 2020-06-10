@@ -94,19 +94,6 @@ export default class Common {
         const size = Resource.getUnitSize();
         return Math.floor(pos.x / size) + "_" + Math.floor(pos.y / size);
     }
-
-    static addConnectTimeoutEvent(callback) {
-        Resource.getRoot().addTimeEvent("TIMEOUT_CALLBACK", function () {
-            if (Status.getValue() !== Status.statusPause()) {
-                return;
-            }
-
-            Common.addMessage("与服务器连接超时！", "#F00");
-            if (callback !== undefined) {
-                callback();
-            }
-        }, 300);
-    };
 }
 
 Date.prototype.format = function (fmt) {

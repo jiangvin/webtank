@@ -16,8 +16,6 @@ export default class AiEngine extends Engine {
 
         const thisEngine = this;
 
-        thisEngine.events = [];
-
         thisEngine.playerLifeCount = 5;
         thisEngine.computerLifeCount = 0;
 
@@ -110,7 +108,7 @@ export default class AiEngine extends Engine {
             });
         };
 
-        thisEngine.addTimeEvent( thisEngine.createItemTimeout * 60, function () {
+        thisEngine.addTimeEvent(thisEngine.createItemTimeout * 60, function () {
             createItemEvent();
         });
     };
@@ -127,26 +125,10 @@ export default class AiEngine extends Engine {
     }
 
     update() {
-        this.updateEvent();
-
         super.update();
 
         this.updateBullets();
         this.updateTanks();
-    }
-
-    updateEvent() {
-        for (let i = 0; i < this.events.length; ++i) {
-            const event = this.events[i];
-            if (event.timeout > 0) {
-                --event.timeout;
-            } else {
-                event.callback();
-                //删除事件
-                this.events.splice(i, 1);
-                --i;
-            }
-        }
     }
 
     updateBullets() {
@@ -586,13 +568,6 @@ export default class AiEngine extends Engine {
             default:
                 return orientation;
         }
-    }
-
-    addTimeEvent(timeout, callback) {
-        const event = {};
-        event.callback = callback;
-        event.timeout = timeout ? timeout : 100;
-        this.events.push(event);
     }
 
     createTank(startPosList, id, typeId, teamId, hasShield) {

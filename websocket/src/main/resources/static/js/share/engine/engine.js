@@ -11,16 +11,39 @@ import Resource from "../tool/resource.js";
 export default class Engine {
     constructor(room) {
         this.room = room;
+        this.events = [];
 
         //连接超时调用
-        Common.addConnectTimeoutEvent(function () {
+        this.addConnectTimeoutEvent(function () {
             Common.lastStage();
             Resource.getRoot().currentStage().initMenu();
         });
     }
 
+    addTimeEvent(timeout, callback) {
+        const event = {};
+        event.callback = callback;
+        event.timeout = timeout ? timeout : 100;
+        this.events.push(event);
+    }
+
     update() {
+        this.updateEvent();
         this.updateCenter(this.room)
+    }
+
+    updateEvent() {
+        for (let i = 0; i < this.events.length; ++i) {
+            const event = this.events[i];
+            if (event.timeout > 0) {
+                --event.timeout;
+            } else {
+                event.callback();
+                //删除事件
+                this.events.splice(i, 1);
+                --i;
+            }
+        }
     }
 
     updateCenter(room) {
@@ -287,6 +310,18 @@ export default class Engine {
         point.gridY = Math.floor(point.y / size);
         let key = point.gridX + "_" + point.gridY;
         return stage.items.has(key) && stage.items.get(key).isBarrier;
+    };
 
+    addConnectTimeoutEvent(callback) {
+        Common.addTimeEvent("connect_timeout", function () {
+            if (Status.getValue() !== Status.statusPause()) {
+                return;
+            }
+
+            Common.addMessage("与服务器连接超时！", "#F00");
+            if (callback !== undefined) {
+                callback();
+            }
+        }, 300);
     };
 }
