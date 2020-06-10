@@ -7,7 +7,6 @@
 import Status from "../tool/status.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
-import Adapter from "../tool/adapter.js";
 
 export default class Engine {
     constructor(room) {
@@ -15,9 +14,8 @@ export default class Engine {
 
         //连接超时调用
         Common.addConnectTimeoutEvent(function () {
-            Adapter.stopConnect();
             Common.lastStage();
-            Resource.getRoot().currentStage().resetButtons();
+            Resource.getRoot().currentStage().initMenu();
         });
     }
 

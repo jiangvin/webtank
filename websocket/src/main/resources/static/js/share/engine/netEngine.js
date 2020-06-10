@@ -83,9 +83,8 @@ export default class NetEngine extends Engine {
             } else {
                 Status.setStatus(Status.statusPause(), "与服务器断开！", true);
                 const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
-                    Adapter.stopConnect();
                     Resource.getRoot().lastStage();
-                    Resource.getRoot().currentStage().resetButtons();
+                    Resource.getRoot().currentStage().initMenu();
                 });
                 thisEngine.room.addButton(back);
             }

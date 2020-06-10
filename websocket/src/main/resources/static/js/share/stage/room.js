@@ -10,7 +10,6 @@ import Play from "./play.js";
 import Status from "../tool/status.js";
 import Control from "../tool/control.js";
 import Button from "./button.js";
-import Adapter from "../tool/adapter.js";
 import Sound from "../tool/sound.js";
 
 export default class room extends stage {
@@ -480,9 +479,8 @@ export default class room extends stage {
         Status.setStatus(Status.statusPause(), status.message, false);
         if (status.type === "OVER") {
             const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
-                Adapter.stopConnect();
                 Resource.getRoot().lastStage();
-                Resource.getRoot().currentStage().resetButtons();
+                Resource.getRoot().currentStage().initMenu();
             });
             this.addButton(back);
         }
