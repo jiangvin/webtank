@@ -22,7 +22,7 @@ export default class AiEngine extends Engine {
         thisEngine.computerLifeCount = 0;
 
         thisEngine.playerTypeId = "tank01";
-        thisEngine.itemTypes = ["star", "shield", "red_star"];
+        thisEngine.itemTypes = ["star", "shield", "red_star", "life"];
 
         thisEngine.maxMapId = 0;
         Common.getRequest("/singlePlayer/getMaxMapId", function (data) {
@@ -411,6 +411,11 @@ export default class AiEngine extends Engine {
                 case "shield":
                     tank.shieldTimeout += 20 * 60;
                     tank.item.hasShield = true;
+                    this.removeGameItem(k);
+                    break;
+                case "life":
+                    ++this.playerLifeCount;
+                    ++this.room.roomInfo.playerLife;
                     this.removeGameItem(k);
                     break;
             }
