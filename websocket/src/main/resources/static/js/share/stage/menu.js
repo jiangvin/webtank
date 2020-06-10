@@ -72,7 +72,7 @@ export default class Menu extends Stage {
             const roomInfo = {
                 mapId: 1,
                 roomType: "PVE",
-                roomId: Resource.getUser().userId + "的房间",
+                roomId: "单人模式",
                 joinTeamType: "RED"
             };
             thisMenu.initRoom(roomInfo);
@@ -81,7 +81,7 @@ export default class Menu extends Stage {
         const bt0102 = new Button("多人游戏", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
             thisMenu.switchButtons(1);
         });
-        this.buttons[0] = [bt0101,bt0102];
+        this.buttons[0] = [bt0101, bt0102];
 
         //多人游戏
         const bt0201 = new Button("创建房间", Resource.width() * 0.5, Resource.height() * 0.35, function () {
@@ -93,7 +93,7 @@ export default class Menu extends Stage {
         const bt0203 = new Button("返回", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
             thisMenu.switchButtons(-1);
         });
-        this.buttons[1] = [bt0201,bt0202,bt0203];
+        this.buttons[1] = [bt0201, bt0202, bt0203];
 
         //创建房间
         const bt0301 = new Button("闯关模式", Resource.width() * 0.5, Resource.height() * 0.35, function () {
@@ -111,7 +111,7 @@ export default class Menu extends Stage {
         const bt0303 = new Button("返回", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
             thisMenu.switchButtons(-1);
         });
-        this.buttons[2] = [bt0301,bt0302,bt0303];
+        this.buttons[2] = [bt0301, bt0302, bt0303];
 
         //对战模式
         const bt0401 = new Button("红队", Resource.width() * 0.5, Resource.height() * 0.35, function () {
@@ -137,7 +137,7 @@ export default class Menu extends Stage {
         const bt0403 = new Button("返回", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
             thisMenu.switchButtons(-1);
         });
-        this.buttons[3] = [bt0401,bt0402,bt0403];
+        this.buttons[3] = [bt0401, bt0402, bt0403];
 
         //加入对战房间
         //对战模式
@@ -154,19 +154,19 @@ export default class Menu extends Stage {
         const bt0603 = new Button("返回", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
             thisMenu.switchButtons(-1);
         });
-        this.buttons[5] = [bt0601,bt0602,bt0603];
+        this.buttons[5] = [bt0601, bt0602, bt0603];
     }
 
     loadButtons() {
         const buttons = this.buttons[this.buttonIndex];
-        for(let i = 0; i < buttons.length; ++i) {
+        for (let i = 0; i < buttons.length; ++i) {
             this.addButton(buttons[i]);
         }
     }
 
     removeButtons() {
         const buttons = this.buttons[this.buttonIndex];
-        for(let i = 0; i < buttons.length; ++i) {
+        for (let i = 0; i < buttons.length; ++i) {
             this.removeButton(buttons[i]);
         }
     }

@@ -958,9 +958,6 @@ public class StageRoom extends BaseStage {
         }
 
         //发送场景信息
-        if (this.isPause) {
-            sendMessageToUser(new GameStatusDto(GameStatusType.PAUSE, this.pauseMessage), MessageType.GAME_STATUS, userBo.getUserId());
-        }
         sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUserId());
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUserId());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUserId());
@@ -969,16 +966,18 @@ public class StageRoom extends BaseStage {
         createTankForUser(userBo, teamType, 60 * 3);
 
         //通知前端数据传输完毕
-        sendReady(userBo.getUserId());
+        if (this.isPause) {
+            sendMessageToUser(new GameStatusDto(GameStatusType.PAUSE, this.pauseMessage), MessageType.GAME_STATUS, userBo.getUserId());
+        } else {
+            sendReady(userBo.getUserId());
+        }
     }
 
     private void createTankForUser(UserBo userBo, TeamType teamType, int timeoutForPlayer) {
         if (isBot(teamType)) {
-            for (int i = 0; i < getMapBo().getComputerStartCount(); ++i) {
-                this.eventList.add(new CreateTankEvent(
-                                       userBo,
-                                       CommonUtil.getId(),
-                                       60 * random.nextInt(getMapBo().getComputerStartCount())));
+            int count = getMapBo().getComputerStartCount();
+            for (int i = 0; i < count; ++i) {
+                this.eventList.add(new CreateTankEvent(userBo, CommonUtil.getId(), 60 * random.nextInt(count)));
             }
             return;
         }
@@ -994,9 +993,7 @@ public class StageRoom extends BaseStage {
         List<StringCountDto> lifeMap = getLifeMap(userBo.getTeamType());
         if (lifeMap.isEmpty()) {
             if (!isBot(userBo.getTeamType())) {
-                sendMessageToRoom(
-                    String.format("没有剩余生命值，玩家 %s 将变成观看模式",
-                                  userBo.getUserId()), MessageType.SYSTEM_MESSAGE);
+                sendMessageToRoom(String.format("没有剩余生命值, 玩家 %s 将变成观看模式", userBo.getUserId()), MessageType.SYSTEM_MESSAGE);
             }
             return;
         }
