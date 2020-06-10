@@ -69,7 +69,7 @@ public class BotService {
         return bot;
     }
 
-    @Scheduled(fixedRate = 17)
+    @Scheduled(fixedRate = 16)
     public void update() {
         for (int i = 0; i < botList.size(); ++i) {
             BaseBot bot = botList.get(i);

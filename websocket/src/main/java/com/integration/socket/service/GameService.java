@@ -17,7 +17,6 @@ import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -150,11 +149,6 @@ public class GameService {
 
         //add into new stage
         roomService.get(roomDto.getRoomId()).addUser(userBo, roomDto.getJoinTeamType());
-    }
-
-    @Scheduled(fixedRate = 17)
-    public void update() {
-        roomService.update();
     }
 
     private BaseStage currentStage(UserBo userBo) {
