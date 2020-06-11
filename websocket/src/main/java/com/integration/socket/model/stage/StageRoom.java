@@ -17,7 +17,7 @@ import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.GameStatusDto;
-import com.integration.socket.model.dto.GameStatusType;
+import com.integration.socket.model.GameStatusType;
 import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.event.BaseEvent;
@@ -103,7 +103,7 @@ public class StageRoom extends BaseStage {
         init();
     }
 
-    public RoomDto convertToDto() {
+    public RoomDto toDto() {
         RoomDto roomDto = new RoomDto();
         roomDto.setRoomId(getRoomId());
         roomDto.setCreator(getCreator());

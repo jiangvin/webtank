@@ -51,7 +51,7 @@ public class RoomService {
     public RoomListDto getRoomListDto(int start, int limit) {
         List<RoomDto> roomDtoList = new ArrayList<>();
         for (StageRoom room : roomList.subList(start, Math.min(start + limit, roomList.size()))) {
-            roomDtoList.add(room.convertToDto());
+            roomDtoList.add(room.toDto());
         }
         return new RoomListDto(roomDtoList, roomList.size());
     }

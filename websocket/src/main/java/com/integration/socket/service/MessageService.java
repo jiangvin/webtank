@@ -1,11 +1,11 @@
 package com.integration.socket.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.bo.WxUserBo;
 import com.integration.util.CommonUtil;
+import com.integration.util.object.ObjectUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +29,6 @@ public class MessageService {
 
     @Autowired
     private OnlineUserService onlineUserService;
-
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     private final SimpMessagingTemplate simpMessagingTemplate;
 
@@ -66,7 +64,7 @@ public class MessageService {
         try {
             if (userBo instanceof WxUserBo) {
                 synchronized (onlineUserService.get(userId)) {
-                    ((WxUserBo)userBo).getSession().getBasicRemote().sendText(objectMapper.writeValueAsString(messageDto));
+                    ((WxUserBo)userBo).getSession().getBasicRemote().sendText(ObjectUtil.writeValue(messageDto));
                 }
             } else {
                 simpMessagingTemplate.convertAndSendToUser(

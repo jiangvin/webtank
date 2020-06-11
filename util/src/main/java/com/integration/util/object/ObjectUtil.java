@@ -1,5 +1,6 @@
 package com.integration.util.object;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +16,15 @@ import java.util.Map;
 @Slf4j
 public class ObjectUtil {
     private static ObjectMapper objectMapper = new ObjectMapper();
+
+    public static String writeValue(Object object) {
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            log.error("write class:{} to json error:{}", object.getClass().getName(), e.getMessage());
+            return null;
+        }
+    }
 
     public static <T> T readValue(String json, Class<T> valueType) {
         try {
