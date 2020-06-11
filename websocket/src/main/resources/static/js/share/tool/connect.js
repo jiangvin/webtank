@@ -48,7 +48,7 @@ export default class Connect {
         };
 
         Connect.instance.socketClient.onclose = function () {
-            Common.addMessage("与服务器连接断开", "#FF0");
+            Common.addMessage("退出多人模式", "#FF0");
         };
     }
 

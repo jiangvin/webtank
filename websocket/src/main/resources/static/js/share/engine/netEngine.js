@@ -81,7 +81,20 @@ export default class NetEngine extends Engine {
                 });
                 Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120, true);
             } else {
-                Status.setStatus(Status.statusPause(), "与服务器断开！", true);
+                Status.setStatus(Status.statusPause(), "与服务器断开！");
+
+                //显示蒙版
+                thisEngine.room.createItem({
+                    z : 9,
+                    draw: function (ctx) {
+                        ctx.globalAlpha = 0.5;
+                        ctx.fillStyle = '#000000';
+                        ctx.fillRect(0, 0, Resource.width(), Resource.height());
+                        ctx.globalAlpha = 1;
+                    }
+                });
+
+                //显示返回按钮
                 const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
                     Resource.getRoot().lastStage();
                     Resource.getRoot().currentStage().initMenu();

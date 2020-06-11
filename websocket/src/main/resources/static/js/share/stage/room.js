@@ -49,7 +49,7 @@ export default class room extends stage {
         this.roomInfo = roomInfo;
         this.showTeam = roomInfo.showTeam;
         this.clear();
-        Status.setStatus(Status.statusPause(), this.generateMaskInfo(), false);
+        Status.setStatus(Status.statusPause(), this.generateMaskInfo());
         Sound.bgm();
     }
 
@@ -75,7 +75,7 @@ export default class room extends stage {
         }
         const thisRoom = this;
         Common.addTimeEvent("hide_mask", function () {
-            Status.setStatus(null, null, false);
+            Status.setStatus(null, null);
             thisRoom.mask = false;
         }, frames);
     }
@@ -223,13 +223,6 @@ export default class room extends stage {
     }
 
     drawStatus(ctx) {
-        if (Status.getShowMask()) {
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, Resource.width(), Resource.height());
-            ctx.globalAlpha = 1;
-        }
-
         if (Status.getMessage()) {
             Common.drawTitle(ctx, Status.getMessage());
         }
@@ -476,7 +469,7 @@ export default class room extends stage {
     }
 
     gameStatus(status) {
-        Status.setStatus(Status.statusPause(), status.message, false);
+        Status.setStatus(Status.statusPause(), status.message);
         if (status.type === "OVER") {
             const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
                 Resource.getRoot().lastStage();

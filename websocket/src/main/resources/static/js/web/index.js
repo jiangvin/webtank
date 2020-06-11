@@ -4,8 +4,6 @@
  * @date 2020/5/26
  */
 import './libs/jquery.js'
-import './libs/stomp.js'
-import './libs/sockjs.js'
 
 import Resource from "../share/tool/resource.js";
 import Home from "../web/home.js"

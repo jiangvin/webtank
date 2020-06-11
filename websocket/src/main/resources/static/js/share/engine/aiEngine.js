@@ -271,7 +271,7 @@ export default class AiEngine extends Engine {
             }
 
             Sound.win();
-            Status.setStatus(Status.statusPause(), "恭喜通关", false);
+            Status.setStatus(Status.statusPause(), "恭喜通关");
             const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.55, function () {
                 //进入下一关
                 ++thisEngine.room.roomInfo.mapId;
