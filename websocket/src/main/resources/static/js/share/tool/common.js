@@ -65,7 +65,7 @@ export default class Common {
     }
 
     static generateHttpHost() {
-        return Resource.getHost() === "" ? document.location.href : Resource.getHost();
+        return Resource.getHost() === "" ? document.location.href.split("?")[0] : Resource.getHost();
     }
 
     static distance(x1, y1, x2, y2) {
