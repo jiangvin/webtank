@@ -31,10 +31,6 @@ public class MapBo {
 
     private int maxGridY;
 
-    private int playerLifeTotalCount = 0;
-
-    private int computerLifeTotalCount = 0;
-
     private int mapId;
 
     private String mapName;
@@ -55,18 +51,41 @@ public class MapBo {
         return mapDto;
     }
 
+    public MapDto toDto(List<String> keys) {
+        MapDto mapDto = new MapDto();
+        copyProperties(mapDto, keys);
+        return mapDto;
+    }
+
     private void copyProperties(MapDto mapDto) {
+        copyProperties(mapDto, null);
+    }
+
+    private void copyProperties(MapDto mapDto, List<String> keys) {
         copyLifeCountProperties(mapDto);
         mapDto.setMapId(getMapId());
         mapDto.setWidth(getWidth());
         mapDto.setHeight(getHeight());
         mapDto.setMapName(getMapName());
         List<ItemDto> itemList = new ArrayList<>();
-        for (Map.Entry<String, MapUnitType> kv : getUnitMap().entrySet()) {
-            ItemDto item = new ItemDto();
-            item.setId(kv.getKey());
-            item.setTypeId(kv.getValue().getValue().toString());
-            itemList.add(item);
+        if (keys == null) {
+            for (Map.Entry<String, MapUnitType> kv : getUnitMap().entrySet()) {
+                ItemDto item = new ItemDto();
+                item.setId(kv.getKey());
+                item.setTypeId(kv.getValue().getValue().toString());
+                itemList.add(item);
+            }
+        } else {
+            for (String key : keys) {
+                if (!getUnitMap().containsKey(key)) {
+                    continue;
+                }
+
+                ItemDto item = new ItemDto();
+                item.setId(key);
+                item.setTypeId(getUnitMap().get(key).getValue().toString());
+                itemList.add(item);
+            }
         }
         mapDto.setItemList(itemList);
     }
@@ -93,12 +112,6 @@ public class MapBo {
     private void copyLifeCountProperties(MapDto mapDto) {
         mapDto.setPlayerLife(getCount(getPlayerLife()));
         mapDto.setComputerLife(getCount(getComputerLife()));
-    }
-
-
-    public void setTotalLifeCount() {
-        this.playerLifeTotalCount = getCount(this.playerLife);
-        this.computerLifeTotalCount = getCount(this.computerLife);
     }
 
     public void checkSelf() {
@@ -132,12 +145,10 @@ public class MapBo {
 
     public void duplicatePlayer() {
         duplicate(computerLife, playerLife);
-        this.computerLifeTotalCount = this.playerLifeTotalCount;
     }
 
     public void duplicateComputer() {
         duplicate(playerLife, computerLife);
-        this.playerLifeTotalCount = this.computerLifeTotalCount;
     }
 
     public void removeMapUnit(MapUnitType mapUnitType) {
@@ -158,5 +169,16 @@ public class MapBo {
             life += kv.getValue();
         }
         return life;
+    }
+
+    public void addPlayerLife(int lifeCount) {
+        if (lifeCount == 0) {
+            return;
+        }
+
+        if (playerLife.isEmpty()) {
+            playerLife.add(new StringCountDto("tank01", 0));
+        }
+        playerLife.get(0).addValue(lifeCount);
     }
 }

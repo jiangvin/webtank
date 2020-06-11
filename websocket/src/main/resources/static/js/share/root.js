@@ -14,7 +14,6 @@ import aiEngine from "./engine/aiEngine.js";
 export default class Root {
     constructor() {
         this.frontFrame = new Frame();
-        this.backendFrame = new Frame();
 
         this.stages = [];
         this.stageIndex = 0;
@@ -86,7 +85,6 @@ export default class Root {
     }
 
     update() {
-        this.backendFrame.calculate();
         this.updateTimeEvents();
 
         if (Status.getValue() !== Status.statusNormal()) {
@@ -187,7 +185,7 @@ export default class Root {
 
         //帧率信息
         ctx.textAlign = 'left';
-        let text = '帧率:' + this.frontFrame.frames + '-' + this.backendFrame.frames;
+        let text = '帧率:' + this.frontFrame.frames;
         if (this.netDelay) {
             text += ' / 延迟:' + this.netDelay + 'ms';
         }

@@ -4,14 +4,13 @@
  * @date 2020/5/26
  */
 import './libs/jquery.js'
-import './libs/stomp.js'
-import './libs/sockjs.js'
 
 import Resource from "../share/tool/resource.js";
 import Home from "../web/home.js"
 import Menu from "../share/stage/menu.js";
 import Control from "../share/tool/control.js";
 import Room from "../share/stage/room.js"
+import Root from "../share/root.js";
 
 export default class Index {
     constructor() {
@@ -19,7 +18,8 @@ export default class Index {
         Resource.setCanvas(this.canvas);
         this.ctx = this.canvas.getContext('2d');
 
-        this.root = Resource.getRoot();
+        this.root = new Root();
+        Resource.setRoot(this.root);
         this.root.addStage(new Home());
         this.root.addStage(new Menu());
         this.root.addStage(new Room());
@@ -76,15 +76,13 @@ export default class Index {
     }
 
     start() {
-        //运算
         const index = this;
         const root = this.root;
-        setInterval(function () {
-            root.update();
-        }, 17);
 
-        //绘制
+        //运算&绘制
         const draw = function () {
+            root.update();
+
             index.ctx.clearRect(0, 0, Resource.width(), Resource.height());
             root.draw(index.ctx);
             root.drawHandler = requestAnimationFrame(draw);
@@ -132,6 +130,8 @@ export default class Index {
         let wrapper = document.getElementById("wrapper");
         wrapper.style.cssText = style;
         Control.setPortrait(height > width);
+        //窗口变化时重新计算触控栏位置
+        Control.generateTouchModeInfo();
     }
 }
 

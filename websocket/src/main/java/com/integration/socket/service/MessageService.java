@@ -1,11 +1,11 @@
 package com.integration.socket.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.bo.WxUserBo;
 import com.integration.util.CommonUtil;
+import com.integration.util.object.ObjectUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +30,6 @@ public class MessageService {
     @Autowired
     private OnlineUserService onlineUserService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     public MessageService(SimpMessagingTemplate simpMessagingTemplate) {
@@ -48,7 +46,7 @@ public class MessageService {
         if (msg.length() > MAX_LOG_LENGTH) {
             msg = msg.substring(0, MAX_LOG_LENGTH) + "...";
         }
-        log.info("send message:{}", msg);
+        log.debug("send message:{}", msg);
 
         //清空原有人数，减少数据量
         messageDto.setSendToList(null);
@@ -65,7 +63,9 @@ public class MessageService {
 
         try {
             if (userBo instanceof WxUserBo) {
-                ((WxUserBo)userBo).getSession().getBasicRemote().sendText(objectMapper.writeValueAsString(messageDto));
+                synchronized (onlineUserService.get(userId)) {
+                    ((WxUserBo)userBo).getSession().getBasicRemote().sendText(ObjectUtil.writeValue(messageDto));
+                }
             } else {
                 simpMessagingTemplate.convertAndSendToUser(
                     userId,

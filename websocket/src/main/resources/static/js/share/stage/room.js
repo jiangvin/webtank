@@ -10,7 +10,6 @@ import Play from "./play.js";
 import Status from "../tool/status.js";
 import Control from "../tool/control.js";
 import Button from "./button.js";
-import Adapter from "../tool/adapter.js";
 import Sound from "../tool/sound.js";
 
 export default class room extends stage {
@@ -50,7 +49,7 @@ export default class room extends stage {
         this.roomInfo = roomInfo;
         this.showTeam = roomInfo.showTeam;
         this.clear();
-        Status.setStatus(Status.statusPause(), this.generateMaskInfo(), false);
+        Status.setStatus(Status.statusPause(), this.generateMaskInfo());
         Sound.bgm();
     }
 
@@ -76,7 +75,7 @@ export default class room extends stage {
         }
         const thisRoom = this;
         Common.addTimeEvent("hide_mask", function () {
-            Status.setStatus(null, null, false);
+            Status.setStatus(null, null);
             thisRoom.mask = false;
         }, frames);
     }
@@ -85,7 +84,7 @@ export default class room extends stage {
         if (this.roomInfo.roomType === "PVP") {
             return "RED vs BLUE";
         }
-        
+
         let displayNum;
         if (this.roomInfo.mapId < 10) {
             displayNum = "0" + this.roomInfo.mapId;
@@ -224,13 +223,6 @@ export default class room extends stage {
     }
 
     drawStatus(ctx) {
-        if (Status.getShowMask()) {
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, Resource.width(), Resource.height());
-            ctx.globalAlpha = 1;
-        }
-
         if (Status.getMessage()) {
             Common.drawTitle(ctx, Status.getMessage());
         }
@@ -321,6 +313,7 @@ export default class room extends stage {
         switch (typeId) {
             case 0:
                 item.image = Resource.getImage("brick");
+                item.orientation = 0;
                 break;
             case 1:
                 item.image = Resource.getImage("brick");
@@ -328,6 +321,7 @@ export default class room extends stage {
                 break;
             case 2:
                 item.image = Resource.getImage("iron");
+                item.orientation = 0;
                 break;
             case 3:
                 item.image = Resource.getImage("iron");
@@ -468,18 +462,18 @@ export default class room extends stage {
 
         if (this.view.center) {
             const center = this.view.center;
-            if (Common.distance(center.x,center.y,item.x,item.y) <= Resource.getUnitSize() + 5) {
+            if (Common.distance(center.x, center.y, item.x, item.y) <= Resource.getUnitSize() + 5) {
                 Sound.catchItem();
             }
         }
     }
 
     gameStatus(status) {
-        Status.setStatus(Status.statusPause(), status.message, false);
+        Status.setStatus(Status.statusPause(), status.message);
         if (status.type === "OVER") {
             const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
-                Adapter.stopConnect();
                 Resource.getRoot().lastStage();
+                Resource.getRoot().currentStage().initMenu();
             });
             this.addButton(back);
         }
@@ -513,7 +507,7 @@ export default class room extends stage {
                     scale: 0.1
                 });
                 thisStage.updateTankProperty(tank);
-                thisStage.updateTankControl(tank);
+                thisStage.updateTankControl(tank, true);
                 tankItem.play = new Play(30, 1,
                     function () {
                         tankItem.scale += this.animationScale;
@@ -537,12 +531,16 @@ export default class room extends stage {
         tankItem.image = Resource.getImage(tankData.typeId);
     };
 
-    updateTankControl(tankData) {
+    updateTankControl(tankData, force) {
         const tankItem = this.items.get(tankData.id);
-        tankItem.x = tankData.x;
-        tankItem.y = tankData.y;
+        //优化前端闪烁显示
+        if (!force && tankItem.orientation === tankData.orientation && tankItem.action === tankData.action) {
+            return;
+        }
         tankItem.orientation = tankData.orientation;
         tankItem.action = tankData.action;
+        tankItem.x = tankData.x;
+        tankItem.y = tankData.y;
     };
 
     createTank(options) {
@@ -601,7 +599,7 @@ export default class room extends stage {
 
         if (this.view.center) {
             const center = this.view.center;
-            const distance = Common.distance(tank.x,tank.y,center.x,center.y);
+            const distance = Common.distance(tank.x, tank.y, center.x, center.y);
             if (distance <= Resource.getUnitSize() * 8) {
                 Sound.boom();
             }
@@ -681,7 +679,7 @@ export default class room extends stage {
 
                 if (thisStage.view.center) {
                     const center = thisStage.view.center;
-                    const distance = Common.distance(bullet.x,bullet.y,center.x,center.y);
+                    const distance = Common.distance(bullet.x, bullet.y, center.x, center.y);
                     if (distance <= Resource.getUnitSize() + 5) {
                         Sound.fire();
                     }

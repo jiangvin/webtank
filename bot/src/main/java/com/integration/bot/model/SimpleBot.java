@@ -180,7 +180,7 @@ public class SimpleBot extends BaseBot {
     }
 
     private boolean canPass(double x, double y) {
-        if (x <= 0 || y <= 0 || x >= mapDto.getWidth() || y >= mapDto.getHeight()) {
+        if (x < 0 || y < 0 || x >= mapDto.getWidth() || y >= mapDto.getHeight()) {
             return false;
         }
 

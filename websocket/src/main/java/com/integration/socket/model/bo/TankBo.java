@@ -30,7 +30,6 @@ public class TankBo {
     private TankTypeDto type;
     private int reloadTime;
     private int bulletCount;
-    private long lastSyncTime = System.currentTimeMillis();
     private List<String> gridKeyList = new ArrayList<>();
     private int shieldTimeout = 0;
 
@@ -53,10 +52,6 @@ public class TankBo {
             tankDto.setHasShield(true);
         }
         return tankDto;
-    }
-
-    public void refreshSyncTime() {
-        this.lastSyncTime = System.currentTimeMillis();
     }
 
     public static TankBo convert(ItemDto tankDto) {
@@ -146,8 +141,7 @@ public class TankBo {
                    this.getType().isBrokenIron(),
                    this.orientationType,
                    null,
-                   null,
-                   System.currentTimeMillis());
+                   null);
     }
 
     private Point getBulletPos() {

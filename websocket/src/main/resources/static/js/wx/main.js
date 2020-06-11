@@ -3,6 +3,8 @@ import Resource from '../share/tool/resource'
 import Control from "../share/tool/control";
 import Room from "../share/stage/room";
 import Adapter from "../share/tool/adapter";
+import Root from "../share/root.js";
+
 Resource.setCanvas(canvas);
 let ctx = canvas.getContext('2d');
 
@@ -25,7 +27,7 @@ export default class Main {
     }
 
     restart() {
-        Resource.setHost("116.63.170.134:8201");
+        Resource.setHost("http://116.63.170.134:8201");
 
         //设置缩放比例
         let width;
@@ -44,7 +46,8 @@ export default class Main {
         Adapter.setPlatform(1);
         Control.setControlMode(true);
 
-        this.root = Resource.getRoot();
+        this.root = new Root();
+        Resource.setRoot(this.root);
         this.root.addStage(new Menu());
         this.root.addStage(new Room());
 

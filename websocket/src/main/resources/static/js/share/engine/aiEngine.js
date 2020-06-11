@@ -20,7 +20,7 @@ export default class AiEngine extends Engine {
         thisEngine.computerLifeCount = 0;
 
         thisEngine.playerTypeId = "tank01";
-        thisEngine.itemTypes = ["star", "shield", "red_star"];
+        thisEngine.itemTypes = ["star", "shield", "red_star", "life", "king"];
 
         thisEngine.maxMapId = 0;
         Common.getRequest("/singlePlayer/getMaxMapId", function (data) {
@@ -44,7 +44,6 @@ export default class AiEngine extends Engine {
         Common.getRequest("/singlePlayer/getTankTypes", function (data) {
             thisEngine.tankTypes = data;
             thisEngine.initStage();
-            thisEngine.createGameItem();
         })
     }
 
@@ -56,12 +55,14 @@ export default class AiEngine extends Engine {
                 message: thisEngine.mapInfo
             });
 
+            //create tanks
             thisEngine.createPlayerTank();
             for (let i = 0; i < thisEngine.mapInfo.computerStartCount; ++i) {
                 thisEngine.createComputerTank();
             }
 
-            thisEngine.createItemTimeout = 25;
+            //create item
+            thisEngine.createGameItem();
 
             Resource.getRoot().processSocketMessage({
                 messageType: "SERVER_READY"
@@ -71,8 +72,15 @@ export default class AiEngine extends Engine {
 
     createGameItem() {
         const thisEngine = this;
+        thisEngine.createItemTimeout = 15;
 
         const createItemEvent = function () {
+            //重复创建道具事件
+            thisEngine.createItemTimeout += 5;
+            thisEngine.addTimeEvent(thisEngine.createItemTimeout * 60, function () {
+                createItemEvent();
+            });
+
             if (thisEngine.items.size >= AiEngine.maxItemLimit) {
                 return;
             }
@@ -100,17 +108,11 @@ export default class AiEngine extends Engine {
                 thisEngine.items.set(id, thisEngine.room.items.get(id));
                 break;
             }
-
-            //重复创建道具事件
-            thisEngine.createItemTimeout += 5;
-            Common.addTimeEvent("create_item", function () {
-                createItemEvent();
-            }, thisEngine.createItemTimeout * 60);
         };
 
-        Common.addTimeEvent("create_item", function () {
+        thisEngine.addTimeEvent(thisEngine.createItemTimeout * 60, function () {
             createItemEvent();
-        }, thisEngine.createItemTimeout * 60);
+        });
     };
 
     loadMapDetail(callback) {
@@ -119,6 +121,7 @@ export default class AiEngine extends Engine {
             thisEngine.mapInfo = data;
             thisEngine.mapInfo.playerLife = thisEngine.playerLifeCount;
             thisEngine.computerLifeCount = thisEngine.mapInfo.computerLife;
+
             callback();
         });
     }
@@ -268,7 +271,7 @@ export default class AiEngine extends Engine {
             }
 
             Sound.win();
-            Status.setStatus(Status.statusPause(), "恭喜通关", false);
+            Status.setStatus(Status.statusPause(), "恭喜通关");
             const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.55, function () {
                 //进入下一关
                 ++thisEngine.room.roomInfo.mapId;
@@ -278,6 +281,10 @@ export default class AiEngine extends Engine {
                 thisEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
 
                 //清空场景
+                thisEngine.events = [];
+                thisEngine.tanks.clear();
+                thisEngine.bullets.clear();
+                thisEngine.items.clear();
                 thisEngine.room.clear();
 
                 //进入下一关
@@ -390,8 +397,78 @@ export default class AiEngine extends Engine {
                     tank.item.hasShield = true;
                     this.removeGameItem(k);
                     break;
+                case "life":
+                    ++this.playerLifeCount;
+                    ++this.room.roomInfo.playerLife;
+                    this.removeGameItem(k);
+                    break;
+                case "king":
+                    this.createKingShield();
+                    this.removeGameItem(k);
+                    break;
             }
         }
+    }
+
+    createKingShield() {
+        const thisEngine = this;
+        const kingKeys = [];
+        this.mapInfo.itemList.forEach(function (item) {
+            if (item.typeId === "6") {
+                kingKeys[kingKeys.length] = item.id;
+            }
+        });
+        const changeKeys = [];
+        kingKeys.forEach(function (key) {
+            const infos = key.split("_");
+            const point = {};
+            point.x = parseInt(infos[0]);
+            point.y = parseInt(infos[1]);
+            for (let x = point.x - 1; x <= point.x + 1; ++x) {
+                for (let y = point.y - 1; y <= point.y + 1; ++y) {
+                    if (x < 0 || x >= thisEngine.mapInfo.maxGridX) {
+                        continue;
+                    }
+                    if (y < 0 || y >= thisEngine.mapInfo.maxGridY) {
+                        continue;
+                    }
+
+                    const changeKey = x + "_" + y;
+                    if (thisEngine.room.items.has(changeKey)) {
+                        const item = thisEngine.room.items.get(changeKey);
+                        if (item.typeId === 0 || item.typeId === 1) {
+                            changeKeys[changeKeys.length] = changeKey;
+                        }
+                    } else {
+                        changeKeys[changeKeys.length] = changeKey;
+                    }
+                }
+            }
+        });
+
+        if (changeKeys.length === 0) {
+            return;
+        }
+
+        //替换成铁
+        changeKeys.forEach(function (key) {
+            thisEngine.room.createOrUpdateMapItem({
+                id: key,
+                typeId: 2
+            });
+        });
+
+        //换回来
+        thisEngine.addTimeEvent(30 * 60, function () {
+            changeKeys.forEach(function (key) {
+                if (thisEngine.room.items.has(key)) {
+                    thisEngine.room.createOrUpdateMapItem({
+                        id: key,
+                        typeId: 0
+                    });
+                }
+            });
+        });
     }
 
     removeGameItem(id) {
@@ -558,10 +635,6 @@ export default class AiEngine extends Engine {
             default:
                 return orientation;
         }
-    }
-
-    addTimeEvent(timeout, callback) {
-        Common.addTimeEvent("AI_ENGINE", callback, timeout);
     }
 
     createTank(startPosList, id, typeId, teamId, hasShield) {

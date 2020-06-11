@@ -8,7 +8,8 @@ import Engine from "./engine.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
-import Adapter from "../tool/adapter.js";
+import Button from "../stage/button.js";
+import Connect from "../tool/connect.js";
 
 export default class NetEngine extends Engine {
     constructor(room) {
@@ -16,11 +17,11 @@ export default class NetEngine extends Engine {
         const thisEngine = this;
 
         thisEngine.setUserId(function () {
-            Adapter.socketConnect(Resource.getUser().userId, function () {
+            Connect.connect(Resource.getUser().userId, function () {
 
                 //注册延时事件
                 Common.addTimeEvent("CLIENT_READY", function () {
-                    Adapter.socketSend("CLIENT_READY", {
+                    Connect.send("CLIENT_READY", {
                         username: Resource.getUser().username
                     })
                 }, 40);
@@ -31,7 +32,7 @@ export default class NetEngine extends Engine {
                     thisEngine.room.roomInfo.roomId = Resource.getUser().userId + "的房间";
 
                     Common.addTimeEvent("CREATE_ROOM", function () {
-                        Adapter.socketSend("CREATE_ROOM", {
+                        Connect.send("CREATE_ROOM", {
                             "roomId": thisEngine.room.roomInfo.roomId,
                             "mapId": thisEngine.room.roomInfo.mapId,
                             "roomType": thisEngine.room.roomInfo.roomType,
@@ -41,7 +42,7 @@ export default class NetEngine extends Engine {
                 } else {
                     //join room
                     Common.addTimeEvent("JOIN_ROOM", function () {
-                        Adapter.socketSend("JOIN_ROOM", {
+                        Connect.send("JOIN_ROOM", {
                             "roomId": thisEngine.room.roomInfo.roomId,
                             "joinTeamType": thisEngine.room.roomInfo.joinTeamType
                         })
@@ -71,17 +72,34 @@ export default class NetEngine extends Engine {
      * 每两秒确认一次连接是否失效
      */
     addConnectCheckEvent() {
+        const thisEngine = this;
         const callBack = function () {
-            if (Adapter.getSocketStatus() === true) {
+            if (Connect.status() === true) {
                 const start = new Date().getTime();
                 Common.getRequest("/multiplePlayers/ping", function () {
                     Resource.getRoot().netDelay = new Date().getTime() - start;
                 });
                 Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120, true);
             } else {
-                Status.setStatus(Status.statusPause(), "与服务器断开！", true);
+                Status.setStatus(Status.statusPause(), "与服务器断开！");
 
-                //TODO 断线重连
+                //显示蒙版
+                thisEngine.room.createItem({
+                    z : 9,
+                    draw: function (ctx) {
+                        ctx.globalAlpha = 0.5;
+                        ctx.fillStyle = '#000000';
+                        ctx.fillRect(0, 0, Resource.width(), Resource.height());
+                        ctx.globalAlpha = 1;
+                    }
+                });
+
+                //显示返回按钮
+                const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
+                    Resource.getRoot().lastStage();
+                    Resource.getRoot().currentStage().initMenu();
+                });
+                thisEngine.room.addButton(back);
             }
         };
 
@@ -93,7 +111,7 @@ export default class NetEngine extends Engine {
         super.processControlEvent(control);
         switch (control) {
             case "FIRE":
-                Adapter.socketSend("UPDATE_TANK_FIRE");
+                Connect.send("UPDATE_TANK_FIRE");
                 break;
             default:
                 break;
@@ -111,7 +129,7 @@ export default class NetEngine extends Engine {
         send.y = center.y;
         send.orientation = center.orientation;
         send.action = center.action;
-        Adapter.socketSend("UPDATE_TANK_CONTROL",
+        Connect.send("UPDATE_TANK_CONTROL",
             {
                 orientation: send.orientation,
                 action: send.action,

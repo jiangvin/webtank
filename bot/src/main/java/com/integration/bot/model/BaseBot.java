@@ -5,7 +5,6 @@ import com.integration.bot.handler.MessageReceiveHandler;
 import com.integration.bot.model.event.BaseEvent;
 import com.integration.bot.model.event.PauseCheckEvent;
 import com.integration.bot.model.event.SendMessageEvent;
-import com.integration.bot.model.event.UserCountCheckEvent;
 import com.integration.bot.model.map.Tank;
 import com.integration.bot.service.BotService;
 import com.integration.dto.bot.BotDto;
@@ -54,7 +53,6 @@ public abstract class BaseBot {
     private List<BaseEvent> eventList = new ArrayList<>();
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
-    private TeamType teamType;
 
     @Getter
     String name;
@@ -68,11 +66,6 @@ public abstract class BaseBot {
     private long startTime = System.currentTimeMillis();
 
     /**
-     * 当只剩BOT一个人时结束
-     */
-    private Integer userCount;
-
-    /**
      * 结束标记，控制结束逻辑
      */
     private boolean deadFlag = false;
@@ -80,7 +73,7 @@ public abstract class BaseBot {
     BaseBot(BotDto botDto) {
         this.name = botDto.getName();
         this.roomId = botDto.getRoomId();
-        this.teamType = botDto.getTeamType();
+        TeamType teamType = botDto.getTeamType();
         connect();
         if (isDead()) {
             return;
@@ -88,7 +81,7 @@ public abstract class BaseBot {
         sendMessage(new MessageDto(null, MessageType.CLIENT_READY));
         RoomDto roomDto = new RoomDto();
         roomDto.setRoomId(this.roomId);
-        roomDto.setJoinTeamType(this.teamType);
+        roomDto.setJoinTeamType(teamType);
         MessageDto messageDto = new MessageDto(roomDto, MessageType.JOIN_ROOM);
         this.eventList.add(new SendMessageEvent(5 * 60, messageDto));
         this.eventList.add(new PauseCheckEvent());
@@ -136,16 +129,6 @@ public abstract class BaseBot {
         if (event instanceof SendMessageEvent) {
             SendMessageEvent sendMessageEvent = (SendMessageEvent) event;
             sendMessage(sendMessageEvent.getMessage());
-        } else if (event instanceof UserCountCheckEvent) {
-            if (this.userCount <= 1) {
-                UserCountCheckEvent userCountCheckEvent = (UserCountCheckEvent) event;
-                if (userCountCheckEvent.isFinished()) {
-                    log.info("bot:{} will be closed because no user in room.", this.name);
-                    this.deadFlag = true;
-                } else {
-                    this.eventList.add(userCountCheckEvent);
-                }
-            }
         } else if (event instanceof PauseCheckEvent) {
             PauseCheckEvent pauseCheckEvent = (PauseCheckEvent) event;
             if (isPause) {
@@ -168,9 +151,10 @@ public abstract class BaseBot {
 
         switch (messageDto.getMessageType()) {
             case USERS:
-                this.userCount = ((List) messageDto.getMessage()).size();
-                if (this.userCount <= 1) {
-                    eventList.add(new UserCountCheckEvent());
+                int userCount = ((List) messageDto.getMessage()).size();
+                if (userCount <= 1) {
+                    log.info("bot:{} will be closed because no user in room.", this.name);
+                    this.deadFlag = true;
                 }
                 break;
             case MAP:
@@ -206,7 +190,7 @@ public abstract class BaseBot {
     private void processTank(List<Object> dtoList) {
         for (Object dto : dtoList) {
             Tank tank = Tank.convert(objectMapper.convertValue(dto, ItemDto.class));
-            if (tankMap.containsKey(tank.getId()) && tankMap.get(tank.getId()).getTeamType() == this.teamType) {
+            if (tankMap.containsKey(tank.getId()) && tankMap.get(tank.getId()).getUserId().equals(this.name)) {
                 tankMap.get(tank.getId()).copyPropertyFromServer(tank);
             } else {
                 tankMap.put(tank.getId(), tank);
