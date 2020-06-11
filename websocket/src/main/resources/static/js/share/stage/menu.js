@@ -9,7 +9,7 @@ import Resource from "../tool/resource.js";
 import Button from "./button.js"
 import RoomButton from "./roombutton.js";
 import Common from "../tool/common.js";
-import Adapter from "../tool/adapter.js";
+import Connect from "../tool/connect.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -178,7 +178,7 @@ export default class Menu extends Stage {
     }
 
     initMenu() {
-        Adapter.stopConnect();
+        Connect.disconnect();
         Resource.getRoot().users = null;
         Resource.getRoot().netDelay = 0;
         this.removeButtons();
