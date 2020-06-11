@@ -204,11 +204,9 @@ export default class Adapter {
     }
 
     static generateSocketHost() {
-        if (Resource.getHost() === "") {
-            return "ws://" + document.location.host;
-        } else {
-            return 'ws://' + Resource.getHost();
-        }
+        return Common.generateHttpHost()
+            .replace("http://","ws://")
+            .replace("https://","wss://");
     }
 
     static socketConnectWx(id, callback) {

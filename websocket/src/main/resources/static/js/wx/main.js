@@ -27,7 +27,7 @@ export default class Main {
     }
 
     restart() {
-        Resource.setHost("116.63.170.134:8201");
+        Resource.setHost("http://116.63.170.134:8201");
 
         //设置缩放比例
         let width;

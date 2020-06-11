@@ -5,7 +5,6 @@
  */
 
 import Resource from "./resource.js";
-import Status from "./status.js";
 
 export default class Common {
     constructor() {
@@ -66,7 +65,7 @@ export default class Common {
     }
 
     static generateHttpHost() {
-        return Resource.getHost() === "" ? "" : "http://" + Resource.getHost();
+        return Resource.getHost() === "" ? document.location.href : Resource.getHost();
     }
 
     static distance(x1, y1, x2, y2) {
