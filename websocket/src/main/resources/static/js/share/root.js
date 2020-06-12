@@ -8,8 +8,8 @@ import Frame from './tool/frame.js'
 import Resource from './tool/resource.js'
 import Status from "./tool/status.js"
 import Common from "./tool/common.js"
-import netEngine from "./engine/netEngine.js";
-import aiEngine from "./engine/aiEngine.js";
+import NetEngine from "./engine/netEngine.js";
+import AiEngine from "./engine/aiEngine.js";
 
 export default class Root {
     constructor() {
@@ -78,9 +78,9 @@ export default class Root {
      */
     addEngine(isNetEngine) {
         if (isNetEngine) {
-            this.engine = new netEngine(this.currentStage());
+            this.engine = new NetEngine(this.currentStage());
         } else {
-            this.engine = new aiEngine(this.currentStage());
+            this.engine = new AiEngine(this.currentStage());
         }
     }
 

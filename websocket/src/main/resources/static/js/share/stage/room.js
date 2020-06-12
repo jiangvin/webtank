@@ -3,7 +3,7 @@
  * @description
  * @date 2020/5/27
  */
-import stage from "./stage.js";
+import Stage from "./stage.js";
 import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
 import Play from "./play.js";
@@ -12,7 +12,7 @@ import Control from "../tool/control.js";
 import Button from "./button.js";
 import Sound from "../tool/sound.js";
 
-export default class room extends stage {
+export default class Room extends Stage {
     constructor() {
         super();
 
