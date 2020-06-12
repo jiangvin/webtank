@@ -106,7 +106,7 @@ export default class Resource {
     }
 
     static setUserId(userId) {
-        Resource.instance.user.userId = userId;
+        Resource.instance.user.setUserId(userId);
     }
 
     static getUser() {
