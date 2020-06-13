@@ -10,6 +10,7 @@ import Button from "./button.js"
 import RoomButton from "./roombutton.js";
 import Common from "../tool/common.js";
 import Connect from "../tool/connect.js";
+import Rect from "./rect.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -81,7 +82,10 @@ export default class Menu extends Stage {
         const bt0102 = new Button("多人游戏", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
             thisMenu.switchButtons(1);
         });
-        this.buttons[0] = [bt0101, bt0102];
+        const bt0103 = new Button("排行榜", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
+            thisMenu.switchButtons(6);
+        });
+        this.buttons[0] = [bt0101, bt0102, bt0103];
 
         //多人游戏
         const bt0201 = new Button("创建房间", Resource.width() * 0.5, Resource.height() * 0.35, function () {
@@ -155,19 +159,30 @@ export default class Menu extends Stage {
             thisMenu.switchButtons(-1);
         });
         this.buttons[5] = [bt0601, bt0602, bt0603];
+
+        //排行榜
+        const rect0701 = new Rect(Resource.width() / 2, Resource.height() * .57, Resource.width() * .6, Resource.height() * .65);
+
+        const bt0703 = new Button("返回",
+            rect0701.x + rect0701.width / 2 - 65,
+            rect0701.y + rect0701.height / 2 - 35,
+            function () {
+            thisMenu.switchButtons(-6);
+        }, 110, 50, '24px Arial');
+        this.buttons[6] = [rect0701, bt0703];
     }
 
     loadButtons() {
         const buttons = this.buttons[this.buttonIndex];
         for (let i = 0; i < buttons.length; ++i) {
-            this.addButton(buttons[i]);
+            this.addItem(buttons[i]);
         }
     }
 
     removeButtons() {
         const buttons = this.buttons[this.buttonIndex];
         for (let i = 0; i < buttons.length; ++i) {
-            this.removeButton(buttons[i]);
+            this.removeItem(buttons[i]);
         }
     }
 

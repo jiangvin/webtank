@@ -3,19 +3,23 @@
  * @description
  * @date 2020/5/26
  */
-import Item from './item.js'
-import Resource from "../tool/resource.js";
 import ControlUnit from "./controlunit.js";
+import Rect from "./rect.js";
 
-export default class Button extends Item {
-    constructor(text, x, y, callBack) {
-        super();
-
-        this.id = Resource.generateClientId();
+export default class Button extends Rect {
+    constructor(text, x, y, callBack, width, height, font) {
+        if (!width || !height) {
+            width = 284;
+            height = 72;
+        }
+        super(x, y, width, height);
         this.text = text;
-        this.x = x;
-        this.y = y;
         this.z = 10;
+        if (font) {
+            this.font = font;
+        } else {
+            this.font = '30px Arial';
+        }
 
         this.generateControlUnit(callBack);
     }
@@ -23,10 +27,10 @@ export default class Button extends Item {
     generateControlUnit(callBack) {
         const leftTop = {};
         const rightBottom = {};
-        leftTop.x = this.x - 284 / 2;
-        leftTop.y = this.y - 72 / 2;
-        rightBottom.x = this.x + 284 / 2;
-        rightBottom.y = this.y + 72 / 2;
+        leftTop.x = this.x - this.width / 2;
+        leftTop.y = this.y - this.height / 2;
+        rightBottom.x = this.x + this.width / 2;
+        rightBottom.y = this.y + this.height / 2;
         this.controlUnit = new ControlUnit(
             this.id,
             leftTop,
@@ -35,18 +39,10 @@ export default class Button extends Item {
     }
 
     draw(ctx) {
-        //按钮框
-        const buttonImage = Resource.getImage("button");
-        const offsetX = this.x - buttonImage.width / 2;
-        const offsetY = this.y - buttonImage.height / 2;
-        ctx.drawImage(buttonImage,
-            0, 0,
-            buttonImage.width, buttonImage.height,
-            offsetX, offsetY,
-            buttonImage.width, buttonImage.height);
+        super.draw(ctx);
 
         //文字
-        ctx.font = '30px Arial';
+        ctx.font = this.font;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#fff';

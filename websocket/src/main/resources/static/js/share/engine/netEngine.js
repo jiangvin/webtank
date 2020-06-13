@@ -85,7 +85,7 @@ export default class NetEngine extends Engine {
 
                 //显示蒙版
                 thisEngine.room.createItem({
-                    z : 9,
+                    z : 8,
                     draw: function (ctx) {
                         ctx.globalAlpha = 0.5;
                         ctx.fillStyle = '#000000';
@@ -99,7 +99,7 @@ export default class NetEngine extends Engine {
                     Resource.getRoot().lastStage();
                     Resource.getRoot().currentStage().initMenu();
                 });
-                thisEngine.room.addButton(back);
+                thisEngine.room.addItem(back);
             }
         };
 

@@ -40,15 +40,19 @@ export default class Stage {
         return item;
     }
 
-    addButton(button) {
-        this.items.set(button.id, button);
-        const controlUnit = button.controlUnit;
-        this.controlUnits.set(controlUnit.id, controlUnit);
+    addItem(item) {
+        this.items.set(item.id, item);
+        const controlUnit = item.controlUnit;
+        if (controlUnit) {
+            this.controlUnits.set(controlUnit.id, controlUnit);
+        }
     }
 
-    removeButton(button) {
-        this.items.delete(button.id);
-        this.controlUnits.delete(button.controlUnit.id);
+    removeItem(item) {
+        this.items.delete(item.id);
+        if (item.controlUnit) {
+            this.controlUnits.delete(item.controlUnit.id);
+        }
     }
 
     processSocketMessage(messageDto) {

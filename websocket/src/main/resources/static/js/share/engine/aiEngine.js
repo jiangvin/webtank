@@ -291,7 +291,7 @@ export default class AiEngine extends Engine {
                 thisEngine.initStage();
                 Sound.bgm();
             });
-            thisEngine.room.addButton(next);
+            thisEngine.room.addItem(next);
         } else {
             this.room.gameStatus({
                 message: "游戏失败",

@@ -475,7 +475,7 @@ export default class Room extends Stage {
                 Resource.getRoot().lastStage();
                 Resource.getRoot().currentStage().initMenu();
             });
-            this.addButton(back);
+            this.addItem(back);
         }
 
         if (status.message.indexOf("失败") >= 0) {
