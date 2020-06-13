@@ -5,6 +5,7 @@ package com.integration.socket.repository.jooq;
 
 
 import com.integration.socket.repository.jooq.tables.Map;
+import com.integration.socket.repository.jooq.tables.User;
 
 import javax.annotation.Generated;
 
@@ -26,4 +27,9 @@ public class Tables {
      * The table <code>map</code>.
      */
     public static final Map MAP = com.integration.socket.repository.jooq.tables.Map.MAP;
+
+    /**
+     * The table <code>user</code>.
+     */
+    public static final User USER = com.integration.socket.repository.jooq.tables.User.USER;
 }

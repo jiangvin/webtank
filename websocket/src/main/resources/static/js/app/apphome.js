@@ -1,22 +1,18 @@
 /**
  * @author 蒋文龙(Vin)
  * @description
- * @date 2020/5/26
+ * @date 2020/6/13
  */
 
+import Stage from "../share/stage/stage.js";
 import Resource from "../share/tool/resource.js";
-import Stage from "../share/stage/stage.js"
 import Common from "../share/tool/common.js";
-import Control from "../share/tool/control.js";
 import Adapter from "../share/tool/adapter.js";
 
-export default class Home extends Stage {
+export default class AppHome extends Stage {
     constructor() {
         super();
 
-        this.defaultNames = ["大酒神","一打七","开始行动","挂机无罪","求上单","RMB玩家","酱油位","对面间谍"];
-        $('#input').val(this.defaultNames[Math.floor(Math.random() * this.defaultNames.length)]);
-        $('#input-name-div').css("visibility", "visible");
         //背景
         const bgImage = Resource.getImage("background_loading","jpg");
         this.createItem({
@@ -36,29 +32,34 @@ export default class Home extends Stage {
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
                 context.fillStyle = '#FFF';
-                context.fillText('欢迎光临', Resource.width() / 2, 40);
+                context.fillText('首次登录', Resource.width() / 2, 40);
             }
         });
 
-        //绑定事件
-        const buttonEvent = function (e) {
-            const name = $('#input').val();
-
+        const input = $('#input');
+        input.css("visibility", "visible");
+        const button = $('#button1');
+        button.text("进入游戏");
+        button.css("top", "35%");
+        button.css("visibility", "visible");
+        button.bind('click',function () {
             //检测是否输入名字
+            const name = input.val();
             if (name === "") {
                 Common.addMessage("名字不能为空!", "#ff0000");
                 return;
             }
 
-            const isTouch = e.currentTarget.id === "button2";
-            Control.setControlMode(isTouch);
-
+            input.css("visibility", "hidden");
+            button.css("visibility", "hidden");
             Resource.setUserId(name);
-            $('#input-name-div').css("visibility", "hidden");
+            Common.postRequest("/user/saveUser", {
+                userId: Resource.getUser().deviceId,
+                username: Resource.getUser().userId,
+                userDevice: Resource.getUser().deviceName
+            });
             Common.nextStage();
             Adapter.initInput();
-        };
-        $('#button1').bind('click', buttonEvent);
-        $('#button2').bind('click', buttonEvent);
+        });
     }
 }

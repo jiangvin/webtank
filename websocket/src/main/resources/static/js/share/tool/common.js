@@ -64,6 +64,24 @@ export default class Common {
         }
     }
 
+    static postRequest(url, body, callback) {
+        $.ajax({
+            url: Common.generateHttpHost() + encodeURI(url),
+            type: 'post',
+            contentType: "application/json;charset=UTF-8",
+            data: JSON.stringify(body),
+            success: function (result) {
+                if (!result.success) {
+                    Common.addMessage(result.message, "#ff0000");
+                    return;
+                }
+                if (callback) {
+                    callback(result.data);
+                }
+            }
+        });
+    };
+
     static generateHttpHost() {
         return Resource.getHost() === "" ? document.location.href.split("?")[0] : Resource.getHost();
     }

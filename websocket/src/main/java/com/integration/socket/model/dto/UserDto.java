@@ -1,5 +1,6 @@
 package com.integration.socket.model.dto;
 
+import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import lombok.Data;
 
 /**
@@ -12,4 +13,11 @@ import lombok.Data;
 public class UserDto {
     private String userId;
     private String username;
+    private String userDevice;
+
+    public static UserDto convert(UserRecord userRecord) {
+        UserDto userDto = new UserDto();
+        userDto.setUsername(userRecord.getUsername());
+        return userDto;
+    }
 }

@@ -11,6 +11,9 @@ import Menu from "../share/stage/menu.js";
 import Control from "../share/tool/control.js";
 import Room from "../share/stage/room.js"
 import Root from "../share/root.js";
+import Adapter from "../share/tool/adapter.js";
+import Common from "../share/tool/common.js";
+import AppHome from "../app/apphome.js";
 
 export default class Index {
     constructor() {
@@ -20,12 +23,34 @@ export default class Index {
 
         this.root = new Root();
         Resource.setRoot(this.root);
-        this.root.addStage(new Home());
-        this.root.addStage(new Menu());
-        this.root.addStage(new Room());
-
-        this.initEvent();
-        this.start();
+        const thisIndex = this;
+        if (Adapter.isApp()) {
+            Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
+                if (data) {
+                    //旧用户
+                    Resource.setUserId(data.username);
+                    $('#input-name-div').css("visibility", "hidden");
+                    thisIndex.root.addStage(new Menu());
+                    thisIndex.root.addStage(new Room());
+                    thisIndex.initEvent();
+                    thisIndex.start();
+                } else {
+                    //新用户
+                    thisIndex.root.addStage(new AppHome());
+                    thisIndex.root.addStage(new Menu());
+                    thisIndex.root.addStage(new Room());
+                    thisIndex.initEvent();
+                    thisIndex.start();
+                }
+            })
+        } else {
+            //web
+            this.root.addStage(new Home());
+            this.root.addStage(new Menu());
+            this.root.addStage(new Room());
+            this.initEvent();
+            this.start();
+        }
     }
 
     initEvent() {

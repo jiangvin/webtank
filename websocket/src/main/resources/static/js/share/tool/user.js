@@ -8,6 +8,8 @@ export default class User {
     constructor() {
         this.userId = null;
         this.originalUserId = null;
+        this.deviceId = null;
+        this.deviceName = null;
     }
 
     setUserId(userId) {

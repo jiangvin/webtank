@@ -5,7 +5,9 @@ package com.integration.socket.repository.jooq;
 
 
 import com.integration.socket.repository.jooq.tables.Map;
+import com.integration.socket.repository.jooq.tables.User;
 import com.integration.socket.repository.jooq.tables.records.MapRecord;
+import com.integration.socket.repository.jooq.tables.records.UserRecord;
 
 import javax.annotation.Generated;
 
@@ -38,6 +40,7 @@ public class Keys {
 
     public static final UniqueKey<MapRecord> KEY_MAP_PRIMARY = UniqueKeys0.KEY_MAP_PRIMARY;
     public static final UniqueKey<MapRecord> KEY_MAP_NAME_UNIQUE = UniqueKeys0.KEY_MAP_NAME_UNIQUE;
+    public static final UniqueKey<UserRecord> KEY_USER_PRIMARY = UniqueKeys0.KEY_USER_PRIMARY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -51,5 +54,6 @@ public class Keys {
     private static class UniqueKeys0 {
         public static final UniqueKey<MapRecord> KEY_MAP_PRIMARY = Internal.createUniqueKey(Map.MAP, "KEY_map_PRIMARY", Map.MAP.NAME);
         public static final UniqueKey<MapRecord> KEY_MAP_NAME_UNIQUE = Internal.createUniqueKey(Map.MAP, "KEY_map_name_UNIQUE", Map.MAP.NAME);
+        public static final UniqueKey<UserRecord> KEY_USER_PRIMARY = Internal.createUniqueKey(User.USER, "KEY_user_PRIMARY", User.USER.USER_ID);
     }
 }
