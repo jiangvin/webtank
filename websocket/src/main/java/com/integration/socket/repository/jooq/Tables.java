@@ -5,7 +5,7 @@ package com.integration.socket.repository.jooq;
 
 
 import com.integration.socket.repository.jooq.tables.Map;
-import com.integration.socket.repository.jooq.tables.Rank;
+import com.integration.socket.repository.jooq.tables.RankBoard;
 import com.integration.socket.repository.jooq.tables.User;
 
 import javax.annotation.Generated;
@@ -30,9 +30,9 @@ public class Tables {
     public static final Map MAP = com.integration.socket.repository.jooq.tables.Map.MAP;
 
     /**
-     * The table <code>rank</code>.
+     * The table <code>rank_board</code>.
      */
-    public static final Rank RANK = com.integration.socket.repository.jooq.tables.Rank.RANK;
+    public static final RankBoard RANK_BOARD = com.integration.socket.repository.jooq.tables.RankBoard.RANK_BOARD;
 
     /**
      * The table <code>user</code>.

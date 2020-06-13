@@ -1,6 +1,7 @@
 package com.integration.socket.controller;
 
 import com.integration.socket.model.dto.MapEditDto;
+import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.service.MapService;
@@ -59,6 +60,12 @@ public class UserController {
     public boolean saveUser(@RequestBody UserDto userDto) {
         userService.saveUser(userDto);
         return true;
+    }
+
+    @GetMapping("/getRank")
+    public List<RankDto> getRank(@RequestParam(value = "start") int start,
+                                 @RequestParam(value = "limit") int limit) {
+        return userService.getRank(start, limit);
     }
 
     @GetMapping("/checkRoomName")

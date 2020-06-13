@@ -119,35 +119,38 @@ public class TankTypeDto {
         com = comCopyType(
                   "tank07",
                   "tank02",
-                  2.5,
+                  3.0,
                   30,
                   null,
                   null);
+        com.brokenIron = true;
         tankTypeMap.put(com.getTypeId(), com);
 
         com = comCopyType(
                   "tank08",
                   "tank03",
-                  3.0,
-                  30,
+                  2.0,
+                  40,
                   null,
                   null);
+        com.setAmmoMaxCount(3);
         tankTypeMap.put(com.getTypeId(), com);
 
         com = comCopyType(
                   "tank09",
                   "tank04",
-                  null,
+                  2.0,
                   60,
                   null,
                   "tank10");
+        com.setAmmoMaxCount(1);
         tankTypeMap.put(com.getTypeId(), com);
 
         com = comCopyType(
                   "tank10",
                   "tank04",
                   2.5,
-                  50,
+                  45,
                   null,
                   "tank11");
         tankTypeMap.put(com.getTypeId(), com);
@@ -163,9 +166,9 @@ public class TankTypeDto {
 
         com = comCopyType(
                   "tank12",
-                  "tank02",
+                  "tank03",
                   4.0,
-                  20,
+                  35,
                   null,
                   null);
         tankTypeMap.put(com.getTypeId(), com);

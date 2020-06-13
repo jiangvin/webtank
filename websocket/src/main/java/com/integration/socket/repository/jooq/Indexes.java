@@ -5,7 +5,7 @@ package com.integration.socket.repository.jooq;
 
 
 import com.integration.socket.repository.jooq.tables.Map;
-import com.integration.socket.repository.jooq.tables.Rank;
+import com.integration.socket.repository.jooq.tables.RankBoard;
 import com.integration.socket.repository.jooq.tables.User;
 
 import javax.annotation.Generated;
@@ -34,7 +34,7 @@ public class Indexes {
 
     public static final Index MAP_NAME_UNIQUE = Indexes0.MAP_NAME_UNIQUE;
     public static final Index MAP_PRIMARY = Indexes0.MAP_PRIMARY;
-    public static final Index RANK_PRIMARY = Indexes0.RANK_PRIMARY;
+    public static final Index RANK_BOARD_PRIMARY = Indexes0.RANK_BOARD_PRIMARY;
     public static final Index USER_PRIMARY = Indexes0.USER_PRIMARY;
 
     // -------------------------------------------------------------------------
@@ -44,7 +44,7 @@ public class Indexes {
     private static class Indexes0 {
         public static Index MAP_NAME_UNIQUE = Internal.createIndex("name_UNIQUE", Map.MAP, new OrderField[] { Map.MAP.NAME }, true);
         public static Index MAP_PRIMARY = Internal.createIndex("PRIMARY", Map.MAP, new OrderField[] { Map.MAP.NAME }, true);
-        public static Index RANK_PRIMARY = Internal.createIndex("PRIMARY", Rank.RANK, new OrderField[] { Rank.RANK.ID }, true);
+        public static Index RANK_BOARD_PRIMARY = Internal.createIndex("PRIMARY", RankBoard.RANK_BOARD, new OrderField[] { RankBoard.RANK_BOARD.ID }, true);
         public static Index USER_PRIMARY = Internal.createIndex("PRIMARY", User.USER, new OrderField[] { User.USER.USER_ID }, true);
     }
 }

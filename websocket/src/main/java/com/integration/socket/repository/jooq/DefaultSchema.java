@@ -5,7 +5,7 @@ package com.integration.socket.repository.jooq;
 
 
 import com.integration.socket.repository.jooq.tables.Map;
-import com.integration.socket.repository.jooq.tables.Rank;
+import com.integration.socket.repository.jooq.tables.RankBoard;
 import com.integration.socket.repository.jooq.tables.User;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DefaultSchema extends SchemaImpl {
 
-    private static final long serialVersionUID = -322742181;
+    private static final long serialVersionUID = 513144689;
 
     /**
      * The reference instance of <code></code>
@@ -45,9 +45,9 @@ public class DefaultSchema extends SchemaImpl {
     public final Map MAP = com.integration.socket.repository.jooq.tables.Map.MAP;
 
     /**
-     * The table <code>rank</code>.
+     * The table <code>rank_board</code>.
      */
-    public final Rank RANK = com.integration.socket.repository.jooq.tables.Rank.RANK;
+    public final RankBoard RANK_BOARD = com.integration.socket.repository.jooq.tables.RankBoard.RANK_BOARD;
 
     /**
      * The table <code>user</code>.
@@ -80,7 +80,7 @@ public class DefaultSchema extends SchemaImpl {
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
             Map.MAP,
-            Rank.RANK,
+            RankBoard.RANK_BOARD,
             User.USER);
     }
 }
