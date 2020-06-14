@@ -12,14 +12,14 @@ import java.net.URLDecoder;
  * @date 2020/5/29
  */
 
-public class WxUserBo extends UserBo {
+public class SocketUserBo extends UserBo {
 
     private static final String USER_ID_PREFIX = "name=";
 
     @Getter
     private Session session;
 
-    private WxUserBo(Session session, String userId) {
+    private SocketUserBo(Session session, String userId) {
         super(userId, session.getId());
         this.session = session;
     }
@@ -32,11 +32,11 @@ public class WxUserBo extends UserBo {
         return URLDecoder.decode(session.getQueryString().substring(USER_ID_PREFIX.length()), "utf-8");
     }
 
-    public static WxUserBo convertWxUserBo(Session session) throws UnsupportedEncodingException {
+    public static SocketUserBo convertSocketUserBo(Session session) throws UnsupportedEncodingException {
         String userId = getUserIdFromSession(session);
         if (userId == null) {
             return null;
         }
-        return new WxUserBo(session, userId);
+        return new SocketUserBo(session, userId);
     }
 }

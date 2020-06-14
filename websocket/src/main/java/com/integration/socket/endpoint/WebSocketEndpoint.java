@@ -2,7 +2,7 @@ package com.integration.socket.endpoint;
 
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
-import com.integration.socket.model.bo.WxUserBo;
+import com.integration.socket.model.bo.SocketUserBo;
 import com.integration.socket.service.GameService;
 import com.integration.socket.service.OnlineUserService;
 import com.integration.util.object.ObjectUtil;
@@ -40,7 +40,7 @@ public class WebSocketEndpoint {
      */
     @OnOpen
     public void onOpen(Session session) throws IOException {
-        WxUserBo userBo = WxUserBo.convertWxUserBo(session);
+        SocketUserBo userBo = SocketUserBo.convertSocketUserBo(session);
         if (userBo == null) {
             return;
         }
@@ -62,7 +62,7 @@ public class WebSocketEndpoint {
      */
     @OnClose
     public void onClose(Session session) throws UnsupportedEncodingException {
-        String userId = WxUserBo.getUserIdFromSession(session);
+        String userId = SocketUserBo.getUserIdFromSession(session);
         if (userId == null) {
             return;
         }
@@ -77,7 +77,7 @@ public class WebSocketEndpoint {
      */
     @OnMessage
     public void onMsg(Session session, String text) throws UnsupportedEncodingException {
-        String userId = WxUserBo.getUserIdFromSession(session);
+        String userId = SocketUserBo.getUserIdFromSession(session);
         if (userId == null) {
             return;
         }

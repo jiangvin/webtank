@@ -14,8 +14,16 @@ import java.util.List;
  */
 @Data
 public class UserBo {
+    /**
+     * 全局唯一
+     */
     @NonNull private String username;
     @NonNull private String socketSessionId;
+
+    /**
+     * 网页用户没有userId
+     */
+    private String userId;
 
     final private List<String> subscribeList = new ArrayList<>();
 

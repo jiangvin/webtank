@@ -17,7 +17,7 @@ export default class NetEngine extends Engine {
         const thisEngine = this;
 
         thisEngine.setUserId(function () {
-            Connect.connect(Resource.getUser().userId, function () {
+            Connect.connect(function () {
 
                 //注册延时事件
                 Common.addTimeEvent("CLIENT_READY", function () {
