@@ -527,7 +527,7 @@ export default class Room extends Stage {
             Sound.lose();
         } else if (status.message.indexOf("恭喜") >= 0 || status.message.indexOf("胜利") >= 0) {
             Sound.win();
-        } else if (status.message.index("MISSION") >= 0) {
+        } else if (status.message.indexOf("MISSION") >= 0) {
             Sound.bgm();
         }
     }
