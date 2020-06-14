@@ -758,6 +758,9 @@ public class StageRoom extends BaseStage {
                 gameStatusDto.setMessage("恭喜通关");
             }
         } else {
+            if (this.score < 0) {
+                this.score = 0;
+            }
             gameStatusDto.setScore(this.score);
             gameStatusDto.setRank(userService.getRank(this.score));
             gameStatusDto.setMessage("游戏失败");
@@ -873,12 +876,14 @@ public class StageRoom extends BaseStage {
         for (String key : tankBo.getGridKeyList()) {
             removeToGridTankMap(tankBo, key);
         }
+
+        updateGameScore(tankBo);
+
         //check status
         if (checkGameStatusAfterTankBomb()) {
             return;
         }
 
-        updateGameScore(tankBo);
         sendTankBombMessage(tankBo);
         //recreate
         UserBo userBo = this.userMap.get(tankBo.getUserId());
@@ -900,6 +905,11 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean checkGameStatusAfterTankBomb() {
+        //游戏已经暂停
+        if (this.isPause) {
+            return true;
+        }
+
         //先判断候补
         boolean redAlive = !getMapBo().getPlayerLife().isEmpty();
         boolean blueAlive = !getMapBo().getComputerLife().isEmpty();

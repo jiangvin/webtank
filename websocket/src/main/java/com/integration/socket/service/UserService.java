@@ -71,6 +71,10 @@ public class UserService {
     }
 
     public void saveRankForMultiplePlayers(UserBo creator, GameStatusDto gameStatusDto) {
+        if (gameStatusDto.getScore() <= 0) {
+            return;
+        }
+
         userDao.updateBoardRank(gameStatusDto.getRank());
 
         //插入数据
