@@ -8,7 +8,6 @@ export default class Sound {
     constructor() {
         this.clickSound = new Audio();
         this.clickSound.src = 'audio/click.mp3';
-        this.clickSound.load();
 
         this.fireSound = new Audio();
         this.fireSound.src = 'audio/fire.mp3';
@@ -24,7 +23,6 @@ export default class Sound {
 
         this.itemSound = new Audio();
         this.itemSound.src = 'audio/item.mp3';
-        this.itemSound.load();
 
         this.bgmSound = new Audio();
         this.bgmSound.loop = true;
