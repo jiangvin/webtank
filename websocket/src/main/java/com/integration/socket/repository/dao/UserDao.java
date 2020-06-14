@@ -44,7 +44,7 @@ public class UserDao extends BaseDao {
     public int queryRank(int score) {
         Integer rank = create.select(RANK_BOARD.RANK).from(RANK_BOARD)
                        .where(RANK_BOARD.SCORE.gt(score))
-                       .orderBy(RANK_BOARD.SCORE.desc()).limit(1).fetchOneInto(Integer.class);
+                       .orderBy(RANK_BOARD.SCORE).limit(1).fetchOneInto(Integer.class);
         return rank == null ? 1 : rank + 1;
     }
 
