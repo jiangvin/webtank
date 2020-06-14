@@ -814,6 +814,9 @@ AiEngine.keepGoingRate = 120;
 AiEngine.keepTryRate = 30;
 AiEngine.maxItemLimit = 3;
 
+/**
+ * 需要和服务器同步
+ */
 AiEngine.scoreComBoom = 10;
 AiEngine.scorePlayerBoom = -30;
 AiEngine.scoreWin = 500;

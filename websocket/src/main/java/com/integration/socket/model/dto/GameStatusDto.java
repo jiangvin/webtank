@@ -1,7 +1,6 @@
 package com.integration.socket.model.dto;
 
 import com.integration.socket.model.GameStatusType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,8 +12,14 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class GameStatusDto {
+    public GameStatusDto(GameStatusType type, String message) {
+        this.type = type;
+        this.message = message;
+    }
+
     private GameStatusType type;
     private String message;
+    private Integer score;
+    private Integer rank;
 }

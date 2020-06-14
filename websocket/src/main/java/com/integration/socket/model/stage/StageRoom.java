@@ -27,6 +27,7 @@ import com.integration.socket.model.event.IronKingEvent;
 import com.integration.socket.model.event.LoadMapEvent;
 import com.integration.socket.model.event.MessageEvent;
 import com.integration.socket.service.MessageService;
+import com.integration.socket.service.UserService;
 import com.integration.util.CommonUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -85,8 +86,7 @@ public class StageRoom extends BaseStage {
     @Getter
     private String roomId;
 
-    @Getter
-    private String creator;
+    private UserBo creator;
 
     private MapMangerBo mapManger;
 
@@ -95,18 +95,33 @@ public class StageRoom extends BaseStage {
     private boolean isPause = false;
     private String pauseMessage;
 
-    public StageRoom(RoomDto roomDto, MapMangerBo mapManger, MessageService messageService) {
+    /**
+     * 计分相关
+     */
+    private long missionStartTime;
+    private int score = 0;
+    private UserService userService;
+
+    /**
+     * 需要和客户端同步
+     */
+    private static final int SCORE_COM_BOOM = 10;
+    private static final int SCORE_PLAYER_BOOM = -30;
+    private static final int SCORE_WIN = 500;
+
+    public StageRoom(RoomDto roomDto, UserBo creator, MapMangerBo mapManger, MessageService messageService, UserService userService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
-        this.creator = roomDto.getCreator();
+        this.creator = creator;
         this.mapManger = mapManger;
+        this.userService = userService;
         init();
     }
 
     public RoomDto toDto() {
         RoomDto roomDto = new RoomDto();
         roomDto.setRoomId(getRoomId());
-        roomDto.setCreator(getCreator());
+        roomDto.setCreator(this.creator.getUsername());
         roomDto.setMapId(getMapId());
         roomDto.setRoomType(getRoomType());
         roomDto.setUserCount(getUserCount());
@@ -122,6 +137,7 @@ public class StageRoom extends BaseStage {
         this.removeBulletIds.clear();
         this.eventList.clear();
         this.syncTankList.clear();
+        this.missionStartTime = System.currentTimeMillis();
 
         this.eventList.add(new CreateItemEvent());
     }
@@ -730,21 +746,37 @@ public class StageRoom extends BaseStage {
         gameStatusDto.setType(GameStatusType.PAUSE);
 
         if (winTeam == TeamType.RED) {
+            updateScoreAfterWin();
+            gameStatusDto.setScore(this.score);
+            gameStatusDto.setRank(userService.getRank(this.score));
             if (!mapManger.loadNextMapPve(saveLife)) {
                 gameStatusDto.setMessage("恭喜全部通关");
                 gameStatusDto.setType(GameStatusType.OVER);
+                userService.saveRankForMultiplePlayers(this.creator, gameStatusDto);
+
             } else {
                 gameStatusDto.setMessage("恭喜通关");
             }
         } else {
+            gameStatusDto.setScore(this.score);
+            gameStatusDto.setRank(userService.getRank(this.score));
             gameStatusDto.setMessage("游戏失败");
             gameStatusDto.setType(GameStatusType.OVER);
+            userService.saveRankForMultiplePlayers(this.creator, gameStatusDto);
         }
 
         sendMessageToRoom(gameStatusDto, MessageType.GAME_STATUS);
 
         this.pauseMessage = String.format("MISSION %02d", getMapId());
         return gameStatusDto.getType() == GameStatusType.PAUSE;
+    }
+
+    private void updateScoreAfterWin() {
+        int seconds = (int)((System.currentTimeMillis() - this.missionStartTime) / 1000);
+        int winScore = SCORE_WIN - seconds;
+        if (winScore > 0) {
+            this.score += winScore;
+        }
     }
 
     private boolean processGameOverPvp(TeamType winTeam) {
@@ -846,11 +878,24 @@ public class StageRoom extends BaseStage {
             return;
         }
 
+        updateGameScore(tankBo);
         sendTankBombMessage(tankBo);
         //recreate
         UserBo userBo = this.userMap.get(tankBo.getUserId());
         if (userBo != null) {
             this.eventList.add(new CreateTankEvent(userBo, tankBo.getTankId(), 60 * 3));
+        }
+    }
+
+    private void updateGameScore(TankBo tankBo) {
+        if (getRoomType() != RoomType.PVE) {
+            return;
+        }
+
+        if (tankBo.getTeamType() == TeamType.RED) {
+            this.score += SCORE_PLAYER_BOOM;
+        } else {
+            this.score += SCORE_COM_BOOM;
         }
     }
 

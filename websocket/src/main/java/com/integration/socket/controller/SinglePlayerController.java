@@ -58,7 +58,7 @@ public class SinglePlayerController {
 
     @PostMapping("/saveRank")
     public boolean saveRank(@RequestBody RankDto rankDto) {
-        userService.saveRank(rankDto);
+        userService.saveRankForSinglePlayer(rankDto);
         return true;
     }
 }

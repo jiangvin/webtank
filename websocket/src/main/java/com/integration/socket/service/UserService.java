@@ -1,5 +1,7 @@
 package com.integration.socket.service;
 
+import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.dto.GameStatusDto;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.UserDao;
@@ -51,7 +53,7 @@ public class UserService {
         return userDao.queryRank(score);
     }
 
-    public void saveRank(RankDto rankDto) {
+    public void saveRankForSinglePlayer(RankDto rankDto) {
         if (StringUtils.isEmpty(rankDto.getUsername()) ||
                 rankDto.getScore() == null ||
                 rankDto.getScore() <= 0) {
@@ -65,6 +67,19 @@ public class UserService {
         //插入数据
         rankDto.setRank(rank);
         rankDto.setGameType(0);
+        userDao.insertRank(rankDto);
+    }
+
+    public void saveRankForMultiplePlayers(UserBo creator, GameStatusDto gameStatusDto) {
+        userDao.updateBoardRank(gameStatusDto.getRank());
+
+        //插入数据
+        RankDto rankDto = new RankDto();
+        rankDto.setGameType(1);
+        rankDto.setRank(gameStatusDto.getRank());
+        rankDto.setScore(gameStatusDto.getScore());
+        rankDto.setUserId(creator.getUserId());
+        rankDto.setUsername(creator.getUsername());
         userDao.insertRank(rankDto);
     }
 }

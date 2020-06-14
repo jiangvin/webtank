@@ -33,6 +33,9 @@ public class RoomService {
     @Autowired
     private MapService mapService;
 
+    @Autowired
+    private UserService userService;
+
     /**
      * 新增List来保证rooms的顺序
      * 顺序 旧 -> 新
@@ -88,7 +91,7 @@ public class RoomService {
         MapMangerBo mapMangerBo = new MapMangerBo(mapService, roomDto.getMapId(), roomDto.getRoomType());
 
         log.info("room:{} will be created", roomDto);
-        StageRoom stageRoom = new StageRoom(roomDto, mapMangerBo, messageService);
+        StageRoom stageRoom = new StageRoom(roomDto, creator, mapMangerBo, messageService, userService);
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
         return stageRoom;
