@@ -16,6 +16,9 @@ export default class AiEngine extends Engine {
 
         const thisEngine = this;
 
+        thisEngine.score = 0;
+        thisEngine.stageStartTime = 0;
+
         thisEngine.playerLifeCount = 5;
         thisEngine.computerLifeCount = 0;
 
@@ -67,6 +70,7 @@ export default class AiEngine extends Engine {
             Resource.getRoot().processSocketMessage({
                 messageType: "SERVER_READY"
             });
+            thisEngine.stageStartTime = Date.now();
         })
     }
 
@@ -261,41 +265,73 @@ export default class AiEngine extends Engine {
 
     processGameOver(win) {
         const thisEngine = this;
+        //计算胜利分数
         if (win) {
-            if (thisEngine.room.roomInfo.mapId >= thisEngine.maxMapId) {
-                this.room.gameStatus({
-                    message: "恭喜全部通关",
-                    type: "OVER"
-                });
-                return;
+            const gameSeconds = (new Date() - thisEngine.stageStartTime) / 1000;
+            let winScore = Math.floor(AiEngine.scoreWin - gameSeconds);
+            if (winScore < 0) {
+                winScore = 0;
             }
+            thisEngine.score += winScore;
+            Common.getRequest("/singlePlayer/getRank?score=" + thisEngine.score, function (rank) {
+                if (thisEngine.room.roomInfo.mapId >= thisEngine.maxMapId) {
+                    thisEngine.room.gameStatus({
+                        message: "恭喜全部通关",
+                        type: "OVER",
+                        score: thisEngine.score,
+                        rank: rank
+                    });
+                    Common.postRequest("/singlePlayer/saveRank",
+                        {
+                            score: thisEngine.score,
+                            userId: Resource.getUser().deviceId,
+                            username: Resource.getUser().userId
+                        });
+                    return;
+                }
 
-            Sound.win();
-            Status.setStatus(Status.statusPause(), "恭喜通关");
-            const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.55, function () {
-                //进入下一关
-                ++thisEngine.room.roomInfo.mapId;
-                Status.setStatus(null, thisEngine.room.generateMaskInfo());
+                thisEngine.room.gameStatus({
+                    message: "恭喜通关",
+                    type: "PAUSE",
+                    score: thisEngine.score,
+                    rank: rank
+                });
 
-                //保存坦克类型和数量
-                thisEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
+                const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.68, function () {
+                    //进入下一关
+                    ++thisEngine.room.roomInfo.mapId;
+                    Status.setStatus(null, thisEngine.room.generateMaskInfo());
 
-                //清空场景
-                thisEngine.events = [];
-                thisEngine.tanks.clear();
-                thisEngine.bullets.clear();
-                thisEngine.items.clear();
-                thisEngine.room.clear();
+                    //保存坦克类型和数量
+                    thisEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
 
-                //进入下一关
-                thisEngine.initStage();
-                Sound.bgm();
+                    //清空场景
+                    thisEngine.events = [];
+                    thisEngine.tanks.clear();
+                    thisEngine.bullets.clear();
+                    thisEngine.items.clear();
+                    thisEngine.room.clear();
+
+                    //进入下一关
+                    thisEngine.initStage();
+                    Sound.bgm();
+                });
+                thisEngine.room.addItem(next);
             });
-            thisEngine.room.addItem(next);
         } else {
-            this.room.gameStatus({
-                message: "游戏失败",
-                type: "OVER"
+            Common.getRequest("/singlePlayer/getRank?score=" + thisEngine.score, function (rank) {
+                thisEngine.room.gameStatus({
+                    message: "游戏失败",
+                    type: "OVER",
+                    score: thisEngine.score,
+                    rank: rank
+                });
+                Common.postRequest("/singlePlayer/saveRank",
+                    {
+                        score: thisEngine.score,
+                        userId: Resource.getUser().deviceId,
+                        username: Resource.getUser().userId
+                    });
             });
         }
     }
@@ -324,6 +360,7 @@ export default class AiEngine extends Engine {
         });
 
         if (tank.item.teamId === 1) {
+            this.score += AiEngine.scorePlayerBoom;
             --this.playerLifeCount;
             if (this.playerLifeCount === 0) {
                 this.processGameOver(false);
@@ -333,6 +370,7 @@ export default class AiEngine extends Engine {
             return;
         }
 
+        this.score += AiEngine.scoreComBoom;
         --this.computerLifeCount;
         if (this.computerLifeCount === 0) {
             this.processGameOver(true);
@@ -775,3 +813,7 @@ export default class AiEngine extends Engine {
 AiEngine.keepGoingRate = 120;
 AiEngine.keepTryRate = 30;
 AiEngine.maxItemLimit = 3;
+
+AiEngine.scoreComBoom = 10;
+AiEngine.scorePlayerBoom = -30;
+AiEngine.scoreWin = 500;

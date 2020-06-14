@@ -209,7 +209,7 @@ export default class Menu extends Stage {
 
     loadRanks() {
         const thisMenu = this;
-        Common.getRequest("/user/getRank?limit=10&start=" + this.rankStart,
+        Common.getRequest("/user/getRankList?limit=10&start=" + this.rankStart,
             /**
              *
              * @param dataList {{score,username,gameType}}

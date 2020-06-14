@@ -30,14 +30,6 @@ export default class Common {
         Resource.getRoot().addMessageEvent(eventType, callBack);
     }
 
-    static drawTitle(ctx, message) {
-        ctx.font = 'bold 55px Microsoft YaHei UI';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#FFF';
-        ctx.fillText(message, Resource.width() / 2, Resource.height() * .4);
-    }
-
     static getRequest(url, callBack) {
         try {
             const xmlHttp = new XMLHttpRequest();

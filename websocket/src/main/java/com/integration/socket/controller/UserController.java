@@ -62,10 +62,10 @@ public class UserController {
         return true;
     }
 
-    @GetMapping("/getRank")
-    public List<RankDto> getRank(@RequestParam(value = "start") int start,
-                                 @RequestParam(value = "limit") int limit) {
-        return userService.getRank(start, limit);
+    @GetMapping("/getRankList")
+    public List<RankDto> getRankList(@RequestParam(value = "start") int start,
+                                     @RequestParam(value = "limit") int limit) {
+        return userService.getRankList(start, limit);
     }
 
     @GetMapping("/checkRoomName")

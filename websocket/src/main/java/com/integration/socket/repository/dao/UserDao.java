@@ -1,5 +1,6 @@
 package com.integration.socket.repository.dao;
 
+import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.jooq.tables.records.RankBoardRecord;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
@@ -36,7 +37,24 @@ public class UserDao extends BaseDao {
         userRecord.insert();
     }
 
-    public List<RankBoardRecord> queryRank(int start, int limit) {
+    public List<RankBoardRecord> queryRankList(int start, int limit) {
         return create.selectFrom(RANK_BOARD).orderBy(RANK_BOARD.RANK, RANK_BOARD.CREATE_TIME.desc()).limit(start, limit).fetch();
+    }
+
+    public int queryRank(int score) {
+        Integer rank = create.select(RANK_BOARD.RANK).from(RANK_BOARD)
+                       .where(RANK_BOARD.SCORE.gt(score))
+                       .orderBy(RANK_BOARD.SCORE.desc()).limit(1).fetchOneInto(Integer.class);
+        return rank == null ? 1 : rank + 1;
+    }
+
+    public void updateBoardRank(int rank) {
+        create.execute(String.format("update rank_board rb set rb.rank = rb.rank + 1 where rb.rank >= %d;", rank));
+    }
+
+    public void insertRank(RankDto rankDto) {
+        RankBoardRecord record = create.newRecord(RANK_BOARD);
+        BeanUtils.copyProperties(rankDto, record);
+        record.insert();
     }
 }
