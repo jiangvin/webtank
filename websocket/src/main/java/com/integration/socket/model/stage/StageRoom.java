@@ -517,7 +517,7 @@ public class StageRoom extends BaseStage {
                     continue;
                 }
 
-                if (tankMap.containsKey(userBo.getUserId())) {
+                if (tankMap.containsKey(userBo.getUsername())) {
                     continue;
                 }
 
@@ -909,7 +909,7 @@ public class StageRoom extends BaseStage {
     }
 
     private String generateUsernameWithTeam(UserBo userBo) {
-        return String.format("%s[%s]", userBo.getUserId(), getTeam(userBo.getTeamType()));
+        return String.format("%s[%s]", userBo.getUsername(), getTeam(userBo.getTeamType()));
     }
 
     private String getTeam(TeamType teamType) {
@@ -947,7 +947,7 @@ public class StageRoom extends BaseStage {
     }
 
     public void addUser(UserBo userBo, TeamType teamType) {
-        userMap.put(userBo.getUserId(), userBo);
+        userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
         userBo.setTeamType(teamType);
         sendStatusAndMessage(userBo, false);
@@ -958,18 +958,18 @@ public class StageRoom extends BaseStage {
         }
 
         //发送场景信息
-        sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUserId());
-        sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUserId());
-        sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUserId());
-        sendMessageToUser(getGameItemList(), MessageType.ITEM, userBo.getUserId());
+        sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUsername());
+        sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
+        sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
+        sendMessageToUser(getGameItemList(), MessageType.ITEM, userBo.getUsername());
 
         createTankForUser(userBo, teamType, 60 * 3);
 
         //通知前端数据传输完毕
         if (this.isPause) {
-            sendMessageToUser(new GameStatusDto(GameStatusType.PAUSE, this.pauseMessage), MessageType.GAME_STATUS, userBo.getUserId());
+            sendMessageToUser(new GameStatusDto(GameStatusType.PAUSE, this.pauseMessage), MessageType.GAME_STATUS, userBo.getUsername());
         } else {
-            sendReady(userBo.getUserId());
+            sendReady(userBo.getUsername());
         }
     }
 
@@ -993,22 +993,22 @@ public class StageRoom extends BaseStage {
         List<StringCountDto> lifeMap = getLifeMap(userBo.getTeamType());
         if (lifeMap.isEmpty()) {
             if (!isBot(userBo.getTeamType())) {
-                sendMessageToRoom(String.format("没有剩余生命值, 玩家 %s 将变成观看模式", userBo.getUserId()), MessageType.SYSTEM_MESSAGE);
+                sendMessageToRoom(String.format("没有剩余生命值, 玩家 %s 将变成观看模式", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
             }
             return;
         }
 
         TankBo tankBo = new TankBo();
         tankBo.setTankId(tankId);
-        tankBo.setUserId(userBo.getUserId());
+        tankBo.setUserId(userBo.getUsername());
         tankBo.setTeamType(userBo.getTeamType());
 
         //设定类型
         TankTypeDto initType = getTankType(lifeMap);
-        TankTypeDto saveType = this.tankTypeSaveMap.get(userBo.getUserId());
+        TankTypeDto saveType = this.tankTypeSaveMap.get(userBo.getUsername());
         if (saveType != null) {
             tankBo.setType(saveType);
-            this.tankTypeSaveMap.remove(userBo.getUserId());
+            this.tankTypeSaveMap.remove(userBo.getUsername());
         } else {
             tankBo.setType(initType);
         }

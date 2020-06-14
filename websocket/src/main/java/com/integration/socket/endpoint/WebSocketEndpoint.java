@@ -45,7 +45,7 @@ public class WebSocketEndpoint {
             return;
         }
 
-        if (onlineUserService.exists(userBo.getUserId())) {
+        if (onlineUserService.exists(userBo.getUsername())) {
             MessageDto messageDto = new MessageDto("用户名重复", MessageType.ERROR_MESSAGE);
             userBo.getSession().getBasicRemote().sendText(ObjectUtil.writeValue(messageDto));
             userBo.getSession().close();

@@ -14,15 +14,15 @@ import lombok.EqualsAndHashCode;
 public class CreateTankEvent extends BaseEvent {
     public CreateTankEvent(UserBo user, int timeout) {
         this.user = user;
-        this.tankId = user.getUserId();
-        setUsernameCheck(user.getUserId());
+        this.tankId = user.getUsername();
+        setUsernameCheck(user.getUsername());
         setTimeout(timeout);
     }
 
     public CreateTankEvent(UserBo user, String tankId, int timeout) {
         this.user = user;
         this.tankId = tankId;
-        setUsernameCheck(user.getUserId());
+        setUsernameCheck(user.getUsername());
         setTimeout(timeout);
     }
 

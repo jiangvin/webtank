@@ -153,7 +153,7 @@ public class GameService {
 
     private BaseStage currentStage(UserBo userBo) {
         if (StringUtils.isEmpty(userBo.getRoomId()) || !roomService.roomNameExists(userBo.getRoomId())) {
-            log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUserId());
+            log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUsername());
             return null;
         }
         return roomService.get(userBo.getRoomId());
