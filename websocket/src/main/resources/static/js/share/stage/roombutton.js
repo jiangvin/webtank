@@ -14,14 +14,7 @@ export default class RoomButton extends Button {
 
     draw(ctx) {
         //按钮框
-        const buttonImage = Resource.getImage("button");
-        const offsetX = this.x - buttonImage.width / 2;
-        const offsetY = this.y - buttonImage.height / 2;
-        ctx.drawImage(buttonImage,
-            0, 0,
-            buttonImage.width, buttonImage.height,
-            offsetX, offsetY,
-            buttonImage.width, buttonImage.height);
+        super.drawImage(ctx);
 
         //文字
         ctx.font = '18px Arial';

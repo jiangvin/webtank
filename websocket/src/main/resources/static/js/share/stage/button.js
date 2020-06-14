@@ -39,7 +39,7 @@ export default class Button extends Rect {
     }
 
     draw(ctx) {
-        super.draw(ctx);
+        this.drawImage(ctx);
 
         //文字
         ctx.font = this.font;
@@ -47,5 +47,9 @@ export default class Button extends Rect {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#fff';
         ctx.fillText(this.text, this.x, this.y);
+    }
+
+    drawImage(ctx) {
+        super.draw(ctx);
     }
 }
