@@ -17,7 +17,7 @@ export default class NetEngine extends Engine {
         const thisEngine = this;
 
         thisEngine.setUserId(function () {
-            Connect.connect(Resource.getUser().userId, function () {
+            Connect.connect(function () {
 
                 //注册延时事件
                 Common.addTimeEvent("CLIENT_READY", function () {
@@ -62,7 +62,7 @@ export default class NetEngine extends Engine {
     }
 
     setUserId(callback) {
-        Common.getRequest("/multiplePlayers/getUserId?userId=" + Resource.getUser().userId, function (userId) {
+        Common.getRequest("/multiplePlayers/getUserId?userId=" + Resource.getUser().originalUserId, function (userId) {
             Resource.setUserId(userId);
             callback();
         })
@@ -85,7 +85,7 @@ export default class NetEngine extends Engine {
 
                 //显示蒙版
                 thisEngine.room.createItem({
-                    z : 9,
+                    z : 8,
                     draw: function (ctx) {
                         ctx.globalAlpha = 0.5;
                         ctx.fillStyle = '#000000';
@@ -99,7 +99,7 @@ export default class NetEngine extends Engine {
                     Resource.getRoot().lastStage();
                     Resource.getRoot().currentStage().initMenu();
                 });
-                thisEngine.room.addButton(back);
+                thisEngine.room.addItem(back);
             }
         };
 

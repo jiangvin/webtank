@@ -30,14 +30,6 @@ export default class Common {
         Resource.getRoot().addMessageEvent(eventType, callBack);
     }
 
-    static drawTitle(ctx, message) {
-        ctx.font = 'bold 55px Microsoft YaHei UI';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#FFF';
-        ctx.fillText(message, Resource.width() / 2, Resource.height() * .4);
-    }
-
     static getRequest(url, callBack) {
         try {
             const xmlHttp = new XMLHttpRequest();
@@ -63,6 +55,24 @@ export default class Common {
             Common.addMessage(e, "#ff0000");
         }
     }
+
+    static postRequest(url, body, callback) {
+        $.ajax({
+            url: Common.generateHttpHost() + encodeURI(url),
+            type: 'post',
+            contentType: "application/json;charset=UTF-8",
+            data: JSON.stringify(body),
+            success: function (result) {
+                if (!result.success) {
+                    Common.addMessage(result.message, "#ff0000");
+                    return;
+                }
+                if (callback) {
+                    callback(result.data);
+                }
+            }
+        });
+    };
 
     static generateHttpHost() {
         return Resource.getHost() === "" ? document.location.href.split("?")[0] : Resource.getHost();

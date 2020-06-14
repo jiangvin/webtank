@@ -1,4 +1,3 @@
-
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -29,10 +28,14 @@ export default class Connect {
         Connect.instance.socketClient.close();
     }
 
-    static connect(id, callback) {
+    static connect(callback) {
         Connect.disconnect();
 
-        Connect.instance.socketClient = new WebSocket(Connect.generateSocketHost() + '/ws?name=' + id);
+        let queryString = "?name=" + Resource.getUser().userId;
+        if (Resource.getUser().deviceId) {
+            queryString += "&id=" + Resource.getUser().deviceId;
+        }
+        Connect.instance.socketClient = new WebSocket(Connect.generateSocketHost() + '/ws' + queryString);
 
         Connect.instance.socketClient.onopen = function () {
             Common.addMessage("与服务器连接中...", "#FF0");
@@ -72,8 +75,8 @@ export default class Connect {
 
     static generateSocketHost() {
         return Common.generateHttpHost()
-            .replace("http://","ws://")
-            .replace("https://","wss://");
+            .replace("http://", "ws://")
+            .replace("https://", "wss://");
     }
 }
 Connect.instance = new Connect();

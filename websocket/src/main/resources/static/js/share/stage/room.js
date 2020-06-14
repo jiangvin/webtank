@@ -3,7 +3,7 @@
  * @description
  * @date 2020/5/27
  */
-import stage from "./stage.js";
+import Stage from "./stage.js";
 import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
 import Play from "./play.js";
@@ -11,8 +11,10 @@ import Status from "../tool/status.js";
 import Control from "../tool/control.js";
 import Button from "./button.js";
 import Sound from "../tool/sound.js";
+import Rect from "./rect.js";
+import Item from "./item.js";
 
-export default class room extends stage {
+export default class Room extends Stage {
     constructor() {
         super();
 
@@ -224,7 +226,11 @@ export default class room extends stage {
 
     drawStatus(ctx) {
         if (Status.getMessage()) {
-            Common.drawTitle(ctx, Status.getMessage());
+            ctx.font = 'bold 55px Microsoft YaHei UI';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#FFF';
+            ctx.fillText(Status.getMessage(), Resource.width() / 2, Status.getHeight());
         }
     }
 
@@ -469,20 +475,59 @@ export default class room extends stage {
     }
 
     gameStatus(status) {
-        Status.setStatus(Status.statusPause(), status.message);
+        let titleHeight = Resource.height() * .4;
+        let buttonHeight = Resource.height() * 0.55;
+        if (status.score && status.rank) {
+            //计分板
+            const rect = new Rect(
+                Resource.width() / 2,
+                Resource.height() * .4,
+                Resource.width() * .6,
+                Resource.height() * .4);
+            this.addItem(rect);
+            const score = new Item({
+                z: 10,
+                draw: function (ctx) {
+                    ctx.font = 'bold 30px Microsoft YaHei UI';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillText("当前得分: " + status.score,
+                        Resource.width() / 2,
+                        Resource.height() * .3 + 60);
+                }
+            });
+            this.addItem(score);
+            const rank = new Item({
+                z: 10,
+                draw: function (ctx) {
+                    ctx.font = 'bold 30px Microsoft YaHei UI';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillText("当前排名: " + status.rank,
+                        Resource.width() / 2,
+                        Resource.height() * .3 + 100);
+                }
+            });
+            this.addItem(rank);
+            titleHeight = Resource.height() * .3;
+            buttonHeight = Resource.height() * 0.68;
+        }
+        Status.setStatus(Status.statusPause(), status.message, titleHeight);
         if (status.type === "OVER") {
-            const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
+            const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
                 Resource.getRoot().lastStage();
                 Resource.getRoot().currentStage().initMenu();
             });
-            this.addButton(back);
+            this.addItem(back);
         }
 
         if (status.message.indexOf("失败") >= 0) {
             Sound.lose();
         } else if (status.message.indexOf("恭喜") >= 0 || status.message.indexOf("胜利") >= 0) {
             Sound.win();
-        } else {
+        } else if (status.message.indexOf("MISSION") >= 0) {
             Sound.bgm();
         }
     }

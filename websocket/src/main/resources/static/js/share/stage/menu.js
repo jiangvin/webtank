@@ -10,6 +10,8 @@ import Button from "./button.js"
 import RoomButton from "./roombutton.js";
 import Common from "../tool/common.js";
 import Connect from "../tool/connect.js";
+import Rect from "./rect.js";
+import Item from "./item.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -19,6 +21,11 @@ export default class Menu extends Stage {
         this.buttonIndex = 0;
         this.joinRoomCache = {};
         this.initButtons();
+
+        //排行榜
+        this.rankIndex = 6;
+        this.rankInfos = [];
+        this.rankStart = 0;
 
         //背景
         const bgImage = Resource.getImage("background_menu");
@@ -81,7 +88,12 @@ export default class Menu extends Stage {
         const bt0102 = new Button("多人游戏", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
             thisMenu.switchButtons(1);
         });
-        this.buttons[0] = [bt0101, bt0102];
+        const bt0103 = new Button("排行榜", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
+            thisMenu.switchButtons(6);
+            thisMenu.rankStart = 0;
+            thisMenu.loadRanks();
+        });
+        this.buttons[0] = [bt0101, bt0102, bt0103];
 
         //多人游戏
         const bt0201 = new Button("创建房间", Resource.width() * 0.5, Resource.height() * 0.35, function () {
@@ -155,19 +167,145 @@ export default class Menu extends Stage {
             thisMenu.switchButtons(-1);
         });
         this.buttons[5] = [bt0601, bt0602, bt0603];
+
+        //排行榜
+        const rect0701 = new Rect(Resource.width() / 2, Resource.height() * .57, Resource.width() * .6, Resource.height() * .65);
+        thisMenu.rankRect = rect0701;
+        const bt0701 = new Button("上一页",
+            rect0701.x - 120,
+            rect0701.y + rect0701.height / 2 - 35,
+            function () {
+                if (thisMenu.rankStart > 0) {
+                    thisMenu.rankStart -= 10;
+                    thisMenu.loadRanks();
+                }
+            }, 110, 50, '24px Arial');
+        const bt0702 = new Button("下一页",
+            rect0701.x,
+            rect0701.y + rect0701.height / 2 - 35,
+            function () {
+                thisMenu.rankStart += 10;
+                thisMenu.loadRanks();
+            }, 110, 50, '24px Arial');
+        const bt0703 = new Button("返回",
+            rect0701.x + 120,
+            rect0701.y + rect0701.height / 2 - 35,
+            function () {
+                thisMenu.switchButtons(-6);
+            }, 110, 50, '24px Arial');
+        const header = new Item({
+            draw: function (ctx) {
+                ctx.font = '20px Helvetica';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillStyle = '#FFF';
+                ctx.fillText("排名                 玩家                 分数           模式",
+                    rect0701.x,
+                    rect0701.y - rect0701.height / 2 + 33);
+            }
+        });
+        this.buttons[6] = [rect0701, bt0701, bt0702, bt0703, header];
+    }
+
+    loadRanks() {
+        const thisMenu = this;
+        Common.getRequest("/user/getRankList?limit=10&start=" + this.rankStart,
+            /**
+             *
+             * @param dataList {{score,username,gameType}}
+             */
+            function (dataList) {
+                if (thisMenu.buttonIndex !== thisMenu.rankIndex) {
+                    return;
+                }
+
+                thisMenu.removeRankInfos();
+                const x = thisMenu.rankRect.x;
+                const y = thisMenu.rankRect.y - thisMenu.rankRect.height / 2 + 58;
+                for (let i = 0; i < 10; ++i) {
+                    const rankNumber = new Item({
+                        draw: function (ctx) {
+                            thisMenu.drawRankText(
+                                ctx,
+                                thisMenu.rankStart + 1 + i + "",
+                                x - 184,
+                                y + i * 22);
+                        }
+                    });
+                    thisMenu.rankInfos[thisMenu.rankInfos.length] = rankNumber;
+                    thisMenu.addItem(rankNumber);
+
+                    if (!dataList[i]) {
+                        continue;
+                    }
+                    const data = dataList[i];
+
+                    //名字
+                    const name = new Item({
+                        draw: function (ctx) {
+                            thisMenu.drawRankText(ctx, data.username, x - 47, y + i * 22);
+                        }
+                    });
+                    thisMenu.rankInfos[thisMenu.rankInfos.length] = name;
+                    thisMenu.addItem(name);
+
+                    //分数
+                    const score = new Item({
+                        draw: function (ctx) {
+                            thisMenu.drawRankText(ctx, data.score, x + 83, y + i * 22);
+                        }
+                    });
+                    thisMenu.rankInfos[thisMenu.rankInfos.length] = score;
+                    thisMenu.addItem(score);
+
+                    //模式
+                    const mode = new Item({
+                        draw: function (ctx) {
+                            thisMenu.drawRankText(
+                                ctx,
+                                data.gameType === 0 ? "单人" : "联机",
+                                x + 186,
+                                y + i * 22);
+                        }
+                    });
+                    thisMenu.rankInfos[thisMenu.rankInfos.length] = mode;
+                    thisMenu.addItem(mode);
+                }
+            })
+    }
+
+    drawRankText(ctx, text, x, y) {
+        ctx.font = '20px Helvetica';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = '#FFF';
+        ctx.fillText(text, x, y);
+    }
+
+    removeRankInfos() {
+        const thisMenu = this;
+        thisMenu.rankInfos.forEach(function (info) {
+            thisMenu.removeItem(info);
+        });
+        thisMenu.rankInfos = [];
     }
 
     loadButtons() {
         const buttons = this.buttons[this.buttonIndex];
         for (let i = 0; i < buttons.length; ++i) {
-            this.addButton(buttons[i]);
+            this.addItem(buttons[i]);
         }
     }
 
     removeButtons() {
         const buttons = this.buttons[this.buttonIndex];
         for (let i = 0; i < buttons.length; ++i) {
-            this.removeButton(buttons[i]);
+            this.removeItem(buttons[i]);
+        }
+
+        //排行榜特殊处理
+        if (this.buttonIndex === this.rankIndex) {
+            this.removeRankInfos();
         }
     }
 

@@ -4,13 +4,15 @@
  * @date 2020/5/28
  */
 import Connect from "./connect.js";
+import Resource from "./resource.js";
+import Control from "./control.js";
 
 export default class Adapter {
 
     constructor() {
 
         /**
-         * 0: web, 1: wx
+         * 0: web, 1: wx, 2:app
          * @type {number}
          */
         this.platform = 0;
@@ -22,12 +24,35 @@ export default class Adapter {
         this.inputEnable = false;
     }
 
+    static isApp() {
+        const deviceId = Adapter.getQueryString("deviceId");
+        const deviceName = Adapter.getQueryString("deviceName");
+        if (deviceId === null || deviceName === null) {
+            return false;
+        }
+
+        Resource.getUser().deviceId = deviceId;
+        Resource.getUser().deviceName = deviceName;
+        Adapter.setPlatform(2);
+        Control.setControlMode(true);
+        return true;
+    }
+
+    static getQueryString(name) {
+        let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        let r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return decodeURIComponent(r[2]);
+        }
+        return null;
+    }
+
     static setPlatform(platform) {
         this.instance.platform = platform;
     }
 
     static initInput() {
-        if (this.instance.platform === 0) {
+        if (this.instance.platform === 0 || this.instance.platform === 2) {
             Adapter.initInputWeb();
         }
     }

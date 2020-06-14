@@ -17,13 +17,19 @@ export default class Main {
         const thisMain = this;
 
         //获取微信用户信息
-        wx.getUserInfo({
-            success: function(res) {
-                Resource.setUserId(res.userInfo.nickName);
-                thisMain.aniId = 0;
-                thisMain.restart();
+        wx.login({
+            success: function (res) {
+                console.log(res);
+                wx.getUserInfo({
+                    success: function (res) {
+                        console.log(res);
+                        Resource.setUserId(res.userInfo.nickName);
+                        thisMain.aniId = 0;
+                        thisMain.restart();
+                    }
+                })
             }
-        })
+        });
     }
 
     restart() {

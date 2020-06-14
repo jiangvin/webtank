@@ -6,7 +6,6 @@
 
 import Resource from "./resource.js";
 import Common from "./common.js";
-import Adapter from "./adapter.js";
 
 export default class Control {
 
@@ -19,7 +18,6 @@ export default class Control {
 
     static setControlMode(isTouch) {
         Control.instance.isTouchMode = isTouch;
-        Adapter.initInput();
         if (isTouch) {
             Control.generateTouchModeInfo();
             document.addEventListener('touchstart', function (e) {
