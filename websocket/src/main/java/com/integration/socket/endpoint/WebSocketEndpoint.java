@@ -62,7 +62,7 @@ public class WebSocketEndpoint {
      */
     @OnClose
     public void onClose(Session session) throws UnsupportedEncodingException {
-        String userId = SocketUserBo.getUserIdFromSession(session);
+        String userId = SocketUserBo.getUsernameFromSession(session);
         if (userId == null) {
             return;
         }
@@ -77,7 +77,7 @@ public class WebSocketEndpoint {
      */
     @OnMessage
     public void onMsg(Session session, String text) throws UnsupportedEncodingException {
-        String userId = SocketUserBo.getUserIdFromSession(session);
+        String userId = SocketUserBo.getUsernameFromSession(session);
         if (userId == null) {
             return;
         }

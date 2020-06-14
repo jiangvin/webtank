@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class UserBo {
     /**
-     * 全局唯一
+     * 全局唯一, 但会根据重名情况进行变化
      */
     @NonNull private String username;
     @NonNull private String socketSessionId;
