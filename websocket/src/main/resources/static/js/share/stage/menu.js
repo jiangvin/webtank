@@ -314,8 +314,7 @@ export default class Menu extends Stage {
 
         //加入房间特殊处理
         if (this.buttonIndex === this.joinIndex) {
-            const input = document.getElementById("input-room-name");
-            input.parentNode.removeChild(input);
+            this.removeInput();
             const thisMenu = this;
             this.joinInfos.forEach(function (joinItem) {
                 thisMenu.removeItem(joinItem);
@@ -323,6 +322,14 @@ export default class Menu extends Stage {
             this.joinInfos = [];
         }
     }
+
+    removeInput() {
+        const input = document.getElementById("input-room-name");
+        if (input) {
+            input.parentNode.removeChild(input);
+        }
+    }
+
 
     switchButtons(offset) {
         this.removeButtons();
@@ -425,6 +432,7 @@ export default class Menu extends Stage {
                                 joinTeamType: "RED",
                                 joinRoom: true
                             };
+                            thisMenu.removeInput();
                             thisMenu.initRoom(roomInfo);
                             Resource.getRoot().addEngine(true);
                         } else {
