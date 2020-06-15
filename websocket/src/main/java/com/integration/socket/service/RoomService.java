@@ -51,12 +51,21 @@ public class RoomService {
         return roomMap.containsKey(roomName);
     }
 
-    public RoomListDto getRoomListDto(int start, int limit) {
+    public RoomListDto getRoomListDto(int start, int limit, String search) {
         List<RoomDto> roomDtoList = new ArrayList<>();
-        for (StageRoom room : roomList.subList(start, Math.min(start + limit, roomList.size()))) {
+        for (StageRoom room : roomList) {
+            if (!StringUtils.isEmpty(search) && !room.getRoomId().contains(search)) {
+                continue;
+            }
             roomDtoList.add(room.toDto());
         }
-        return new RoomListDto(roomDtoList, roomList.size());
+        if (start >= roomDtoList.size()) {
+            return new RoomListDto(new ArrayList<>(), roomDtoList.size());
+        }
+        if (limit > roomDtoList.size() - start) {
+            limit = roomDtoList.size() - start;
+        }
+        return new RoomListDto(roomDtoList.subList(start, limit), roomDtoList.size());
     }
 
     @Scheduled(fixedRate = 16)

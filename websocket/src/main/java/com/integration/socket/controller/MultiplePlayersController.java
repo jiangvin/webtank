@@ -45,8 +45,9 @@ public class MultiplePlayersController {
 
     @GetMapping("/getRooms")
     public RoomListDto getRooms(@RequestParam(value = "start", defaultValue = "0") int start,
-                                @RequestParam(value = "limit", defaultValue = "5") int limit) {
-        return roomService.getRoomListDto(start, limit);
+                                @RequestParam(value = "limit", defaultValue = "5") int limit,
+                                @RequestParam(value = "search", required = false) String search) {
+        return roomService.getRoomListDto(start, limit, search);
     }
 
     @GetMapping("/ping")

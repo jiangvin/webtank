@@ -43,8 +43,10 @@ input.input-message {
 }
 input.input-room-name {
     position: relative;
-    text-align: left;
-    font-size: 1.3em;
+    text-align: center;
+    font-size: 32px;
+    width: 220px;
+    background-color: white;
 }
 
 select {
