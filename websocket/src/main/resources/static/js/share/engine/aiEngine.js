@@ -281,12 +281,7 @@ export default class AiEngine extends Engine {
                         score: thisEngine.score,
                         rank: rank
                     });
-                    Common.postRequest("/singlePlayer/saveRank",
-                        {
-                            score: thisEngine.score,
-                            userId: Resource.getUser().deviceId,
-                            username: Resource.getUser().userId
-                        });
+                    thisEngine.saveRank();
                     return;
                 }
 
@@ -326,14 +321,21 @@ export default class AiEngine extends Engine {
                     score: thisEngine.score,
                     rank: rank
                 });
-                Common.postRequest("/singlePlayer/saveRank",
-                    {
-                        score: thisEngine.score,
-                        userId: Resource.getUser().deviceId,
-                        username: Resource.getUser().userId
-                    });
+                thisEngine.saveRank();
             });
         }
+    }
+
+    saveRank() {
+        const thisEngine = this;
+        Common.postRequest("/singlePlayer/saveRank",
+            {
+                data: Resource.encryptData({
+                    score: thisEngine.score,
+                    userId: Resource.getUser().deviceId,
+                    username: Resource.getUser().userId
+                })
+            });
     }
 
     removeBullet(bullet) {

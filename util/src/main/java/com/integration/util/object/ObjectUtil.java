@@ -44,6 +44,10 @@ public class ObjectUtil {
         }
     }
 
+    public static <T> T convertValue(String json, Class<T> valueType) {
+        return objectMapper.convertValue(json, valueType);
+    }
+
     public static <T> T readValue(Object object, Class<T> valueType) {
         if (object == null) {
             return null;

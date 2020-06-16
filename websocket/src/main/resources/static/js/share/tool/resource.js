@@ -15,6 +15,8 @@ export default class Resource {
         this.itemId = 1;
         this.scale = 1;
         this.host = "";
+        this.encrypt = new JSEncrypt();
+        this.encrypt.setPublicKey('MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCGLK2SvOA8W84X/w9IDld7MiO+eEFCCiCeK0czeB+yS2dsQ7FAfReeZrNznJCzJvMwr2RWir/0+xngvyZOcPCM3P1SSYZHUQXzrEGSXTcaqKGvRHEnbWnpsGacccidomfsvHYHHoeCqkprk/rWWoRiAR7HI6riwHQNb0FE/MwukwIDAQAB');
         this.initImage();
     }
 
@@ -82,6 +84,10 @@ export default class Resource {
 
     static getHost() {
         return Resource.instance.host;
+    }
+
+    static encryptData(object) {
+        return Resource.instance.encrypt.encrypt(JSON.stringify(object));
     }
 
     static calculateScale(d1, d2) {
