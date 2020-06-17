@@ -1002,6 +1002,11 @@ public class StageRoom extends BaseStage {
     }
 
     public void addUser(UserBo userBo, TeamType teamType) {
+        //TODO - 暂停状态不允许加入,需要后期优化
+        if (this.isPause) {
+            return;
+        }
+
         userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
         userBo.setTeamType(teamType);
@@ -1019,13 +1024,7 @@ public class StageRoom extends BaseStage {
         sendMessageToUser(getGameItemList(), MessageType.ITEM, userBo.getUsername());
 
         createTankForUser(userBo, teamType, 60 * 3);
-
-        //通知前端数据传输完毕
-        if (this.isPause) {
-            sendMessageToUser(new GameStatusDto(GameStatusType.PAUSE, this.pauseMessage), MessageType.GAME_STATUS, userBo.getUsername());
-        } else {
-            sendReady(userBo.getUsername());
-        }
+        sendReady(userBo.getUsername());
     }
 
     private void createTankForUser(UserBo userBo, TeamType teamType, int timeoutForPlayer) {

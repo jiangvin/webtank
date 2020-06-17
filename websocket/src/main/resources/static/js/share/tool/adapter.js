@@ -6,6 +6,7 @@
 import Connect from "./connect.js";
 import Resource from "./resource.js";
 import Control from "./control.js";
+import WxInput from "../../wx/wxinput.js";
 
 export default class Adapter {
 
@@ -90,6 +91,59 @@ export default class Adapter {
                 input.focus();
             }
         }
+    }
+
+    /**
+     * room name输入框
+     */
+    static createInputRoomName(x, y, parent) {
+        if (Adapter.instance.platform === 1) {
+            Adapter.createInputRoomNameWx(x, y, parent);
+        } else {
+            Adapter.createInputRoomNameWeb(x, y);
+        }
+    }
+
+    static createInputRoomNameWx(x, y, parent) {
+        parent[parent.length] = new WxInput(
+            "input-room-name",
+            x,
+            y,
+            220,
+            47,
+            "请输入房间名"
+        );
+    }
+
+    static createInputRoomNameWeb(x, y) {
+        let input = document.createElement('input');
+        input.type = "text";
+        input.id = "input-room-name";
+        input.placeholder = "请输入房间名";
+        input.className = "input-room-name";
+        input.style.left = x + "px";
+        input.style.top = y + "px";
+        document.getElementById('wrapper').appendChild(input);
+    }
+
+    static getInputRoomName(parent) {
+        if (Adapter.instance.platform === 1) {
+            return Adapter.getInputRoomNameWx(parent);
+        } else {
+            return Adapter.getInputRoomNameWeb();
+        }
+    }
+
+    static getInputRoomNameWeb() {
+        return $('#input-room-name').val()
+    }
+
+    static getInputRoomNameWx(parent) {
+        const input = parent.get("input-room-name");
+        if (!input) {
+            return "";
+        }
+        return input.text;
     }
 }
 Adapter.instance = new Adapter();

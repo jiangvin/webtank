@@ -119,8 +119,8 @@ public class TankTypeDto {
         com = comCopyType(
                   "tank07",
                   "tank02",
-                  3.0,
-                  30,
+                  2.0,
+                  35,
                   null,
                   null);
         com.brokenIron = true;
@@ -129,8 +129,8 @@ public class TankTypeDto {
         com = comCopyType(
                   "tank08",
                   "tank03",
-                  2.0,
-                  40,
+                  3.0,
+                  35,
                   null,
                   null);
         com.setAmmoMaxCount(3);

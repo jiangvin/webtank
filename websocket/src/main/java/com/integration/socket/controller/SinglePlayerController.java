@@ -1,12 +1,14 @@
 package com.integration.socket.controller;
 
 import com.integration.dto.room.RoomType;
+import com.integration.socket.model.dto.EncryptDto;
 import com.integration.socket.model.dto.MapDetailDto;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.service.MapService;
 import com.integration.socket.service.UserService;
+import com.integration.util.object.ObjectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,7 +59,11 @@ public class SinglePlayerController {
     }
 
     @PostMapping("/saveRank")
-    public boolean saveRank(@RequestBody RankDto rankDto) {
+    public boolean saveRank(@RequestBody EncryptDto encryptDto) {
+        RankDto rankDto = ObjectUtil.readValue(encryptDto.decrypt(), RankDto.class);
+        if (rankDto == null) {
+            return false;
+        }
         userService.saveRankForSinglePlayer(rankDto);
         return true;
     }

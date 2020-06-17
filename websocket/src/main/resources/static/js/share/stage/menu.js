@@ -12,6 +12,7 @@ import Common from "../tool/common.js";
 import Connect from "../tool/connect.js";
 import Rect from "./rect.js";
 import Item from "./item.js";
+import Adapter from "../tool/adapter.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -26,6 +27,10 @@ export default class Menu extends Stage {
         this.rankIndex = 6;
         this.rankInfos = [];
         this.rankStart = 0;
+
+        //加入房间
+        this.joinIndex = 4;
+        this.joinInfos = [];
 
         //背景
         const bgImage = Resource.getImage("background_menu");
@@ -164,7 +169,7 @@ export default class Menu extends Stage {
             Resource.getRoot().addEngine(true);
         });
         const bt0603 = new Button("返回", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
-            thisMenu.switchButtons(-1);
+            thisMenu.joinRoomEvent();
         });
         this.buttons[5] = [bt0601, bt0602, bt0603];
 
@@ -307,11 +312,35 @@ export default class Menu extends Stage {
         if (this.buttonIndex === this.rankIndex) {
             this.removeRankInfos();
         }
+
+        //加入房间特殊处理
+        if (this.buttonIndex === this.joinIndex) {
+            this.removeInput();
+            const thisMenu = this;
+            this.joinInfos.forEach(function (joinItem) {
+                thisMenu.removeItem(joinItem);
+            });
+            this.joinInfos = [];
+        }
     }
+
+    removeInput() {
+        const input = document.getElementById("input-room-name");
+        if (input) {
+            input.parentNode.removeChild(input);
+        }
+    }
+
 
     switchButtons(offset) {
         this.removeButtons();
         this.buttonIndex += offset;
+        this.loadButtons();
+    }
+
+    switchToIndex(index) {
+        this.removeButtons();
+        this.buttonIndex = index;
         this.loadButtons();
     }
 
@@ -328,42 +357,97 @@ export default class Menu extends Stage {
         const thisMenu = this;
         thisMenu.buttons[4] = [];
         const buttons = thisMenu.buttons[4];
-        let offsetY = 0;
-        /**
-         * @param dto {{roomList}}
-         */
-        Common.getRequest("/multiplePlayers/getRooms?start=0&limit=2", function (dto) {
-            dto.roomList.forEach(function (room) {
-                const title = "房间名:" + room.roomId + "[关卡:" + room.mapId + "]";
-                const type = room.roomType === "PVE" ? "闯关" : "对战";
-                buttons[buttons.length] = new RoomButton(title, type, Resource.width() * 0.5, Resource.height() * 0.35 + offsetY, function () {
-                    if (room.roomType === "PVE") {
-                        const roomInfo = {
-                            mapId: room.mapId,
-                            roomType: room.roomType,
-                            roomId: room.roomId,
-                            joinTeamType: "RED",
-                            joinRoom: true
-                        };
-                        thisMenu.initRoom(roomInfo);
-                        Resource.getRoot().addEngine(true);
-                    } else {
-                        thisMenu.joinRoomCache = {
-                            mapId: room.mapId,
-                            roomType: room.roomType,
-                            roomId: room.roomId,
-                            joinRoom: true,
-                            showTeam: true
-                        };
-                        thisMenu.switchButtons(1);
-                    }
-                });
-                offsetY += 100;
-            });
-            buttons[buttons.length] = new Button("返回", Resource.width() * 0.5, Resource.height() * 0.35 + offsetY, function () {
+
+        let start = 0;
+        const background = new Rect(Resource.width() / 2, Resource.height() / 2, Resource.width() * .6, Resource.height() * .8);
+        buttons[buttons.length] = background;
+        buttons[buttons.length] = new Button("上一页",
+            background.x - 120,
+            background.y + background.height / 2 - 35,
+            function () {
+                if (start > 0) {
+                    start -= 3;
+                    search();
+                }
+            }, 110, 50, '24px Arial');
+        buttons[buttons.length] = new Button("下一页",
+            background.x,
+            background.y + background.height / 2 - 35,
+            function () {
+                if (thisMenu.joinInfos.length > 2) {
+                    start += 3;
+                    search();
+                }
+            }, 110, 50, '24px Arial');
+        buttons[buttons.length] = new Button("返回",
+            background.x + 120,
+            background.y + background.height / 2 - 35,
+            function () {
                 thisMenu.switchButtons(-3);
-            });
-            thisMenu.switchButtons(3);
-        })
+            }, 110, 50, '24px Arial');
+
+        buttons[buttons.length] = new Button("搜索",
+            background.x + 120,
+            background.y - background.height / 2 + 35,
+            function () {
+                start = 0;
+                search();
+            }, 110, 50, '24px Arial');
+
+        Adapter.createInputRoomName(
+            background.x - 175,
+            background.y - background.height / 2 + 11,
+            buttons);
+
+        thisMenu.switchToIndex(4);
+        const search = function () {
+            let queryString = "?limit=3&start=" + start;
+            const roomName = Adapter.getInputRoomName(thisMenu.items);
+            if (roomName !== "") {
+                queryString += "&search=" + roomName;
+            }
+            /**
+             * @param dto {{roomList}}
+             */
+            Common.getRequest("/multiplePlayers/getRooms" + queryString, function (dto) {
+                thisMenu.joinInfos.forEach(function (joinItem) {
+                    thisMenu.removeItem(joinItem);
+                });
+                thisMenu.joinInfos = [];
+                let offsetY = 0;
+
+                dto.roomList.forEach(function (room) {
+                    const title = room.roomId + " [关卡:" + room.mapId + "]";
+                    const type = room.roomType === "PVE" ? "闯关" : "对战";
+                    const roomButton = new RoomButton(title, type, Resource.width() * 0.5, Resource.height() * 0.33 + offsetY, function () {
+                        if (room.roomType === "PVE") {
+                            const roomInfo = {
+                                mapId: room.mapId,
+                                roomType: room.roomType,
+                                roomId: room.roomId,
+                                joinTeamType: "RED",
+                                joinRoom: true
+                            };
+                            thisMenu.removeInput();
+                            thisMenu.initRoom(roomInfo);
+                            Resource.getRoot().addEngine(true);
+                        } else {
+                            thisMenu.joinRoomCache = {
+                                mapId: room.mapId,
+                                roomType: room.roomType,
+                                roomId: room.roomId,
+                                joinRoom: true,
+                                showTeam: true
+                            };
+                            thisMenu.switchButtons(1);
+                        }
+                    }, 350, 72);
+                    thisMenu.joinInfos[thisMenu.joinInfos.length] = roomButton;
+                    thisMenu.addItem(roomButton);
+                    offsetY += 80;
+                });
+            })
+        };
+        search();
     }
 }

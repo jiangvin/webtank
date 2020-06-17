@@ -7,8 +7,8 @@ import Button from "./button.js";
 import Resource from "../tool/resource.js";
 
 export default class RoomButton extends Button {
-    constructor(text, type, x, y, callBack) {
-        super(text, x, y, callBack);
+    constructor(text, type, x, y, callBack, width, height) {
+        super(text, x, y, callBack, width, height);
         this.type = type;
     }
 

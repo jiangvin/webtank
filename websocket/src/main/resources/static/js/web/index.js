@@ -3,7 +3,6 @@
  * @description 网页端入口
  * @date 2020/5/26
  */
-import './libs/jquery.js'
 
 import Resource from "../share/tool/resource.js";
 import Home from "../web/home.js"

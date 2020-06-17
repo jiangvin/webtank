@@ -1,3 +1,5 @@
+import '../share/libs/jsencrypt.min.js'
+
 import Menu from "../share/stage/menu";
 import Resource from '../share/tool/resource'
 import Control from "../share/tool/control";
