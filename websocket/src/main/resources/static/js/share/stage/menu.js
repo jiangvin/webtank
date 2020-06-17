@@ -12,6 +12,7 @@ import Common from "../tool/common.js";
 import Connect from "../tool/connect.js";
 import Rect from "./rect.js";
 import Item from "./item.js";
+import Adapter from "../tool/adapter.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -373,10 +374,10 @@ export default class Menu extends Stage {
             background.x,
             background.y + background.height / 2 - 35,
             function () {
-            if (thisMenu.joinInfos.length > 2) {
-                start += 3;
-                search();
-            }
+                if (thisMenu.joinInfos.length > 2) {
+                    start += 3;
+                    search();
+                }
             }, 110, 50, '24px Arial');
         buttons[buttons.length] = new Button("返回",
             background.x + 120,
@@ -393,20 +394,15 @@ export default class Menu extends Stage {
                 search();
             }, 110, 50, '24px Arial');
 
-        //TODO - wx特殊处理输入框
-        let input = document.createElement('input');
-        input.type = "text";
-        input.id = "input-room-name";
-        input.placeholder = "请输入房间名";
-        input.className = "input-room-name";
-        input.style.left = (background.x - 175) + "px";
-        input.style.top = (background.y - background.height / 2 + 11) + "px";
-        document.getElementById('wrapper').appendChild(input);
-        thisMenu.switchToIndex(4);
+        Adapter.createInputRoomName(
+            background.x - 175,
+            background.y - background.height / 2 + 11,
+            buttons);
 
+        thisMenu.switchToIndex(4);
         const search = function () {
             let queryString = "?limit=3&start=" + start;
-            const roomName = $('#input-room-name').val();
+            const roomName = Adapter.getInputRoomName(thisMenu.items);
             if (roomName !== "") {
                 queryString += "&search=" + roomName;
             }
