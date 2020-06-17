@@ -13,6 +13,7 @@ import Connect from "../tool/connect.js";
 import Rect from "./rect.js";
 import Item from "./item.js";
 import Adapter from "../tool/adapter.js";
+import Sound from "../tool/sound.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -346,6 +347,7 @@ export default class Menu extends Stage {
 
     initMenu() {
         Connect.disconnect();
+        Sound.bgmPause();
         Resource.getRoot().users = null;
         Resource.getRoot().netDelay = 0;
         this.removeButtons();

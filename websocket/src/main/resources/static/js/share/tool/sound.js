@@ -59,6 +59,10 @@ export default class Sound {
         Sound.playSound(Sound.instance.loseSound);
     }
 
+    static bgmPause() {
+        Sound.instance.bgmSound.pause();
+    }
+
     static playSound(sound) {
         if (!sound.ended) {
             sound.load();
