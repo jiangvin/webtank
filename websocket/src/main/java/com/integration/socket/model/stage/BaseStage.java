@@ -75,8 +75,8 @@ public abstract class BaseStage {
         if (ammo == null) {
             return;
         }
-        bulletMap.put(ammo.getId(), ammo);
         processTankFireExtension(ammo);
+        bulletMap.put(ammo.getId(), ammo);
         sendMessageToRoom(Collections.singletonList(ammo.convertToDto()), MessageType.BULLET);
     }
 

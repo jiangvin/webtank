@@ -54,26 +54,6 @@ public class TankBo {
         return tankDto;
     }
 
-    public static TankBo convert(ItemDto tankDto) {
-        TankBo tankBo = new TankBo();
-        tankBo.setTankId(tankDto.getId());
-        tankBo.setUserId(tankDto.getId());
-        tankBo.setOrientationType(OrientationType.convert(tankDto.getOrientation()));
-        tankBo.setActionType(ActionType.convert(tankDto.getAction()));
-        tankBo.setX(tankDto.getX());
-        tankBo.setY(tankDto.getY());
-        tankBo.setType(TankTypeDto.getTankType(tankDto.getTypeId()));
-        tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
-
-        //bo的team type不能为空
-        if (tankDto.getTeamId() == null) {
-            tankBo.setTeamType(TeamType.RED);
-        } else {
-            tankBo.setTeamType(TeamType.convert(tankDto.getTeamId()));
-        }
-        return tankBo;
-    }
-
     public boolean hasShield() {
         return shieldTimeout > 0;
     }
