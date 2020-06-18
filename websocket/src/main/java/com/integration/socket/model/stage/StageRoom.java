@@ -333,11 +333,6 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        //游戏结束后的最后一个循环判断
-        if (this.isPause) {
-            return;
-        }
-
         if (bullet.getLifeTime() == 0) {
             addRemoveBulletIds(bullet.getId());
             return;
