@@ -28,7 +28,8 @@ export default class Index {
                 if (data) {
                     //旧用户
                     Resource.setUserId(data.username);
-                    $('#input-name-div').css("visibility", "hidden");
+                    Resource.getUser().coin = data.coin;
+
                     thisIndex.root.addStage(new Menu());
                     thisIndex.root.addStage(new Room());
                     thisIndex.initEvent();

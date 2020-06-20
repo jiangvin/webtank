@@ -10,7 +10,7 @@ export default class Button extends Rect {
     constructor(text, x, y, callBack, width, height, font) {
         if (!width || !height) {
             width = 284;
-            height = 72;
+            height = 65;
         }
         super(x, y, width, height);
         this.text = text;

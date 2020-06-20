@@ -10,6 +10,7 @@ export default class User {
         this.originalUserId = null;
         this.deviceId = null;
         this.deviceName = null;
+        this.coin = 0;
     }
 
     setUserId(userId) {

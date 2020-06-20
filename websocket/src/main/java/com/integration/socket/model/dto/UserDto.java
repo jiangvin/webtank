@@ -14,10 +14,12 @@ public class UserDto {
     private String userId;
     private String username;
     private String userDevice;
+    private int coin;
 
     public static UserDto convert(UserRecord userRecord) {
         UserDto userDto = new UserDto();
         userDto.setUsername(userRecord.getUsername());
+        userDto.setCoin(userRecord.getCoin());
         return userDto;
     }
 }
