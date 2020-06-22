@@ -495,22 +495,13 @@ export default class Room extends Stage {
                     ctx.fillText("当前得分: " + status.score,
                         Resource.width() / 2,
                         Resource.height() * .3 + 60);
-                }
-            });
-            this.addItem(score);
-            const rank = new Item({
-                z: 10,
-                draw: function (ctx) {
-                    ctx.font = 'bold 30px Microsoft YaHei UI';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = '#FFF';
+                    
                     ctx.fillText("当前排名: " + status.rank,
                         Resource.width() / 2,
                         Resource.height() * .3 + 100);
                 }
             });
-            this.addItem(rank);
+            this.addItem(score);
             titleHeight = Resource.height() * .3;
             buttonHeight = Resource.height() * 0.68;
         }
