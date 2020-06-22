@@ -94,6 +94,10 @@ export default class ShopButton extends Button {
                 background.x - 70,
                 background.y + background.height / 2 - 35,
                 function () {
+                    if (!thisButton.buyType || thisButton.priceType === 1) {
+                        Common.addMessage("暂未开放，敬请期待", "#FF0");
+                        return;
+                    }
                     Common.postEncrypt("/shop/buyWithCoin", {
                         userId: Resource.getUser().deviceId,
                         buyType: thisButton.buyType
