@@ -9,6 +9,7 @@ import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
 import com.integration.dto.room.TeamType;
 import com.integration.socket.model.CollideType;
+import com.integration.socket.model.GameStatusType;
 import com.integration.socket.model.ItemType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.ItemBo;
@@ -17,7 +18,6 @@ import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.GameStatusDto;
-import com.integration.socket.model.GameStatusType;
 import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.event.BaseEvent;
@@ -753,7 +753,7 @@ public class StageRoom extends BaseStage {
                 gameStatusDto.setMessage("恭喜全部通关");
                 gameStatusDto.setType(GameStatusType.OVER);
                 userService.saveRankForMultiplePlayers(this.creator, gameStatusDto);
-
+                saveCoin();
             } else {
                 gameStatusDto.setMessage("恭喜通关");
             }
@@ -766,12 +766,22 @@ public class StageRoom extends BaseStage {
             gameStatusDto.setMessage("游戏失败");
             gameStatusDto.setType(GameStatusType.OVER);
             userService.saveRankForMultiplePlayers(this.creator, gameStatusDto);
+            saveCoin();
         }
 
         sendMessageToRoom(gameStatusDto, MessageType.GAME_STATUS);
 
         this.pauseMessage = String.format("MISSION %02d", getMapId());
         return gameStatusDto.getType() == GameStatusType.PAUSE;
+    }
+
+    private void saveCoin() {
+        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
+            int coin = userService.saveCoinFromScore(kv.getValue().getUserId(), score);
+            if (coin > 0) {
+                sendMessageToUser(String.format("恭喜你获得金币奖励:%d", coin), MessageType.SYSTEM_MESSAGE, kv.getKey());
+            }
+        }
     }
 
     private void updateScoreAfterWin() {

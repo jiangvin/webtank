@@ -1,5 +1,6 @@
 package com.integration.socket.service;
 
+import com.integration.socket.model.Constant;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.GameStatusDto;
 import com.integration.socket.model.dto.RankDto;
@@ -53,11 +54,11 @@ public class UserService {
         return userDao.queryRank(score);
     }
 
-    public void saveRankForSinglePlayer(RankDto rankDto) {
+    public int saveRankForSinglePlayer(RankDto rankDto) {
         if (StringUtils.isEmpty(rankDto.getUsername()) ||
                 rankDto.getScore() == null ||
                 rankDto.getScore() <= 0) {
-            return;
+            return 0;
         }
 
         //更新后面的排名
@@ -68,6 +69,28 @@ public class UserService {
         rankDto.setRank(rank);
         rankDto.setGameType(0);
         userDao.insertRank(rankDto);
+
+        //返回金币奖励
+        return saveCoinFromScore(rankDto.getUserId(), rankDto.getScore());
+    }
+
+    public int saveCoinFromScore(String userId, int score) {
+        if (StringUtils.isEmpty(userId)) {
+            return 0;
+        }
+
+        int coin = score / Constant.SCORE_TO_COIN;
+        if (coin == 0) {
+            return 0;
+        }
+
+        UserRecord record = userDao.query(userId);
+        if (record == null) {
+            return 0;
+        }
+        record.setCoin(record.getCoin() + coin);
+        record.update();
+        return coin;
     }
 
     public void saveRankForMultiplePlayers(UserBo creator, GameStatusDto gameStatusDto) {

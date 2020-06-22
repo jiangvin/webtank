@@ -59,12 +59,11 @@ public class SinglePlayerController {
     }
 
     @PostMapping("/saveRank")
-    public boolean saveRank(@RequestBody EncryptDto encryptDto) {
+    public int saveRank(@RequestBody EncryptDto encryptDto) {
         RankDto rankDto = ObjectUtil.readValue(encryptDto.decrypt(), RankDto.class);
         if (rankDto == null) {
-            return false;
+            return 0;
         }
-        userService.saveRankForSinglePlayer(rankDto);
-        return true;
+        return userService.saveRankForSinglePlayer(rankDto);
     }
 }
