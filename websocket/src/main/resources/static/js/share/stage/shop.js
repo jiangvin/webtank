@@ -100,10 +100,10 @@ export default class Shop {
         const items = this.totalShopItems;
 
         //第一页
-        items[items.length] = new ShopButton(this, 0, 0, "幽灵(限时)", Resource.getImage("item_red_star"), 0, 0, 8,
+        items[items.length] = new ShopButton(this, 0, 0, "幽灵(限时)", Resource.getImage("item_ghost"), 0, 0, 8,
             ["游戏中会随机出现幽灵道具（限时一天）",
                 "效果：使你的坦克变成半透明移动时无视一切障碍物"]);
-        items[items.length] = new ShopButton(this, 1, 0, "定时器(限时)", Resource.getImage("item_red_star"), 0, 0, 10,
+        items[items.length] = new ShopButton(this, 1, 0, "定时器(限时)", Resource.getImage("item_clock"), 0, 0, 10,
             ["游戏中会随机出现定时器道具（限时一天）",
                 "效果：使敌方所有坦克10秒内不能移动"]);
         items[items.length] = new ShopButton(this, 2, 0, "红星(限时)", Resource.getImage("item_red_star"), 0, 0, 12,
@@ -123,10 +123,10 @@ export default class Shop {
             ["获得250个金币"]);
         items[items.length] = new ShopButton(this, 2, 0, "X 500", Resource.getImage("coin"), 0, 1, 42,
             ["获得500个金币"]);
-        items[items.length] = new ShopButton(this, 0, 1, "幽灵(永久)", Resource.getImage("item_red_star"), 0, 1, 12,
+        items[items.length] = new ShopButton(this, 0, 1, "幽灵(永久)", Resource.getImage("item_ghost"), 0, 1, 12,
             ["游戏中会随机出现幽灵道具",
                 "效果：使你的坦克变成半透明移动时无视一切障碍物"]);
-        items[items.length] = new ShopButton(this, 1, 1, "定时器(永久)", Resource.getImage("item_red_star"), 0, 1, 15,
+        items[items.length] = new ShopButton(this, 1, 1, "定时器(永久)", Resource.getImage("item_clock"), 0, 1, 15,
             ["游戏中会随机出现定时器道具",
                 "效果：使敌方所有坦克10秒内不能移动"]);
         items[items.length] = new ShopButton(this, 2, 1, "红星(永久)", Resource.getImage("item_red_star"), 0, 1, 18,
