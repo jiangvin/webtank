@@ -1,9 +1,12 @@
 package com.integration.socket.model.bo;
 
 import com.integration.dto.room.TeamType;
+import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import lombok.Data;
 import lombok.NonNull;
+import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,4 +39,25 @@ public class UserBo {
      * 用户在房间号内的团队
      */
     private TeamType teamType;
+
+    /**
+     * 持久层数据
+     */
+    private UserRecord userRecord;
+
+    public boolean hasUserId() {
+        return !StringUtils.isEmpty(userId);
+    }
+
+    public boolean hasRedStar() {
+        if (userRecord == null) {
+            return false;
+        }
+
+        if (userRecord.getRedStarExpired() == null) {
+            return false;
+        }
+
+        return userRecord.getRedStarExpired().after(new Timestamp(System.currentTimeMillis()));
+    }
 }

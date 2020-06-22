@@ -11,6 +11,7 @@ export default class User {
         this.deviceId = null;
         this.deviceName = null;
         this.coin = 0;
+        this.redStarExpired = null;
     }
 
     setUserId(userId) {
@@ -18,5 +19,9 @@ export default class User {
         if (!this.originalUserId) {
             this.originalUserId = userId;
         }
+    }
+
+    hasRedStar() {
+        return this.redStarExpired && this.redStarExpired > new Date().getTime();
     }
 }

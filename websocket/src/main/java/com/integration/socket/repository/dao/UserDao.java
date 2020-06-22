@@ -7,6 +7,7 @@ import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -19,7 +20,10 @@ import java.util.List;
 
 @Repository
 public class UserDao extends BaseDao {
-    public UserRecord query(String userId) {
+    public UserRecord queryUser(String userId) {
+        if (StringUtils.isEmpty(userId)) {
+            return null;
+        }
         return create.selectFrom(USER).where(USER.USER_ID.eq(userId)).fetchOne();
     }
 

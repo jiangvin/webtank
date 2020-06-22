@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -109,13 +110,26 @@ public class StageRoom extends BaseStage {
     private static final int SCORE_PLAYER_BOOM = -30;
     private static final int SCORE_WIN = 500;
 
+    /**
+     * 道具池
+     */
+    private List<ItemType> itemTypePool;
+
     public StageRoom(RoomDto roomDto, UserBo creator, MapMangerBo mapManger, MessageService messageService, UserService userService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
         this.creator = creator;
         this.mapManger = mapManger;
         this.userService = userService;
+        initItemPool(creator);
         init();
+    }
+
+    private void initItemPool(UserBo creator) {
+        itemTypePool = Arrays.asList(ItemType.values());
+        if (!creator.hasRedStar()) {
+            itemTypePool.remove(ItemType.RED_STAR);
+        }
     }
 
     public RoomDto toDto() {
@@ -283,7 +297,7 @@ public class StageRoom extends BaseStage {
         if (event instanceof CreateItemEvent) {
             CreateItemEvent createItemEvent = (CreateItemEvent) event;
             if (itemMap.size() < MAX_ITEM_LIMIT) {
-                ItemType itemType = ItemType.values()[random.nextInt(ItemType.values().length)];
+                ItemType itemType = itemTypePool.get(random.nextInt(itemTypePool.size()));
                 for (int time = 0; time < TRY_TIMES_OF_CREATE_ITEM; ++time) {
                     Point grid = new Point();
                     grid.x = random.nextInt(getMapBo().getMaxGridX());
@@ -777,7 +791,7 @@ public class StageRoom extends BaseStage {
 
     private void saveCoin() {
         for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-            int coin = userService.saveCoinFromScore(kv.getValue().getUserId(), score, false);
+            int coin = userService.saveCoinFromScore(kv.getValue().getUserRecord(), score, false);
             if (coin > 0) {
                 sendMessageToUser(String.format("恭喜你获得金币奖励:%d", coin), MessageType.SYSTEM_MESSAGE, kv.getKey());
             }
@@ -1031,7 +1045,7 @@ public class StageRoom extends BaseStage {
         sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUsername());
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
-        sendMessageToUser(getGameItemList(), MessageType.ITEM, userBo.getUsername());
+        sendMessageToUser(getItemPool(), MessageType.ITEM, userBo.getUsername());
 
         createTankForUser(userBo, teamType, 60 * 3);
         sendReady(userBo.getUsername());
@@ -1129,7 +1143,7 @@ public class StageRoom extends BaseStage {
         return bulletDtoList;
     }
 
-    private List<ItemDto> getGameItemList() {
+    private List<ItemDto> getItemPool() {
         List<ItemDto> itemDtoList = new ArrayList<>();
         for (Map.Entry<String, ItemBo> kv : itemMap.entrySet()) {
             itemDtoList.add(kv.getValue().toDto());

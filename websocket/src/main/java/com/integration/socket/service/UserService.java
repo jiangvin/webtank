@@ -30,7 +30,7 @@ public class UserService {
     private UserDao userDao;
 
     public UserDto queryUser(String userId) {
-        UserRecord userRecord = userDao.query(userId);
+        UserRecord userRecord = userDao.queryUser(userId);
         if (userRecord == null) {
             return null;
         }
@@ -71,15 +71,10 @@ public class UserService {
         userDao.insertRank(rankDto);
 
         //返回金币奖励
-        return saveCoinFromScore(rankDto.getUserId(), rankDto.getScore(), true);
+        return saveCoinFromScore(userDao.queryUser(rankDto.getUserId()), rankDto.getScore(), true);
     }
 
-    public int saveCoinFromScore(String userId, int score, boolean isSingle) {
-        if (StringUtils.isEmpty(userId)) {
-            return 0;
-        }
-
-        UserRecord record = userDao.query(userId);
+    public int saveCoinFromScore(UserRecord record, int score, boolean isSingle) {
         if (record == null) {
             return 0;
         }

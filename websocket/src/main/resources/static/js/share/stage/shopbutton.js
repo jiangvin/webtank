@@ -10,10 +10,11 @@ import Rect from "./rect.js";
 import Item from "./item.js";
 
 export default class ShopButton extends Button {
-    constructor(shop, x, y, text, image, imageIndex, priceType, price, des) {
+    constructor(shop, x, y, text, image, imageIndex, priceType, price, des, done) {
         const length = 120;
         const paddingX = 40;
         const paddingY = 20;
+
         super(text, Resource.width() / 2 - (1 - x) * (length + paddingX),
             Resource.height() / 2 - length / 2 - paddingY / 2 + y * (length + paddingY),
             null,
@@ -25,12 +26,21 @@ export default class ShopButton extends Button {
         this.price = price;
         this.shop = shop;
         this.des = des;
+        //是否激活
+        this.done = done;
+        if (this.done) {
+            this.image = Resource.getImage("button_disabled");
+        }
+
         this.generateControlUnit();
     }
 
     generateControlUnit() {
         const thisButton = this;
         super.generateControlUnit(function () {
+            if (thisButton.done) {
+                return;
+            }
 
             //缓存，清空所有按钮事件
             const cacheUnits = thisButton.shop.menu.controlUnits;
@@ -112,6 +122,12 @@ export default class ShopButton extends Button {
             displayWidth, displayHeight);
 
         //商品价格
+        if (this.done) {
+            ctx.textAlign = 'center';
+            ctx.fillText("已激活", this.x, this.y + 42);
+            return;
+        }
+
         ctx.textAlign = 'left';
         if (this.priceType === 0) {
             const coin = Resource.getImage("coin");

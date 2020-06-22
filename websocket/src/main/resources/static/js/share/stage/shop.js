@@ -108,7 +108,8 @@ export default class Shop {
                 "效果：使敌方所有坦克10秒内不能移动"]);
         items[items.length] = new ShopButton(this, 2, 0, "红星(限时)", Resource.getImage("item_red_star"), 0, 0, 12,
             ["游戏中会随机出现红星道具（限时一天）",
-                "效果：使你的坦克直接升至四星坦克"]);
+                "效果：使你的坦克直接升至四星坦克"],
+            Resource.getUser().hasRedStar());
         items[items.length] = new ShopButton(this, 0, 1, "二星坦克(限时)", Resource.getImage("tank02"), 3, 0, 20,
             ["效果：使你的坦克初始状态为二星坦克（限时一天）"]);
         items[items.length] = new ShopButton(this, 1, 1, "三星坦克(限时)", Resource.getImage("tank03"), 3, 0, 40,

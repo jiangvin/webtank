@@ -23,7 +23,12 @@ export default class AiEngine extends Engine {
         thisEngine.computerLifeCount = 0;
 
         thisEngine.playerTypeId = "tank01";
-        thisEngine.itemTypes = ["star", "shield", "red_star", "life", "king"];
+
+        //整理随机道具池
+        thisEngine.itemTypes = ["star", "shield", "life", "king"];
+        if (Resource.getUser().hasRedStar()) {
+            thisEngine.itemTypes[thisEngine.itemTypes.length] = "red_star";
+        }
 
         thisEngine.maxMapId = 0;
         Common.getRequest("/singlePlayer/getMaxMapId", function (data) {

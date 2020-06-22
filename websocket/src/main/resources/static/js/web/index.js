@@ -29,6 +29,7 @@ export default class Index {
                     //旧用户
                     Resource.setUserId(data.username);
                     Resource.getUser().coin = data.coin;
+                    Resource.getUser().redStarExpired = data.redStarExpired;
 
                     thisIndex.root.addStage(new Menu());
                     thisIndex.root.addStage(new Room());
