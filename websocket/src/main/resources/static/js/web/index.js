@@ -27,9 +27,7 @@ export default class Index {
             Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
                 if (data) {
                     //旧用户
-                    Resource.setUserId(data.username);
-                    Resource.getUser().coin = data.coin;
-                    Resource.getUser().redStarExpired = data.redStarExpired;
+                    Resource.setUser(data);
 
                     thisIndex.root.addStage(new Menu());
                     thisIndex.root.addStage(new Room());

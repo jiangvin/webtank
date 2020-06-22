@@ -8,9 +8,10 @@ import Button from "./button.js";
 import Resource from "../tool/resource.js";
 import Rect from "./rect.js";
 import Item from "./item.js";
+import Common from "../tool/common.js";
 
 export default class ShopButton extends Button {
-    constructor(shop, x, y, text, image, imageIndex, priceType, price, des, done) {
+    constructor(shop, x, y, text, image, imageIndex, priceType, price, des, done, buyType) {
         const length = 120;
         const paddingX = 40;
         const paddingY = 20;
@@ -26,6 +27,8 @@ export default class ShopButton extends Button {
         this.price = price;
         this.shop = shop;
         this.des = des;
+        this.buyType = buyType;
+
         //是否激活
         this.done = done;
         if (this.done) {
@@ -77,13 +80,29 @@ export default class ShopButton extends Button {
             });
             thisButton.shop.menu.addItem(font);
 
+            const close = function () {
+                thisButton.shop.menu.removeItem(background);
+                thisButton.shop.menu.removeItem(font);
+                thisButton.shop.menu.removeItem(ok);
+                thisButton.shop.menu.removeItem(cancel);
+                thisButton.shop.menu.controlUnits = cacheUnits;
+            };
+
             //确定取消按钮
             //按钮
             const ok = new Button("购买",
                 background.x - 70,
                 background.y + background.height / 2 - 35,
                 function () {
-
+                    Common.postEncrypt("/shop/buyWithCoin", {
+                        userId: Resource.getUser().deviceId,
+                        buyType: thisButton.buyType
+                    }, function (data) {
+                        close();
+                        Resource.setUser(data);
+                        Common.addMessage("购买成功!", '#FF0');
+                        thisButton.shop.reload();
+                    })
                 }, 110, 50, '24px Arial');
             thisButton.shop.menu.addItem(ok);
 
@@ -91,11 +110,7 @@ export default class ShopButton extends Button {
                 background.x + 70,
                 background.y + background.height / 2 - 35,
                 function () {
-                    thisButton.shop.menu.removeItem(background);
-                    thisButton.shop.menu.removeItem(font);
-                    thisButton.shop.menu.removeItem(ok);
-                    thisButton.shop.menu.removeItem(cancel);
-                    thisButton.shop.menu.controlUnits = cacheUnits;
+                    close();
                 }, 110, 50, '24px Arial');
             thisButton.shop.menu.addItem(cancel);
         });

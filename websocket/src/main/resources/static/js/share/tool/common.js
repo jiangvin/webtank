@@ -56,6 +56,10 @@ export default class Common {
         }
     }
 
+    static postEncrypt(url, body, callback) {
+        this.postRequest(url, {data: Resource.encryptData(body)}, callback);
+    }
+
     static postRequest(url, body, callback) {
         $.ajax({
             url: Common.generateHttpHost() + encodeURI(url),

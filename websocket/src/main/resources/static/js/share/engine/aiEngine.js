@@ -333,13 +333,11 @@ export default class AiEngine extends Engine {
 
     saveRank() {
         const thisEngine = this;
-        Common.postRequest("/singlePlayer/saveRank",
+        Common.postEncrypt("/singlePlayer/saveRank",
             {
-                data: Resource.encryptData({
-                    score: thisEngine.score,
-                    userId: Resource.getUser().deviceId,
-                    username: Resource.getUser().userId
-                })
+                score: thisEngine.score,
+                userId: Resource.getUser().deviceId,
+                username: Resource.getUser().userId
             }, function (getCoin) {
                 if (getCoin > 0) {
                     Resource.getUser().coin += getCoin;

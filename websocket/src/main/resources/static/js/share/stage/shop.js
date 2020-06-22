@@ -96,7 +96,13 @@ export default class Shop {
         this.currentShopItems = [];
     }
 
+    reload() {
+        this.initShopItems();
+        this.loadShopItems();
+    }
+
     initShopItems() {
+        this.totalShopItems = [];
         const items = this.totalShopItems;
 
         //第一页
@@ -109,7 +115,7 @@ export default class Shop {
         items[items.length] = new ShopButton(this, 2, 0, "红星(限时)", Resource.getImage("item_red_star"), 0, 0, 12,
             ["游戏中会随机出现红星道具（限时一天）",
                 "效果：使你的坦克直接升至四星坦克"],
-            Resource.getUser().hasRedStar());
+            Resource.getUser().hasRedStar(), "RED_STAR");
         items[items.length] = new ShopButton(this, 0, 1, "二星坦克(限时)", Resource.getImage("tank02"), 3, 0, 20,
             ["效果：使你的坦克初始状态为二星坦克（限时一天）"]);
         items[items.length] = new ShopButton(this, 1, 1, "三星坦克(限时)", Resource.getImage("tank03"), 3, 0, 40,
