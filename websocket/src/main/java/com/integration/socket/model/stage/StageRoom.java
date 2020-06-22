@@ -777,7 +777,7 @@ public class StageRoom extends BaseStage {
 
     private void saveCoin() {
         for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-            int coin = userService.saveCoinFromScore(kv.getValue().getUserId(), score);
+            int coin = userService.saveCoinFromScore(kv.getValue().getUserId(), score, false);
             if (coin > 0) {
                 sendMessageToUser(String.format("恭喜你获得金币奖励:%d", coin), MessageType.SYSTEM_MESSAGE, kv.getKey());
             }

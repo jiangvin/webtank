@@ -71,16 +71,11 @@ public class UserService {
         userDao.insertRank(rankDto);
 
         //返回金币奖励
-        return saveCoinFromScore(rankDto.getUserId(), rankDto.getScore());
+        return saveCoinFromScore(rankDto.getUserId(), rankDto.getScore(), true);
     }
 
-    public int saveCoinFromScore(String userId, int score) {
+    public int saveCoinFromScore(String userId, int score, boolean isSingle) {
         if (StringUtils.isEmpty(userId)) {
-            return 0;
-        }
-
-        int coin = score / Constant.SCORE_TO_COIN;
-        if (coin == 0) {
             return 0;
         }
 
@@ -88,7 +83,15 @@ public class UserService {
         if (record == null) {
             return 0;
         }
+
+        int coin = score / Constant.SCORE_TO_COIN;
+
         record.setCoin(record.getCoin() + coin);
+        if (isSingle) {
+            record.setSingleGameTimes(record.getSingleGameTimes() + 1);
+        } else {
+            record.setNetGameTimes(record.getNetGameTimes() + 1);
+        }
         record.update();
         return coin;
     }

@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class User extends TableImpl<UserRecord> {
 
-    private static final long serialVersionUID = -1268544414;
+    private static final long serialVersionUID = -1624085155;
 
     /**
      * The reference instance of <code>user</code>
@@ -85,6 +85,16 @@ public class User extends TableImpl<UserRecord> {
      * The column <code>user.coin</code>.
      */
     public final TableField<UserRecord, Integer> COIN = createField("coin", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>user.single_game_times</code>.
+     */
+    public final TableField<UserRecord, Integer> SINGLE_GAME_TIMES = createField("single_game_times", org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>user.net_game_times</code>.
+     */
+    public final TableField<UserRecord, Integer> NET_GAME_TIMES = createField("net_game_times", org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * Create a <code>user</code> table reference
