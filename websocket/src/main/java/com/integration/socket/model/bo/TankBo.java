@@ -32,6 +32,7 @@ public class TankBo {
     private int bulletCount;
     private List<String> gridKeyList = new ArrayList<>();
     private int shieldTimeout = 0;
+    private boolean hasGhost = false;
 
     public ItemDto toDto() {
         ItemDto tankDto = new ItemDto();
@@ -45,6 +46,8 @@ public class TankBo {
         tankDto.setBulletCount(getBulletCount());
         tankDto.setReloadTime(getReloadTime());
         tankDto.setUserId(getUserId());
+        tankDto.setHasGhost(isHasGhost());
+
         if (getTeamType() != null) {
             tankDto.setTeamId(getTeamType().getValue());
         }

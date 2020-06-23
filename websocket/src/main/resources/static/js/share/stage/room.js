@@ -559,12 +559,13 @@ export default class Room extends Stage {
 
     /**
      *
-     * @param tankData {{typeId,speed,hasShield,id}}
+     * @param tankData {{typeId,speed,hasShield,id,hasGhost}}
      */
     updateTankProperty(tankData) {
         const tankItem = this.items.get(tankData.id);
         tankItem.speed = tankData.speed;
         tankItem.hasShield = tankData.hasShield;
+        tankItem.hasGhost = tankData.hasGhost;
         tankItem.image = Resource.getImage(tankData.typeId);
     };
 

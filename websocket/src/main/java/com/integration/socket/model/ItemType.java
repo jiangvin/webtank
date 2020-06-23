@@ -11,5 +11,6 @@ public enum ItemType {
     RED_STAR,
     LIFE,
     KING,
-    BULLET
+    BULLET,
+    GHOST
 }

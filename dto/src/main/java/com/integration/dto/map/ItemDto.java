@@ -25,4 +25,5 @@ public class ItemDto {
     private Integer reloadTime;
 
     private Boolean hasShield;
+    private Boolean hasGhost;
 }

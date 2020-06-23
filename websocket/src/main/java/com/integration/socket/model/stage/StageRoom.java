@@ -130,6 +130,9 @@ public class StageRoom extends BaseStage {
         if (!creator.hasRedStar()) {
             itemTypePool.remove(ItemType.RED_STAR);
         }
+        if (!creator.hasGhost()) {
+            itemTypePool.remove(ItemType.GHOST);
+        }
     }
 
     public RoomDto toDto() {
@@ -484,6 +487,14 @@ public class StageRoom extends BaseStage {
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return true;
+            case GHOST:
+                if (tankBo.isHasGhost()) {
+                    return false;
+                }
+                tankBo.setHasGhost(true);
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return true;
             default:
                 return false;
         }
@@ -569,6 +580,11 @@ public class StageRoom extends BaseStage {
         if (grid.x < 0 || grid.y < 0 || grid.x >= getMapBo().getMaxGridX() || grid.y >= getMapBo().getMaxGridY()) {
             //超出范围，停止
             return CollideType.COLLIDE_BOUNDARY;
+        }
+
+        //幽灵状态下无视一切障碍
+        if (tankBo.isHasGhost()) {
+            return CollideType.COLLIDE_NONE;
         }
 
         if (collideForTank(getMapBo().getUnitMap().get(key))) {
