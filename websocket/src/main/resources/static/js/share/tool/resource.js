@@ -37,6 +37,7 @@ export default class Resource {
         this.loadAnimationImage("bomb", 6);
 
         //item
+        this.loadAnimationImage("item_bullet", 2);
         this.loadAnimationImage("item_clock", 2);
         this.loadAnimationImage("item_ghost", 2);
         this.loadAnimationImage("item_star", 2);

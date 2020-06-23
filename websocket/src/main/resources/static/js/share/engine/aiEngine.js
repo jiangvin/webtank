@@ -25,7 +25,7 @@ export default class AiEngine extends Engine {
         thisEngine.playerTypeId = "tank01";
 
         //整理随机道具池
-        thisEngine.itemTypes = ["star", "shield", "life", "king"];
+        thisEngine.itemTypes = ["star", "shield", "life", "king", "bullet"];
         if (Resource.getUser().hasRedStar()) {
             thisEngine.itemTypes[thisEngine.itemTypes.length] = "red_star";
         }
@@ -452,6 +452,10 @@ export default class AiEngine extends Engine {
                     break;
                 case "king":
                     this.createKingShield();
+                    this.removeGameItem(k);
+                    break;
+                case "bullet":
+                    tank.bulletCount += 1;
                     this.removeGameItem(k);
                     break;
             }

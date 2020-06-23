@@ -479,6 +479,11 @@ public class StageRoom extends BaseStage {
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return false;
+            case BULLET:
+                tankBo.setBulletCount(tankBo.getBulletCount() + 1);
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return true;
             default:
                 return false;
         }
