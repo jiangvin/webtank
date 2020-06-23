@@ -71,6 +71,17 @@ public class UserBo {
         }
 
         return userRecord.getGhostExpired().after(TimeUtil.now());
+    }
 
+    public boolean hasClock() {
+        if (userRecord == null) {
+            return false;
+        }
+
+        if (userRecord.getClockExpired() == null) {
+            return false;
+        }
+
+        return userRecord.getClockExpired().after(TimeUtil.now());
     }
 }

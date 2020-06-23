@@ -93,8 +93,10 @@ public class StageRoom extends BaseStage {
 
     private Random random = new Random();
 
-    private boolean isPause = false;
-    private String pauseMessage;
+    /**
+     * 游戏状态相关
+     */
+    private GameStatusDto gameStatus = new GameStatusDto();
 
     /**
      * 计分相关
@@ -122,6 +124,7 @@ public class StageRoom extends BaseStage {
         this.mapManger = mapManger;
         this.userService = userService;
         initItemPool(creator);
+
         init();
     }
 
@@ -132,6 +135,9 @@ public class StageRoom extends BaseStage {
         }
         if (!creator.hasGhost()) {
             itemTypePool.remove(ItemType.GHOST);
+        }
+        if (!creator.hasClock()) {
+            itemTypePool.remove(ItemType.CLOCK);
         }
     }
 
@@ -155,6 +161,7 @@ public class StageRoom extends BaseStage {
         this.eventList.clear();
         this.syncTankList.clear();
         this.missionStartTime = System.currentTimeMillis();
+        this.gameStatus.init();
 
         this.eventList.add(new CreateItemEvent());
     }
@@ -206,7 +213,7 @@ public class StageRoom extends BaseStage {
     public void update() {
         processEvent();
 
-        if (this.isPause) {
+        if (gameStatus.isPause()) {
             return;
         }
 
@@ -272,7 +279,7 @@ public class StageRoom extends BaseStage {
 
         if (event instanceof LoadMapEvent) {
             sendMessageToRoom(getMapBo().convertToDto(), MessageType.MAP);
-            this.isPause = false;
+            gameStatus.setType(GameStatusType.NORMAL);
             sendMessageToRoom(null, MessageType.SERVER_READY);
             //1 ~ 5 秒陆续出现坦克
             for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
@@ -737,7 +744,7 @@ public class StageRoom extends BaseStage {
     }
 
     private void processGameOver(TeamType winTeam) {
-        this.isPause = true;
+        gameStatus.setType(GameStatusType.PAUSE);
         if (getRoomType() == RoomType.PVE && !processGameOverPve(winTeam)) {
             return;
         } else if (getRoomType() != RoomType.PVE && !processGameOverPvp(winTeam)) {
@@ -765,7 +772,7 @@ public class StageRoom extends BaseStage {
         this.eventList.add(cleanEvent);
 
         //更改标题
-        MessageEvent changeTitle = new MessageEvent(new GameStatusDto(GameStatusType.PAUSE, this.pauseMessage), MessageType.GAME_STATUS);
+        MessageEvent changeTitle = new MessageEvent(gameStatus, MessageType.GAME_STATUS);
         changeTitle.setTimeout(cleanMapTimeoutSeconds * 60);
         this.eventList.add(changeTitle);
 
@@ -777,37 +784,36 @@ public class StageRoom extends BaseStage {
 
     private boolean processGameOverPve(TeamType winTeam) {
         int saveLife = saveTankType();
-        GameStatusDto gameStatusDto = new GameStatusDto();
-        gameStatusDto.setType(GameStatusType.PAUSE);
 
         if (winTeam == TeamType.RED) {
             updateScoreAfterWin();
-            gameStatusDto.setScore(this.score);
-            gameStatusDto.setRank(userService.getRank(this.score));
+            gameStatus.setScore(this.score);
+            gameStatus.setRank(userService.getRank(this.score));
             if (!mapManger.loadNextMapPve(saveLife)) {
-                gameStatusDto.setMessage("恭喜全部通关");
-                gameStatusDto.setType(GameStatusType.OVER);
-                userService.saveRankForMultiplePlayers(this.creator, gameStatusDto);
+                gameStatus.setMessage("恭喜全部通关");
+                gameStatus.setType(GameStatusType.OVER);
+                userService.saveRankForMultiplePlayers(this.creator, gameStatus);
                 saveCoin();
             } else {
-                gameStatusDto.setMessage("恭喜通关");
+                gameStatus.setMessage("恭喜通关");
             }
         } else {
             if (this.score < 0) {
                 this.score = 0;
             }
-            gameStatusDto.setScore(this.score);
-            gameStatusDto.setRank(userService.getRank(this.score));
-            gameStatusDto.setMessage("游戏失败");
-            gameStatusDto.setType(GameStatusType.OVER);
-            userService.saveRankForMultiplePlayers(this.creator, gameStatusDto);
+            gameStatus.setScore(this.score);
+            gameStatus.setRank(userService.getRank(this.score));
+            gameStatus.setMessage("游戏失败");
+            gameStatus.setType(GameStatusType.OVER);
+            userService.saveRankForMultiplePlayers(this.creator, gameStatus);
             saveCoin();
         }
 
-        sendMessageToRoom(gameStatusDto, MessageType.GAME_STATUS);
+        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
 
-        this.pauseMessage = String.format("MISSION %02d", getMapId());
-        return gameStatusDto.getType() == GameStatusType.PAUSE;
+        //修改标题，下次使用
+        gameStatus.setMessage(String.format("MISSION %02d", getMapId()));
+        return gameStatus.getType() == GameStatusType.PAUSE;
     }
 
     private void saveCoin() {
@@ -828,20 +834,17 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean processGameOverPvp(TeamType winTeam) {
-        this.pauseMessage = getTeam(winTeam) + "胜利!";
-
-        GameStatusDto gameStatusDto = new GameStatusDto();
-        gameStatusDto.setMessage(this.pauseMessage);
+        gameStatus.setMessage(getTeam(winTeam) + "胜利!");
 
         if (!mapManger.loadRandomMapPvp()) {
-            gameStatusDto.setType(GameStatusType.OVER);
-        } else {
-            gameStatusDto.setType(GameStatusType.PAUSE);
+            gameStatus.setType(GameStatusType.OVER);
         }
 
-        sendMessageToRoom(gameStatusDto, MessageType.GAME_STATUS);
-        this.pauseMessage = "RED vs BLUE";
-        return gameStatusDto.getType() == GameStatusType.PAUSE;
+        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
+
+        //修改标题，下次使用
+        gameStatus.setMessage("RED vs BLUE");
+        return gameStatus.getType() == GameStatusType.PAUSE;
     }
 
     private void changeMap(String key, MapUnitType type) {
@@ -951,7 +954,7 @@ public class StageRoom extends BaseStage {
 
     private boolean checkGameStatusAfterTankBomb() {
         //游戏已经暂停
-        if (this.isPause) {
+        if (gameStatus.isPause()) {
             return true;
         }
 
@@ -1048,7 +1051,7 @@ public class StageRoom extends BaseStage {
 
     public void addUser(UserBo userBo, TeamType teamType) {
         //TODO - 暂停状态不允许加入,需要后期优化
-        if (this.isPause) {
+        if (gameStatus.isPause()) {
             return;
         }
 

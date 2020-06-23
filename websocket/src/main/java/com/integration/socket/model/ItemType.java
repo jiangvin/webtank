@@ -12,5 +12,6 @@ public enum ItemType {
     LIFE,
     KING,
     BULLET,
-    GHOST
+    GHOST,
+    CLOCK
 }

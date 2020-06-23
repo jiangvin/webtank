@@ -6,5 +6,5 @@ package com.integration.socket.model;
  * @date 2020/6/6
  */
 public enum GameStatusType {
-    PAUSE, OVER
+    PAUSE, OVER, PAUSE_RED, PAUSE_BLUE, NORMAL
 }
