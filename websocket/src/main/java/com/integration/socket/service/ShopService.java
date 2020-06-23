@@ -24,6 +24,8 @@ public class ShopService {
      * 以下数据需和前端同步
      */
     private static final int RED_STAR_PRICE = 12;
+    private static final int CLOCK_PRICE = 10;
+    private static final int GHOST_PRICE = 8;
 
     public UserDto buyWithCoin(BuyDto buyDto) {
         UserRecord userRecord = userDao.queryUser(buyDto.getUserId());
@@ -38,6 +40,22 @@ public class ShopService {
                 }
                 userRecord.setCoin(userRecord.getCoin() - RED_STAR_PRICE);
                 userRecord.setRedStarExpired(TimeUtil.tomorrow());
+                userRecord.update();
+                return UserDto.convert(userRecord);
+            case GHOST:
+                if (userRecord.getCoin() < GHOST_PRICE) {
+                    throw new CustomException("金币不足!");
+                }
+                userRecord.setCoin(userRecord.getCoin() - GHOST_PRICE);
+                userRecord.setGhostExpired(TimeUtil.tomorrow());
+                userRecord.update();
+                return UserDto.convert(userRecord);
+            case CLOCK:
+                if (userRecord.getCoin() < CLOCK_PRICE) {
+                    throw new CustomException("金币不足!");
+                }
+                userRecord.setCoin(userRecord.getCoin() - CLOCK_PRICE);
+                userRecord.setClockExpired(TimeUtil.tomorrow());
                 userRecord.update();
                 return UserDto.convert(userRecord);
             default:

@@ -2,6 +2,7 @@ package com.integration.socket.model.dto;
 
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
 
 import java.sql.Timestamp;
 
@@ -19,12 +20,16 @@ public class UserDto {
     private int coin;
 
     private Timestamp redStarExpired;
+    private Timestamp ghostExpired;
+    private Timestamp clockExpired;
 
     public static UserDto convert(UserRecord userRecord) {
         UserDto userDto = new UserDto();
-        userDto.setUsername(userRecord.getUsername());
-        userDto.setCoin(userRecord.getCoin());
-        userDto.setRedStarExpired(userRecord.getRedStarExpired());
+        BeanUtils.copyProperties(userRecord, userDto);
+
+        //去掉userId和userDevice
+        userDto.setUserId(null);
+        userDto.setUserDevice(null);
         return userDto;
     }
 }

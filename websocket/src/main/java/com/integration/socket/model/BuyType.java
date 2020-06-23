@@ -6,5 +6,7 @@ package com.integration.socket.model;
  * @date 2020/6/22
  */
 public enum BuyType {
-    RED_STAR
+    GHOST,
+    CLOCK,
+    RED_STAR,
 }

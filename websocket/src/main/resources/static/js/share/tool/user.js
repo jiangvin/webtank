@@ -6,12 +6,22 @@
 
 export default class User {
     constructor() {
-        this.userId = null;
+        this.userId = "";
+        this.coin = 0;
         this.originalUserId = null;
         this.deviceId = null;
         this.deviceName = null;
-        this.coin = 0;
         this.redStarExpired = null;
+        this.ghostExpired = null;
+        this.clockExpired = null;
+    }
+
+    setData(data) {
+        this.setUserId(data.username);
+        this.coin = data.coin;
+        this.redStarExpired = data.redStarExpired;
+        this.ghostExpired = data.ghostExpired;
+        this.clockExpired = data.clockExpired;
     }
 
     setUserId(userId) {
@@ -23,5 +33,13 @@ export default class User {
 
     hasRedStar() {
         return this.redStarExpired && this.redStarExpired > new Date().getTime();
+    }
+
+    hasGhost() {
+        return this.ghostExpired && this.ghostExpired > new Date().getTime();
+    }
+
+    hasClock() {
+        return this.clockExpired && this.clockExpired > new Date().getTime();
     }
 }

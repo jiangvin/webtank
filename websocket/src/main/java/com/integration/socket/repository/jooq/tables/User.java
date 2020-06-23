@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class User extends TableImpl<UserRecord> {
 
-    private static final long serialVersionUID = 869081199;
+    private static final long serialVersionUID = 1196765698;
 
     /**
      * The reference instance of <code>user</code>
@@ -85,6 +85,16 @@ public class User extends TableImpl<UserRecord> {
      * The column <code>user.coin</code>.
      */
     public final TableField<UserRecord, Integer> COIN = createField("coin", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>user.ghost_expired</code>.
+     */
+    public final TableField<UserRecord, Timestamp> GHOST_EXPIRED = createField("ghost_expired", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>user.clock_expired</code>.
+     */
+    public final TableField<UserRecord, Timestamp> CLOCK_EXPIRED = createField("clock_expired", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
      * The column <code>user.red_star_expired</code>.

@@ -119,9 +119,7 @@ export default class Resource {
     }
 
     static setUser(data) {
-        Resource.setUserId(data.username);
-        Resource.getUser().coin = data.coin;
-        Resource.getUser().redStarExpired = data.redStarExpired;
+        Resource.getUser().setData(data);
     }
 
     static getUser() {
