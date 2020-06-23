@@ -316,6 +316,7 @@ export default class AiEngine extends Engine {
 
                     //清空场景
                     thisEngine.events = [];
+                    thisEngine.hasClock = false;
                     thisEngine.tanks.clear();
                     thisEngine.bullets.clear();
                     thisEngine.items.clear();

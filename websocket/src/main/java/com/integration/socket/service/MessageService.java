@@ -64,7 +64,7 @@ public class MessageService {
         try {
             if (userBo instanceof SocketUserBo) {
                 synchronized (onlineUserService.get(userId)) {
-                    ((SocketUserBo)userBo).getSession().getBasicRemote().sendText(ObjectUtil.writeValue(messageDto));
+                    ((SocketUserBo) userBo).getSession().getBasicRemote().sendText(ObjectUtil.writeValue(messageDto));
                 }
             } else {
                 simpMessagingTemplate.convertAndSendToUser(
@@ -73,7 +73,7 @@ public class MessageService {
                     messageDto);
             }
         } catch (Exception e) {
-            log.error("catch send user message error:", e);
+            log.error("catch send user:{} message error:", userBo.getUsername(), e);
         }
     }
 
