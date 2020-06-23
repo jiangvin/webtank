@@ -29,6 +29,10 @@ export default class Status {
         }
     }
 
+    static isGaming() {
+        return Status.getValue() !== Status.statusPause();
+    }
+
     static getMessage() {
         return Status.instance.message;
     }
@@ -47,6 +51,14 @@ export default class Status {
 
     static statusPause() {
         return "pause";
+    }
+
+    static statusPauseRed() {
+        return "pauseRed";
+    }
+
+    static statusPauseBlue() {
+        return "pauseBlue";
     }
 }
 Status.instance = new Status();

@@ -24,9 +24,6 @@ export default class AiEngine extends Engine {
 
         thisEngine.playerTypeId = "tank01";
 
-        //时钟道具
-        thisEngine.hasClock = false;
-
         //整理随机道具池
         thisEngine.itemTypes = ["star", "shield", "life", "king", "bullet"];
         if (Resource.getUser().hasRedStar()) {
@@ -316,7 +313,6 @@ export default class AiEngine extends Engine {
 
                     //清空场景
                     thisEngine.events = [];
-                    thisEngine.hasClock = false;
                     thisEngine.tanks.clear();
                     thisEngine.bullets.clear();
                     thisEngine.items.clear();
@@ -423,7 +419,7 @@ export default class AiEngine extends Engine {
             }
 
             //有时钟道具，所有坦克全部暂停
-            if (thisEngine.hasClock) {
+            if (Status.getValue() === Status.statusPauseBlue()) {
                 return;
             }
 
@@ -488,7 +484,7 @@ export default class AiEngine extends Engine {
     }
 
     createClock() {
-        this.hasClock = true;
+        Status.setStatus(Status.statusPauseBlue());
         this.tanks.forEach(function (tank) {
             if (tank.item.teamId !== 2) {
                 return;
@@ -498,9 +494,8 @@ export default class AiEngine extends Engine {
         });
 
         //10秒后变回来
-        const thisEngine = this;
         this.addTimeEvent(10 * 60, function () {
-            thisEngine.hasClock = false;
+            Status.setStatus(Status.statusNormal());
         });
     }
 
