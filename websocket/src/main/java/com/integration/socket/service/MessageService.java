@@ -2,10 +2,9 @@ package com.integration.socket.service;
 
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
-import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.bo.SocketUserBo;
+import com.integration.socket.model.bo.UserBo;
 import com.integration.util.CommonUtil;
-import com.integration.util.object.ObjectUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,9 +62,8 @@ public class MessageService {
 
         try {
             if (userBo instanceof SocketUserBo) {
-                synchronized (onlineUserService.get(userId)) {
-                    ((SocketUserBo) userBo).getSession().getBasicRemote().sendText(ObjectUtil.writeValue(messageDto));
-                }
+                SocketUserBo socketUserBo = (SocketUserBo) userBo;
+                socketUserBo.sendMessage(messageDto);
             } else {
                 simpMessagingTemplate.convertAndSendToUser(
                     userId,

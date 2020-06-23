@@ -1,8 +1,11 @@
 package com.integration.socket.model.bo;
 
+import com.integration.dto.message.MessageDto;
+import com.integration.util.object.ObjectUtil;
 import lombok.Getter;
 
 import javax.websocket.Session;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -18,12 +21,18 @@ public class SocketUserBo extends UserBo {
     private static final String USER_ID_PREFIX = "id=";
 
     @Getter
-    private Session session;
+    private final Session session;
 
     private SocketUserBo(Session session, String username, String userId) {
         super(username, session.getId());
         this.session = session;
         this.setUserId(userId);
+    }
+
+    public void sendMessage(MessageDto messageDto) throws IOException {
+        synchronized (session) {
+            session.getBasicRemote().sendText(ObjectUtil.writeValue(messageDto));
+        }
     }
 
     private static String getQueryParam(String name, String[] queryInfos) throws UnsupportedEncodingException {

@@ -11,4 +11,8 @@ public class TimeUtil {
     public static Timestamp tomorrow() {
         return new Timestamp(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
     }
+
+    public static Timestamp now() {
+        return new Timestamp(System.currentTimeMillis());
+    }
 }

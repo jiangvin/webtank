@@ -2,11 +2,11 @@ package com.integration.socket.model.bo;
 
 import com.integration.dto.room.TeamType;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
+import com.integration.util.time.TimeUtil;
 import lombok.Data;
 import lombok.NonNull;
 import org.springframework.util.StringUtils;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +58,19 @@ public class UserBo {
             return false;
         }
 
-        return userRecord.getRedStarExpired().after(new Timestamp(System.currentTimeMillis()));
+        return userRecord.getRedStarExpired().after(TimeUtil.now());
+    }
+
+    public boolean hasGhost() {
+        if (userRecord == null) {
+            return false;
+        }
+
+        if (userRecord.getGhostExpired() == null) {
+            return false;
+        }
+
+        return userRecord.getGhostExpired().after(TimeUtil.now());
+
     }
 }
