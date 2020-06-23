@@ -295,7 +295,7 @@ export default class Room extends Stage {
 
         //调整z值
         if (typeId === 5) {
-            item.z = 2;
+            item.z = 4;
         } else if (typeId === 4) {
             item.z = -4;
         }

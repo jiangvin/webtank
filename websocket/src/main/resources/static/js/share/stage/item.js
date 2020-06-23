@@ -33,6 +33,9 @@ export default class Item {
         //是否有护盾
         this.hasShield = false;
 
+        //是否有幽灵道具
+        this.hasGhost = false;
+
         //动画相关
         this.play = null;
 
@@ -112,11 +115,20 @@ export default class Item {
         const displayWidth = this.image.width / this.image.widthPics * this.scale;
         const displayHeight = this.image.height / this.image.heightPics * this.scale;
 
+        if (this.hasGhost) {
+            this.z = 2;
+            context.globalAlpha = 0.5;
+        } else {
+            this.z = 0;
+            context.globalAlpha = 1;
+        }
+
         context.drawImage(this.image,
             this.orientation * this.image.width / this.image.widthPics, 0,
             this.image.width / this.image.widthPics, this.image.height / this.image.heightPics,
             this.screenPoint.x - displayWidth / 2, this.screenPoint.y - displayHeight / 2,
             displayWidth, displayHeight);
+        context.globalAlpha = 1;
 
         this.drawShield(context);
     };

@@ -29,6 +29,9 @@ export default class AiEngine extends Engine {
         if (Resource.getUser().hasRedStar()) {
             thisEngine.itemTypes[thisEngine.itemTypes.length] = "red_star";
         }
+        if (Resource.getUser().hasGhost()) {
+            thisEngine.itemTypes[thisEngine.itemTypes.length] = "ghost";
+        }
 
         thisEngine.maxMapId = 0;
         Common.getRequest("/singlePlayer/getMaxMapId", function (data) {
@@ -457,6 +460,12 @@ export default class AiEngine extends Engine {
                 case "bullet":
                     tank.bulletCount += 1;
                     this.removeGameItem(k);
+                    break;
+                case "ghost":
+                    if (!tank.item.hasGhost) {
+                        tank.item.hasGhost = true;
+                        this.removeGameItem(k);
+                    }
                     break;
             }
         }

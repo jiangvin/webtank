@@ -233,8 +233,8 @@ export default class Engine {
                 break;
         }
 
-        corner1.isBarrier = this.isBarrier(stage, corner1);
-        corner2.isBarrier = this.isBarrier(stage, corner2);
+        corner1.isBarrier = this.isBarrier(stage, corner1, tank.hasGhost);
+        corner2.isBarrier = this.isBarrier(stage, corner2, tank.hasGhost);
 
         //两个边界都有阻碍，返回
         if (corner1.isBarrier && corner2.isBarrier) {
@@ -310,10 +310,16 @@ export default class Engine {
         return newControl;
     };
 
-    isBarrier(stage, point) {
+    isBarrier(stage, point, ghost) {
         if (point.x < 0 || point.y < 0 || point.x > stage.size.width || point.y > stage.size.height) {
             return true;
         }
+
+        //幽灵状态无视障碍
+        if (ghost) {
+            return false;
+        }
+
         const size = Resource.getUnitSize();
         point.gridX = Math.floor(point.x / size);
         point.gridY = Math.floor(point.y / size);
