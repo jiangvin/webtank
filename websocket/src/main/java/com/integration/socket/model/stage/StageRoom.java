@@ -5,6 +5,7 @@ import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.message.MessageType;
+import com.integration.dto.room.GameStatusDto;
 import com.integration.dto.room.GameStatusType;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
@@ -798,7 +799,7 @@ public class StageRoom extends BaseStage {
         this.eventList.add(cleanEvent);
 
         //更改标题
-        MessageEvent changeTitle = new MessageEvent(gameStatus, MessageType.GAME_STATUS);
+        MessageEvent changeTitle = new MessageEvent(new GameStatusDto(GameStatusType.PAUSE, gameStatus.getMessage()), MessageType.GAME_STATUS);
         changeTitle.setTimeout(cleanMapTimeoutSeconds * 60);
         this.eventList.add(changeTitle);
 

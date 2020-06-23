@@ -1,6 +1,5 @@
 package com.integration.bot.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.integration.bot.handler.MessageReceiveHandler;
 import com.integration.bot.model.event.BaseEvent;
 import com.integration.bot.model.event.PauseCheckEvent;
@@ -17,6 +16,7 @@ import com.integration.dto.room.GameStatusDto;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.TeamType;
 import com.integration.util.CommonUtil;
+import com.integration.util.object.ObjectUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -48,7 +48,6 @@ public abstract class BaseBot {
 
     private static final int BOT_LIFETIME = 90 * 60 * 1000;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
     private String roomId;
     private boolean isPause = true;
     private List<BaseEvent> eventList = new ArrayList<>();
@@ -161,7 +160,7 @@ public abstract class BaseBot {
                 }
                 break;
             case MAP:
-                processMap(objectMapper.convertValue(messageDto.getMessage(), MapDto.class));
+                processMap(ObjectUtil.convertValue(messageDto.getMessage(), MapDto.class));
                 break;
             case REMOVE_MAP:
                 String key = (String) messageDto.getMessage();
@@ -172,17 +171,17 @@ public abstract class BaseBot {
                 tankMap.clear();
                 break;
             case TANKS:
-                processTank(objectMapper.convertValue(messageDto.getMessage(), List.class));
+                processTank(ObjectUtil.convertValue(messageDto.getMessage(), List.class));
                 break;
             case REMOVE_TANK:
-                ItemDto dto = objectMapper.convertValue(messageDto.getMessage(), ItemDto.class);
+                ItemDto dto = ObjectUtil.convertValue(messageDto.getMessage(), ItemDto.class);
                 tankMap.remove(dto.getId());
                 break;
             case SERVER_READY:
                 isPause = false;
                 break;
             case GAME_STATUS:
-                GameStatusDto gameStatusDto = objectMapper.convertValue(messageDto.getMessage(), GameStatusDto.class);
+                GameStatusDto gameStatusDto = ObjectUtil.convertValue(messageDto.getMessage(), GameStatusDto.class);
                 switch (gameStatusDto.getType()) {
                     case PAUSE:
                     case OVER:
@@ -215,7 +214,7 @@ public abstract class BaseBot {
 
     private void processTank(List<Object> dtoList) {
         for (Object dto : dtoList) {
-            Tank tank = Tank.convert(objectMapper.convertValue(dto, ItemDto.class));
+            Tank tank = Tank.convert(ObjectUtil.convertValue(dto, ItemDto.class));
             if (tankMap.containsKey(tank.getId()) && tankMap.get(tank.getId()).getUserId().equals(this.name)) {
                 tankMap.get(tank.getId()).copyPropertyFromServer(tank);
             } else {

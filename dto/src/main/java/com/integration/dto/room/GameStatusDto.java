@@ -28,7 +28,6 @@ public class GameStatusDto {
 
     public void init() {
         type = GameStatusType.NORMAL;
-        message = null;
         score = null;
         rank = null;
     }
