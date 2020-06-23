@@ -13,6 +13,7 @@ import Button from "./button.js";
 import Sound from "../tool/sound.js";
 import Rect from "./rect.js";
 import Item from "./item.js";
+import Tank from "./tank.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -580,7 +581,10 @@ export default class Room extends Stage {
     };
 
     createTank(options) {
-        const item = this.createItem(options);
+        const item = new Tank(options);
+        item.stage = this;
+        this.items.set(item.id, item);
+
         const thisRoom = this;
         item.update = function () {
             thisRoom.generalUpdateEvent(item);
