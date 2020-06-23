@@ -53,14 +53,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StageRoom extends BaseStage {
 
     private static final int MAX_ITEM_LIMIT = 3;
-
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
-
     private static final int DEFAULT_SHIELD_TIME = 20 * 60;
-
     private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
-
-    private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
+    private static final int SCORE_COM_BOOM = 10;
+    private static final int SCORE_PLAYER_BOOM = -30;
+    private static final int SCORE_WIN = 500;
 
     private ConcurrentHashMap<String, List<String>> gridTankMap = new ConcurrentHashMap<>();
 
@@ -100,13 +98,6 @@ public class StageRoom extends BaseStage {
     private long missionStartTime;
     private int score = 0;
     private UserService userService;
-
-    /**
-     * 需要和客户端同步
-     */
-    private static final int SCORE_COM_BOOM = 10;
-    private static final int SCORE_PLAYER_BOOM = -30;
-    private static final int SCORE_WIN = 500;
 
     /**
      * 道具池
@@ -184,10 +175,6 @@ public class StageRoom extends BaseStage {
 
     private MapBo getMapBo() {
         return mapManger.getMapBo();
-    }
-
-    public int getUserCount() {
-        return userMap.size();
     }
 
     private void addRemoveBulletIds(String id) {
