@@ -24,6 +24,9 @@ export default class AiEngine extends Engine {
 
         thisEngine.playerTypeId = "tank01";
 
+        //时钟道具
+        thisEngine.hasClock = false;
+
         //整理随机道具池
         thisEngine.itemTypes = ["star", "shield", "life", "king", "bullet"];
         if (Resource.getUser().hasRedStar()) {
@@ -31,6 +34,9 @@ export default class AiEngine extends Engine {
         }
         if (Resource.getUser().hasGhost()) {
             thisEngine.itemTypes[thisEngine.itemTypes.length] = "ghost";
+        }
+        if (Resource.getUser().hasClock()) {
+            thisEngine.itemTypes[thisEngine.itemTypes.length] = "clock";
         }
 
         thisEngine.maxMapId = 0;
@@ -415,6 +421,11 @@ export default class AiEngine extends Engine {
                 return;
             }
 
+            //有时钟道具，所有坦克全部暂停
+            if (thisEngine.hasClock) {
+                return;
+            }
+
             thisEngine.updateTankAi(tank);
         })
     }
@@ -467,8 +478,29 @@ export default class AiEngine extends Engine {
                         this.removeGameItem(k);
                     }
                     break;
+                case "clock":
+                    this.createClock();
+                    this.removeGameItem(k);
+                    break;
             }
         }
+    }
+
+    createClock() {
+        this.hasClock = true;
+        this.tanks.forEach(function (tank) {
+            if (tank.item.teamId !== 2) {
+                return;
+            }
+
+            tank.item.action = 0;
+        });
+
+        //10秒后变回来
+        const thisEngine = this;
+        this.addTimeEvent(10 * 60, function () {
+            thisEngine.hasClock = false;
+        });
     }
 
     createKingShield() {
