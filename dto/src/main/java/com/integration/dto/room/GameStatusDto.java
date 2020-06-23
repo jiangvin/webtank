@@ -1,6 +1,5 @@
-package com.integration.socket.model.dto;
+package com.integration.dto.room;
 
-import com.integration.socket.model.GameStatusType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

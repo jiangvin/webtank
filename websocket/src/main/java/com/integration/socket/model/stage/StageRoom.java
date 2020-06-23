@@ -5,11 +5,11 @@ import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.message.MessageType;
+import com.integration.dto.room.GameStatusType;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
 import com.integration.dto.room.TeamType;
 import com.integration.socket.model.CollideType;
-import com.integration.socket.model.GameStatusType;
 import com.integration.socket.model.ItemType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.ItemBo;
@@ -17,10 +17,10 @@ import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.socket.model.dto.GameStatusDto;
 import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.event.BaseEvent;
+import com.integration.socket.model.event.ClockEvent;
 import com.integration.socket.model.event.CreateItemEvent;
 import com.integration.socket.model.event.CreateTankEvent;
 import com.integration.socket.model.event.IronKingEvent;
@@ -92,11 +92,6 @@ public class StageRoom extends BaseStage {
     private MapMangerBo mapManger;
 
     private Random random = new Random();
-
-    /**
-     * 游戏状态相关
-     */
-    private GameStatusDto gameStatus = new GameStatusDto();
 
     /**
      * 计分相关
@@ -277,6 +272,14 @@ public class StageRoom extends BaseStage {
             return;
         }
 
+        if (event instanceof ClockEvent) {
+            if (gameStatus.getType() != GameStatusType.NORMAL) {
+                gameStatus.setType(GameStatusType.NORMAL);
+                sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
+            }
+            return;
+        }
+
         if (event instanceof LoadMapEvent) {
             sendMessageToRoom(getMapBo().convertToDto(), MessageType.MAP);
             gameStatus.setType(GameStatusType.NORMAL);
@@ -387,6 +390,14 @@ public class StageRoom extends BaseStage {
      * @param tankBo
      */
     private void updateTank(TankBo tankBo) {
+        //查看是否为暂停状态
+        if (gameStatus.getType() == GameStatusType.PAUSE_RED && tankBo.getTeamType() == TeamType.RED) {
+            return;
+        }
+        if (gameStatus.getType() == GameStatusType.PAUSE_BLUE && tankBo.getTeamType() == TeamType.BLUE) {
+            return;
+        }
+
         boolean needUpdate = false;
 
         //填装弹药计算
@@ -502,9 +513,24 @@ public class StageRoom extends BaseStage {
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return true;
+            case CLOCK:
+                clockEvent(tankBo.getTeamType());
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return false;
             default:
                 return false;
         }
+    }
+
+    private void clockEvent(TeamType teamType) {
+        if (teamType == TeamType.RED) {
+            gameStatus.setType(GameStatusType.PAUSE_BLUE);
+        } else {
+            gameStatus.setType(GameStatusType.PAUSE_RED);
+        }
+        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
+        eventList.add(new ClockEvent());
     }
 
     private void kingShield(TeamType teamType) {

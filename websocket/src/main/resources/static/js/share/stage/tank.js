@@ -6,6 +6,7 @@
 import Item from "./item.js";
 import Resource from "../tool/resource.js";
 import Play from "./play.js";
+import Status from "../tool/status.js";
 
 export default class Tank extends Item {
     constructor(options) {
@@ -22,6 +23,39 @@ export default class Tank extends Item {
 
         for (let key in options) {
             this[key] = options[key];
+        }
+    }
+
+    update() {
+        if (this.play) {
+            this.play.update();
+        }
+
+        if (this.action === 0) {
+            return;
+        }
+
+        //时钟的暂停事件
+        if (Status.getValue() === Status.statusPauseRed() && this.teamId === 1) {
+            return;
+        }
+        if (Status.getValue() === Status.statusPauseBlue() && this.teamId === 2) {
+            return;
+        }
+
+        switch (this.orientation) {
+            case 0:
+                this.y -= this.speed;
+                break;
+            case 1:
+                this.y += this.speed;
+                break;
+            case 2:
+                this.x -= this.speed;
+                break;
+            case 3:
+                this.x += this.speed;
+                break;
         }
     }
 

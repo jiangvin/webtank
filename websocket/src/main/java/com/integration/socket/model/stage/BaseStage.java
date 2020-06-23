@@ -1,12 +1,15 @@
 package com.integration.socket.model.stage;
 
+import com.integration.dto.map.ActionType;
+import com.integration.dto.map.ItemDto;
+import com.integration.dto.map.OrientationType;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
-import com.integration.dto.map.ActionType;
-import com.integration.dto.map.OrientationType;
+import com.integration.dto.room.GameStatusDto;
+import com.integration.dto.room.GameStatusType;
+import com.integration.dto.room.TeamType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
-import com.integration.dto.map.ItemDto;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,11 @@ public abstract class BaseStage {
     ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
     ConcurrentHashMap<String, BulletBo> bulletMap = new ConcurrentHashMap<>();
+
+    /**
+     * 游戏状态相关
+     */
+    GameStatusDto gameStatus = new GameStatusDto();
 
     BaseStage(MessageService messageService) {
         this.messageService = messageService;
@@ -68,6 +76,14 @@ public abstract class BaseStage {
 
         TankBo tankBo = tankMap.get(tankId);
         if (!tankBo.getUserId().equals(sendFrom)) {
+            return;
+        }
+
+        if (gameStatus.getType() == GameStatusType.PAUSE_BLUE && tankBo.getTeamType() == TeamType.BLUE) {
+            return;
+        }
+
+        if (gameStatus.getType() == GameStatusType.PAUSE_RED && tankBo.getTeamType() == TeamType.RED) {
             return;
         }
 

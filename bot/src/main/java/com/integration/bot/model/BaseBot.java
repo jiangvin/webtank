@@ -13,6 +13,7 @@ import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
+import com.integration.dto.room.GameStatusDto;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.TeamType;
 import com.integration.util.CommonUtil;
@@ -70,10 +71,12 @@ public abstract class BaseBot {
      */
     private boolean deadFlag = false;
 
+    private TeamType teamType;
+
     BaseBot(BotDto botDto) {
         this.name = botDto.getName();
         this.roomId = botDto.getRoomId();
-        TeamType teamType = botDto.getTeamType();
+        teamType = botDto.getTeamType();
         connect();
         if (isDead()) {
             return;
@@ -179,8 +182,31 @@ public abstract class BaseBot {
                 isPause = false;
                 break;
             case GAME_STATUS:
-                isPause = true;
-                eventList.add(new PauseCheckEvent());
+                GameStatusDto gameStatusDto = objectMapper.convertValue(messageDto.getMessage(), GameStatusDto.class);
+                switch (gameStatusDto.getType()) {
+                    case PAUSE:
+                    case OVER:
+                        isPause = true;
+                        break;
+                    case PAUSE_BLUE:
+                        if (teamType == TeamType.BLUE) {
+                            isPause = true;
+                        }
+                        break;
+                    case PAUSE_RED:
+                        if (teamType == TeamType.RED) {
+                            isPause = true;
+                        }
+                        break;
+                    case NORMAL:
+                        isPause = false;
+                        break;
+                    default:
+                        break;
+                }
+                if (isPause) {
+                    eventList.add(new PauseCheckEvent());
+                }
                 break;
             default:
                 break;

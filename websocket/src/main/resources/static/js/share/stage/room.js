@@ -476,6 +476,20 @@ export default class Room extends Stage {
     }
 
     gameStatus(status) {
+        if (status.type === "NORMAL") {
+            Status.setStatus(Status.statusNormal());
+            return;
+        }
+        if (status.type === "PAUSE_RED") {
+            Status.setStatus(Status.statusPauseRed());
+            return;
+        }
+        if (status.type === "PAUSE_BLUE") {
+            Status.setStatus(Status.statusPauseBlue());
+            return;
+        }
+
+        //其他结束状态
         let titleHeight = Resource.height() * .4;
         let buttonHeight = Resource.height() * 0.55;
         if (status.score && status.rank) {
@@ -587,9 +601,6 @@ export default class Room extends Stage {
         this.items.set(item.id, item);
 
         const thisRoom = this;
-        item.update = function () {
-            thisRoom.generalUpdateEvent(item);
-        };
 
         //set center
         if (!this.view.center && Resource.getUser().userId) {

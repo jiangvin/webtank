@@ -2,7 +2,7 @@ package com.integration.socket.service;
 
 import com.integration.socket.model.Constant;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.socket.model.dto.GameStatusDto;
+import com.integration.dto.room.GameStatusDto;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.UserDao;
