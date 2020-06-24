@@ -102,7 +102,7 @@ public class StageRoom extends BaseStage {
     /**
      * 道具池
      */
-    private List<ItemType> itemTypePool;
+    private List<ItemType> itemTypePool = new ArrayList<>();
 
     public StageRoom(RoomDto roomDto, UserBo creator, MapMangerBo mapManger, MessageService messageService, UserService userService) {
         super(messageService);
@@ -116,7 +116,7 @@ public class StageRoom extends BaseStage {
     }
 
     private void initItemPool(UserBo creator) {
-        itemTypePool = Arrays.asList(ItemType.values());
+        itemTypePool.addAll(Arrays.asList(ItemType.values()));
         if (!creator.hasRedStar()) {
             itemTypePool.remove(ItemType.RED_STAR);
         }
