@@ -344,11 +344,6 @@ export default class AiEngine extends Engine {
                 score: thisEngine.score,
                 userId: Resource.getUser().deviceId,
                 username: Resource.getUser().userId
-            }, function (getCoin) {
-                if (getCoin > 0) {
-                    Resource.getUser().coin += getCoin;
-                    Common.addMessage("恭喜你获得金币奖励:" + getCoin, "#FF0");
-                }
             });
     }
 

@@ -54,11 +54,11 @@ public class UserService {
         return userDao.queryRank(score);
     }
 
-    public int saveRankForSinglePlayer(RankDto rankDto) {
+    public void saveRankForSinglePlayer(RankDto rankDto) {
         if (StringUtils.isEmpty(rankDto.getUsername()) ||
                 rankDto.getScore() == null ||
                 rankDto.getScore() <= 0) {
-            return 0;
+            return;
         }
 
         //更新后面的排名
@@ -71,12 +71,12 @@ public class UserService {
         userDao.insertRank(rankDto);
 
         //返回金币奖励
-        return saveCoinFromScore(userDao.queryUser(rankDto.getUserId()), rankDto.getScore(), true);
+        saveCoinFromScore(userDao.queryUser(rankDto.getUserId()), rankDto.getScore(), true);
     }
 
-    public int saveCoinFromScore(UserRecord record, int score, boolean isSingle) {
+    public void saveCoinFromScore(UserRecord record, int score, boolean isSingle) {
         if (record == null) {
-            return 0;
+            return;
         }
 
         int coin = score / Constant.SCORE_TO_COIN;
@@ -88,7 +88,6 @@ public class UserService {
             record.setNetGameTimes(record.getNetGameTimes() + 1);
         }
         record.update();
-        return coin;
     }
 
     public void saveRankForMultiplePlayers(UserBo creator, GameStatusDto gameStatusDto) {

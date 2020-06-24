@@ -35,8 +35,13 @@ export default class Common {
             return;
         }
 
+        const oldCoins = Resource.getUser().coin;
         Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
             Resource.setUser(data);
+            const newCoins = Resource.getUser().coin;
+            if (newCoins !== oldCoins) {
+                Common.addMessage("当前金币数量: " + newCoins);
+            }
         });
     }
 
