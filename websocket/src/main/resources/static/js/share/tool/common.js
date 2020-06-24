@@ -30,6 +30,16 @@ export default class Common {
         Resource.getRoot().addMessageEvent(eventType, callBack);
     }
 
+    static syncUserData() {
+        if (!Resource.getUser().deviceId) {
+            return;
+        }
+
+        Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
+            Resource.setUser(data);
+        });
+    }
+
     static getRequest(url, callBack) {
         try {
             const xmlHttp = new XMLHttpRequest();

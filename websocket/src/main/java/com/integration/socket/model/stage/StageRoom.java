@@ -807,7 +807,7 @@ public class StageRoom extends BaseStage {
                 gameStatus.setMessage("恭喜全部通关");
                 gameStatus.setType(GameStatusType.OVER);
                 userService.saveRankForMultiplePlayers(this.creator, gameStatus);
-                saveCoin();
+                getAndSaveCoin();
             } else {
                 gameStatus.setMessage("恭喜通关");
             }
@@ -820,7 +820,7 @@ public class StageRoom extends BaseStage {
             gameStatus.setMessage("游戏失败");
             gameStatus.setType(GameStatusType.OVER);
             userService.saveRankForMultiplePlayers(this.creator, gameStatus);
-            saveCoin();
+            getAndSaveCoin();
         }
 
         sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
@@ -830,7 +830,7 @@ public class StageRoom extends BaseStage {
         return gameStatus.getType() == GameStatusType.PAUSE;
     }
 
-    private void saveCoin() {
+    private void getAndSaveCoin() {
         for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
             int coin = userService.saveCoinFromScore(kv.getValue().getUserRecord(), score, false);
             if (coin > 0) {
