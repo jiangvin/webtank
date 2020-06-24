@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.OnClose;
-import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -88,10 +87,5 @@ public class WebSocketEndpoint {
             return;
         }
         gameService.receiveMessage(messageDto, userId);
-    }
-
-    @OnError
-    public void onError(Session session, Throwable error) {
-        log.warn("catch session:{} error:{}", session.getId(), error.getMessage());
     }
 }
