@@ -7,6 +7,6 @@ package com.integration.socket.model.event;
  */
 public class ClockEvent extends BaseEvent {
     public ClockEvent() {
-        setTimeout(10 * 60);
+        setTimeout(15 * 60);
     }
 }

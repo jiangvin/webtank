@@ -494,7 +494,7 @@ export default class AiEngine extends Engine {
         });
 
         //10秒后变回来
-        this.addTimeEvent(10 * 60, function () {
+        this.addTimeEvent(15 * 60, function () {
             Status.setStatus(Status.statusNormal());
         });
     }

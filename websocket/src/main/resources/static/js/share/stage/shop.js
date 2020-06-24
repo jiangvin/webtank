@@ -112,7 +112,7 @@ export default class Shop {
             Resource.getUser().hasGhost(), "GHOST");
         items[items.length] = new ShopButton(this, 1, 0, "定时器(限时)", Resource.getImage("item_clock"), 0, 0, 10,
             ["游戏中会随机出现定时器道具（限时一天）",
-                "效果：使敌方所有坦克10秒内不能移动"],
+                "效果：使敌方所有坦克15秒内不能移动"],
             Resource.getUser().hasClock(), "CLOCK");
         items[items.length] = new ShopButton(this, 2, 0, "红星(限时)", Resource.getImage("item_red_star"), 0, 0, 12,
             ["游戏中会随机出现红星道具（限时一天）",
