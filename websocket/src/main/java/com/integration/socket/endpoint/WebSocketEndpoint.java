@@ -76,7 +76,7 @@ public class WebSocketEndpoint {
      * @param text
      */
     @OnMessage
-    public void onMsg(Session session, String text) throws UnsupportedEncodingException {
+    public void onMsg(Session session, String text) throws IOException {
         String userId = SocketUserBo.getUsernameFromSession(session);
         if (userId == null) {
             return;
@@ -86,6 +86,13 @@ public class WebSocketEndpoint {
         if (messageDto == null) {
             return;
         }
-        gameService.receiveMessage(messageDto, userId);
+
+        try {
+            gameService.receiveMessage(messageDto, userId);
+        } catch (Exception e) {
+            log.error(String.format("userId:%s catch error:", userId), e);
+            MessageDto errorDto = new MessageDto(e.getMessage(), MessageType.ERROR_MESSAGE);
+            session.getBasicRemote().sendText(ObjectUtil.writeValue(errorDto));
+        }
     }
 }
