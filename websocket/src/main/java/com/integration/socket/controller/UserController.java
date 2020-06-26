@@ -1,10 +1,7 @@
 package com.integration.socket.controller;
 
-import com.integration.socket.model.dto.MapEditDto;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
-import com.integration.socket.repository.dao.MapDao;
-import com.integration.socket.service.MapService;
 import com.integration.socket.service.OnlineUserService;
 import com.integration.socket.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +30,6 @@ public class UserController {
     private OnlineUserService onlineUserService;
 
     @Autowired
-    private MapDao mapDao;
-
-    @Autowired
-    private MapService mapService;
-
-    @Autowired
     private UserService userService;
 
     @GetMapping("/getUsers")
@@ -61,17 +52,6 @@ public class UserController {
     public List<RankDto> getRankList(@RequestParam(value = "start") int start,
                                      @RequestParam(value = "limit") int limit) {
         return userService.getRankList(start, limit);
-    }
-
-    @GetMapping("/getMaps")
-    public List<String> getMaps() {
-        return mapDao.queryMapNameList();
-    }
-
-    @PostMapping("/setMap")
-    public boolean setMap(MapEditDto mapEditDto) {
-        mapService.saveMap(mapEditDto);
-        return true;
     }
 
 }
