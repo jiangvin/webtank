@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("multiplePlayers")
 public class MultiplePlayersController {
 
+    private static final int NAME_START = 2;
+    private static final int NAME_LIMIT = 99;
+
     @Autowired
     private OnlineUserService onlineUserService;
 
@@ -33,10 +36,26 @@ public class MultiplePlayersController {
             return userId;
         }
 
-        for (int i = 2; i < 100; ++i) {
+        for (int i = NAME_START; i <= NAME_LIMIT; ++i) {
             String newId = String.format("%s(%d)", userId, i);
             if (!onlineUserService.exists(newId)) {
                 return newId;
+            }
+        }
+
+        return CommonUtil.getId();
+    }
+
+    @GetMapping("/getRoomName")
+    public String getRoomName(@RequestParam(value = "roomName") String roomName) {
+        if (!roomService.roomNameExists(roomName)) {
+            return roomName;
+        }
+
+        for (int i = NAME_START; i <= NAME_LIMIT; ++i) {
+            String newRoomName = String.format("%s(%d)", roomName, i);
+            if (!roomService.roomNameExists(newRoomName)) {
+                return newRoomName;
             }
         }
 

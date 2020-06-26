@@ -24,21 +24,24 @@ export default class NetEngine extends Engine {
                     Connect.send("CLIENT_READY", {
                         username: Resource.getUser().username
                     })
-                }, 40);
+                }, 30);
 
                 //create room
                 if (!room.roomInfo.joinRoom) {
-                    //set room id
-                    thisEngine.room.roomInfo.roomId = Resource.getUser().userId + "的房间";
-
                     Common.addTimeEvent("CREATE_ROOM", function () {
-                        Connect.send("CREATE_ROOM", {
-                            "roomId": thisEngine.room.roomInfo.roomId,
-                            "mapId": thisEngine.room.roomInfo.mapId,
-                            "roomType": thisEngine.room.roomInfo.roomType,
-                            "joinTeamType": thisEngine.room.roomInfo.joinTeamType
-                        })
-                    }, 50);
+                        Common.getRequest("/multiplePlayers/getRoomName?roomName=" + Resource.getUser().userId + "的房间",
+                            function (roomName) {
+                                //set room id
+                                thisEngine.room.roomInfo.roomId = roomName;
+
+                                Connect.send("CREATE_ROOM", {
+                                    "roomId": thisEngine.room.roomInfo.roomId,
+                                    "mapId": thisEngine.room.roomInfo.mapId,
+                                    "roomType": thisEngine.room.roomInfo.roomType,
+                                    "joinTeamType": thisEngine.room.roomInfo.joinTeamType
+                                })
+                            });
+                    }, 40);
                 } else {
                     //join room
                     Common.addTimeEvent("JOIN_ROOM", function () {
@@ -46,7 +49,7 @@ export default class NetEngine extends Engine {
                             "roomId": thisEngine.room.roomInfo.roomId,
                             "joinTeamType": thisEngine.room.roomInfo.joinTeamType
                         })
-                    }, 50);
+                    }, 40);
                 }
 
                 //注册消息事件
@@ -85,7 +88,7 @@ export default class NetEngine extends Engine {
 
                 //显示蒙版
                 thisEngine.room.createItem({
-                    z : 8,
+                    z: 8,
                     draw: function (ctx) {
                         ctx.globalAlpha = 0.5;
                         ctx.fillStyle = '#000000';
