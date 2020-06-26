@@ -107,7 +107,7 @@ export default class Room extends Stage {
             return;
         }
 
-        if (Status.getValue() !== Status.statusNormal()) {
+        if (Status.getValue() === Status.statusPause()) {
             return;
         }
 
