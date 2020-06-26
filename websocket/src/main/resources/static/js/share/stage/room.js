@@ -181,6 +181,13 @@ export default class Room extends Stage {
                 end.x = start.x + this.backgroundImage.sizeX;
                 end.y = start.y + this.backgroundImage.sizeY;
 
+                if (start.x > Resource.width() ||
+                    start.y > Resource.height() ||
+                    end.x < 0 ||
+                    end.y < 0) {
+                    continue;
+                }
+
                 ctx.drawImage(this.backgroundImage,
                     0, 0,
                     this.backgroundImage.width, this.backgroundImage.height,
@@ -383,20 +390,9 @@ export default class Room extends Stage {
 
 
     calculateBackgroundRepeat() {
-        const imageRate = this.backgroundImage.width / this.backgroundImage.height;
-        const mapRate = this.size.width / this.size.height;
-        if (mapRate >= imageRate * 0.7 && mapRate <= imageRate * 1.3) {
-            this.backgroundImage.repeatX = 1;
-            this.backgroundImage.repeatY = 1;
-        } else {
-            if (mapRate < imageRate * 0.7) {
-                this.backgroundImage.repeatX = 1;
-                this.backgroundImage.repeatY = Math.round(this.size.height / (this.size.width / imageRate));
-            } else {
-                this.backgroundImage.repeatY = 1;
-                this.backgroundImage.repeatX = Math.round(this.size.width / (this.size.height * imageRate));
-            }
-        }
+        this.backgroundImage.repeatX = Math.round(this.size.width / this.backgroundImage.width);
+        this.backgroundImage.repeatY = Math.round(this.size.height / this.backgroundImage.height);
+
         this.backgroundImage.sizeX = this.size.width / this.backgroundImage.repeatX;
         this.backgroundImage.sizeY = this.size.height / this.backgroundImage.repeatY;
     };
@@ -510,7 +506,7 @@ export default class Room extends Stage {
                     ctx.fillText("当前得分: " + status.score,
                         Resource.width() / 2,
                         Resource.height() * .3 + 60);
-                    
+
                     ctx.fillText("当前排名: " + status.rank,
                         Resource.width() / 2,
                         Resource.height() * .3 + 100);
