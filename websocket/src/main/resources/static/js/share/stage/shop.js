@@ -137,7 +137,7 @@ export default class Shop {
                 "效果：使你的坦克变成半透明移动时无视一切障碍物"]);
         items[items.length] = new ShopButton(this, 1, 1, "定时器(永久)", Resource.getImage("item_clock"), 0, 1, 15,
             ["游戏中会随机出现定时器道具",
-                "效果：使敌方所有坦克10秒内不能移动"]);
+                "效果：使敌方所有坦克15秒内不能移动"]);
         items[items.length] = new ShopButton(this, 2, 1, "红星(永久)", Resource.getImage("item_red_star"), 0, 1, 18,
             ["游戏中会随机出现红星道具",
                 "效果：使你的坦克直接升至四星坦克"]);
