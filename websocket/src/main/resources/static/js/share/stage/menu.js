@@ -368,6 +368,7 @@ export default class Menu extends Stage {
     initMenu() {
         Connect.disconnect();
         Sound.bgmPause();
+        Resource.getRoot().engine = null;
         Resource.getRoot().users = null;
         Resource.getRoot().netDelay = 0;
         this.removeButtons();

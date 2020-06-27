@@ -14,6 +14,7 @@ import Sound from "../tool/sound.js";
 import Rect from "./rect.js";
 import Item from "./item.js";
 import Tank from "./tank.js";
+import Confirm from "./confirm.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -775,4 +776,23 @@ export default class Room extends Stage {
                 });
         });
     };
+
+    processPointDownEvent(point) {
+        super.processPointDownEvent(point);
+
+        //返回主菜单
+        if (point.x < Resource.width() - 140 ||
+            point.y > 40) {
+            return;
+        }
+
+        new Confirm(
+            this,
+            "返回主菜单",
+            ["返回主菜单将不会获得任何积分和金币，确定要返回吗？"],
+            function () {
+                Resource.getRoot().lastStage();
+                Resource.getRoot().currentStage().initMenu();
+            });
+    }
 }

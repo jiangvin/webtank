@@ -308,6 +308,15 @@ export default class Control {
             fire.width, fire.height,
             controlMode.rightCenterX - controlMode.rightRadius, controlMode.rightCenterY - controlMode.rightRadius,
             controlMode.rightRadius * 2, controlMode.rightRadius * 2);
+
+        //返回
+        const back = Resource.getImage("back");
+        ctx.drawImage(
+            back,
+            0, 0,
+            back.width, back.height,
+            Resource.width() - back.width, 0,
+            back.width, back.height);
     }
 
     static getTouchPoint(eventPoint) {
