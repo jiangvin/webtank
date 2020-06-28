@@ -27,9 +27,11 @@ import com.integration.socket.model.event.CreateTankEvent;
 import com.integration.socket.model.event.IronKingEvent;
 import com.integration.socket.model.event.LoadMapEvent;
 import com.integration.socket.model.event.MessageEvent;
+import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import com.integration.socket.service.MessageService;
 import com.integration.socket.service.UserService;
 import com.integration.util.CommonUtil;
+import com.integration.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
@@ -1117,7 +1119,7 @@ public class StageRoom extends BaseStage {
         tankBo.setTeamType(userBo.getTeamType());
 
         //设定类型
-        TankTypeDto initType = getTankType(lifeMap);
+        TankTypeDto initType = getTankType(lifeMap, userBo);
         TankTypeDto saveType = this.tankTypeSaveMap.get(userBo.getUsername());
         if (saveType != null) {
             tankBo.setType(saveType);
@@ -1142,7 +1144,7 @@ public class StageRoom extends BaseStage {
      * @param lifeMap
      * @return
      */
-    private TankTypeDto getTankType(List<StringCountDto> lifeMap) {
+    private TankTypeDto getTankType(List<StringCountDto> lifeMap, UserBo userBo) {
         StringCountDto pair = lifeMap.get(0);
         int lastCount = pair.getValue() - 1;
         if (lastCount == 0) {
@@ -1151,7 +1153,20 @@ public class StageRoom extends BaseStage {
             pair.setValue(lastCount);
         }
         sendMessageToRoom(getMapBo().convertLifeCountToDto(), MessageType.MAP);
-        return TankTypeDto.getTankType(pair.getKey());
+        String tankType = pair.getKey();
+        if (isBot(userBo.getTeamType())) {
+            return TankTypeDto.getTankType(tankType);
+        }
+        if (userBo.getUserRecord() == null) {
+            return TankTypeDto.getTankType(tankType);
+        }
+        UserRecord userRecord = userBo.getUserRecord();
+        if (!StringUtils.isEmpty(userRecord.getTankType()) &&
+                userRecord.getTankTypeExpired() != null &&
+                userRecord.getTankTypeExpired().after(TimeUtil.now())) {
+            tankType = userRecord.getTankType();
+        }
+        return TankTypeDto.getTankType(tankType);
     }
 
     private List<StringCountDto> getLifeMap(TeamType teamType) {

@@ -119,9 +119,11 @@ export default class Shop {
                 "效果：使你的坦克直接升至四星坦克"],
             Resource.getUser().hasRedStar(), "RED_STAR");
         items[items.length] = new ShopButton(this, 0, 1, "二星坦克(限时)", Resource.getImage("tank02"), 3, 0, 20,
-            ["效果：使你的坦克初始状态为二星坦克（限时一天）"]);
+            ["效果：使你的坦克初始状态为二星坦克（限时一天）"],
+            Resource.getUser().getTankType() === "tank02", "TANK02");
         items[items.length] = new ShopButton(this, 1, 1, "三星坦克(限时)", Resource.getImage("tank03"), 3, 0, 40,
-            ["效果：使你的坦克初始状态为三星坦克（限时一天）"]);
+            ["效果：使你的坦克初始状态为三星坦克（限时一天）"],
+            Resource.getUser().getTankType() === "tank03", "TANK03");
         items[items.length] = new ShopButton(this, 2, 1, "X 50(首充)", Resource.getImage("coin"), 0, 1, 2,
             ["获得50个金币（仅限一次）"]);
 

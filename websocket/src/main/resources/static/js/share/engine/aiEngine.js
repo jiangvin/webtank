@@ -22,7 +22,7 @@ export default class AiEngine extends Engine {
         thisEngine.playerLifeCount = 5;
         thisEngine.computerLifeCount = 0;
 
-        thisEngine.playerTypeId = "tank01";
+        thisEngine.playerTypeId = Resource.getUser().getTankType();
 
         //整理随机道具池
         thisEngine.itemTypes = ["star", "shield", "life", "king", "bullet"];
@@ -761,7 +761,7 @@ export default class AiEngine extends Engine {
                 thisEngine.playerTypeId,
                 1, true);
             //恢复玩家保存的类型
-            thisEngine.playerTypeId = "tank01";
+            thisEngine.playerTypeId = Resource.getUser().getTankType();
         });
     }
 

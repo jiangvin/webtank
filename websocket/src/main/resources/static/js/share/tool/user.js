@@ -14,6 +14,9 @@ export default class User {
         this.redStarExpired = null;
         this.ghostExpired = null;
         this.clockExpired = null;
+
+        this.tankType = "tank01";
+        this.tankTypeExpired = null;
     }
 
     setData(data) {
@@ -22,6 +25,8 @@ export default class User {
         this.redStarExpired = data.redStarExpired;
         this.ghostExpired = data.ghostExpired;
         this.clockExpired = data.clockExpired;
+        this.tankType = data.tankType;
+        this.tankTypeExpired = data.tankTypeExpired;
     }
 
     setUserId(userId) {
@@ -41,5 +46,12 @@ export default class User {
 
     hasClock() {
         return this.clockExpired && this.clockExpired > new Date().getTime();
+    }
+
+    getTankType() {
+        if (!this.tankTypeExpired || this.tankTypeExpired < new Date().getTime()) {
+            return "tank01";
+        }
+        return this.tankType;
     }
 }

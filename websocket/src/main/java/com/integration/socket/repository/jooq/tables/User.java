@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class User extends TableImpl<UserRecord> {
 
-    private static final long serialVersionUID = 1196765698;
+    private static final long serialVersionUID = -1115462183;
 
     /**
      * The reference instance of <code>user</code>
@@ -100,6 +100,16 @@ public class User extends TableImpl<UserRecord> {
      * The column <code>user.red_star_expired</code>.
      */
     public final TableField<UserRecord, Timestamp> RED_STAR_EXPIRED = createField("red_star_expired", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>user.tank_type</code>.
+     */
+    public final TableField<UserRecord, String> TANK_TYPE = createField("tank_type", org.jooq.impl.SQLDataType.VARCHAR(32).nullable(false).defaultValue(org.jooq.impl.DSL.inline("tank01", org.jooq.impl.SQLDataType.VARCHAR)), this, "");
+
+    /**
+     * The column <code>user.tank_type_expired</code>.
+     */
+    public final TableField<UserRecord, Timestamp> TANK_TYPE_EXPIRED = createField("tank_type_expired", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
      * The column <code>user.single_game_times</code>.

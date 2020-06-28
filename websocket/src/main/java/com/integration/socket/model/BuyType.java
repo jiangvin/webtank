@@ -9,4 +9,6 @@ public enum BuyType {
     GHOST,
     CLOCK,
     RED_STAR,
+    TANK02,
+    TANK03
 }

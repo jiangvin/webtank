@@ -7,4 +7,5 @@ package com.integration.socket.model;
  */
 public class Constant {
     static public final int SCORE_TO_COIN = 1000;
+    static public final String DEFAULT_TANK_TYPE = "tank01";
 }

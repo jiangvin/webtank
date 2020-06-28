@@ -35,7 +35,9 @@ public class UserDao extends BaseDao {
 
     public void saveUser(UserDto userDto) {
         UserRecord userRecord = create.newRecord(USER);
-        BeanUtils.copyProperties(userDto, userRecord);
+        userRecord.setUserId(userDto.getUserId());
+        userRecord.setUsername(userDto.getUsername());
+        userRecord.setUserDevice(userDto.getUserDevice());
         userRecord.setCreateTime(new Timestamp(System.currentTimeMillis()));
         userRecord.setLastLoginTime(userRecord.getCreateTime());
         userRecord.insert();
