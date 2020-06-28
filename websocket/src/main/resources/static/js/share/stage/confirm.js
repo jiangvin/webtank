@@ -10,7 +10,7 @@ import Button from "./button.js";
  */
 
 export default class Confirm {
-    constructor(stage, title, textList, callback, buttonText) {
+    constructor(stage, title, textList, callback, buttonText, autoClose) {
         this.stage = stage;
         this.title = title;
         this.textList = textList;
@@ -20,21 +20,27 @@ export default class Confirm {
         } else {
             this.buttonText = "确定";
         }
+        if (autoClose === undefined) {
+            this.autoClose = true;
+        } else {
+            this.autoClose = autoClose;
+        }
         this.initRect();
     }
 
     initRect() {
+        const thisConfirm = this;
+
         //缓存，清空所有按钮事件
         this.cacheUnits = this.stage.controlUnits;
         this.stage.controlUnits = new Map();
 
         //背景
-        const background = new Rect(Resource.width() / 2, Resource.height() / 2, Resource.width() * .6, Resource.height() * .6);
-        this.stage.addItem(background);
+        thisConfirm.background = new Rect(Resource.width() / 2, Resource.height() / 2, Resource.width() * .6, Resource.height() * .6);
+        this.stage.addItem(thisConfirm.background);
 
         //文字
-        const thisConfirm = this;
-        const font = new Item({
+        thisConfirm.font = new Item({
             z: 10,
             draw: function (ctx) {
                 ctx.textAlign = 'center';
@@ -47,7 +53,7 @@ export default class Confirm {
                     ctx.fillText(
                         thisConfirm.title,
                         Resource.width() / 2,
-                        Resource.height() / 2 - background.height / 2 + 30);
+                        Resource.height() / 2 - thisConfirm.background.height / 2 + 30);
                 }
 
                 //描述
@@ -59,33 +65,33 @@ export default class Confirm {
                 });
             }
         });
-        this.stage.addItem(font);
+        this.stage.addItem(thisConfirm.font);
 
-        //确定取消按钮
-        const close = function () {
-            thisConfirm.stage.removeItem(background);
-            thisConfirm.stage.removeItem(font);
-            thisConfirm.stage.removeItem(ok);
-            thisConfirm.stage.removeItem(cancel);
-            thisConfirm.stage.controlUnits = thisConfirm.cacheUnits;
-        };
-
-        const ok = new Button(thisConfirm.buttonText,
-            background.x - 70,
-            background.y + background.height / 2 - 35,
+        thisConfirm.ok = new Button(thisConfirm.buttonText,
+            thisConfirm.background.x - 70,
+            thisConfirm.background.y + thisConfirm.background.height / 2 - 35,
             function () {
-                if (thisConfirm.callback()) {
-                    close();
+                thisConfirm.callback();
+                if (thisConfirm.autoClose) {
+                    thisConfirm.close();
                 }
             }, 110, 50, '24px Arial');
-        this.stage.addItem(ok);
+        this.stage.addItem(thisConfirm.ok);
 
-        const cancel = new Button("取消",
-            background.x + 70,
-            background.y + background.height / 2 - 35,
+        thisConfirm.cancel = new Button("取消",
+            thisConfirm.background.x + 70,
+            thisConfirm.background.y + thisConfirm.background.height / 2 - 35,
             function () {
-                close();
+                thisConfirm.close();
             }, 110, 50, '24px Arial');
-        this.stage.addItem(cancel);
+        this.stage.addItem(thisConfirm.cancel);
+    }
+
+    close() {
+        this.stage.removeItem(this.background);
+        this.stage.removeItem(this.font);
+        this.stage.removeItem(this.ok);
+        this.stage.removeItem(this.cancel);
+        this.stage.controlUnits = this.cacheUnits;
     }
 }

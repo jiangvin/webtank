@@ -6,9 +6,8 @@
 
 import Button from "./button.js";
 import Resource from "../tool/resource.js";
-import Rect from "./rect.js";
-import Item from "./item.js";
 import Common from "../tool/common.js";
+import Confirm from "./confirm.js";
 
 export default class ShopButton extends Button {
     constructor(shop, x, y, text, image, imageIndex, priceType, price, des, done, buyType) {
@@ -45,78 +44,24 @@ export default class ShopButton extends Button {
                 return;
             }
 
-            //缓存，清空所有按钮事件
-            const cacheUnits = thisButton.shop.menu.controlUnits;
-            thisButton.shop.menu.controlUnits = new Map();
-
-            const background = new Rect(Resource.width() / 2, Resource.height() / 2, Resource.width() * .6, Resource.height() * .6);
-            thisButton.shop.menu.addItem(background);
-
-            //文字
-            const font = new Item({
-                draw: function (ctx) {
-                    //标题
-                    ctx.font = '26px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'top';
-                    ctx.fillStyle = '#fff';
-                    ctx.fillText(thisButton.text,
-                        Resource.width() / 2,
-                        Resource.height() / 2 - background.height / 2 + 13);
-
-                    //描述
-                    ctx.font = '18px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = '#fff';
-                    let height = Resource.height() / 2 - 20;
-                    thisButton.des.forEach(function (str) {
-                        ctx.fillText(str,
-                            Resource.width() / 2,
-                            height);
-                        height += 20;
-                    });
-                }
-            });
-            thisButton.shop.menu.addItem(font);
-
-            const close = function () {
-                thisButton.shop.menu.removeItem(background);
-                thisButton.shop.menu.removeItem(font);
-                thisButton.shop.menu.removeItem(ok);
-                thisButton.shop.menu.removeItem(cancel);
-                thisButton.shop.menu.controlUnits = cacheUnits;
-            };
-
-            //确定取消按钮
-            //按钮
-            const ok = new Button("购买",
-                background.x - 70,
-                background.y + background.height / 2 - 35,
-                function () {
+            const confirm = new Confirm(thisButton.shop.menu, thisButton.text, thisButton.des, function () {
                     if (!thisButton.buyType || thisButton.priceType === 1) {
                         Common.addMessage("暂未开放，敬请期待", "#FF0");
                         return;
                     }
+
                     Common.postEncrypt("/shop/buyWithCoin", {
                         userId: Resource.getUser().deviceId,
                         buyType: thisButton.buyType
                     }, function (data) {
-                        close();
                         Resource.setUser(data);
                         Common.addMessage("购买成功!", '#FF0');
+                        confirm.close();
                         thisButton.shop.reload();
-                    })
-                }, 110, 50, '24px Arial');
-            thisButton.shop.menu.addItem(ok);
-
-            const cancel = new Button("取消",
-                background.x + 70,
-                background.y + background.height / 2 - 35,
-                function () {
-                    close();
-                }, 110, 50, '24px Arial');
-            thisButton.shop.menu.addItem(cancel);
+                    });
+                },
+                "购买",
+                false);
         });
     }
 

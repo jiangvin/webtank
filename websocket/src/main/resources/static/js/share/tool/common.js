@@ -76,21 +76,30 @@ export default class Common {
     }
 
     static postRequest(url, body, callback) {
-        $.ajax({
-            url: Common.generateHttpHost() + encodeURI(url),
-            type: 'post',
-            contentType: "application/json;charset=UTF-8",
-            data: JSON.stringify(body),
-            success: function (result) {
-                if (!result.success) {
-                    Common.addMessage(result.message, "#ff0000");
+        try {
+            const xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function () {
+                if (xmlHttp.readyState !== 4) {
                     return;
                 }
-                if (callback) {
-                    callback(result.data);
+                if (xmlHttp.status !== 200) {
+                    Common.addMessage(xmlHttp.responseText, "#ff0000");
+                    return;
                 }
-            }
-        });
+
+                const result = JSON.parse(xmlHttp.responseText);
+                if (result.success) {
+                    callback(result.data);
+                } else {
+                    Common.addMessage(result.message, "#ff0000");
+                }
+            };
+            xmlHttp.open("POST", Common.generateHttpHost() + encodeURI(url), true); // true for asynchronous
+            xmlHttp.setRequestHeader('content-type', 'application/json');
+            xmlHttp.send(JSON.stringify(body));
+        } catch (e) {
+            Common.addMessage(e, "#ff0000");
+        }
     };
 
     static generateHttpHost() {
