@@ -84,7 +84,7 @@ export default class Menu extends Stage {
     }
 
     getButtonPos(line) {
-        return Resource.height() * 0.32 + line* 85;
+        return Resource.height() * 0.32 + line * 85;
     }
 
     initButtons() {
@@ -219,9 +219,11 @@ export default class Menu extends Stage {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 ctx.fillStyle = '#FFF';
-                ctx.fillText("排名                 玩家                 分数           模式",
-                    rect0701.x,
-                    rect0701.y - rect0701.height / 2 + 33);
+                const y = rect0701.y - rect0701.height / 2 + 33;
+                ctx.fillText("排名", rect0701.x - 184, y);
+                ctx.fillText("玩家", rect0701.x - 47, y);
+                ctx.fillText("分数", rect0701.x + 83, y);
+                ctx.fillText("模式", rect0701.x + 186, y);
             }
         });
         this.buttons[6] = [rect0701, bt0701, bt0702, bt0703, header];
@@ -247,61 +249,31 @@ export default class Menu extends Stage {
                 for (let i = 0; i < 10; ++i) {
                     const rankNumber = new Item({
                         draw: function (ctx) {
-                            thisMenu.drawRankText(
-                                ctx,
-                                thisMenu.rankStart + 1 + i + "",
-                                x - 184,
-                                y + i * 22);
+                            //rank
+                            ctx.font = '20px Helvetica';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'bottom';
+                            ctx.fillStyle = '#FFF';
+
+                            //rank
+                            ctx.fillText(thisMenu.rankStart + 1 + i + "", x - 184, y + i * 22);
+                            if (!dataList[i]) {
+                                return;
+                            }
+                            
+                            const data = dataList[i];
+                            //name
+                            ctx.fillText(data.username, x - 47, y + i * 22);
+                            //score
+                            ctx.fillText(data.score, x + 83, y + i * 22);
+                            //mode
+                            ctx.fillText(data.gameType === 0 ? "单人" : "联机", x + 186, y + i * 22);
                         }
                     });
                     thisMenu.rankInfos[thisMenu.rankInfos.length] = rankNumber;
                     thisMenu.addItem(rankNumber);
-
-                    if (!dataList[i]) {
-                        continue;
-                    }
-                    const data = dataList[i];
-
-                    //名字
-                    const name = new Item({
-                        draw: function (ctx) {
-                            thisMenu.drawRankText(ctx, data.username, x - 47, y + i * 22);
-                        }
-                    });
-                    thisMenu.rankInfos[thisMenu.rankInfos.length] = name;
-                    thisMenu.addItem(name);
-
-                    //分数
-                    const score = new Item({
-                        draw: function (ctx) {
-                            thisMenu.drawRankText(ctx, data.score, x + 83, y + i * 22);
-                        }
-                    });
-                    thisMenu.rankInfos[thisMenu.rankInfos.length] = score;
-                    thisMenu.addItem(score);
-
-                    //模式
-                    const mode = new Item({
-                        draw: function (ctx) {
-                            thisMenu.drawRankText(
-                                ctx,
-                                data.gameType === 0 ? "单人" : "联机",
-                                x + 186,
-                                y + i * 22);
-                        }
-                    });
-                    thisMenu.rankInfos[thisMenu.rankInfos.length] = mode;
-                    thisMenu.addItem(mode);
                 }
             })
-    }
-
-    drawRankText(ctx, text, x, y) {
-        ctx.font = '20px Helvetica';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        ctx.fillStyle = '#FFF';
-        ctx.fillText(text, x, y);
     }
 
     removeRankInfos() {
