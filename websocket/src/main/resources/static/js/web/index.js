@@ -159,4 +159,6 @@ export default class Index {
     }
 }
 
-new Index();
+Resource.preloadResource(function () {
+    new Index();
+});

@@ -53,6 +53,30 @@ export default class Resource {
         this.loadAnimationImage("river", 2);
         this.loadAnimationImage("red_king", 2);
         this.loadAnimationImage("blue_king", 2);
+
+        //menu
+        this.loadAnimationImage("background_menu",1);
+        this.loadAnimationImage("button",1);
+    }
+
+    static preloadResource(callback) {
+        const imageSize = Resource.instance.images.size;
+        let loadSize = 0;
+        Resource.instance.images.forEach(function (image) {
+            if (image.complete) {
+                ++loadSize;
+                if (loadSize >= imageSize) {
+                    callback();
+                }
+            } else {
+                image.onload = function () {
+                    ++loadSize;
+                    if (loadSize >= imageSize) {
+                        callback();
+                    }
+                }
+            }
+        })
     }
 
     loadAnimationImage(imageId, widthPics) {
