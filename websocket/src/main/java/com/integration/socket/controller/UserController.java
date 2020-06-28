@@ -3,6 +3,7 @@ package com.integration.socket.controller;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.service.OnlineUserService;
+import com.integration.socket.service.TokenService;
 import com.integration.socket.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TokenService tokenService;
+
     @GetMapping("/getUsers")
     public List<String> getUsers() {
         return onlineUserService.getUserList();
@@ -52,6 +56,11 @@ public class UserController {
     public List<RankDto> getRankList(@RequestParam(value = "start") int start,
                                      @RequestParam(value = "limit") int limit) {
         return userService.getRankList(start, limit);
+    }
+
+    @GetMapping("/getToken")
+    public String getToken() {
+        return tokenService.createToken();
     }
 
 }

@@ -27,6 +27,9 @@ public class UserService {
     private static final int MAX_RANK_LIMIT = 10;
 
     @Autowired
+    private TokenService tokenService;
+
+    @Autowired
     private UserDao userDao;
 
     public UserDto queryUser(String userId) {
@@ -55,6 +58,10 @@ public class UserService {
     }
 
     public void saveRankForSinglePlayer(RankDto rankDto) {
+        if (!tokenService.checkToken(rankDto.getToken())) {
+            return;
+        }
+
         if (StringUtils.isEmpty(rankDto.getUsername()) ||
                 rankDto.getScore() == null ||
                 rankDto.getScore() <= 0) {
