@@ -40,8 +40,10 @@ export default class Button extends Rect {
 
     draw(ctx) {
         this.drawImage(ctx);
+        this.drawText(ctx);
+    }
 
-        //文字
+    drawText(ctx) {
         ctx.font = this.font;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';

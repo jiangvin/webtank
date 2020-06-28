@@ -4,7 +4,6 @@
  * @date 2020/6/4
  */
 import Button from "./button.js";
-import Resource from "../tool/resource.js";
 
 export default class RoomButton extends Button {
     constructor(text, type, x, y, callBack, width, height) {
@@ -12,11 +11,7 @@ export default class RoomButton extends Button {
         this.type = type;
     }
 
-    draw(ctx) {
-        //按钮框
-        super.drawImage(ctx);
-
-        //文字
+    drawText(ctx) {
         ctx.font = '18px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -24,5 +19,4 @@ export default class RoomButton extends Button {
         ctx.fillText(this.text, this.x, this.y - 13);
         ctx.fillText("(" + this.type + ")", this.x, this.y + 13);
     }
-
 }
