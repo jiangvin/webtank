@@ -7,6 +7,7 @@ import com.integration.socket.service.ShopService;
 import com.integration.util.model.CustomException;
 import com.integration.util.object.ObjectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +30,9 @@ public class ShopController {
         BuyDto buyDto = ObjectUtil.readValue(encryptDto.decrypt(), BuyDto.class);
         if (buyDto == null) {
             throw new CustomException("参数出错!");
+        }
+        if (StringUtils.isEmpty(buyDto.getUserId())) {
+            throw new CustomException("网页用户不支持购买!");
         }
 
         return shopService.buyWithCoin(buyDto);

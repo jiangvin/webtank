@@ -60,5 +60,8 @@ export default class Home extends Stage {
         };
         $('#button1').bind('click', buttonEvent);
         $('#button2').bind('click', buttonEvent);
+        $('#button3').bind('click', function () {
+            window.open("app/app-release.apk");
+        });
     }
 }

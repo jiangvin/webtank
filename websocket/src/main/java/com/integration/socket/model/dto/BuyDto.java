@@ -16,6 +16,6 @@ import lombok.NonNull;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BuyDto {
-    @NonNull private String userId;
+    private String userId;
     @NonNull private BuyType buyType;
 }
