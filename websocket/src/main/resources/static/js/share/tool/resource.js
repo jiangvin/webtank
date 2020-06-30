@@ -55,8 +55,8 @@ export default class Resource {
         this.loadAnimationImage("blue_king", 2);
 
         //menu
-        this.loadAnimationImage("background_menu",1);
-        this.loadAnimationImage("button",1);
+        this.loadAnimationImage("background_menu", 1, "jpg");
+        this.loadAnimationImage("button", 1);
     }
 
     static preloadResource(callback) {
@@ -79,9 +79,13 @@ export default class Resource {
         })
     }
 
-    loadAnimationImage(imageId, widthPics) {
+    loadAnimationImage(imageId, widthPics, type) {
+        if (!type) {
+            type = "png";
+        }
+
         const img = document.createElement('img');
-        img.src = 'image/' + imageId + '.png';
+        img.src = 'image/' + imageId + '.' + type;
         img.widthPics = widthPics;
         img.heightPics = 1;
         img.displayWidth = img.width / img.widthPics;
@@ -161,18 +165,7 @@ export default class Resource {
     static getImage(id, type) {
         const images = Resource.instance.images;
         if (!images.has(id)) {
-            const widthPics = 1;
-            const heightPics = 1;
-            const img = document.createElement('img');
-            if (!type) {
-                type = "png";
-            }
-            img.src = 'image/' + id + '.' + type;
-            img.widthPics = widthPics;
-            img.heightPics = heightPics;
-            img.displayWidth = img.width / img.widthPics;
-            img.displayHeight = img.height / img.heightPics;
-            images.set(id, img);
+            Resource.instance.loadAnimationImage(id, 1, type);
         }
         return images.get(id);
     }

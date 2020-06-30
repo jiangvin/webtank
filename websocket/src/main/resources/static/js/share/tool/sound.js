@@ -65,7 +65,8 @@ export default class Sound {
 
     static playSound(sound) {
         if (!sound.ended) {
-            sound.load();
+            sound.pause();
+            sound.currentTime = 0;
         }
         sound.play();
     }
