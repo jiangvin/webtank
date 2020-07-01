@@ -34,6 +34,10 @@ export default class Sound {
     }
 
     static bgm() {
+        //暂停其他声音
+        if (!Sound.instance.winSound.ended) {
+            Sound.instance.winSound.pause();
+        }
         Sound.playSound(Sound.instance.bgmSound);
     }
 

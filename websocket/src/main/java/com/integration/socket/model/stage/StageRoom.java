@@ -769,7 +769,7 @@ public class StageRoom extends BaseStage {
 
         init();
         long loadTimeoutSeconds = 10;
-        long cleanMapTimeoutSeconds = 7;
+        long cleanMapTimeoutSeconds = 8;
         String tips;
         if (getRoomType() == RoomType.PVE && winTeam == TeamType.BLUE) {
             tips = "重新开始";

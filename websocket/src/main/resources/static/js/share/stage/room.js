@@ -41,6 +41,10 @@ export default class Room extends Stage {
             cache: {}
         };
 
+        /**
+         * 阻挡一些不需要发送的情况
+         * @type {{orientation: number, x: number, action: number, y: number}}
+         */
         this.send = {
             orientation: 0,
             action: 0,
@@ -199,25 +203,25 @@ export default class Room extends Stage {
     }
 
     drawRoomInfo(ctx) {
+        ctx.font = '14px Helvetica';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = '#ffffff';
+
         //标题
-        const tipMessage = '房间号:' + this.roomInfo.roomId +
-            " 关卡:" + this.roomInfo.mapId + " [" + this.roomInfo.roomType + "]";
-        this.drawTips(ctx, tipMessage, 10, 6);
+        if (this.roomInfo.roomId) {
+            const tipMessage = '房间号:' + this.roomInfo.roomId +
+                " 关卡:" + this.roomInfo.mapId + " [" + this.roomInfo.roomType + "]";
+            ctx.fillText(tipMessage, 10, 6);
+        }
 
         //相关信息
         if (this.roomInfo.roomType === 'PVE' && this.roomInfo.playerLife !== undefined) {
-            this.drawTips(ctx,
-                "玩家剩余生命:" + this.roomInfo.playerLife,
-                10, 24);
-            this.drawTips(ctx,
-                "电脑剩余生命:" + this.roomInfo.computerLife,
-                10, 40);
+            ctx.fillText("玩家剩余生命:" + this.roomInfo.playerLife, 10, 24);
+            ctx.fillText("电脑剩余生命:" + this.roomInfo.computerLife, 10, 40);
         } else if (this.roomInfo.playerLife !== undefined) {
-            this.drawTips(ctx,
-                "红队剩余生命:" + this.roomInfo.playerLife,
-                10, 24);
-            this.drawTips(ctx, "蓝队剩余生命:" + this.roomInfo.computerLife,
-                10, 40);
+            ctx.fillText("红队剩余生命:" + this.roomInfo.playerLife, 10, 24);
+            ctx.fillText("蓝队剩余生命:" + this.roomInfo.computerLife, 10, 40);
         }
     }
 
@@ -241,14 +245,6 @@ export default class Room extends Stage {
             ctx.fillStyle = '#FFF';
             ctx.fillText(Status.getMessage(), Resource.width() / 2, Status.getHeight());
         }
-    }
-
-    drawTips(ctx, tips, x, y) {
-        ctx.font = '14px Helvetica';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(tips, x, y);
     }
 
     /**
@@ -780,9 +776,10 @@ export default class Room extends Stage {
     processPointDownEvent(point) {
         super.processPointDownEvent(point);
 
-        //返回主菜单
+        //返回主菜单(暂停状态不能返回)
         if (point.x < Resource.width() - 140 ||
-            point.y > 40) {
+            point.y > 40 ||
+            !Status.isGaming()) {
             return;
         }
 
