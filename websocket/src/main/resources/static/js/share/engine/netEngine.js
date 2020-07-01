@@ -140,4 +140,16 @@ export default class NetEngine extends Engine {
                 y: send.y
             });
     };
+
+    again() {
+        //需在暂停的时候触发
+        if (Status.isGaming()) {
+            return;
+        }
+
+        Common.postEncrypt("/shop/buyWithCoin", {
+            userId: Resource.getUser().deviceId,
+            buyType: "AGAIN_FOR_NET"
+        });
+    }
 }

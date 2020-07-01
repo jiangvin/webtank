@@ -21,6 +21,9 @@ public class ShopService {
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private GameService gameService;
+
     /**
      * 以下数据需和前端同步
      */
@@ -85,6 +88,15 @@ public class ShopService {
                 if (userRecord.getCoin() < AGAIN_PRICE) {
                     throw new CustomException("金币不足!");
                 }
+                userRecord.setCoin(userRecord.getCoin() - AGAIN_PRICE);
+                userRecord.update();
+                return UserDto.convert(userRecord);
+            case AGAIN_FOR_NET:
+                if (userRecord.getCoin() < AGAIN_PRICE) {
+                    throw new CustomException("金币不足!");
+                }
+                //重新赋值userRecord,和缓存中保持一致
+                userRecord = gameService.restartStage(buyDto.getUserId());
                 userRecord.setCoin(userRecord.getCoin() - AGAIN_PRICE);
                 userRecord.update();
                 return UserDto.convert(userRecord);

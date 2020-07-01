@@ -23,7 +23,9 @@ public class GameStatusDto {
     }
 
     public boolean isPause() {
-        return type == GameStatusType.PAUSE || type == GameStatusType.OVER;
+        return type == GameStatusType.PAUSE ||
+               type == GameStatusType.WIN ||
+               type == GameStatusType.LOSE;
     }
 
     public void init() {

@@ -10,6 +10,7 @@ import com.integration.dto.room.TeamType;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.stage.BaseStage;
 import com.integration.socket.model.stage.StageRoom;
+import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import com.integration.util.CommonUtil;
 import com.integration.util.http.HttpUtil;
 import com.integration.util.model.CustomException;
@@ -50,23 +51,19 @@ public class GameService {
             return;
         }
 
-        BaseStage stage = currentStage(userBo);
+        StageRoom stage = currentStage(userBo);
         if (stage == null) {
             return;
         }
         stage.removeUser(userId);
 
         //房间为空时删除房间
-        if (!(stage instanceof StageRoom)) {
-            return;
-        }
-        StageRoom room = (StageRoom) stage;
-        if (room.getUserCount() != 0) {
+        if (stage.getUserCount() != 0) {
             return;
         }
 
-        log.info("room:{} will be removed", room.getRoomId());
-        roomService.remove(room);
+        log.info("room:{} will be removed", stage.getRoomId());
+        roomService.remove(stage);
     }
 
     public void receiveMessage(MessageDto messageDto, String sendFrom) {
@@ -95,6 +92,24 @@ public class GameService {
                 }
                 break;
         }
+    }
+
+    /**
+     * 续关
+     * @param userId
+     */
+    UserRecord restartStage(String userId) {
+        UserBo userBo = onlineUserService.getFormUserId(userId);
+        if (userBo == null) {
+            throw new CustomException("用户不存在");
+        }
+        StageRoom stage = currentStage(userBo);
+        if (stage == null) {
+            throw new CustomException("房间不存在");
+        }
+
+        stage.restartPve(userBo);
+        return userBo.getUserRecord();
     }
 
     private void createRoom(MessageDto messageDto, String sendFrom) {
@@ -151,7 +166,7 @@ public class GameService {
         roomService.get(roomDto.getRoomId()).addUser(userBo, roomDto.getJoinTeamType());
     }
 
-    private BaseStage currentStage(UserBo userBo) {
+    private StageRoom currentStage(UserBo userBo) {
         if (StringUtils.isEmpty(userBo.getRoomId()) || !roomService.roomNameExists(userBo.getRoomId())) {
             log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUsername());
             return null;

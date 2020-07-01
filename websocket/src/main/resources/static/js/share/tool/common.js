@@ -89,7 +89,9 @@ export default class Common {
 
                 const result = JSON.parse(xmlHttp.responseText);
                 if (result.success) {
-                    callback(result.data);
+                    if (callback) {
+                        callback(result.data);
+                    }
                 } else {
                     Common.addMessage(result.message, "#ff0000");
                 }

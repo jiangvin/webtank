@@ -184,7 +184,8 @@ public abstract class BaseBot {
                 GameStatusDto gameStatusDto = ObjectUtil.convertValue(messageDto.getMessage(), GameStatusDto.class);
                 switch (gameStatusDto.getType()) {
                     case PAUSE:
-                    case OVER:
+                    case WIN:
+                    case LOSE:
                         isPause = true;
                         break;
                     case PAUSE_BLUE:
@@ -202,9 +203,6 @@ public abstract class BaseBot {
                         break;
                     default:
                         break;
-                }
-                if (isPause) {
-                    eventList.add(new PauseCheckEvent());
                 }
                 break;
             default:

@@ -31,6 +31,7 @@ import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import com.integration.socket.service.MessageService;
 import com.integration.socket.service.UserService;
 import com.integration.util.CommonUtil;
+import com.integration.util.model.CustomException;
 import com.integration.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -759,6 +760,24 @@ public class StageRoom extends BaseStage {
         }
     }
 
+    /**
+     * 续关
+     */
+    public void restartPve(UserBo userBo) {
+        if (gameStatus.getType() != GameStatusType.LOSE) {
+            throw new CustomException("房间状态异常, 操作失败");
+        }
+        if (!mapManger.reload()) {
+            throw new CustomException("地图读取异常, 操作失败");
+        }
+
+        sendMessageToRoom(String.format("%s 选择了续关,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
+        gameStatus.setType(GameStatusType.PAUSE);
+        gameStatus.setMessage(String.format("MISSION %02d", getMapId()));
+        init();
+        processNextMapEvent(5, "重新开始");
+    }
+
     private void processGameOver(TeamType winTeam) {
         gameStatus.setType(GameStatusType.PAUSE);
         if (getRoomType() == RoomType.PVE && !processGameOverPve(winTeam)) {
@@ -768,33 +787,30 @@ public class StageRoom extends BaseStage {
         }
 
         init();
-        long loadTimeoutSeconds = 10;
-        long cleanMapTimeoutSeconds = 8;
-        String tips;
-        if (getRoomType() == RoomType.PVE && winTeam == TeamType.BLUE) {
-            tips = "重新开始";
-        } else {
-            tips = "进入下一关";
-        }
-        for (int i = 1; i <= loadTimeoutSeconds; ++i) {
+        processNextMapEvent(10, "进入下一关");
+    }
+
+    private void processNextMapEvent(int loadSeconds, String tips) {
+        int clearSeconds = loadSeconds - 2;
+        for (int i = 1; i <= loadSeconds; ++i) {
             String content = String.format("%d秒后%s...", i, tips);
             MessageEvent messageEvent = new MessageEvent(content, MessageType.SYSTEM_MESSAGE);
-            messageEvent.setTimeout((loadTimeoutSeconds - i) * 60);
+            messageEvent.setTimeout((loadSeconds - i) * 60);
             this.eventList.add(messageEvent);
         }
         //清空地图
         MessageEvent cleanEvent = new MessageEvent(null, MessageType.CLEAR_MAP);
-        cleanEvent.setTimeout(cleanMapTimeoutSeconds * 60);
+        cleanEvent.setTimeout(clearSeconds * 60);
         this.eventList.add(cleanEvent);
 
         //更改标题
         MessageEvent changeTitle = new MessageEvent(new GameStatusDto(GameStatusType.PAUSE, gameStatus.getMessage()), MessageType.GAME_STATUS);
-        changeTitle.setTimeout(cleanMapTimeoutSeconds * 60);
+        changeTitle.setTimeout(clearSeconds * 60);
         this.eventList.add(changeTitle);
 
         //加载地图
         LoadMapEvent loadEvent = new LoadMapEvent();
-        loadEvent.setTimeout(loadTimeoutSeconds * 60);
+        loadEvent.setTimeout(loadSeconds * 60);
         this.eventList.add(loadEvent);
     }
 
@@ -807,7 +823,7 @@ public class StageRoom extends BaseStage {
             gameStatus.setRank(userService.getRank(this.score));
             if (!mapManger.loadNextMapPve(saveLife)) {
                 gameStatus.setMessage("恭喜全部通关");
-                gameStatus.setType(GameStatusType.OVER);
+                gameStatus.setType(GameStatusType.WIN);
                 userService.saveRankForMultiplePlayers(this.creator, gameStatus);
                 getAndSaveCoin();
             } else {
@@ -820,7 +836,7 @@ public class StageRoom extends BaseStage {
             gameStatus.setScore(this.score);
             gameStatus.setRank(userService.getRank(this.score));
             gameStatus.setMessage("游戏失败");
-            gameStatus.setType(GameStatusType.OVER);
+            gameStatus.setType(GameStatusType.LOSE);
             userService.saveRankForMultiplePlayers(this.creator, gameStatus);
             getAndSaveCoin();
         }
@@ -850,7 +866,7 @@ public class StageRoom extends BaseStage {
         gameStatus.setMessage(getTeam(winTeam) + "胜利!");
 
         if (!mapManger.loadRandomMapPvp()) {
-            gameStatus.setType(GameStatusType.OVER);
+            gameStatus.setType(GameStatusType.WIN);
         }
 
         sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);

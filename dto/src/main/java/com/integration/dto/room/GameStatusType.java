@@ -6,5 +6,10 @@ package com.integration.dto.room;
  * @date 2020/6/6
  */
 public enum GameStatusType {
-    PAUSE, OVER, PAUSE_RED, PAUSE_BLUE, NORMAL
+    PAUSE,
+    WIN,
+    LOSE,
+    PAUSE_RED,
+    PAUSE_BLUE,
+    NORMAL
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -80,6 +81,18 @@ public class OnlineUserService {
 
     UserBo get(String key) {
         return userMap.get(key);
+    }
+
+    UserBo getFormUserId(String userId) {
+        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
+            if (kv.getValue().getUserId() == null) {
+                continue;
+            }
+            if (userId.equals(kv.getValue().getUserId())) {
+                return kv.getValue();
+            }
+        }
+        return null;
     }
 
     public List<String> getUserList() {
