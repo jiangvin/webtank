@@ -53,16 +53,17 @@ export default class Resource {
         this.loadAnimationImage("river", 2);
         this.loadAnimationImage("red_king", 2);
         this.loadAnimationImage("blue_king", 2);
-
-        //menu
-        this.loadAnimationImage("background_menu", 1, "jpg");
-        this.loadAnimationImage("button", 1);
     }
 
     static preloadResource(callback) {
-        const imageSize = Resource.instance.images.size;
+        const preList = [];
+        preList[preList.length] = Resource.getImage("background_loading","jpg");
+        preList[preList.length] = Resource.getImage("background_menu","jpg");
+        preList[preList.length] = Resource.getImage("button");
+
+        const imageSize = preList.length;
         let loadSize = 0;
-        Resource.instance.images.forEach(function (image) {
+        preList.forEach(function (image) {
             if (image.complete) {
                 ++loadSize;
                 if (loadSize >= imageSize) {
