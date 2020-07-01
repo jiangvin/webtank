@@ -186,10 +186,10 @@ export default class Room extends Stage {
                 end.x = start.x + this.backgroundImage.sizeX;
                 end.y = start.y + this.backgroundImage.sizeY;
 
-                if (start.x > Resource.width() ||
-                    start.y > Resource.height() ||
-                    end.x < 0 ||
-                    end.y < 0) {
+                if (start.x + mapStart.x > Resource.width() ||
+                    start.y + mapStart.y  > Resource.height() ||
+                    end.x + mapStart.x < 0 ||
+                    end.y + mapStart.y < 0) {
                     continue;
                 }
 
