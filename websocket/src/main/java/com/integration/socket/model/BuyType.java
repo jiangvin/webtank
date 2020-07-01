@@ -10,5 +10,8 @@ public enum BuyType {
     CLOCK,
     RED_STAR,
     TANK02,
-    TANK03
+    TANK03,
+
+    AGAIN_FOR_SINGLE,
+    AGAIN_FOR_NET
 }

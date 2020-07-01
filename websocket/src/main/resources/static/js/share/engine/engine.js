@@ -339,4 +339,11 @@ export default class Engine {
             }
         }, 300);
     };
+
+    /**
+     * 重新开始（需在子类中实现）
+     */
+    again() {
+
+    }
 }

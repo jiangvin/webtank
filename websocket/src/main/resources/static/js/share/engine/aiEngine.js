@@ -19,7 +19,7 @@ export default class AiEngine extends Engine {
         thisEngine.score = 0;
         thisEngine.stageStartTime = 0;
 
-        thisEngine.playerLifeCount = 5;
+        thisEngine.playerLifeCount = 0;
         thisEngine.computerLifeCount = 0;
 
         thisEngine.playerTypeId = Resource.getUser().getTankType();
@@ -134,7 +134,13 @@ export default class AiEngine extends Engine {
         const thisEngine = this;
         Common.getRequest("/singlePlayer/getMapFromId?id=" + this.room.roomInfo.mapId, function (data) {
             thisEngine.mapInfo = data;
-            thisEngine.mapInfo.playerLife = thisEngine.playerLifeCount;
+
+            //如果playerLife有值，则以playerLife为准，否则以地图数据为准
+            if (thisEngine.playerLifeCount) {
+                thisEngine.mapInfo.playerLife = thisEngine.playerLifeCount;
+            } else {
+                thisEngine.playerLifeCount = thisEngine.mapInfo.playerLife;
+            }
             thisEngine.computerLifeCount = thisEngine.mapInfo.computerLife;
 
             callback();
@@ -288,7 +294,7 @@ export default class AiEngine extends Engine {
                 if (thisEngine.room.roomInfo.mapId >= thisEngine.maxMapId) {
                     thisEngine.room.gameStatus({
                         message: "恭喜全部通关",
-                        type: "OVER",
+                        type: "WIN",
                         score: thisEngine.score,
                         rank: rank
                     });
@@ -328,7 +334,7 @@ export default class AiEngine extends Engine {
             Common.getRequest("/singlePlayer/getRank?score=" + thisEngine.score, function (rank) {
                 thisEngine.room.gameStatus({
                     message: "游戏失败",
-                    type: "OVER",
+                    type: "LOSE",
                     score: thisEngine.score,
                     rank: rank
                 });
@@ -857,6 +863,44 @@ export default class AiEngine extends Engine {
                 break;
         }
         return {x: x, y: y};
+    }
+
+    again() {
+        //需在暂停的时候触发
+        if (Status.isGaming()) {
+            return;
+        }
+
+        const thisEngine = this;
+        Common.postEncrypt("/shop/buyWithCoin", {
+            userId: Resource.getUser().deviceId,
+            buyType: "AGAIN_FOR_SINGLE"
+        }, function (data) {
+            Resource.setUser(data);
+            Common.addMessage("续关成功!", '#FF0');
+
+            //续关
+            Status.setStatus(null, thisEngine.room.generateMaskInfo());
+
+            //重置初始生命
+            thisEngine.playerLifeCount = 0;
+
+            //保存坦克类型
+            if (thisEngine.tanks.get(Resource.getUser().userId)) {
+                thisEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
+            }
+
+            //清空场景
+            thisEngine.events = [];
+            thisEngine.tanks.clear();
+            thisEngine.bullets.clear();
+            thisEngine.items.clear();
+            thisEngine.room.clear();
+
+            //进入下一关
+            thisEngine.initStage();
+            Sound.bgm();
+        });
     }
 }
 AiEngine.keepGoingRate = 120;

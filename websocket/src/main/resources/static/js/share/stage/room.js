@@ -514,7 +514,38 @@ export default class Room extends Stage {
             buttonHeight = Resource.height() * 0.68;
         }
         Status.setStatus(Status.statusPause(), status.message, titleHeight);
-        if (status.type === "OVER") {
+        if (status.type === "WIN") {
+            const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
+                //同步用户信息(获得的金币等)
+                Common.syncUserData();
+
+                Resource.getRoot().lastStage();
+                Resource.getRoot().currentStage().initMenu();
+            });
+            this.addItem(back);
+        } else if (status.type === "LOSE") {
+            const again = new Button("", Resource.width() * 0.5, buttonHeight, function () {
+                Resource.getRoot().engine.again();
+            });
+            again.drawText = function (ctx) {
+                ctx.font = '30px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'left';
+                ctx.fillStyle = '#fff';
+                ctx.fillText("重玩本关", this.x - 45, this.y);
+
+                const coin = Resource.getImage("coin");
+                ctx.drawImage(coin,
+                    0, 0,
+                    coin.width, coin.height,
+                    this.x + 27, this.y - 15,
+                    30, 30);
+
+                ctx.font = '20px Arial';
+                ctx.fillText("x 30", this.x + 82, this.y);
+            };
+            this.addItem(again);
+            buttonHeight += 75;
             const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
                 //同步用户信息(获得的金币等)
                 Common.syncUserData();

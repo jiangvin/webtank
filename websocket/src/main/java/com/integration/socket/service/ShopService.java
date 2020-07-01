@@ -29,6 +29,7 @@ public class ShopService {
     private static final int GHOST_PRICE = 8;
     private static final int TANK02_PRICE = 20;
     private static final int TANK03_PRICE = 40;
+    private static final int AGAIN_PRICE = 30;
 
     public UserDto buyWithCoin(BuyDto buyDto) {
         UserRecord userRecord = userDao.queryUser(buyDto.getUserId());
@@ -78,6 +79,13 @@ public class ShopService {
                 userRecord.setCoin(userRecord.getCoin() - TANK03_PRICE);
                 userRecord.setTankType("tank03");
                 userRecord.setTankTypeExpired(TimeUtil.tomorrow());
+                userRecord.update();
+                return UserDto.convert(userRecord);
+            case AGAIN_FOR_SINGLE:
+                if (userRecord.getCoin() < AGAIN_PRICE) {
+                    throw new CustomException("金币不足!");
+                }
+                userRecord.setCoin(userRecord.getCoin() - AGAIN_PRICE);
                 userRecord.update();
                 return UserDto.convert(userRecord);
             default:
