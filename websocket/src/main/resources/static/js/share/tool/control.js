@@ -21,9 +21,11 @@ export default class Control {
         if (isTouch) {
             Control.generateTouchModeInfo();
             document.addEventListener('touchstart', function (e) {
-                const touchPoint = Control.getTouchPoint(e.touches[e.touches.length - 1]);
-                Control.touchStartControl(touchPoint);
-                Resource.getRoot().processPointDownEvent(touchPoint);
+                for(let i = 0; i < e.touches.length; ++i) {
+                    const touchPoint = Control.getTouchPoint(e.touches[i]);
+                    Control.touchStartControl(touchPoint);
+                    Resource.getRoot().processPointDownEvent(touchPoint);
+                }
             });
             document.addEventListener('touchmove', function (e) {
                 Control.touchMoveControl(e);
