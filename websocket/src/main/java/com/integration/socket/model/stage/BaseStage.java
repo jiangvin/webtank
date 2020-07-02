@@ -1,12 +1,16 @@
 package com.integration.socket.model.stage;
 
+import com.integration.dto.map.ActionType;
+import com.integration.dto.map.ItemDto;
+import com.integration.dto.map.OrientationType;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
-import com.integration.dto.map.ActionType;
-import com.integration.dto.map.OrientationType;
+import com.integration.dto.room.GameStatusDto;
+import com.integration.dto.room.GameStatusType;
+import com.integration.dto.room.TeamType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
-import com.integration.dto.map.ItemDto;
+import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +32,23 @@ public abstract class BaseStage {
 
     private MessageService messageService;
 
+    ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
+
     ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
     ConcurrentHashMap<String, BulletBo> bulletMap = new ConcurrentHashMap<>();
 
+    /**
+     * 游戏状态相关
+     */
+    GameStatusDto gameStatus = new GameStatusDto();
+
     BaseStage(MessageService messageService) {
         this.messageService = messageService;
+    }
+
+    public int getUserCount() {
+        return userMap.size();
     }
 
     /**
@@ -71,12 +86,20 @@ public abstract class BaseStage {
             return;
         }
 
+        if (gameStatus.getType() == GameStatusType.PAUSE_BLUE && tankBo.getTeamType() == TeamType.BLUE) {
+            return;
+        }
+
+        if (gameStatus.getType() == GameStatusType.PAUSE_RED && tankBo.getTeamType() == TeamType.RED) {
+            return;
+        }
+
         BulletBo ammo = tankBo.fire();
         if (ammo == null) {
             return;
         }
-        bulletMap.put(ammo.getId(), ammo);
         processTankFireExtension(ammo);
+        bulletMap.put(ammo.getId(), ammo);
         sendMessageToRoom(Collections.singletonList(ammo.convertToDto()), MessageType.BULLET);
     }
 

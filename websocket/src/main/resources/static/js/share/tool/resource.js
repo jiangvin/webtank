@@ -37,6 +37,9 @@ export default class Resource {
         this.loadAnimationImage("bomb", 6);
 
         //item
+        this.loadAnimationImage("item_bullet", 2);
+        this.loadAnimationImage("item_clock", 2);
+        this.loadAnimationImage("item_ghost", 2);
         this.loadAnimationImage("item_star", 2);
         this.loadAnimationImage("item_shield", 2);
         this.loadAnimationImage("item_red_star", 2);
@@ -52,9 +55,38 @@ export default class Resource {
         this.loadAnimationImage("blue_king", 2);
     }
 
-    loadAnimationImage(imageId, widthPics) {
+    static preloadResource(callback) {
+        const preList = [];
+        preList[preList.length] = Resource.getImage("background_loading","jpg");
+        preList[preList.length] = Resource.getImage("background_menu","jpg");
+        preList[preList.length] = Resource.getImage("button");
+
+        const imageSize = preList.length;
+        let loadSize = 0;
+        preList.forEach(function (image) {
+            if (image.complete) {
+                ++loadSize;
+                if (loadSize >= imageSize) {
+                    callback();
+                }
+            } else {
+                image.onload = function () {
+                    ++loadSize;
+                    if (loadSize >= imageSize) {
+                        callback();
+                    }
+                }
+            }
+        })
+    }
+
+    loadAnimationImage(imageId, widthPics, type) {
+        if (!type) {
+            type = "png";
+        }
+
         const img = document.createElement('img');
-        img.src = 'image/' + imageId + '.png';
+        img.src = 'image/' + imageId + '.' + type;
         img.widthPics = widthPics;
         img.heightPics = 1;
         img.displayWidth = img.width / img.widthPics;
@@ -115,6 +147,10 @@ export default class Resource {
         Resource.instance.user.setUserId(userId);
     }
 
+    static setUser(data) {
+        Resource.getUser().setData(data);
+    }
+
     static getUser() {
         return Resource.instance.user;
     }
@@ -130,18 +166,7 @@ export default class Resource {
     static getImage(id, type) {
         const images = Resource.instance.images;
         if (!images.has(id)) {
-            const widthPics = 1;
-            const heightPics = 1;
-            const img = document.createElement('img');
-            if (!type) {
-                type = "png";
-            }
-            img.src = 'image/' + id + '.' + type;
-            img.widthPics = widthPics;
-            img.heightPics = heightPics;
-            img.displayWidth = img.width / img.widthPics;
-            img.displayHeight = img.height / img.heightPics;
-            images.set(id, img);
+            Resource.instance.loadAnimationImage(id, 1, type);
         }
         return images.get(id);
     }

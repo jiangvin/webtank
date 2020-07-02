@@ -1,6 +1,7 @@
 package com.integration.util.object;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +17,10 @@ import java.util.Map;
 @Slf4j
 public class ObjectUtil {
     private static ObjectMapper objectMapper = new ObjectMapper();
+    static {
+        //忽略未知字段
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     public static String writeValue(Object object) {
         try {
@@ -44,8 +49,8 @@ public class ObjectUtil {
         }
     }
 
-    public static <T> T convertValue(String json, Class<T> valueType) {
-        return objectMapper.convertValue(json, valueType);
+    public static <T> T convertValue(Object object, Class<T> valueType) {
+        return objectMapper.convertValue(object, valueType);
     }
 
     public static <T> T readValue(Object object, Class<T> valueType) {

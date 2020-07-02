@@ -19,11 +19,22 @@ export default class AiEngine extends Engine {
         thisEngine.score = 0;
         thisEngine.stageStartTime = 0;
 
-        thisEngine.playerLifeCount = 5;
+        thisEngine.playerLifeCount = 0;
         thisEngine.computerLifeCount = 0;
 
-        thisEngine.playerTypeId = "tank01";
-        thisEngine.itemTypes = ["star", "shield", "red_star", "life", "king"];
+        thisEngine.playerTypeId = Resource.getUser().getTankType();
+
+        //整理随机道具池
+        thisEngine.itemTypes = ["star", "shield", "life", "king", "bullet"];
+        if (Resource.getUser().hasRedStar()) {
+            thisEngine.itemTypes[thisEngine.itemTypes.length] = "red_star";
+        }
+        if (Resource.getUser().hasGhost()) {
+            thisEngine.itemTypes[thisEngine.itemTypes.length] = "ghost";
+        }
+        if (Resource.getUser().hasClock()) {
+            thisEngine.itemTypes[thisEngine.itemTypes.length] = "clock";
+        }
 
         thisEngine.maxMapId = 0;
         Common.getRequest("/singlePlayer/getMaxMapId", function (data) {
@@ -123,7 +134,13 @@ export default class AiEngine extends Engine {
         const thisEngine = this;
         Common.getRequest("/singlePlayer/getMapFromId?id=" + this.room.roomInfo.mapId, function (data) {
             thisEngine.mapInfo = data;
-            thisEngine.mapInfo.playerLife = thisEngine.playerLifeCount;
+
+            //如果playerLife有值，则以playerLife为准，否则以地图数据为准
+            if (thisEngine.playerLifeCount) {
+                thisEngine.mapInfo.playerLife = thisEngine.playerLifeCount;
+            } else {
+                thisEngine.playerLifeCount = thisEngine.mapInfo.playerLife;
+            }
             thisEngine.computerLifeCount = thisEngine.mapInfo.computerLife;
 
             callback();
@@ -277,7 +294,7 @@ export default class AiEngine extends Engine {
                 if (thisEngine.room.roomInfo.mapId >= thisEngine.maxMapId) {
                     thisEngine.room.gameStatus({
                         message: "恭喜全部通关",
-                        type: "OVER",
+                        type: "WIN",
                         score: thisEngine.score,
                         rank: rank
                     });
@@ -317,7 +334,7 @@ export default class AiEngine extends Engine {
             Common.getRequest("/singlePlayer/getRank?score=" + thisEngine.score, function (rank) {
                 thisEngine.room.gameStatus({
                     message: "游戏失败",
-                    type: "OVER",
+                    type: "LOSE",
                     score: thisEngine.score,
                     rank: rank
                 });
@@ -328,14 +345,15 @@ export default class AiEngine extends Engine {
 
     saveRank() {
         const thisEngine = this;
-        Common.postRequest("/singlePlayer/saveRank",
-            {
-                data: Resource.encryptData({
+        Common.getRequest("/user/getToken", function (token) {
+            Common.postEncrypt("/singlePlayer/saveRank",
+                {
                     score: thisEngine.score,
                     userId: Resource.getUser().deviceId,
-                    username: Resource.getUser().userId
-                })
-            });
+                    username: Resource.getUser().userId,
+                    token: token
+                });
+        });
     }
 
     removeBullet(bullet) {
@@ -404,6 +422,11 @@ export default class AiEngine extends Engine {
                 return;
             }
 
+            //有时钟道具，所有坦克全部暂停
+            if (Status.getValue() === Status.statusPauseBlue()) {
+                return;
+            }
+
             thisEngine.updateTankAi(tank);
         })
     }
@@ -446,8 +469,38 @@ export default class AiEngine extends Engine {
                     this.createKingShield();
                     this.removeGameItem(k);
                     break;
+                case "bullet":
+                    tank.bulletCount += 1;
+                    this.removeGameItem(k);
+                    break;
+                case "ghost":
+                    if (!tank.item.hasGhost) {
+                        tank.item.hasGhost = true;
+                        this.removeGameItem(k);
+                    }
+                    break;
+                case "clock":
+                    this.createClock();
+                    this.removeGameItem(k);
+                    break;
             }
         }
+    }
+
+    createClock() {
+        Status.setStatus(Status.statusPauseBlue());
+        this.tanks.forEach(function (tank) {
+            if (tank.item.teamId !== 2) {
+                return;
+            }
+
+            tank.item.action = 0;
+        });
+
+        //10秒后变回来
+        this.addTimeEvent(15 * 60, function () {
+            Status.setStatus(Status.statusNormal());
+        });
     }
 
     createKingShield() {
@@ -714,7 +767,7 @@ export default class AiEngine extends Engine {
                 thisEngine.playerTypeId,
                 1, true);
             //恢复玩家保存的类型
-            thisEngine.playerTypeId = "tank01";
+            thisEngine.playerTypeId = Resource.getUser().getTankType();
         });
     }
 
@@ -810,6 +863,44 @@ export default class AiEngine extends Engine {
                 break;
         }
         return {x: x, y: y};
+    }
+
+    again() {
+        //需在暂停的时候触发
+        if (Status.isGaming()) {
+            return;
+        }
+
+        const thisEngine = this;
+        Common.postEncrypt("/shop/buyWithCoin", {
+            userId: Resource.getUser().deviceId,
+            buyType: "AGAIN_FOR_SINGLE"
+        }, function (data) {
+            Resource.setUser(data);
+            Common.addMessage("续关成功!", '#FF0');
+
+            //续关
+            Status.setStatus(null, thisEngine.room.generateMaskInfo());
+
+            //重置初始生命
+            thisEngine.playerLifeCount = 0;
+
+            //保存坦克类型
+            if (thisEngine.tanks.get(Resource.getUser().userId)) {
+                thisEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
+            }
+
+            //清空场景
+            thisEngine.events = [];
+            thisEngine.tanks.clear();
+            thisEngine.bullets.clear();
+            thisEngine.items.clear();
+            thisEngine.room.clear();
+
+            //进入下一关
+            thisEngine.initStage();
+            Sound.bgm();
+        });
     }
 }
 AiEngine.keepGoingRate = 120;

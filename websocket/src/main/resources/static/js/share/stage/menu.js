@@ -13,6 +13,8 @@ import Connect from "../tool/connect.js";
 import Rect from "./rect.js";
 import Item from "./item.js";
 import Adapter from "../tool/adapter.js";
+import Sound from "../tool/sound.js";
+import Shop from "./shop.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -21,7 +23,6 @@ export default class Menu extends Stage {
         this.buttons = [];
         this.buttonIndex = 0;
         this.joinRoomCache = {};
-        this.initButtons();
 
         //排行榜
         this.rankIndex = 6;
@@ -31,6 +32,12 @@ export default class Menu extends Stage {
         //加入房间
         this.joinIndex = 4;
         this.joinInfos = [];
+
+        //商店
+        this.shop = new Shop(this);
+        this.shopIndex = 7;
+
+        this.initButtons();
 
         //背景
         const bgImage = Resource.getImage("background_menu");
@@ -76,11 +83,15 @@ export default class Menu extends Stage {
         Resource.getRoot().currentStage().init(roomInfo);
     }
 
+    getButtonPos(line) {
+        return Resource.height() * 0.32 + line * 85;
+    }
+
     initButtons() {
         const thisMenu = this;
 
         //主菜单
-        const bt0101 = new Button("单人游戏", Resource.width() * 0.5, Resource.height() * 0.35, function () {
+        const bt0101 = new Button("单人游戏", Resource.width() * 0.5, this.getButtonPos(0), function () {
             const roomInfo = {
                 mapId: 1,
                 roomType: "PVE",
@@ -90,30 +101,34 @@ export default class Menu extends Stage {
             thisMenu.initRoom(roomInfo);
             Resource.getRoot().addEngine(false);
         });
-        const bt0102 = new Button("多人游戏", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
+        const bt0102 = new Button("多人游戏", Resource.width() * 0.5, this.getButtonPos(1), function () {
             thisMenu.switchButtons(1);
         });
-        const bt0103 = new Button("排行榜", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
+        const bt0103 = new Button("道具商店", Resource.width() * 0.5, this.getButtonPos(2), function () {
+            thisMenu.switchButtons(7);
+            thisMenu.shop.loadShopItems();
+        });
+        const bt0104 = new Button("排行榜", Resource.width() * 0.5, this.getButtonPos(3), function () {
             thisMenu.switchButtons(6);
             thisMenu.rankStart = 0;
             thisMenu.loadRanks();
         });
-        this.buttons[0] = [bt0101, bt0102, bt0103];
+        this.buttons[0] = [bt0101, bt0102, bt0103, bt0104];
 
         //多人游戏
-        const bt0201 = new Button("创建房间", Resource.width() * 0.5, Resource.height() * 0.35, function () {
+        const bt0201 = new Button("创建房间", Resource.width() * 0.5, this.getButtonPos(0), function () {
             thisMenu.switchButtons(1);
         });
-        const bt0202 = new Button("加入房间", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
+        const bt0202 = new Button("加入房间", Resource.width() * 0.5, this.getButtonPos(1), function () {
             thisMenu.joinRoomEvent();
         });
-        const bt0203 = new Button("返回", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
+        const bt0203 = new Button("返回", Resource.width() * 0.5, this.getButtonPos(2), function () {
             thisMenu.switchButtons(-1);
         });
         this.buttons[1] = [bt0201, bt0202, bt0203];
 
         //创建房间
-        const bt0301 = new Button("闯关模式", Resource.width() * 0.5, Resource.height() * 0.35, function () {
+        const bt0301 = new Button("闯关模式", Resource.width() * 0.5, this.getButtonPos(0), function () {
             const roomInfo = {
                 mapId: 1,
                 roomType: "PVE",
@@ -122,16 +137,16 @@ export default class Menu extends Stage {
             thisMenu.initRoom(roomInfo);
             Resource.getRoot().addEngine(true);
         });
-        const bt0302 = new Button("对战模式", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
+        const bt0302 = new Button("对战模式", Resource.width() * 0.5, this.getButtonPos(1), function () {
             thisMenu.switchButtons(1);
         });
-        const bt0303 = new Button("返回", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
+        const bt0303 = new Button("返回", Resource.width() * 0.5, this.getButtonPos(2), function () {
             thisMenu.switchButtons(-1);
         });
         this.buttons[2] = [bt0301, bt0302, bt0303];
 
         //对战模式
-        const bt0401 = new Button("红队", Resource.width() * 0.5, Resource.height() * 0.35, function () {
+        const bt0401 = new Button("红队", Resource.width() * 0.5, this.getButtonPos(0), function () {
             const roomInfo = {
                 mapId: 1,
                 roomType: "PVP",
@@ -141,7 +156,7 @@ export default class Menu extends Stage {
             thisMenu.initRoom(roomInfo);
             Resource.getRoot().addEngine(true);
         });
-        const bt0402 = new Button("蓝队", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
+        const bt0402 = new Button("蓝队", Resource.width() * 0.5, this.getButtonPos(1), function () {
             const roomInfo = {
                 mapId: 1,
                 roomType: "PVP",
@@ -151,24 +166,24 @@ export default class Menu extends Stage {
             thisMenu.initRoom(roomInfo);
             Resource.getRoot().addEngine(true);
         });
-        const bt0403 = new Button("返回", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
+        const bt0403 = new Button("返回", Resource.width() * 0.5, this.getButtonPos(2), function () {
             thisMenu.switchButtons(-1);
         });
         this.buttons[3] = [bt0401, bt0402, bt0403];
 
         //加入对战房间
         //对战模式
-        const bt0601 = new Button("红队", Resource.width() * 0.5, Resource.height() * 0.35, function () {
+        const bt0601 = new Button("红队", Resource.width() * 0.5, this.getButtonPos(0), function () {
             thisMenu.joinRoomCache.joinTeamType = "RED";
             thisMenu.initRoom(thisMenu.joinRoomCache);
             Resource.getRoot().addEngine(true);
         });
-        const bt0602 = new Button("蓝队", Resource.width() * 0.5, Resource.height() * 0.35 + 100, function () {
+        const bt0602 = new Button("蓝队", Resource.width() * 0.5, this.getButtonPos(1), function () {
             thisMenu.joinRoomCache.joinTeamType = "BLUE";
             thisMenu.initRoom(thisMenu.joinRoomCache);
             Resource.getRoot().addEngine(true);
         });
-        const bt0603 = new Button("返回", Resource.width() * 0.5, Resource.height() * 0.35 + 200, function () {
+        const bt0603 = new Button("返回", Resource.width() * 0.5, this.getButtonPos(2), function () {
             thisMenu.joinRoomEvent();
         });
         this.buttons[5] = [bt0601, bt0602, bt0603];
@@ -204,12 +219,16 @@ export default class Menu extends Stage {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 ctx.fillStyle = '#FFF';
-                ctx.fillText("排名                 玩家                 分数           模式",
-                    rect0701.x,
-                    rect0701.y - rect0701.height / 2 + 33);
+                const y = rect0701.y - rect0701.height / 2 + 33;
+                ctx.fillText("排名", rect0701.x - 184, y);
+                ctx.fillText("玩家", rect0701.x - 47, y);
+                ctx.fillText("分数", rect0701.x + 83, y);
+                ctx.fillText("模式", rect0701.x + 186, y);
             }
         });
         this.buttons[6] = [rect0701, bt0701, bt0702, bt0703, header];
+
+        this.buttons[7] = this.shop.initShop();
     }
 
     loadRanks() {
@@ -230,61 +249,31 @@ export default class Menu extends Stage {
                 for (let i = 0; i < 10; ++i) {
                     const rankNumber = new Item({
                         draw: function (ctx) {
-                            thisMenu.drawRankText(
-                                ctx,
-                                thisMenu.rankStart + 1 + i + "",
-                                x - 184,
-                                y + i * 22);
+                            //rank
+                            ctx.font = '20px Helvetica';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'bottom';
+                            ctx.fillStyle = '#FFF';
+
+                            //rank
+                            ctx.fillText(thisMenu.rankStart + 1 + i + "", x - 184, y + i * 22);
+                            if (!dataList[i]) {
+                                return;
+                            }
+                            
+                            const data = dataList[i];
+                            //name
+                            ctx.fillText(data.username, x - 47, y + i * 22);
+                            //score
+                            ctx.fillText(data.score, x + 83, y + i * 22);
+                            //mode
+                            ctx.fillText(data.gameType === 0 ? "单人" : "联机", x + 186, y + i * 22);
                         }
                     });
                     thisMenu.rankInfos[thisMenu.rankInfos.length] = rankNumber;
                     thisMenu.addItem(rankNumber);
-
-                    if (!dataList[i]) {
-                        continue;
-                    }
-                    const data = dataList[i];
-
-                    //名字
-                    const name = new Item({
-                        draw: function (ctx) {
-                            thisMenu.drawRankText(ctx, data.username, x - 47, y + i * 22);
-                        }
-                    });
-                    thisMenu.rankInfos[thisMenu.rankInfos.length] = name;
-                    thisMenu.addItem(name);
-
-                    //分数
-                    const score = new Item({
-                        draw: function (ctx) {
-                            thisMenu.drawRankText(ctx, data.score, x + 83, y + i * 22);
-                        }
-                    });
-                    thisMenu.rankInfos[thisMenu.rankInfos.length] = score;
-                    thisMenu.addItem(score);
-
-                    //模式
-                    const mode = new Item({
-                        draw: function (ctx) {
-                            thisMenu.drawRankText(
-                                ctx,
-                                data.gameType === 0 ? "单人" : "联机",
-                                x + 186,
-                                y + i * 22);
-                        }
-                    });
-                    thisMenu.rankInfos[thisMenu.rankInfos.length] = mode;
-                    thisMenu.addItem(mode);
                 }
             })
-    }
-
-    drawRankText(ctx, text, x, y) {
-        ctx.font = '20px Helvetica';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        ctx.fillStyle = '#FFF';
-        ctx.fillText(text, x, y);
     }
 
     removeRankInfos() {
@@ -322,6 +311,10 @@ export default class Menu extends Stage {
             });
             this.joinInfos = [];
         }
+
+        if (this.buttonIndex === this.shopIndex) {
+            this.shop.removeCurrentItems();
+        }
     }
 
     removeInput() {
@@ -346,6 +339,8 @@ export default class Menu extends Stage {
 
     initMenu() {
         Connect.disconnect();
+        Sound.bgmPause();
+        Resource.getRoot().engine = null;
         Resource.getRoot().users = null;
         Resource.getRoot().netDelay = 0;
         this.removeButtons();

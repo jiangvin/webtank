@@ -69,7 +69,6 @@ public class MapMangerBo {
         }
 
         this.mapBo = mapBo;
-        initPlayerLife();
         return true;
     }
 

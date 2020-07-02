@@ -1,7 +1,8 @@
 package com.integration.socket.service;
 
+import com.integration.socket.model.Constant;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.socket.model.dto.GameStatusDto;
+import com.integration.dto.room.GameStatusDto;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.UserDao;
@@ -26,10 +27,13 @@ public class UserService {
     private static final int MAX_RANK_LIMIT = 10;
 
     @Autowired
+    private TokenService tokenService;
+
+    @Autowired
     private UserDao userDao;
 
     public UserDto queryUser(String userId) {
-        UserRecord userRecord = userDao.query(userId);
+        UserRecord userRecord = userDao.queryUser(userId);
         if (userRecord == null) {
             return null;
         }
@@ -54,6 +58,10 @@ public class UserService {
     }
 
     public void saveRankForSinglePlayer(RankDto rankDto) {
+        if (!tokenService.checkToken(rankDto.getToken())) {
+            return;
+        }
+
         if (StringUtils.isEmpty(rankDto.getUsername()) ||
                 rankDto.getScore() == null ||
                 rankDto.getScore() <= 0) {
@@ -68,6 +76,25 @@ public class UserService {
         rankDto.setRank(rank);
         rankDto.setGameType(0);
         userDao.insertRank(rankDto);
+
+        //返回金币奖励
+        saveCoinFromScore(userDao.queryUser(rankDto.getUserId()), rankDto.getScore(), true);
+    }
+
+    public void saveCoinFromScore(UserRecord record, int score, boolean isSingle) {
+        if (record == null) {
+            return;
+        }
+
+        int coin = score / Constant.SCORE_TO_COIN;
+
+        record.setCoin(record.getCoin() + coin);
+        if (isSingle) {
+            record.setSingleGameTimes(record.getSingleGameTimes() + 1);
+        } else {
+            record.setNetGameTimes(record.getNetGameTimes() + 1);
+        }
+        record.update();
     }
 
     public void saveRankForMultiplePlayers(UserBo creator, GameStatusDto gameStatusDto) {

@@ -10,5 +10,8 @@ public enum ItemType {
     SHIELD,
     RED_STAR,
     LIFE,
-    KING
+    KING,
+    BULLET,
+    GHOST,
+    CLOCK
 }

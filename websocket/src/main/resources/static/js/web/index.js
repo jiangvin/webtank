@@ -27,8 +27,8 @@ export default class Index {
             Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
                 if (data) {
                     //旧用户
-                    Resource.setUserId(data.username);
-                    $('#input-name-div').css("visibility", "hidden");
+                    Resource.setUser(data);
+
                     thisIndex.root.addStage(new Menu());
                     thisIndex.root.addStage(new Room());
                     thisIndex.initEvent();
@@ -159,4 +159,6 @@ export default class Index {
     }
 }
 
-new Index();
+Resource.preloadResource(function () {
+    new Index();
+});

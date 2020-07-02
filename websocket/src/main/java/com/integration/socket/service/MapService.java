@@ -2,6 +2,7 @@ package com.integration.socket.service;
 
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.room.RoomType;
+import com.integration.socket.model.Constant;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.dto.MapEditDto;
 import com.integration.socket.model.dto.StringCountDto;
@@ -46,8 +47,6 @@ public class MapService {
     private static final String COMPUTER_START = "computer_start";
 
     private static final String MAP_CONTENT = "map_content";
-
-    private static final String PLAYER_DEFAULT_TYPE = "tank01";
 
     public MapBo loadNextMap(int mapId, RoomType roomType) {
         if (mapDao.queryFromId(mapId) == null) {
@@ -153,7 +152,7 @@ public class MapService {
                             mapBo.setHeight(mapBo.getMaxGridY() * CommonUtil.UNIT_SIZE);
                             break;
                         case PLAYERS:
-                            mapBo.getPlayerLife().add(new StringCountDto(PLAYER_DEFAULT_TYPE, Integer.parseInt(kv.value)));
+                            mapBo.getPlayerLife().add(new StringCountDto(Constant.DEFAULT_TANK_TYPE, Integer.parseInt(kv.value)));
                             break;
                         case COMPUTERS:
                             parseComputers(mapBo, kv.value);

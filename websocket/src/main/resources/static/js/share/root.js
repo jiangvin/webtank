@@ -87,7 +87,7 @@ export default class Root {
     update() {
         this.updateTimeEvents();
 
-        if (Status.getValue() !== Status.statusNormal()) {
+        if (!Status.isGaming()) {
             return;
         }
 

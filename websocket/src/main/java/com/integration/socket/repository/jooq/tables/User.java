@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class User extends TableImpl<UserRecord> {
 
-    private static final long serialVersionUID = -1443275404;
+    private static final long serialVersionUID = -1115462183;
 
     /**
      * The reference instance of <code>user</code>
@@ -80,6 +80,46 @@ public class User extends TableImpl<UserRecord> {
      * The column <code>user.last_login_time</code>.
      */
     public final TableField<UserRecord, Timestamp> LAST_LOGIN_TIME = createField("last_login_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+
+    /**
+     * The column <code>user.coin</code>.
+     */
+    public final TableField<UserRecord, Integer> COIN = createField("coin", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>user.ghost_expired</code>.
+     */
+    public final TableField<UserRecord, Timestamp> GHOST_EXPIRED = createField("ghost_expired", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>user.clock_expired</code>.
+     */
+    public final TableField<UserRecord, Timestamp> CLOCK_EXPIRED = createField("clock_expired", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>user.red_star_expired</code>.
+     */
+    public final TableField<UserRecord, Timestamp> RED_STAR_EXPIRED = createField("red_star_expired", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>user.tank_type</code>.
+     */
+    public final TableField<UserRecord, String> TANK_TYPE = createField("tank_type", org.jooq.impl.SQLDataType.VARCHAR(32).nullable(false).defaultValue(org.jooq.impl.DSL.inline("tank01", org.jooq.impl.SQLDataType.VARCHAR)), this, "");
+
+    /**
+     * The column <code>user.tank_type_expired</code>.
+     */
+    public final TableField<UserRecord, Timestamp> TANK_TYPE_EXPIRED = createField("tank_type_expired", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>user.single_game_times</code>.
+     */
+    public final TableField<UserRecord, Integer> SINGLE_GAME_TIMES = createField("single_game_times", org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>user.net_game_times</code>.
+     */
+    public final TableField<UserRecord, Integer> NET_GAME_TIMES = createField("net_game_times", org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * Create a <code>user</code> table reference

@@ -30,6 +30,21 @@ export default class Common {
         Resource.getRoot().addMessageEvent(eventType, callBack);
     }
 
+    static syncUserData() {
+        if (!Resource.getUser().deviceId) {
+            return;
+        }
+
+        const oldCoins = Resource.getUser().coin;
+        Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
+            Resource.setUser(data);
+            const newCoins = Resource.getUser().coin;
+            if (newCoins !== oldCoins) {
+                Common.addMessage("当前金币数量: " + newCoins);
+            }
+        });
+    }
+
     static getRequest(url, callBack) {
         try {
             const xmlHttp = new XMLHttpRequest();
@@ -56,22 +71,37 @@ export default class Common {
         }
     }
 
+    static postEncrypt(url, body, callback) {
+        this.postRequest(url, {data: Resource.encryptData(body)}, callback);
+    }
+
     static postRequest(url, body, callback) {
-        $.ajax({
-            url: Common.generateHttpHost() + encodeURI(url),
-            type: 'post',
-            contentType: "application/json;charset=UTF-8",
-            data: JSON.stringify(body),
-            success: function (result) {
-                if (!result.success) {
-                    Common.addMessage(result.message, "#ff0000");
+        try {
+            const xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function () {
+                if (xmlHttp.readyState !== 4) {
                     return;
                 }
-                if (callback) {
-                    callback(result.data);
+                if (xmlHttp.status !== 200) {
+                    Common.addMessage(xmlHttp.responseText, "#ff0000");
+                    return;
                 }
-            }
-        });
+
+                const result = JSON.parse(xmlHttp.responseText);
+                if (result.success) {
+                    if (callback) {
+                        callback(result.data);
+                    }
+                } else {
+                    Common.addMessage(result.message, "#ff0000");
+                }
+            };
+            xmlHttp.open("POST", Common.generateHttpHost() + encodeURI(url), true); // true for asynchronous
+            xmlHttp.setRequestHeader('content-type', 'application/json');
+            xmlHttp.send(JSON.stringify(body));
+        } catch (e) {
+            Common.addMessage(e, "#ff0000");
+        }
     };
 
     static generateHttpHost() {

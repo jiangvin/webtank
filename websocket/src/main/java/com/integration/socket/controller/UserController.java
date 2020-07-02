@@ -1,14 +1,10 @@
 package com.integration.socket.controller;
 
-import com.integration.socket.model.dto.MapEditDto;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
-import com.integration.socket.repository.dao.MapDao;
-import com.integration.socket.service.MapService;
 import com.integration.socket.service.OnlineUserService;
-import com.integration.socket.service.RoomService;
+import com.integration.socket.service.TokenService;
 import com.integration.socket.service.UserService;
-import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,16 +31,10 @@ public class UserController {
     private OnlineUserService onlineUserService;
 
     @Autowired
-    private RoomService roomService;
-
-    @Autowired
-    private MapDao mapDao;
-
-    @Autowired
-    private MapService mapService;
-
-    @Autowired
     private UserService userService;
+
+    @Autowired
+    private TokenService tokenService;
 
     @GetMapping("/getUsers")
     public List<String> getUsers() {
@@ -68,23 +58,9 @@ public class UserController {
         return userService.getRankList(start, limit);
     }
 
-    @GetMapping("/checkRoomName")
-    public boolean checkRoomName(@RequestParam(value = "name") String name) {
-        if (roomService.roomNameExists(name)) {
-            throw new CustomException("输入的房间号重复: " + name);
-        }
-        return true;
-    }
-
-    @GetMapping("/getMaps")
-    public List<String> getMaps() {
-        return mapDao.queryMapNameList();
-    }
-
-    @PostMapping("/setMap")
-    public boolean setMap(MapEditDto mapEditDto) {
-        mapService.saveMap(mapEditDto);
-        return true;
+    @GetMapping("/getToken")
+    public String getToken() {
+        return tokenService.createToken();
     }
 
 }

@@ -13,6 +13,8 @@ import Button from "./button.js";
 import Sound from "../tool/sound.js";
 import Rect from "./rect.js";
 import Item from "./item.js";
+import Tank from "./tank.js";
+import Confirm from "./confirm.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -39,6 +41,10 @@ export default class Room extends Stage {
             cache: {}
         };
 
+        /**
+         * 阻挡一些不需要发送的情况
+         * @type {{orientation: number, x: number, action: number, y: number}}
+         */
         this.send = {
             orientation: 0,
             action: 0,
@@ -106,7 +112,7 @@ export default class Room extends Stage {
             return;
         }
 
-        if (Status.getValue() !== Status.statusNormal()) {
+        if (Status.getValue() === Status.statusPause()) {
             return;
         }
 
@@ -180,6 +186,13 @@ export default class Room extends Stage {
                 end.x = start.x + this.backgroundImage.sizeX;
                 end.y = start.y + this.backgroundImage.sizeY;
 
+                if (start.x + mapStart.x > Resource.width() ||
+                    start.y + mapStart.y  > Resource.height() ||
+                    end.x + mapStart.x < 0 ||
+                    end.y + mapStart.y < 0) {
+                    continue;
+                }
+
                 ctx.drawImage(this.backgroundImage,
                     0, 0,
                     this.backgroundImage.width, this.backgroundImage.height,
@@ -190,25 +203,25 @@ export default class Room extends Stage {
     }
 
     drawRoomInfo(ctx) {
+        ctx.font = '14px Helvetica';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = '#ffffff';
+
         //标题
-        const tipMessage = '房间号:' + this.roomInfo.roomId +
-            " 关卡:" + this.roomInfo.mapId + " [" + this.roomInfo.roomType + "]";
-        this.drawTips(ctx, tipMessage, 10, 6);
+        if (this.roomInfo.roomId) {
+            const tipMessage = '房间号:' + this.roomInfo.roomId +
+                " 关卡:" + this.roomInfo.mapId + " [" + this.roomInfo.roomType + "]";
+            ctx.fillText(tipMessage, 10, 6);
+        }
 
         //相关信息
         if (this.roomInfo.roomType === 'PVE' && this.roomInfo.playerLife !== undefined) {
-            this.drawTips(ctx,
-                "玩家剩余生命:" + this.roomInfo.playerLife,
-                10, 24);
-            this.drawTips(ctx,
-                "电脑剩余生命:" + this.roomInfo.computerLife,
-                10, 40);
+            ctx.fillText("玩家剩余生命:" + this.roomInfo.playerLife, 10, 24);
+            ctx.fillText("电脑剩余生命:" + this.roomInfo.computerLife, 10, 40);
         } else if (this.roomInfo.playerLife !== undefined) {
-            this.drawTips(ctx,
-                "红队剩余生命:" + this.roomInfo.playerLife,
-                10, 24);
-            this.drawTips(ctx, "蓝队剩余生命:" + this.roomInfo.computerLife,
-                10, 40);
+            ctx.fillText("红队剩余生命:" + this.roomInfo.playerLife, 10, 24);
+            ctx.fillText("蓝队剩余生命:" + this.roomInfo.computerLife, 10, 40);
         }
     }
 
@@ -232,14 +245,6 @@ export default class Room extends Stage {
             ctx.fillStyle = '#FFF';
             ctx.fillText(Status.getMessage(), Resource.width() / 2, Status.getHeight());
         }
-    }
-
-    drawTips(ctx, tips, x, y) {
-        ctx.font = '14px Helvetica';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(tips, x, y);
     }
 
     /**
@@ -295,7 +300,7 @@ export default class Room extends Stage {
 
         //调整z值
         if (typeId === 5) {
-            item.z = 2;
+            item.z = 4;
         } else if (typeId === 4) {
             item.z = -4;
         }
@@ -382,20 +387,9 @@ export default class Room extends Stage {
 
 
     calculateBackgroundRepeat() {
-        const imageRate = this.backgroundImage.width / this.backgroundImage.height;
-        const mapRate = this.size.width / this.size.height;
-        if (mapRate >= imageRate * 0.7 && mapRate <= imageRate * 1.3) {
-            this.backgroundImage.repeatX = 1;
-            this.backgroundImage.repeatY = 1;
-        } else {
-            if (mapRate < imageRate * 0.7) {
-                this.backgroundImage.repeatX = 1;
-                this.backgroundImage.repeatY = Math.round(this.size.height / (this.size.width / imageRate));
-            } else {
-                this.backgroundImage.repeatY = 1;
-                this.backgroundImage.repeatX = Math.round(this.size.width / (this.size.height * imageRate));
-            }
-        }
+        this.backgroundImage.repeatX = Math.round(this.size.width / this.backgroundImage.width);
+        this.backgroundImage.repeatY = Math.round(this.size.height / this.backgroundImage.height);
+
         this.backgroundImage.sizeX = this.size.width / this.backgroundImage.repeatX;
         this.backgroundImage.sizeY = this.size.height / this.backgroundImage.repeatY;
     };
@@ -475,6 +469,20 @@ export default class Room extends Stage {
     }
 
     gameStatus(status) {
+        if (status.type === "NORMAL") {
+            Status.setStatus(Status.statusNormal());
+            return;
+        }
+        if (status.type === "PAUSE_RED") {
+            Status.setStatus(Status.statusPauseRed());
+            return;
+        }
+        if (status.type === "PAUSE_BLUE") {
+            Status.setStatus(Status.statusPauseBlue());
+            return;
+        }
+
+        //其他结束状态
         let titleHeight = Resource.height() * .4;
         let buttonHeight = Resource.height() * 0.55;
         if (status.score && status.rank) {
@@ -495,28 +503,53 @@ export default class Room extends Stage {
                     ctx.fillText("当前得分: " + status.score,
                         Resource.width() / 2,
                         Resource.height() * .3 + 60);
-                }
-            });
-            this.addItem(score);
-            const rank = new Item({
-                z: 10,
-                draw: function (ctx) {
-                    ctx.font = 'bold 30px Microsoft YaHei UI';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = '#FFF';
+
                     ctx.fillText("当前排名: " + status.rank,
                         Resource.width() / 2,
                         Resource.height() * .3 + 100);
                 }
             });
-            this.addItem(rank);
+            this.addItem(score);
             titleHeight = Resource.height() * .3;
             buttonHeight = Resource.height() * 0.68;
         }
         Status.setStatus(Status.statusPause(), status.message, titleHeight);
-        if (status.type === "OVER") {
+        if (status.type === "WIN") {
             const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
+                //同步用户信息(获得的金币等)
+                Common.syncUserData();
+
+                Resource.getRoot().lastStage();
+                Resource.getRoot().currentStage().initMenu();
+            });
+            this.addItem(back);
+        } else if (status.type === "LOSE") {
+            const again = new Button("", Resource.width() * 0.5, buttonHeight, function () {
+                Resource.getRoot().engine.again();
+            });
+            again.drawText = function (ctx) {
+                ctx.font = '30px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'left';
+                ctx.fillStyle = '#fff';
+                ctx.fillText("重玩本关", this.x - 45, this.y);
+
+                const coin = Resource.getImage("coin");
+                ctx.drawImage(coin,
+                    0, 0,
+                    coin.width, coin.height,
+                    this.x + 27, this.y - 15,
+                    30, 30);
+
+                ctx.font = '20px Arial';
+                ctx.fillText("x 30", this.x + 82, this.y);
+            };
+            this.addItem(again);
+            buttonHeight += 75;
+            const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
+                //同步用户信息(获得的金币等)
+                Common.syncUserData();
+
                 Resource.getRoot().lastStage();
                 Resource.getRoot().currentStage().initMenu();
             });
@@ -567,12 +600,13 @@ export default class Room extends Stage {
 
     /**
      *
-     * @param tankData {{typeId,speed,hasShield,id}}
+     * @param tankData {{typeId,speed,hasShield,id,hasGhost}}
      */
     updateTankProperty(tankData) {
         const tankItem = this.items.get(tankData.id);
         tankItem.speed = tankData.speed;
         tankItem.hasShield = tankData.hasShield;
+        tankItem.hasGhost = tankData.hasGhost;
         tankItem.image = Resource.getImage(tankData.typeId);
     };
 
@@ -589,11 +623,11 @@ export default class Room extends Stage {
     };
 
     createTank(options) {
-        const item = this.createItem(options);
+        const item = new Tank(options);
+        item.stage = this;
+        this.items.set(item.id, item);
+
         const thisRoom = this;
-        item.update = function () {
-            thisRoom.generalUpdateEvent(item);
-        };
 
         //set center
         if (!this.view.center && Resource.getUser().userId) {
@@ -769,4 +803,24 @@ export default class Room extends Stage {
                 });
         });
     };
+
+    processPointDownEvent(point) {
+        super.processPointDownEvent(point);
+
+        //返回主菜单(暂停状态不能返回)
+        if (point.x < Resource.width() - 140 ||
+            point.y > 40 ||
+            !Status.isGaming()) {
+            return;
+        }
+
+        new Confirm(
+            this,
+            "返回主菜单",
+            ["返回主菜单将不会获得任何积分和金币，确定要返回吗？"],
+            function () {
+                Resource.getRoot().lastStage();
+                Resource.getRoot().currentStage().initMenu();
+            });
+    }
 }

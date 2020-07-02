@@ -5,6 +5,8 @@ import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.message.MessageType;
+import com.integration.dto.room.GameStatusDto;
+import com.integration.dto.room.GameStatusType;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
 import com.integration.dto.room.TeamType;
@@ -16,25 +18,28 @@ import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.socket.model.dto.GameStatusDto;
-import com.integration.socket.model.GameStatusType;
 import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.event.BaseEvent;
+import com.integration.socket.model.event.ClockEvent;
 import com.integration.socket.model.event.CreateItemEvent;
 import com.integration.socket.model.event.CreateTankEvent;
 import com.integration.socket.model.event.IronKingEvent;
 import com.integration.socket.model.event.LoadMapEvent;
 import com.integration.socket.model.event.MessageEvent;
+import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import com.integration.socket.service.MessageService;
 import com.integration.socket.service.UserService;
 import com.integration.util.CommonUtil;
+import com.integration.util.model.CustomException;
+import com.integration.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -51,14 +56,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StageRoom extends BaseStage {
 
     private static final int MAX_ITEM_LIMIT = 3;
-
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
-
     private static final int DEFAULT_SHIELD_TIME = 20 * 60;
-
     private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
-
-    private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
+    private static final int SCORE_COM_BOOM = 10;
+    private static final int SCORE_PLAYER_BOOM = -30;
+    private static final int SCORE_WIN = 500;
 
     private ConcurrentHashMap<String, List<String>> gridTankMap = new ConcurrentHashMap<>();
 
@@ -92,9 +95,6 @@ public class StageRoom extends BaseStage {
 
     private Random random = new Random();
 
-    private boolean isPause = false;
-    private String pauseMessage;
-
     /**
      * 计分相关
      */
@@ -103,11 +103,9 @@ public class StageRoom extends BaseStage {
     private UserService userService;
 
     /**
-     * 需要和客户端同步
+     * 道具池
      */
-    private static final int SCORE_COM_BOOM = 10;
-    private static final int SCORE_PLAYER_BOOM = -30;
-    private static final int SCORE_WIN = 500;
+    private List<ItemType> itemTypePool = new ArrayList<>();
 
     public StageRoom(RoomDto roomDto, UserBo creator, MapMangerBo mapManger, MessageService messageService, UserService userService) {
         super(messageService);
@@ -115,7 +113,22 @@ public class StageRoom extends BaseStage {
         this.creator = creator;
         this.mapManger = mapManger;
         this.userService = userService;
+        initItemPool(creator);
+
         init();
+    }
+
+    private void initItemPool(UserBo creator) {
+        itemTypePool.addAll(Arrays.asList(ItemType.values()));
+        if (!creator.hasRedStar()) {
+            itemTypePool.remove(ItemType.RED_STAR);
+        }
+        if (!creator.hasGhost()) {
+            itemTypePool.remove(ItemType.GHOST);
+        }
+        if (!creator.hasClock()) {
+            itemTypePool.remove(ItemType.CLOCK);
+        }
     }
 
     public RoomDto toDto() {
@@ -138,6 +151,7 @@ public class StageRoom extends BaseStage {
         this.eventList.clear();
         this.syncTankList.clear();
         this.missionStartTime = System.currentTimeMillis();
+        this.gameStatus.init();
 
         this.eventList.add(new CreateItemEvent());
     }
@@ -166,10 +180,6 @@ public class StageRoom extends BaseStage {
         return mapManger.getMapBo();
     }
 
-    public int getUserCount() {
-        return userMap.size();
-    }
-
     private void addRemoveBulletIds(String id) {
         if (!this.removeBulletIds.contains(id)) {
             removeBulletIds.add(id);
@@ -189,7 +199,7 @@ public class StageRoom extends BaseStage {
     public void update() {
         processEvent();
 
-        if (this.isPause) {
+        if (gameStatus.isPause()) {
             return;
         }
 
@@ -253,9 +263,17 @@ public class StageRoom extends BaseStage {
             return;
         }
 
+        if (event instanceof ClockEvent) {
+            if (gameStatus.getType() != GameStatusType.NORMAL) {
+                gameStatus.setType(GameStatusType.NORMAL);
+                sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
+            }
+            return;
+        }
+
         if (event instanceof LoadMapEvent) {
             sendMessageToRoom(getMapBo().convertToDto(), MessageType.MAP);
-            this.isPause = false;
+            gameStatus.setType(GameStatusType.NORMAL);
             sendMessageToRoom(null, MessageType.SERVER_READY);
             //1 ~ 5 秒陆续出现坦克
             for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
@@ -283,7 +301,7 @@ public class StageRoom extends BaseStage {
         if (event instanceof CreateItemEvent) {
             CreateItemEvent createItemEvent = (CreateItemEvent) event;
             if (itemMap.size() < MAX_ITEM_LIMIT) {
-                ItemType itemType = ItemType.values()[random.nextInt(ItemType.values().length)];
+                ItemType itemType = itemTypePool.get(random.nextInt(itemTypePool.size()));
                 for (int time = 0; time < TRY_TIMES_OF_CREATE_ITEM; ++time) {
                     Point grid = new Point();
                     grid.x = random.nextInt(getMapBo().getMaxGridX());
@@ -363,6 +381,14 @@ public class StageRoom extends BaseStage {
      * @param tankBo
      */
     private void updateTank(TankBo tankBo) {
+        //查看是否为暂停状态
+        if (gameStatus.getType() == GameStatusType.PAUSE_RED && tankBo.getTeamType() == TeamType.RED) {
+            return;
+        }
+        if (gameStatus.getType() == GameStatusType.PAUSE_BLUE && tankBo.getTeamType() == TeamType.BLUE) {
+            return;
+        }
+
         boolean needUpdate = false;
 
         //填装弹药计算
@@ -465,9 +491,37 @@ public class StageRoom extends BaseStage {
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return false;
+            case BULLET:
+                tankBo.setBulletCount(tankBo.getBulletCount() + 1);
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return true;
+            case GHOST:
+                if (tankBo.isHasGhost()) {
+                    return false;
+                }
+                tankBo.setHasGhost(true);
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return true;
+            case CLOCK:
+                clockEvent(tankBo.getTeamType());
+                itemMap.remove(itemBo.getPosKey());
+                sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
+                return false;
             default:
                 return false;
         }
+    }
+
+    private void clockEvent(TeamType teamType) {
+        if (teamType == TeamType.RED) {
+            gameStatus.setType(GameStatusType.PAUSE_BLUE);
+        } else {
+            gameStatus.setType(GameStatusType.PAUSE_RED);
+        }
+        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
+        eventList.add(new ClockEvent());
     }
 
     private void kingShield(TeamType teamType) {
@@ -550,6 +604,11 @@ public class StageRoom extends BaseStage {
         if (grid.x < 0 || grid.y < 0 || grid.x >= getMapBo().getMaxGridX() || grid.y >= getMapBo().getMaxGridY()) {
             //超出范围，停止
             return CollideType.COLLIDE_BOUNDARY;
+        }
+
+        //幽灵状态下无视一切障碍
+        if (tankBo.isHasGhost()) {
+            return CollideType.COLLIDE_NONE;
         }
 
         if (collideForTank(getMapBo().getUnitMap().get(key))) {
@@ -701,8 +760,26 @@ public class StageRoom extends BaseStage {
         }
     }
 
+    /**
+     * 续关
+     */
+    public void restartPve(UserBo userBo) {
+        if (gameStatus.getType() != GameStatusType.LOSE) {
+            throw new CustomException("房间状态异常, 操作失败");
+        }
+        if (!mapManger.reload()) {
+            throw new CustomException("地图读取异常, 操作失败");
+        }
+
+        sendMessageToRoom(String.format("%s 选择了续关,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
+        gameStatus.setType(GameStatusType.PAUSE);
+        gameStatus.setMessage(String.format("MISSION %02d", getMapId()));
+        init();
+        processNextMapEvent(5, "重新开始");
+    }
+
     private void processGameOver(TeamType winTeam) {
-        this.isPause = true;
+        gameStatus.setType(GameStatusType.PAUSE);
         if (getRoomType() == RoomType.PVE && !processGameOverPve(winTeam)) {
             return;
         } else if (getRoomType() != RoomType.PVE && !processGameOverPvp(winTeam)) {
@@ -710,68 +787,71 @@ public class StageRoom extends BaseStage {
         }
 
         init();
-        long loadTimeoutSeconds = 10;
-        long cleanMapTimeoutSeconds = 7;
-        String tips;
-        if (getRoomType() == RoomType.PVE && winTeam == TeamType.BLUE) {
-            tips = "重新开始";
-        } else {
-            tips = "进入下一关";
-        }
-        for (int i = 1; i <= loadTimeoutSeconds; ++i) {
+        processNextMapEvent(10, "进入下一关");
+    }
+
+    private void processNextMapEvent(int loadSeconds, String tips) {
+        int clearSeconds = loadSeconds - 2;
+        for (int i = 1; i <= loadSeconds; ++i) {
             String content = String.format("%d秒后%s...", i, tips);
             MessageEvent messageEvent = new MessageEvent(content, MessageType.SYSTEM_MESSAGE);
-            messageEvent.setTimeout((loadTimeoutSeconds - i) * 60);
+            messageEvent.setTimeout((loadSeconds - i) * 60);
             this.eventList.add(messageEvent);
         }
         //清空地图
         MessageEvent cleanEvent = new MessageEvent(null, MessageType.CLEAR_MAP);
-        cleanEvent.setTimeout(cleanMapTimeoutSeconds * 60);
+        cleanEvent.setTimeout(clearSeconds * 60);
         this.eventList.add(cleanEvent);
 
         //更改标题
-        MessageEvent changeTitle = new MessageEvent(new GameStatusDto(GameStatusType.PAUSE, this.pauseMessage), MessageType.GAME_STATUS);
-        changeTitle.setTimeout(cleanMapTimeoutSeconds * 60);
+        MessageEvent changeTitle = new MessageEvent(new GameStatusDto(GameStatusType.PAUSE, gameStatus.getMessage()), MessageType.GAME_STATUS);
+        changeTitle.setTimeout(clearSeconds * 60);
         this.eventList.add(changeTitle);
 
         //加载地图
         LoadMapEvent loadEvent = new LoadMapEvent();
-        loadEvent.setTimeout(loadTimeoutSeconds * 60);
+        loadEvent.setTimeout(loadSeconds * 60);
         this.eventList.add(loadEvent);
     }
 
     private boolean processGameOverPve(TeamType winTeam) {
         int saveLife = saveTankType();
-        GameStatusDto gameStatusDto = new GameStatusDto();
-        gameStatusDto.setType(GameStatusType.PAUSE);
 
         if (winTeam == TeamType.RED) {
             updateScoreAfterWin();
-            gameStatusDto.setScore(this.score);
-            gameStatusDto.setRank(userService.getRank(this.score));
+            gameStatus.setScore(this.score);
+            gameStatus.setRank(userService.getRank(this.score));
             if (!mapManger.loadNextMapPve(saveLife)) {
-                gameStatusDto.setMessage("恭喜全部通关");
-                gameStatusDto.setType(GameStatusType.OVER);
-                userService.saveRankForMultiplePlayers(this.creator, gameStatusDto);
-
+                gameStatus.setMessage("恭喜全部通关");
+                gameStatus.setType(GameStatusType.WIN);
+                userService.saveRankForMultiplePlayers(this.creator, gameStatus);
+                getAndSaveCoin();
             } else {
-                gameStatusDto.setMessage("恭喜通关");
+                gameStatus.setMessage("恭喜通关");
             }
         } else {
             if (this.score < 0) {
                 this.score = 0;
             }
-            gameStatusDto.setScore(this.score);
-            gameStatusDto.setRank(userService.getRank(this.score));
-            gameStatusDto.setMessage("游戏失败");
-            gameStatusDto.setType(GameStatusType.OVER);
-            userService.saveRankForMultiplePlayers(this.creator, gameStatusDto);
+            gameStatus.setScore(this.score);
+            gameStatus.setRank(userService.getRank(this.score));
+            gameStatus.setMessage("游戏失败");
+            gameStatus.setType(GameStatusType.LOSE);
+            userService.saveRankForMultiplePlayers(this.creator, gameStatus);
+            getAndSaveCoin();
         }
 
-        sendMessageToRoom(gameStatusDto, MessageType.GAME_STATUS);
+        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
 
-        this.pauseMessage = String.format("MISSION %02d", getMapId());
-        return gameStatusDto.getType() == GameStatusType.PAUSE;
+        //修改标题，下次使用
+        gameStatus.setMessage(String.format("MISSION %02d", getMapId()));
+        return gameStatus.getType() == GameStatusType.PAUSE;
+    }
+
+    private void getAndSaveCoin() {
+        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
+            userService.saveCoinFromScore(kv.getValue().getUserRecord(), score, false);
+        }
     }
 
     private void updateScoreAfterWin() {
@@ -783,20 +863,17 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean processGameOverPvp(TeamType winTeam) {
-        this.pauseMessage = getTeam(winTeam) + "胜利!";
-
-        GameStatusDto gameStatusDto = new GameStatusDto();
-        gameStatusDto.setMessage(this.pauseMessage);
+        gameStatus.setMessage(getTeam(winTeam) + "胜利!");
 
         if (!mapManger.loadRandomMapPvp()) {
-            gameStatusDto.setType(GameStatusType.OVER);
-        } else {
-            gameStatusDto.setType(GameStatusType.PAUSE);
+            gameStatus.setType(GameStatusType.WIN);
         }
 
-        sendMessageToRoom(gameStatusDto, MessageType.GAME_STATUS);
-        this.pauseMessage = "RED vs BLUE";
-        return gameStatusDto.getType() == GameStatusType.PAUSE;
+        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
+
+        //修改标题，下次使用
+        gameStatus.setMessage("RED vs BLUE");
+        return gameStatus.getType() == GameStatusType.PAUSE;
     }
 
     private void changeMap(String key, MapUnitType type) {
@@ -906,7 +983,7 @@ public class StageRoom extends BaseStage {
 
     private boolean checkGameStatusAfterTankBomb() {
         //游戏已经暂停
-        if (this.isPause) {
+        if (gameStatus.isPause()) {
             return true;
         }
 
@@ -1003,7 +1080,7 @@ public class StageRoom extends BaseStage {
 
     public void addUser(UserBo userBo, TeamType teamType) {
         //TODO - 暂停状态不允许加入,需要后期优化
-        if (this.isPause) {
+        if (gameStatus.isPause()) {
             return;
         }
 
@@ -1021,7 +1098,7 @@ public class StageRoom extends BaseStage {
         sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUsername());
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
-        sendMessageToUser(getGameItemList(), MessageType.ITEM, userBo.getUsername());
+        sendMessageToUser(getItemPool(), MessageType.ITEM, userBo.getUsername());
 
         createTankForUser(userBo, teamType, 60 * 3);
         sendReady(userBo.getUsername());
@@ -1058,7 +1135,7 @@ public class StageRoom extends BaseStage {
         tankBo.setTeamType(userBo.getTeamType());
 
         //设定类型
-        TankTypeDto initType = getTankType(lifeMap);
+        TankTypeDto initType = getTankType(lifeMap, userBo);
         TankTypeDto saveType = this.tankTypeSaveMap.get(userBo.getUsername());
         if (saveType != null) {
             tankBo.setType(saveType);
@@ -1083,7 +1160,7 @@ public class StageRoom extends BaseStage {
      * @param lifeMap
      * @return
      */
-    private TankTypeDto getTankType(List<StringCountDto> lifeMap) {
+    private TankTypeDto getTankType(List<StringCountDto> lifeMap, UserBo userBo) {
         StringCountDto pair = lifeMap.get(0);
         int lastCount = pair.getValue() - 1;
         if (lastCount == 0) {
@@ -1092,7 +1169,20 @@ public class StageRoom extends BaseStage {
             pair.setValue(lastCount);
         }
         sendMessageToRoom(getMapBo().convertLifeCountToDto(), MessageType.MAP);
-        return TankTypeDto.getTankType(pair.getKey());
+        String tankType = pair.getKey();
+        if (isBot(userBo.getTeamType())) {
+            return TankTypeDto.getTankType(tankType);
+        }
+        if (userBo.getUserRecord() == null) {
+            return TankTypeDto.getTankType(tankType);
+        }
+        UserRecord userRecord = userBo.getUserRecord();
+        if (!StringUtils.isEmpty(userRecord.getTankType()) &&
+                userRecord.getTankTypeExpired() != null &&
+                userRecord.getTankTypeExpired().after(TimeUtil.now())) {
+            tankType = userRecord.getTankType();
+        }
+        return TankTypeDto.getTankType(tankType);
     }
 
     private List<StringCountDto> getLifeMap(TeamType teamType) {
@@ -1119,7 +1209,7 @@ public class StageRoom extends BaseStage {
         return bulletDtoList;
     }
 
-    private List<ItemDto> getGameItemList() {
+    private List<ItemDto> getItemPool() {
         List<ItemDto> itemDtoList = new ArrayList<>();
         for (Map.Entry<String, ItemBo> kv : itemMap.entrySet()) {
             itemDtoList.add(kv.getValue().toDto());

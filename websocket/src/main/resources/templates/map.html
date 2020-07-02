@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>地图编辑界面</title>
 </head>
-<script src="js/web/libs/jquery.js"></script>
+<script src="js/web/libs/jquery.min.js"></script>
 <body>
 <div>
     <div>
@@ -37,7 +37,7 @@
 <script type="text/javascript">
     refreshMaps();
     function refreshMaps() {
-        $.getJSON('/user/getMaps', function(result) {
+        $.getJSON('/edit/getMaps', function(result) {
             if (result.success) {
                 setSelectorItems(result.data);
             }
@@ -75,7 +75,7 @@
     
     function save() {
         $.ajax({
-            url: encodeURI('/user/setMap'),
+            url: encodeURI('/edit/setMap'),
             type: 'post',
             data: {
                 name:$('#name')[0].value,
