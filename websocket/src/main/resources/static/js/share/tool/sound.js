@@ -14,6 +14,9 @@ export default class Sound {
         this.sounds.set("lose", new Audio('audio/lose.wav'));
         this.sounds.set("item", new Audio('audio/item.mp3'));
         this.sounds.set("bgm", new Audio('audio/bgm.mp3'));
+        this.sounds.forEach(function (sound) {
+            sound.addEventListener('canplaythrough', function () {}, false);
+        });
     }
 
     static catchItem() {

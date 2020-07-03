@@ -47,7 +47,7 @@ export default class Loading extends Stage {
 
     init() {
         const thisLoading = this;
-        const total = Resource.instance.images.size + Sound.instance.sounds.size;
+        const total = Resource.instance.images.size;
         let loaded = 0;
 
         const event = function () {
@@ -69,11 +69,6 @@ export default class Loading extends Stage {
                     event();
                 }
             }
-        });
-        Sound.instance.sounds.forEach(function (sound) {
-            sound.addEventListener('canplaythrough', function () {
-                event();
-            }, false);
         });
 
         //最大8秒直接进入游戏

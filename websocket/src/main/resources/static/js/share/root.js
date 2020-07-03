@@ -154,7 +154,7 @@ export default class Root {
     }
 
     drawMessage(ctx) {
-        let height = Resource.height() - 50;
+        let height = 80;
         ctx.font = '16px Helvetica';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
@@ -164,8 +164,8 @@ export default class Root {
             }
             ctx.globalAlpha = (message.lifetime / 300);
             ctx.fillStyle = message.color;
-            ctx.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context, 50, height);
-            height -= 18;
+            ctx.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context, 80, height);
+            height += 18;
         });
 
         ctx.globalAlpha = 1;
