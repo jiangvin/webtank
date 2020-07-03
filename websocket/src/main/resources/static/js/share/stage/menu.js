@@ -79,8 +79,7 @@ export default class Menu extends Stage {
     }
 
     initRoom(roomInfo) {
-        Common.nextStage();
-        Resource.getRoot().currentStage().init(roomInfo);
+        Common.nextStage(roomInfo);
     }
 
     getButtonPos(line) {

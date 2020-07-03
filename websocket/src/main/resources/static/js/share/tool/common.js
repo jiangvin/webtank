@@ -14,8 +14,8 @@ export default class Common {
         Resource.getRoot().addMessage(context, color);
     }
 
-    static nextStage() {
-        Resource.getRoot().nextStage();
+    static nextStage(options) {
+        Resource.getRoot().nextStage(options);
     }
 
     static lastStage() {

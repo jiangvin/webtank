@@ -37,11 +37,9 @@ export default class AppHome extends Stage {
         });
 
         const input = $('#input');
-        input.css("visibility", "visible");
         const button = $('#button1');
         button.text("进入游戏");
         button.css("top", "35%");
-        button.css("visibility", "visible");
         button.bind('click',function () {
             //检测是否输入名字
             const name = input.val();
@@ -61,5 +59,10 @@ export default class AppHome extends Stage {
             Common.nextStage();
             Adapter.initInput();
         });
+    }
+
+    init() {
+        $('#input').css("visibility", "visible");
+        $('#button1').css("visibility", "visible");
     }
 }

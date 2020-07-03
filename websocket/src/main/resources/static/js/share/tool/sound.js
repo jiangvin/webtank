@@ -6,65 +6,54 @@
 
 export default class Sound {
     constructor() {
-        this.clickSound = new Audio();
-        this.clickSound.src = 'audio/click.mp3';
-
-        this.fireSound = new Audio();
-        this.fireSound.src = 'audio/fire.mp3';
-
-        this.boomSound = new Audio();
-        this.boomSound.src = 'audio/boom.mp3';
-
-        this.winSound = new Audio();
-        this.winSound.src = 'audio/win.wav';
-
-        this.loseSound = new Audio();
-        this.loseSound.src = 'audio/lose.wav';
-
-        this.itemSound = new Audio();
-        this.itemSound.src = 'audio/item.mp3';
-
-        this.bgmSound = new Audio();
-        this.bgmSound.loop = true;
-        this.bgmSound.src = 'audio/bgm.mp3';
+        this.sounds = new Map();
+        this.sounds.set("click", new Audio('audio/click.mp3'));
+        this.sounds.set("fire", new Audio('audio/fire.mp3'));
+        this.sounds.set("boom", new Audio('audio/boom.mp3'));
+        this.sounds.set("win", new Audio('audio/win.wav'));
+        this.sounds.set("lose", new Audio('audio/lose.wav'));
+        this.sounds.set("item", new Audio('audio/item.mp3'));
+        this.sounds.set("bgm", new Audio('audio/bgm.mp3'));
     }
 
     static catchItem() {
-        Sound.playSound(Sound.instance.itemSound);
+        Sound.playSound(Sound.instance.sounds.get("item"));
     }
 
     static bgm() {
         //暂停其他声音
-        if (!Sound.instance.winSound.ended) {
-            Sound.instance.winSound.pause();
+        const win = Sound.instance.sounds.get("win");
+        if (!win.ended) {
+            win.pause();
+            win.currentTime = 0;
         }
-        Sound.playSound(Sound.instance.bgmSound);
+        Sound.playSound(Sound.instance.sounds.get("bgm"));
     }
 
     static click() {
-        Sound.playSound(Sound.instance.clickSound);
+        Sound.playSound(Sound.instance.sounds.get("click"));
     }
 
     static fire() {
-        Sound.playSound(Sound.instance.fireSound);
+        Sound.playSound(Sound.instance.sounds.get("fire"));
     }
 
     static boom() {
-        Sound.playSound(Sound.instance.boomSound);
+        Sound.playSound(Sound.instance.sounds.get("boom"));
     }
 
     static win() {
-        Sound.instance.bgmSound.pause();
-        Sound.playSound(Sound.instance.winSound);
+        Sound.bgmPause();
+        Sound.playSound(Sound.instance.sounds.get("win"));
     }
 
     static lose() {
-        Sound.instance.bgmSound.pause();
-        Sound.playSound(Sound.instance.loseSound);
+        Sound.bgmPause();
+        Sound.playSound(Sound.instance.sounds.get("lose"));
     }
 
     static bgmPause() {
-        Sound.instance.bgmSound.pause();
+        Sound.instance.sounds.get("bgm").pause();
     }
 
     static playSound(sound) {

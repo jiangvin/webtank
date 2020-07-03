@@ -35,7 +35,7 @@ export default class Main {
     }
 
     restart() {
-        Resource.setHost("http://116.63.170.134:8201");
+        Resource.setHost("https://xiwen100.com/tank");
 
         //设置缩放比例
         let width;
@@ -56,9 +56,12 @@ export default class Main {
 
         this.root = new Root();
         Resource.setRoot(this.root);
+
+        //因为小程序是读取本地文件和使用微信账户，所以不需要资源加载页面和登录页面
         this.root.addStage(new Menu());
         this.root.addStage(new Room());
 
+        this.root.currentStage().init();
         //渲染层
         this.bindLoop = this.loop.bind(this);
         // 清除上一局的动画

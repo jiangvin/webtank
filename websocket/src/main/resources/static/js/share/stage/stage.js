@@ -56,4 +56,7 @@ export default class Stage {
 
     processSocketMessage(messageDto) {
     }
+
+    init() {
+    }
 }

@@ -16,7 +16,6 @@ export default class Home extends Stage {
 
         this.defaultNames = ["大酒神","一打七","开始行动","挂机无罪","求上单","RMB玩家","酱油位","对面间谍"];
         $('#input').val(this.defaultNames[Math.floor(Math.random() * this.defaultNames.length)]);
-        $('#input-name-div').css("visibility", "visible");
         //背景
         const bgImage = Resource.getImage("background_loading","jpg");
         this.createItem({
@@ -63,5 +62,9 @@ export default class Home extends Stage {
         $('#button3').bind('click', function () {
             window.open("app/app-release.apk");
         });
+    }
+
+    init() {
+        $('#input-name-div').css("visibility", "visible");
     }
 }

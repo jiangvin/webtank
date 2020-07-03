@@ -13,15 +13,19 @@ import Root from "../share/root.js";
 import Adapter from "../share/tool/adapter.js";
 import Common from "../share/tool/common.js";
 import AppHome from "../app/apphome.js";
+import Loading from "../share/stage/loading.js";
 
 export default class Index {
     constructor() {
+        this.initEvent();
+
         this.generateCanvas();
         Resource.setCanvas(this.canvas);
         this.ctx = this.canvas.getContext('2d');
 
         this.root = new Root();
         Resource.setRoot(this.root);
+        this.root.addStage(new Loading());
         const thisIndex = this;
         if (Adapter.isApp()) {
             Control.setControlMode(true);
@@ -33,14 +37,12 @@ export default class Index {
 
                     thisIndex.root.addStage(new Menu());
                     thisIndex.root.addStage(new Room());
-                    thisIndex.initEvent();
                     thisIndex.start();
                 } else {
                     //新用户
                     thisIndex.root.addStage(new AppHome());
                     thisIndex.root.addStage(new Menu());
                     thisIndex.root.addStage(new Room());
-                    thisIndex.initEvent();
                     thisIndex.start();
                 }
             })
@@ -49,7 +51,6 @@ export default class Index {
             this.root.addStage(new Home());
             this.root.addStage(new Menu());
             this.root.addStage(new Room());
-            this.initEvent();
             this.start();
         }
     }
@@ -104,6 +105,7 @@ export default class Index {
     start() {
         const index = this;
         const root = this.root;
+        root.currentStage().init();
 
         //运算&绘制
         const draw = function () {
@@ -160,7 +162,4 @@ export default class Index {
         Control.generateTouchModeInfo();
     }
 }
-
-Resource.preloadResource(function () {
-    new Index();
-});
+new Index();

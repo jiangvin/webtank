@@ -140,9 +140,10 @@ export default class Root {
         return this.stages[this.stageIndex];
     }
 
-    nextStage() {
+    nextStage(options) {
         if (this.stageIndex < this.stages.length - 1) {
             ++this.stageIndex;
+            this.currentStage().init(options);
         }
     }
 

@@ -53,31 +53,11 @@ export default class Resource {
         this.loadAnimationImage("river", 2);
         this.loadAnimationImage("red_king", 2);
         this.loadAnimationImage("blue_king", 2);
-    }
 
-    static preloadResource(callback) {
-        const preList = [];
-        preList[preList.length] = Resource.getImage("background_loading","jpg");
-        preList[preList.length] = Resource.getImage("background_menu","jpg");
-        preList[preList.length] = Resource.getImage("button");
-
-        const imageSize = preList.length;
-        let loadSize = 0;
-        preList.forEach(function (image) {
-            if (image.complete) {
-                ++loadSize;
-                if (loadSize >= imageSize) {
-                    callback();
-                }
-            } else {
-                image.onload = function () {
-                    ++loadSize;
-                    if (loadSize >= imageSize) {
-                        callback();
-                    }
-                }
-            }
-        })
+        //menu
+        this.loadAnimationImage("background_loading", 1, "jpg");
+        this.loadAnimationImage("background_menu", 1, "jpg");
+        this.loadAnimationImage("button", 1);
     }
 
     loadAnimationImage(imageId, widthPics, type) {
