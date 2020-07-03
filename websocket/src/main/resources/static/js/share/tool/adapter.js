@@ -5,7 +5,6 @@
  */
 import Connect from "./connect.js";
 import Resource from "./resource.js";
-import Control from "./control.js";
 import WxInput from "../../wx/wxinput.js";
 
 export default class Adapter {
@@ -35,7 +34,6 @@ export default class Adapter {
         Resource.getUser().deviceId = deviceId;
         Resource.getUser().deviceName = deviceName;
         Adapter.setPlatform(2);
-        Control.setControlMode(true);
         return true;
     }
 

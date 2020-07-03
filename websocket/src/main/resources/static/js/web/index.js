@@ -24,6 +24,7 @@ export default class Index {
         Resource.setRoot(this.root);
         const thisIndex = this;
         if (Adapter.isApp()) {
+            Control.setControlMode(true);
             Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
                 if (data) {
                     //旧用户
