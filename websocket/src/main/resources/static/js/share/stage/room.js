@@ -529,10 +529,10 @@ export default class Room extends Stage {
             });
             again.drawText = function (ctx) {
                 ctx.font = '30px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'left';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#fff';
-                ctx.fillText("重玩本关", this.x - 45, this.y);
+                ctx.fillText("重玩本关", this.x - 95, this.y);
 
                 const coin = Resource.getImage("coin");
                 ctx.drawImage(coin,
@@ -542,7 +542,7 @@ export default class Room extends Stage {
                     30, 30);
 
                 ctx.font = '20px Arial';
-                ctx.fillText("x 30", this.x + 82, this.y);
+                ctx.fillText("x 30", this.x + 60, this.y);
             };
             this.addItem(again);
             buttonHeight += 75;
