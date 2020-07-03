@@ -819,6 +819,9 @@ export default class Room extends Stage {
             "返回主菜单",
             ["返回主菜单将不会获得任何积分和金币，确定要返回吗？"],
             function () {
+                //同步用户信息(获得的金币等)
+                Common.syncUserData();
+
                 Resource.getRoot().lastStage();
                 Resource.getRoot().currentStage().initMenu();
             });
