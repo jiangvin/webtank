@@ -38,7 +38,7 @@ input.input-name {
 }
 input.input-message {
     left: 15%;
-    top: 80%;
+    top: 70px;
     width: 70%;
 }
 input.input-room-name {

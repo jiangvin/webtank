@@ -516,9 +516,6 @@ export default class Room extends Stage {
         Status.setStatus(Status.statusPause(), status.message, titleHeight);
         if (status.type === "WIN") {
             const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
-                //同步用户信息(获得的金币等)
-                Common.syncUserData();
-
                 Resource.getRoot().lastStage();
                 Resource.getRoot().currentStage().initMenu();
             });
@@ -547,9 +544,6 @@ export default class Room extends Stage {
             this.addItem(again);
             buttonHeight += 75;
             const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
-                //同步用户信息(获得的金币等)
-                Common.syncUserData();
-
                 Resource.getRoot().lastStage();
                 Resource.getRoot().currentStage().initMenu();
             });
@@ -819,9 +813,6 @@ export default class Room extends Stage {
             "返回主菜单",
             ["返回主菜单将不会获得任何积分和金币，确定要返回吗？"],
             function () {
-                //同步用户信息(获得的金币等)
-                Common.syncUserData();
-
                 Resource.getRoot().lastStage();
                 Resource.getRoot().currentStage().initMenu();
             });

@@ -71,6 +71,31 @@ export default class Adapter {
         });
     }
 
+    static inputMessageEvent(inputFocus) {
+        if (this.instance.platform === 1) {
+            Adapter.inputMessageWxEvent();
+        } else {
+            Adapter.inputMessageWebEvent(inputFocus);
+        }
+    }
+
+    static inputMessageWxEvent() {
+        const obj = {};
+        obj['defaultValue'] = "";
+        obj['maxLength'] = 100;
+        obj['multiple'] = false;
+        obj['confirmHold'] = false;
+        obj['confirmType'] = 'done';
+        wx.showKeyboard(obj);
+        wx.onKeyboardConfirm(function (result) {
+            const text = result.value;
+            if (text !== "") {
+                Connect.send("USER_MESSAGE", text);
+            }
+            wx.offKeyboardConfirm(this);
+        })
+    }
+
     static inputMessageWebEvent(inputFocus) {
         const input = $('#input');
         if (Adapter.instance.inputEnable) {

@@ -6,6 +6,7 @@
 
 import Resource from "./resource.js";
 import Common from "./common.js";
+import Adapter from "./adapter.js";
 
 export default class Control {
 
@@ -21,7 +22,7 @@ export default class Control {
         if (isTouch) {
             Control.generateTouchModeInfo();
             document.addEventListener('touchstart', function (e) {
-                for(let i = 0; i < e.touches.length; ++i) {
+                for (let i = 0; i < e.touches.length; ++i) {
                     const touchPoint = Control.getTouchPoint(e.touches[i]);
                     Control.touchStartControl(touchPoint);
                     Resource.getRoot().processPointDownEvent(touchPoint);
@@ -194,12 +195,21 @@ export default class Control {
         let y = touchPoint.y;
         const controlMode = Control.instance.controlMode;
 
+        //fire
         let distance = Common.distance(x, y, controlMode.rightCenterX, controlMode.rightCenterY);
         if (distance < controlMode.rightRadius) {
             Resource.getRoot().processControlEvent("FIRE");
             return;
         }
 
+        //talk
+        distance = Common.distance(x, y, controlMode.talkCenterX, controlMode.talkCenterY);
+        if (distance < controlMode.talkRadius) {
+            Adapter.inputMessageEvent(false);
+            return;
+        }
+
+        //way
         distance = Common.distance(x, y, controlMode.centerX, controlMode.centerY);
         if (distance > controlMode.radius) {
             //超过外圆
@@ -273,9 +283,9 @@ export default class Control {
         thisControl.controlMode.rightCenterY = rightCenterY;
         thisControl.controlMode.rightRadius = rightRadius;
 
-        thisControl.controlMode.hornCenterX = rightCenterX + rightRadius * 1.1;
-        thisControl.controlMode.hornCenterY = rightCenterY - rightRadius;
-        thisControl.controlMode.hornRadius = rightRadius * .4;
+        thisControl.controlMode.talkRadius = 37;
+        thisControl.controlMode.talkCenterX = Resource.width() - 61;
+        thisControl.controlMode.talkCenterY = 92;
     };
 
     static draw(ctx) {
@@ -319,6 +329,15 @@ export default class Control {
             back.width, back.height,
             Resource.width() - back.width, 0,
             back.width, back.height);
+
+        //talk
+        const talk = Resource.getImage("talk");
+        ctx.drawImage(
+            talk,
+            0, 0,
+            talk.width, talk.height,
+            controlMode.talkCenterX - controlMode.talkRadius, controlMode.talkCenterY - controlMode.talkRadius,
+            controlMode.talkRadius * 2, controlMode.talkRadius * 2);
     }
 
     static getTouchPoint(eventPoint) {

@@ -40,7 +40,7 @@ export default class Menu extends Stage {
         this.initButtons();
 
         //背景
-        const bgImage = Resource.getImage("background_menu");
+        const bgImage = Resource.getImage("background_menu", "jpg");
         this.createItem({
             draw: function (ctx) {
                 ctx.drawImage(bgImage,
@@ -260,7 +260,7 @@ export default class Menu extends Stage {
                             if (!dataList[i]) {
                                 return;
                             }
-                            
+
                             const data = dataList[i];
                             //name
                             ctx.fillText(data.username, x - 47, y + i * 22);
@@ -338,6 +338,9 @@ export default class Menu extends Stage {
     }
 
     initMenu() {
+        //同步用户信息(获得的金币等)
+        Common.syncUserData();
+
         Connect.disconnect();
         Sound.bgmPause();
         Resource.getRoot().engine = null;

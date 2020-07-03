@@ -41,6 +41,7 @@ export default class WxInput extends Item {
                 wx.showKeyboard(obj);
                 wx.onKeyboardConfirm(function (result) {
                     thisInput.text = result.value;
+                    wx.offKeyboardConfirm(this);
                 })
             });
     }
