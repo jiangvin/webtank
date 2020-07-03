@@ -40,6 +40,9 @@ export default class Item {
     }
 
     draw(ctx) {
+        //先更新动画,保证事件顺利进行
+        this.updateAnimation();
+
         this.screenPoint = this.stage.convertToScreenPoint({x: this.x, y: this.y});
         const point = this.screenPoint;
         const half = Resource.getUnitSize() / 2;
@@ -50,7 +53,6 @@ export default class Item {
             return false;
         }
 
-        this.updateAnimation();
         this.drawImage(ctx);
         return true;
     }
