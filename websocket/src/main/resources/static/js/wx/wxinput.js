@@ -51,7 +51,7 @@ export default class WxInput extends Item {
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
         ctx.lineWidth = 2;
-        ctx.fillStyle = '#000';
+        ctx.strokeStyle = '#000';
         ctx.strokeRect(this.x, this.y, this.width, this.height);
 
         let text;

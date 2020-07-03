@@ -5,7 +5,6 @@
  */
 
 import Item from './item.js'
-import Resource from "../tool/resource.js";
 
 export default class Stage {
     constructor() {
