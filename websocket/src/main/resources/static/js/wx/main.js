@@ -6,6 +6,7 @@ import Control from "../share/tool/control";
 import Room from "../share/stage/room";
 import Adapter from "../share/tool/adapter";
 import Root from "../share/root.js";
+import Sound from "../share/tool/sound.js";
 
 Resource.setCanvas(canvas);
 let ctx = canvas.getContext('2d');
@@ -17,7 +18,7 @@ let ctx = canvas.getContext('2d');
 export default class Main {
     constructor() {
         const thisMain = this;
-
+        thisMain.initSound();
         //获取微信用户信息
         wx.login({
             success: function (res) {
@@ -91,5 +92,30 @@ export default class Main {
             this.bindLoop,
             canvas
         )
+    }
+
+    /**
+     * 加载声音引擎
+     */
+    initSound() {
+        Sound.instance.sounds.forEach(function (sound) {
+            sound.instance = new Audio(sound.src);
+            if (sound.loop) {
+                sound.instance.loop = true;
+            }
+            sound.play = function () {
+                if (!sound.instance.ended) {
+                    sound.stop();
+                }
+                sound.instance.play();
+            };
+            sound.stop = function () {
+                sound.instance.pause();
+                sound.instance.currentTime = 0;
+            };
+            sound.setVolume = function (volume) {
+                sound.instance.volume = volume;
+            }
+        })
     }
 }

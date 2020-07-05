@@ -341,7 +341,7 @@ export default class Menu extends Stage {
         Common.syncUserData();
 
         Connect.disconnect();
-        Sound.bgmPause();
+        Sound.stopAll();
         Resource.getRoot().engine = null;
         Resource.getRoot().users = null;
         Resource.getRoot().netDelay = 0;
