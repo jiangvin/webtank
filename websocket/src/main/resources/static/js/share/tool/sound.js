@@ -14,9 +14,25 @@ export default class Sound {
         this.sounds.set("lose", new Audio('audio/lose.wav'));
         this.sounds.set("item", new Audio('audio/item.mp3'));
         this.sounds.set("bgm", new Audio('audio/bgm.mp3'));
+        this.sounds.get("bgm").loop = true;
         this.sounds.forEach(function (sound) {
             sound.addEventListener('canplaythrough', function () {}, false);
         });
+
+        //切换至后台时静音
+        const thisSound = this;
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                thisSound.sounds.forEach(function (sound) {
+                    sound.volume = 0;
+                })
+            } else  {
+                thisSound.sounds.forEach(function (sound) {
+                    sound.volume = 1;
+                })
+            }
+        }
+        document.addEventListener("visibilitychange", handleVisibilityChange, false);
     }
 
     static catchItem() {
