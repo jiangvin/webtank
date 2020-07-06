@@ -41,7 +41,7 @@ export default class Common {
             Resource.setUser(data);
             const newCoins = Resource.getUser().coin;
             if (newCoins > oldCoins) {
-                Common.addMessage("获得金币数量: " + newCoins - oldCoins);
+                Common.addMessage("获得金币数量: " + (newCoins - oldCoins));
             }
             const newStage = Resource.getUser().stage;
             if (newStage > oldStage) {
