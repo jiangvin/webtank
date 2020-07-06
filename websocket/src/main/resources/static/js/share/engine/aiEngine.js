@@ -36,9 +36,9 @@ export default class AiEngine extends Engine {
             thisEngine.itemTypes[thisEngine.itemTypes.length] = "clock";
         }
 
-        thisEngine.maxMapId = 0;
-        Common.getRequest("/singlePlayer/getMaxMapId", function (data) {
-            thisEngine.maxMapId = data;
+        thisEngine.maxSubId = 1;
+        Common.getRequest("/singlePlayer/getMaxSubId?id=" + thisEngine.room.roomInfo.mapId, function (data) {
+            thisEngine.maxSubId = data;
         });
 
         /**
@@ -132,7 +132,8 @@ export default class AiEngine extends Engine {
 
     loadMapDetail(callback) {
         const thisEngine = this;
-        Common.getRequest("/singlePlayer/getMapFromId?id=" + this.room.roomInfo.mapId, function (data) {
+        Common.getRequest("/singlePlayer/getMapFromId?id=" + this.room.roomInfo.mapId +
+            "&subId=" + this.room.roomInfo.subId, function (data) {
             thisEngine.mapInfo = data;
 
             //如果playerLife有值，则以playerLife为准，否则以地图数据为准
@@ -291,7 +292,7 @@ export default class AiEngine extends Engine {
             }
             thisEngine.score += winScore;
             Common.getRequest("/singlePlayer/getRank?score=" + thisEngine.score, function (rank) {
-                if (thisEngine.room.roomInfo.mapId >= thisEngine.maxMapId) {
+                if (thisEngine.room.roomInfo.subId >= thisEngine.maxSubId) {
                     thisEngine.room.gameStatus({
                         message: "恭喜全部通关",
                         type: "WIN",
@@ -311,7 +312,7 @@ export default class AiEngine extends Engine {
 
                 const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.68, function () {
                     //进入下一关
-                    ++thisEngine.room.roomInfo.mapId;
+                    ++thisEngine.room.roomInfo.subId;
                     Status.setStatus(null, thisEngine.room.generateMaskInfo());
 
                     //保存坦克类型和数量

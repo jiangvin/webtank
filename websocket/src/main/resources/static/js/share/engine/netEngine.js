@@ -37,6 +37,7 @@ export default class NetEngine extends Engine {
                                 Connect.send("CREATE_ROOM", {
                                     "roomId": thisEngine.room.roomInfo.roomId,
                                     "mapId": thisEngine.room.roomInfo.mapId,
+                                    "subId": thisEngine.room.roomInfo.subId,
                                     "roomType": thisEngine.room.roomInfo.roomType,
                                     "joinTeamType": thisEngine.room.roomInfo.joinTeamType
                                 })

@@ -1,6 +1,7 @@
 package com.integration.socket.model.bo;
 
 import com.integration.dto.room.RoomType;
+import com.integration.socket.model.Constant;
 import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.service.MapService;
 import lombok.Data;
@@ -27,20 +28,23 @@ public class MapMangerBo {
 
     private int mapId;
 
-    public MapMangerBo(MapService mapService, int mapId, RoomType roomType) {
+    private int subId;
+
+    public MapMangerBo(MapService mapService, int mapId, int subId, RoomType roomType) {
         this.mapService = mapService;
         this.roomType = roomType;
         if (roomType == RoomType.PVE) {
-            this.mapBo = mapService.loadMap(mapId, roomType);
+            this.mapBo = mapService.loadMap(mapId, subId, roomType);
         } else {
             this.mapBo = mapService.loadRandomMap(loadedMapNames, roomType);
         }
         initPlayerLife();
-        this.mapId = mapId;
+        this.mapId = mapBo.getMapId();
+        this.subId = mapBo.getSubId();
     }
 
     public boolean loadNextMapPve(int saveLife) {
-        MapBo mapBo = mapService.loadNextMap(++mapId, roomType);
+        MapBo mapBo = mapService.loadNextMap(mapId, ++subId, roomType);
         if (mapBo == null) {
             return false;
         }
@@ -59,11 +63,13 @@ public class MapMangerBo {
             return false;
         }
         this.mapBo = mapBo;
+        this.mapId = mapBo.getMapId();
+        this.subId = mapBo.getSubId();
         return true;
     }
 
     public boolean reload() {
-        MapBo mapBo = mapService.loadMap(mapId, roomType);
+        MapBo mapBo = mapService.loadMap(mapId, subId, roomType);
         if (mapBo == null) {
             return false;
         }
@@ -74,7 +80,7 @@ public class MapMangerBo {
 
     private static List<StringCountDto> initPlayerLifeInPve() {
         List<StringCountDto> list = new ArrayList<>();
-        list.add(new StringCountDto("tank01", 4));
+        list.add(new StringCountDto(Constant.DEFAULT_TANK_TYPE, 4));
         return list;
     }
 

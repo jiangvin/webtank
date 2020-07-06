@@ -48,11 +48,11 @@ public class MapService {
 
     private static final String MAP_CONTENT = "map_content";
 
-    public MapBo loadNextMap(int mapId, RoomType roomType) {
-        if (mapDao.queryFromId(mapId) == null) {
+    public MapBo loadNextMap(int mapId, int subId, RoomType roomType) {
+        if (mapDao.queryFromId(mapId, subId) == null) {
             return null;
         }
-        return loadMap(mapId, roomType);
+        return loadMap(mapId, subId, roomType);
     }
 
     private MapBo loadMap(MapRecord record, RoomType roomType) {
@@ -66,6 +66,7 @@ public class MapService {
 
         MapBo mapBo = readFile(content);
         mapBo.setMapId(record.getId());
+        mapBo.setSubId(record.getSubId());
         mapBo.setMapName(record.getName());
 
         //根据类型调整数据
@@ -81,8 +82,8 @@ public class MapService {
         return mapBo;
     }
 
-    public MapBo loadMap(int mapId, RoomType roomType) {
-        return loadMap(mapDao.queryFromId(mapId), roomType);
+    public MapBo loadMap(int mapId, int subId, RoomType roomType) {
+        return loadMap(mapDao.queryFromId(mapId, subId), roomType);
     }
 
     public MapBo loadRandomMap(List<String> loadedMapNames, RoomType roomType) {

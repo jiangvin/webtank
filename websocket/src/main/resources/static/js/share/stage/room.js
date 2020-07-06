@@ -22,7 +22,7 @@ export default class Room extends Stage {
 
         /**
          *
-         * @type {{roomId,roomType,mapId}}
+         * @type {{roomId,roomType,mapId,subId}}
          */
         this.roomInfo = {};
         this.size = {};
@@ -93,13 +93,7 @@ export default class Room extends Stage {
             return "RED vs BLUE";
         }
 
-        let displayNum;
-        if (this.roomInfo.mapId < 10) {
-            displayNum = "0" + this.roomInfo.mapId;
-        } else {
-            displayNum = "" + this.roomInfo.mapId;
-        }
-        return "MISSION " + displayNum;
+        return "MISSION " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
     }
 
     update() {
@@ -209,9 +203,10 @@ export default class Room extends Stage {
         ctx.fillStyle = '#ffffff';
 
         //标题
-        if (this.roomInfo.roomId) {
+        if (this.roomInfo.roomId && this.roomInfo.mapId && this.roomInfo.subId) {
             const tipMessage = '房间号:' + this.roomInfo.roomId +
-                " 关卡:" + this.roomInfo.mapId + " [" + this.roomInfo.roomType + "]";
+                " 关卡:" + this.roomInfo.mapId + "-" + this.roomInfo.subId +
+                " [" + this.roomInfo.roomType + "]";
             ctx.fillText(tipMessage, 10, 6);
         }
 
@@ -249,11 +244,12 @@ export default class Room extends Stage {
 
     /**
      *
-     * @param data {{mapId,playerLife,computerLife,width,height,itemList}}
+     * @param data {{mapId,subId,playerLife,computerLife,width,height,itemList}}
      */
     loadMap(data) {
-        if (data.mapId !== undefined) {
+        if (data.mapId !== undefined && data.subId !== undefined) {
             this.roomInfo.mapId = data.mapId;
+            this.roomInfo.subId = data.subId;
         }
         if (data.playerLife !== undefined) {
             this.roomInfo.playerLife = data.playerLife;

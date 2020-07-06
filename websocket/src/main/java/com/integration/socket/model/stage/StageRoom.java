@@ -136,6 +136,7 @@ public class StageRoom extends BaseStage {
         roomDto.setRoomId(getRoomId());
         roomDto.setCreator(this.creator.getUsername());
         roomDto.setMapId(getMapId());
+        roomDto.setSubId(getSubId());
         roomDto.setRoomType(getRoomType());
         roomDto.setUserCount(getUserCount());
         return roomDto;
@@ -169,7 +170,11 @@ public class StageRoom extends BaseStage {
     }
 
     private int getMapId() {
-        return mapManger.getMapBo().getMapId();
+        return mapManger.getMapId();
+    }
+
+    private int getSubId() {
+        return mapManger.getSubId();
     }
 
     private RoomType getRoomType() {
@@ -773,7 +778,7 @@ public class StageRoom extends BaseStage {
 
         sendMessageToRoom(String.format("%s 选择了续关,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
         gameStatus.setType(GameStatusType.PAUSE);
-        gameStatus.setMessage(String.format("MISSION %02d", getMapId()));
+        gameStatus.setMessage(String.format("MISSION %d-%d", getMapId(), getSubId()));
         init();
         processNextMapEvent(5, "重新开始");
     }
@@ -844,7 +849,7 @@ public class StageRoom extends BaseStage {
         sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
 
         //修改标题，下次使用
-        gameStatus.setMessage(String.format("MISSION %02d", getMapId()));
+        gameStatus.setMessage(String.format("MISSION %d-%d", getMapId(), getSubId()));
         return gameStatus.getType() == GameStatusType.PAUSE;
     }
 

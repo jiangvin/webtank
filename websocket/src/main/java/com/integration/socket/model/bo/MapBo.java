@@ -33,6 +33,8 @@ public class MapBo {
 
     private int mapId;
 
+    private int subId;
+
     private String mapName;
 
     private List<StringCountDto> playerLife = new ArrayList<>();
@@ -64,6 +66,7 @@ public class MapBo {
     private void copyProperties(MapDto mapDto, List<String> keys) {
         copyLifeCountProperties(mapDto);
         mapDto.setMapId(getMapId());
+        mapDto.setSubId(getSubId());
         mapDto.setWidth(getWidth());
         mapDto.setHeight(getHeight());
         mapDto.setMapName(getMapName());

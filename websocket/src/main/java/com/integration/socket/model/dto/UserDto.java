@@ -25,6 +25,7 @@ public class UserDto {
     private Timestamp redStarExpired;
     private Timestamp ghostExpired;
     private Timestamp clockExpired;
+    private int stage;
 
     public static UserDto convert(UserRecord userRecord) {
         UserDto userDto = new UserDto();

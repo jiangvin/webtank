@@ -39,8 +39,8 @@ public class SinglePlayerController {
     private UserService userService;
 
     @GetMapping("/getMapFromId")
-    public MapDetailDto getMapFromId(@RequestParam(value = "id") int id) {
-        return mapService.loadMap(id, RoomType.PVE).toDetailDto();
+    public MapDetailDto getMapFromId(@RequestParam(value = "id") int id, @RequestParam(value = "subId") int subId) {
+        return mapService.loadMap(id, subId, RoomType.PVE).toDetailDto();
     }
 
     @GetMapping("getTankTypes")
@@ -48,9 +48,9 @@ public class SinglePlayerController {
         return TankTypeDto.getTypeMap();
     }
 
-    @GetMapping("getMaxMapId")
-    public int getMaxMapId() {
-        return mapDao.queryMaxMapId();
+    @GetMapping("getMaxSubId")
+    public int getMaxSubId(@RequestParam(value = "id") int id) {
+        return mapDao.queryMaxSubId(id);
     }
 
     @GetMapping("/getRank")

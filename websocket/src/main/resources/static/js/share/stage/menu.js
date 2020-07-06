@@ -91,14 +91,7 @@ export default class Menu extends Stage {
 
         //主菜单
         const bt0101 = new Button("单人游戏", Resource.width() * 0.5, this.getButtonPos(0), function () {
-            const roomInfo = {
-                mapId: 1,
-                roomType: "PVE",
-                roomId: "单人模式",
-                joinTeamType: "RED"
-            };
-            thisMenu.initRoom(roomInfo);
-            Resource.getRoot().addEngine(false);
+            thisMenu.initStagePve(false);
         });
         const bt0102 = new Button("多人游戏", Resource.width() * 0.5, this.getButtonPos(1), function () {
             thisMenu.switchButtons(1);
@@ -128,13 +121,7 @@ export default class Menu extends Stage {
 
         //创建房间
         const bt0301 = new Button("闯关模式", Resource.width() * 0.5, this.getButtonPos(0), function () {
-            const roomInfo = {
-                mapId: 1,
-                roomType: "PVE",
-                joinTeamType: "RED"
-            };
-            thisMenu.initRoom(roomInfo);
-            Resource.getRoot().addEngine(true);
+            thisMenu.initStagePve(true);
         });
         const bt0302 = new Button("对战模式", Resource.width() * 0.5, this.getButtonPos(1), function () {
             thisMenu.switchButtons(1);
@@ -147,7 +134,6 @@ export default class Menu extends Stage {
         //对战模式
         const bt0401 = new Button("红队", Resource.width() * 0.5, this.getButtonPos(0), function () {
             const roomInfo = {
-                mapId: 1,
                 roomType: "PVP",
                 joinTeamType: "RED",
                 showTeam: true
@@ -157,7 +143,6 @@ export default class Menu extends Stage {
         });
         const bt0402 = new Button("蓝队", Resource.width() * 0.5, this.getButtonPos(1), function () {
             const roomInfo = {
-                mapId: 1,
                 roomType: "PVP",
                 joinTeamType: "BLUE",
                 showTeam: true
@@ -228,6 +213,54 @@ export default class Menu extends Stage {
         this.buttons[6] = [rect0701, bt0701, bt0702, bt0703, header];
 
         this.buttons[7] = this.shop.initShop();
+
+        //this.buttons[8]为关卡选择
+    }
+
+    initStagePve(isNet) {
+        this.buttons[8] = [];
+        const list = this.buttons[8];
+        const thisMenu = this;
+
+        list[list.length] = new Button("关卡 01", Resource.width() * 0.5, this.getButtonPos(0), function () {
+            const roomInfo = {
+                mapId: 1,
+                subId: 1,
+                roomType: "PVE",
+                roomId: isNet === true ? "多人模式" : "单人模式",
+                joinTeamType: "RED"
+            };
+            thisMenu.initRoom(roomInfo);
+            Resource.getRoot().addEngine(isNet);
+        });
+
+        list[list.length] = new Button("关卡 02", Resource.width() * 0.5, this.getButtonPos(1), function () {
+            if (Resource.getUser().stage < 1) {
+                return;
+            }
+            const roomInfo = {
+                mapId: 2,
+                subId: 1,
+                roomType: "PVE",
+                roomId: isNet === true ? "多人模式" : "单人模式",
+                joinTeamType: "RED"
+            };
+            thisMenu.initRoom(roomInfo);
+            Resource.getRoot().addEngine(isNet);
+        });
+        if (Resource.getUser().stage < 1) {
+            list[list.length - 1].image = Resource.getImage("button_disabled");
+        }
+
+        list[list.length] = new Button("返回", Resource.width() * 0.5, this.getButtonPos(2), function () {
+            if (isNet) {
+                thisMenu.switchToIndex(2);
+            } else {
+                thisMenu.switchToIndex(0);
+            }
+        });
+
+        thisMenu.switchToIndex(8);
     }
 
     loadRanks() {
@@ -323,7 +356,6 @@ export default class Menu extends Stage {
         }
     }
 
-
     switchButtons(offset) {
         this.removeButtons();
         this.buttonIndex += offset;
@@ -414,12 +446,13 @@ export default class Menu extends Stage {
                 let offsetY = 0;
 
                 dto.roomList.forEach(function (room) {
-                    const title = room.roomId + " [关卡:" + room.mapId + "]";
+                    const title = room.roomId + " [关卡:" + room.mapId + "-" + room.subId + "]";
                     const type = room.roomType === "PVE" ? "闯关" : "对战";
                     const roomButton = new RoomButton(title, type, Resource.width() * 0.5, Resource.height() * 0.33 + offsetY, function () {
                         if (room.roomType === "PVE") {
                             const roomInfo = {
                                 mapId: room.mapId,
+                                subId: room.subId,
                                 roomType: room.roomType,
                                 roomId: room.roomId,
                                 joinTeamType: "RED",
@@ -431,6 +464,7 @@ export default class Menu extends Stage {
                         } else {
                             thisMenu.joinRoomCache = {
                                 mapId: room.mapId,
+                                subId: room.subId,
                                 roomType: room.roomType,
                                 roomId: room.roomId,
                                 joinRoom: true,

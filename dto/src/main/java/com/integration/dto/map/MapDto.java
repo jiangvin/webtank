@@ -16,6 +16,7 @@ import java.util.List;
 @Data
 public class MapDto {
     private Integer mapId;
+    private Integer subId;
     private Integer width;
     private Integer height;
     private Integer playerLife;

@@ -17,6 +17,8 @@ export default class User {
 
         this.tankType = "tank01";
         this.tankTypeExpired = null;
+
+        this.stage = 0;
     }
 
     setData(data) {
@@ -27,6 +29,7 @@ export default class User {
         this.clockExpired = data.clockExpired;
         this.tankType = data.tankType;
         this.tankTypeExpired = data.tankTypeExpired;
+        this.stage = data.stage;
     }
 
     setUserId(userId) {

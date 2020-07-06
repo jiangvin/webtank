@@ -58,6 +58,7 @@ export default class Resource {
         this.loadAnimationImage("background_loading", 1, "jpg");
         this.loadAnimationImage("background_menu", 1, "jpg");
         this.loadAnimationImage("button", 1);
+        this.loadAnimationImage("button_disabled", 1);
     }
 
     loadAnimationImage(imageId, widthPics, type) {

@@ -17,6 +17,7 @@ public class RoomDto {
     private String roomId;
     private String creator;
     private int mapId;
+    private int subId;
     private RoomType roomType;
     private TeamType joinTeamType;
     private Integer userCount;
