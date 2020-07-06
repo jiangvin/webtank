@@ -181,9 +181,6 @@ export default class Index {
             sound.stop = function () {
                 createjs.Sound.stop(sound.id);
             };
-            sound.setVolume = function (volume) {
-                createjs.Sound.volume = volume;
-            }
         });
         //切换至后台时静音
         function handleVisibilityChange() {
