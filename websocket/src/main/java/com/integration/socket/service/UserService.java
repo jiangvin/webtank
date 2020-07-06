@@ -57,6 +57,14 @@ public class UserService {
         return userDao.queryRank(score);
     }
 
+    public void saveStageForSinglePlayer(UserDto userDto) {
+        UserRecord userRecord = userDao.queryUser(userDto.getUserId());
+        if (userRecord.getStage() < userDto.getStage()) {
+            userRecord.setStage(userDto.getStage());
+            userRecord.update();
+        }
+    }
+
     public void saveRankForSinglePlayer(RankDto rankDto) {
         if (!tokenService.checkToken(rankDto.getToken())) {
             return;

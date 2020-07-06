@@ -5,11 +5,13 @@ import com.integration.socket.model.dto.EncryptDto;
 import com.integration.socket.model.dto.MapDetailDto;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.TankTypeDto;
+import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.service.MapService;
 import com.integration.socket.service.UserService;
 import com.integration.util.object.ObjectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -65,6 +67,17 @@ public class SinglePlayerController {
             return false;
         }
         userService.saveRankForSinglePlayer(rankDto);
+        return true;
+    }
+
+    @PostMapping("/saveStage")
+    public boolean saveStage(@RequestBody EncryptDto encryptDto) {
+        UserDto userDto = ObjectUtil.readValue(encryptDto.decrypt(), UserDto.class);
+        if (userDto == null || StringUtils.isEmpty(userDto.getUserId())) {
+            return false;
+        }
+
+        userService.saveStageForSinglePlayer(userDto);
         return true;
     }
 }

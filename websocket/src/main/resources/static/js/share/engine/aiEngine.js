@@ -300,6 +300,7 @@ export default class AiEngine extends Engine {
                         rank: rank
                     });
                     thisEngine.saveRank();
+                    thisEngine.saveStage();
                     return;
                 }
 
@@ -342,6 +343,15 @@ export default class AiEngine extends Engine {
                 thisEngine.saveRank();
             });
         }
+    }
+
+    saveStage() {
+        const thisEngine = this;
+        Common.postEncrypt("/singlePlayer/saveStage",
+            {
+                userId: Resource.getUser().deviceId,
+                stage: thisEngine.room.roomInfo.mapId
+            });
     }
 
     saveRank() {

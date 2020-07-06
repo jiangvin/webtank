@@ -830,6 +830,7 @@ public class StageRoom extends BaseStage {
                 gameStatus.setMessage("恭喜全部通关");
                 gameStatus.setType(GameStatusType.WIN);
                 userService.saveRankForMultiplePlayers(this.creator, gameStatus);
+                saveStage();
                 getAndSaveCoin();
             } else {
                 gameStatus.setMessage("恭喜通关");
@@ -851,6 +852,23 @@ public class StageRoom extends BaseStage {
         //修改标题，下次使用
         gameStatus.setMessage(String.format("MISSION %d-%d", getMapId(), getSubId()));
         return gameStatus.getType() == GameStatusType.PAUSE;
+    }
+
+    /**
+     * 保持通关记录
+     */
+    private void saveStage() {
+        if (creator.getUserRecord() == null) {
+            return;
+        }
+
+        UserRecord userRecord = creator.getUserRecord();
+        if (userRecord.getStage() >= getMapId()) {
+            return;
+        }
+
+        userRecord.setStage(getMapId());
+        userRecord.update();
     }
 
     private void getAndSaveCoin() {
