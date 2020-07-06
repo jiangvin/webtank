@@ -105,18 +105,24 @@ public class MapService {
         if (StringUtils.isEmpty(mapEditDto.getName())) {
             throw new CustomException("名字不能为空");
         }
+        if (mapEditDto.getId() == null ||
+                mapEditDto.getId() <= 0 ||
+                mapEditDto.getSubId() == null ||
+                mapEditDto.getSubId() <= 0) {
+            throw new CustomException("ID不能为空");
+        }
         MapBo mapBo = readFile(mapEditDto.getData());
 
-        MapRecord mapRecord = mapDao.queryFromName(mapEditDto.getName());
+        MapRecord mapRecord = mapDao.queryFromId(mapEditDto.getId(), mapEditDto.getSubId());
         if (mapRecord != null) {
             if (mapRecord.getSecret() != null && !mapRecord.getSecret().equals(mapEditDto.getPw())) {
-                throw new CustomException("密码校验出错,请重新输入密码或者修改地图名存为新地图");
+                throw new CustomException("密码校验出错,请重新输入密码或者修改ID存为新地图");
             }
+            mapRecord.setName(mapEditDto.getName());
             mapRecord.setData(mapEditDto.getData());
             mapRecord.setWidth(mapBo.getMaxGridX());
             mapRecord.setHeight(mapBo.getMaxGridY());
             mapRecord.update();
-            mapDao.resetId();
             return;
         }
 
@@ -124,8 +130,13 @@ public class MapService {
         if (!StringUtils.isEmpty(mapEditDto.getPw())) {
             secret = mapEditDto.getPw();
         }
-        mapDao.insertMap(mapEditDto.getName(), secret, mapBo.getMaxGridX(), mapBo.getMaxGridY(), mapEditDto.getData());
-        mapDao.resetId();
+        mapDao.insertMap(mapEditDto.getName(),
+                         mapEditDto.getId(),
+                         mapEditDto.getSubId(),
+                         secret,
+                         mapBo.getMaxGridX(),
+                         mapBo.getMaxGridY(),
+                         mapEditDto.getData());
     }
 
     private MapBo readFile(String content) {

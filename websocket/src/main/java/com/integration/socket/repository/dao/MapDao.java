@@ -26,24 +26,15 @@ public class MapDao extends BaseDao {
         return create.selectFrom(MAP).where(MAP.NAME.eq(name)).fetchOne();
     }
 
-    public void insertMap(String name, String secret, int width, int height, String data) {
+    public void insertMap(String name, int id, int subId, String secret, int width, int height, String data) {
         create.insertInto(MAP)
         .set(MAP.NAME, name)
+        .set(MAP.ID, id)
+        .set(MAP.SUB_ID, subId)
         .set(MAP.DATA, data)
         .set(MAP.WIDTH, width)
         .set(MAP.HEIGHT, height)
         .set(MAP.SECRET, secret).execute();
-    }
-
-    public void resetId() {
-        List<MapRecord> list = create.fetch("SELECT * FROM map order by width * height;").into(MapRecord.class);
-        for (int i = 0; i < list.size(); ++i) {
-            MapRecord record = list.get(i);
-            if (record.getId() == null || record.getId() != i + 1) {
-                record.setId(i + 1);
-                record.update();
-            }
-        }
     }
 
     public int queryMaxSubId(int id) {

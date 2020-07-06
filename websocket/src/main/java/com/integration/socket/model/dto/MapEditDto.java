@@ -16,11 +16,15 @@ public class MapEditDto {
     private String name;
     private String pw;
     private String data;
+    private Integer id;
+    private Integer subId;
 
     public static MapEditDto convert(MapRecord mapRecord) {
         MapEditDto mapEditDto = new MapEditDto();
         mapEditDto.setName(mapRecord.getName());
         mapEditDto.setData(mapRecord.getData());
+        mapEditDto.setId(mapRecord.getId());
+        mapEditDto.setSubId(mapRecord.getSubId());
         return mapEditDto;
     }
 }
