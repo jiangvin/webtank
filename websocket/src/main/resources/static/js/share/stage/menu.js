@@ -58,7 +58,7 @@ export default class Menu extends Stage {
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
                 context.fillStyle = '#FFF';
-                context.fillText('90坦克世界', Resource.width() / 2, Resource.height() * .12);
+                context.fillText('坦克大作战', Resource.width() / 2, Resource.height() * .12);
             }
         });
 
