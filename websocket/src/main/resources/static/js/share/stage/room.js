@@ -181,7 +181,7 @@ export default class Room extends Stage {
                 end.y = start.y + this.backgroundImage.sizeY;
 
                 if (start.x + mapStart.x > Resource.width() ||
-                    start.y + mapStart.y  > Resource.height() ||
+                    start.y + mapStart.y > Resource.height() ||
                     end.x + mapStart.x < 0 ||
                     end.y + mapStart.y < 0) {
                     continue;
@@ -603,7 +603,10 @@ export default class Room extends Stage {
     updateTankControl(tankData, force) {
         const tankItem = this.items.get(tankData.id);
         //优化前端闪烁显示
-        if (!force && tankItem.orientation === tankData.orientation && tankItem.action === tankData.action) {
+        if (!force &&
+            tankItem.orientation === tankData.orientation &&
+            tankItem.action === tankData.action &&
+            Common.distance(tankData.x, tankData.y, tankItem.x, tankItem.y) < 20) {
             return;
         }
         tankItem.orientation = tankData.orientation;

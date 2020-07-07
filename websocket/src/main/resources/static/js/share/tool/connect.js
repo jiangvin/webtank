@@ -21,7 +21,7 @@ export default class Connect {
     }
 
     static disconnect() {
-        if (!Connect.status()) {
+        if (!Connect.instance.socketClient) {
             return;
         }
 

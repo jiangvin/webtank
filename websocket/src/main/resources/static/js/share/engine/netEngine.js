@@ -86,7 +86,8 @@ export default class NetEngine extends Engine {
                 Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120, true);
             } else {
                 Status.setStatus(Status.statusPause(), "与服务器断开！");
-
+                //再关闭一次，排除一些情况
+                Connect.disconnect();
                 //显示蒙版
                 thisEngine.room.createItem({
                     z: 8,
