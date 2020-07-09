@@ -69,9 +69,11 @@ export default class Menu extends Stage {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#fff';
-                ctx.fillText(Resource.getUser().userId,
-                    Resource.width() / 2,
-                    Resource.height() * .2);
+                let text = Resource.getUser().userId;
+                if (Resource.getUser().rank) {
+                    text += "(排名:" + Resource.getUser().rank + ")";
+                }
+                ctx.fillText(text, Resource.width() / 2, Resource.height() * .2);
             }
         });
 

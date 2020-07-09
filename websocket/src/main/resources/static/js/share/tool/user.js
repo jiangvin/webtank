@@ -19,6 +19,7 @@ export default class User {
         this.tankTypeExpired = null;
 
         this.stage = 0;
+        this.rank = 0;
     }
 
     setData(data) {
@@ -30,6 +31,10 @@ export default class User {
         this.tankType = data.tankType;
         this.tankTypeExpired = data.tankTypeExpired;
         this.stage = data.stage;
+
+        if (data.rank) {
+            this.rank = data.rank;
+        }
     }
 
     setUserId(userId) {

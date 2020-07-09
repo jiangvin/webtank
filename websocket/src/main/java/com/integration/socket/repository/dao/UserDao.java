@@ -4,6 +4,7 @@ import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.jooq.tables.records.RankBoardRecord;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
+import org.jooq.impl.DSL;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
@@ -52,6 +53,23 @@ public class UserDao extends BaseDao {
                        .where(RANK_BOARD.SCORE.gt(score))
                        .orderBy(RANK_BOARD.SCORE).limit(1).fetchOneInto(Integer.class);
         return rank == null ? 1 : rank + 1;
+    }
+
+    public Integer queryMaxScore(String userId, String username) {
+        if (StringUtils.isEmpty(userId)) {
+            return create.select(DSL.max(RANK_BOARD.SCORE)).from(RANK_BOARD)
+                   .where(RANK_BOARD.USER_ID.isNull().and(RANK_BOARD.USERNAME.eq(username)))
+                   .fetchOneInto(Integer.class);
+        } else {
+            return create.select(DSL.max(RANK_BOARD.SCORE)).from(RANK_BOARD)
+                   .where(RANK_BOARD.USER_ID.eq(userId))
+                   .fetchOneInto(Integer.class);
+        }
+    }
+
+    public Integer queryRankFromUserId(String userId) {
+        return create.select(DSL.min(RANK_BOARD.RANK)).from(RANK_BOARD)
+               .where(RANK_BOARD.USER_ID.eq(userId)).fetchOneInto(Integer.class);
     }
 
     public void updateBoardRank(int rank) {

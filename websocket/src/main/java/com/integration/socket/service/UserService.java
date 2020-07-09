@@ -1,8 +1,8 @@
 package com.integration.socket.service;
 
+import com.integration.dto.room.GameStatusDto;
 import com.integration.socket.model.Constant;
 import com.integration.socket.model.bo.UserBo;
-import com.integration.dto.room.GameStatusDto;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.UserDao;
@@ -38,7 +38,11 @@ public class UserService {
             return null;
         }
         userDao.updateLoginTime(userRecord);
-        return UserDto.convert(userRecord);
+        UserDto userDto = UserDto.convert(userRecord);
+
+        //查询排名
+        userDto.setRank(userDao.queryRankFromUserId(userId));
+        return userDto;
     }
 
     public void saveUser(UserDto userDto) {
@@ -66,13 +70,20 @@ public class UserService {
     }
 
     public void saveRankForSinglePlayer(RankDto rankDto) {
+        //幂等性检测
         if (!tokenService.checkToken(rankDto.getToken())) {
             return;
         }
 
-        if (StringUtils.isEmpty(rankDto.getUsername()) ||
-                rankDto.getScore() == null ||
-                rankDto.getScore() <= 0) {
+        if (StringUtils.isEmpty(rankDto.getUsername()) || rankDto.getScore() == null || rankDto.getScore() <= 0) {
+            return;
+        }
+
+        //返回金币奖励
+        saveCoinFromScore(userDao.queryUser(rankDto.getUserId()), rankDto.getScore(), true);
+
+        Integer maxScore = userDao.queryMaxScore(rankDto.getUserId(), rankDto.getUsername());
+        if (maxScore != null && maxScore > rankDto.getScore()) {
             return;
         }
 
@@ -84,9 +95,29 @@ public class UserService {
         rankDto.setRank(rank);
         rankDto.setGameType(0);
         userDao.insertRank(rankDto);
+    }
 
-        //返回金币奖励
-        saveCoinFromScore(userDao.queryUser(rankDto.getUserId()), rankDto.getScore(), true);
+    public void saveRankForMultiplePlayers(UserBo creator, GameStatusDto gameStatusDto) {
+        if (gameStatusDto.getScore() <= 0) {
+            return;
+        }
+
+        Integer maxScore = userDao.queryMaxScore(creator.getUserId(), creator.getUsername());
+        if (maxScore != null && maxScore > gameStatusDto.getScore()) {
+            return;
+        }
+
+        //更新后面的排名
+        userDao.updateBoardRank(gameStatusDto.getRank());
+
+        //插入数据
+        RankDto rankDto = new RankDto();
+        rankDto.setGameType(1);
+        rankDto.setRank(gameStatusDto.getRank());
+        rankDto.setScore(gameStatusDto.getScore());
+        rankDto.setUserId(creator.getUserId());
+        rankDto.setUsername(creator.getUsername());
+        userDao.insertRank(rankDto);
     }
 
     public void saveCoinFromScore(UserRecord record, int score, boolean isSingle) {
@@ -103,22 +134,5 @@ public class UserService {
             record.setNetGameTimes(record.getNetGameTimes() + 1);
         }
         record.update();
-    }
-
-    public void saveRankForMultiplePlayers(UserBo creator, GameStatusDto gameStatusDto) {
-        if (gameStatusDto.getScore() <= 0) {
-            return;
-        }
-
-        userDao.updateBoardRank(gameStatusDto.getRank());
-
-        //插入数据
-        RankDto rankDto = new RankDto();
-        rankDto.setGameType(1);
-        rankDto.setRank(gameStatusDto.getRank());
-        rankDto.setScore(gameStatusDto.getScore());
-        rankDto.setUserId(creator.getUserId());
-        rankDto.setUsername(creator.getUsername());
-        userDao.insertRank(rankDto);
     }
 }

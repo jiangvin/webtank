@@ -20,12 +20,13 @@ public class UserDto {
     private String username;
     private String userDevice;
     private int coin;
+    private int stage;
+    private int rank;
     private String tankType;
     private Timestamp tankTypeExpired;
     private Timestamp redStarExpired;
     private Timestamp ghostExpired;
     private Timestamp clockExpired;
-    private int stage;
 
     public static UserDto convert(UserRecord userRecord) {
         UserDto userDto = new UserDto();
