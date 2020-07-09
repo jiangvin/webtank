@@ -13,7 +13,7 @@ import Root from "../share/root.js";
 import Adapter from "../share/tool/adapter.js";
 import Common from "../share/tool/common.js";
 import AppHome from "../app/apphome.js";
-import Loading from "../share/stage/loading.js";
+import Loading from "./loading.js";
 import Sound from "../share/tool/sound.js";
 
 export default class Index {

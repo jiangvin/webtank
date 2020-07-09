@@ -3,9 +3,9 @@
  * @description 资源加载的缓冲页面
  * @date 2020/7/3
  */
-import Stage from "./stage.js";
-import Resource from "../tool/resource.js";
-import Sound from "../tool/sound.js";
+import Stage from "../share/stage/stage.js";
+import Resource from "../share/tool/resource.js";
+import Sound from "../share/tool/sound.js";
 
 export default class Loading extends Stage {
     constructor() {
