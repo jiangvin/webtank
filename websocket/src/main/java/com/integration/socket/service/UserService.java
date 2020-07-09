@@ -6,8 +6,10 @@ import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.UserDao;
+import com.integration.socket.repository.jooq.tables.records.RankBoardRecord;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -82,19 +84,24 @@ public class UserService {
         //返回金币奖励
         saveCoinFromScore(userDao.queryUser(rankDto.getUserId()), rankDto.getScore(), true);
 
-        Integer maxScore = userDao.queryMaxScore(rankDto.getUserId(), rankDto.getUsername());
-        if (maxScore != null && maxScore > rankDto.getScore()) {
+        RankBoardRecord rankBoardRecord = userDao.queryFirstRank(rankDto.getUserId(), rankDto.getUsername());
+        if (rankBoardRecord != null && rankBoardRecord.getScore() > rankDto.getScore()) {
             return;
         }
 
-        //更新后面的排名
+        //更新
         int rank = getRank(rankDto.getScore());
-        userDao.updateBoardRank(rank);
-
-        //插入数据
         rankDto.setRank(rank);
         rankDto.setGameType(0);
-        userDao.insertRank(rankDto);
+
+        if (rankBoardRecord != null) {
+            userDao.updateBoardRank(rank, rankBoardRecord.getRank());
+            BeanUtils.copyProperties(rankDto, rankBoardRecord);
+            rankBoardRecord.update();
+        } else {
+            userDao.updateBoardRank(rank, null);
+            userDao.insertRank(rankDto);
+        }
     }
 
     public void saveRankForMultiplePlayers(UserBo creator, GameStatusDto gameStatusDto) {
@@ -102,22 +109,27 @@ public class UserService {
             return;
         }
 
-        Integer maxScore = userDao.queryMaxScore(creator.getUserId(), creator.getUsername());
-        if (maxScore != null && maxScore > gameStatusDto.getScore()) {
+        RankBoardRecord rankBoardRecord = userDao.queryFirstRank(creator.getUserId(), creator.getUsername());
+        if (rankBoardRecord != null && rankBoardRecord.getScore() > gameStatusDto.getScore()) {
             return;
         }
 
-        //更新后面的排名
-        userDao.updateBoardRank(gameStatusDto.getRank());
-
-        //插入数据
+        //更新
         RankDto rankDto = new RankDto();
         rankDto.setGameType(1);
         rankDto.setRank(gameStatusDto.getRank());
         rankDto.setScore(gameStatusDto.getScore());
         rankDto.setUserId(creator.getUserId());
         rankDto.setUsername(creator.getUsername());
-        userDao.insertRank(rankDto);
+
+        if (rankBoardRecord != null) {
+            userDao.updateBoardRank(gameStatusDto.getRank(), rankBoardRecord.getRank());
+            BeanUtils.copyProperties(rankDto, rankBoardRecord);
+            rankBoardRecord.update();
+        } else {
+            userDao.updateBoardRank(gameStatusDto.getRank(), null);
+            userDao.insertRank(rankDto);
+        }
     }
 
     public void saveCoinFromScore(UserRecord record, int score, boolean isSingle) {

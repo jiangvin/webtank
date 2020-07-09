@@ -55,15 +55,17 @@ public class UserDao extends BaseDao {
         return rank == null ? 1 : rank + 1;
     }
 
-    public Integer queryMaxScore(String userId, String username) {
+    public RankBoardRecord queryFirstRank(String userId, String username) {
         if (StringUtils.isEmpty(userId)) {
-            return create.select(DSL.max(RANK_BOARD.SCORE)).from(RANK_BOARD)
+            return create.selectFrom(RANK_BOARD)
                    .where(RANK_BOARD.USER_ID.isNull().and(RANK_BOARD.USERNAME.eq(username)))
-                   .fetchOneInto(Integer.class);
+                   .orderBy(RANK_BOARD.RANK)
+                   .limit(1).fetchOne();
         } else {
-            return create.select(DSL.max(RANK_BOARD.SCORE)).from(RANK_BOARD)
+            return create.selectFrom(RANK_BOARD)
                    .where(RANK_BOARD.USER_ID.eq(userId))
-                   .fetchOneInto(Integer.class);
+                   .orderBy(RANK_BOARD.RANK)
+                   .limit(1).fetchOne();
         }
     }
 
@@ -72,8 +74,12 @@ public class UserDao extends BaseDao {
                .where(RANK_BOARD.USER_ID.eq(userId)).fetchOneInto(Integer.class);
     }
 
-    public void updateBoardRank(int rank) {
-        create.execute(String.format("update rank_board rb set rb.rank = rb.rank + 1 where rb.rank >= %d;", rank));
+    public void updateBoardRank(int start, Integer end) {
+        if (end != null) {
+            create.execute(String.format("update rank_board rb set rb.rank = rb.rank + 1 where rb.rank >= %d and rb.rank < %d;", start, end));
+        } else {
+            create.execute(String.format("update rank_board rb set rb.rank = rb.rank + 1 where rb.rank >= %d;", start));
+        }
     }
 
     public void insertRank(RankDto rankDto) {
