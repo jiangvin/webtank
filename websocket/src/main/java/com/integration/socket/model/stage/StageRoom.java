@@ -208,16 +208,16 @@ public class StageRoom extends BaseStage {
             return;
         }
 
+        for (Map.Entry<String, BulletBo> kv : bulletMap.entrySet()) {
+            updateBullet(kv.getValue());
+        }
+        removeBullets();
+
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             updateTank(tankBo);
         }
         syncTanks();
-
-        for (Map.Entry<String, BulletBo> kv : bulletMap.entrySet()) {
-            updateBullet(kv.getValue());
-        }
-        removeBullets();
     }
 
     private void syncTanks() {
@@ -689,7 +689,7 @@ public class StageRoom extends BaseStage {
                 continue;
             }
             double distance = Point.distance(tankBo.getX(), tankBo.getY(), bulletBo.getX(), bulletBo.getY());
-            double minDistance = CommonUtil.UNIT_SIZE / 2.0;
+            double minDistance = (CommonUtil.UNIT_SIZE + CommonUtil.AMMO_SIZE) / 2.0;
             if (distance <= minDistance) {
                 return tankBo;
             }
