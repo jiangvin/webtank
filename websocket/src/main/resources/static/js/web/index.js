@@ -14,12 +14,10 @@ import Adapter from "../share/tool/adapter.js";
 import Common from "../share/tool/common.js";
 import AppHome from "../app/apphome.js";
 import Loading from "./loading.js";
-import Sound from "../share/tool/sound.js";
 
 export default class Index {
     constructor() {
         this.initEvent();
-        this.initSound();
 
         this.generateCanvas();
         Resource.setCanvas(this.canvas);
@@ -162,37 +160,6 @@ export default class Index {
         Control.setPortrait(height > width);
         //窗口变化时重新计算触控栏位置
         Control.generateTouchModeInfo();
-    }
-
-    /**
-     * 加载声音引擎
-     */
-    initSound() {
-        createjs.Sound.alternateExtensions = ["mp3", "wav"];
-        Sound.instance.sounds.forEach(function (sound) {
-            createjs.Sound.registerSound(sound.src, sound.id);
-            sound.play = function () {
-                if (sound.loop) {
-                    createjs.Sound.play(sound.id, {loop: -1});
-                } else {
-                    createjs.Sound.play(sound.id);
-                }
-            };
-            sound.stop = function () {
-                createjs.Sound.stop(sound.id);
-            };
-        });
-        //切换至后台时静音
-        function handleVisibilityChange() {
-            if (document.hidden) {
-                createjs.Sound.volume = 0;
-            } else {
-                createjs.Sound.volume = 1;
-            }
-        }
-
-        document.addEventListener("visibilitychange", handleVisibilityChange, false);
-
     }
 }
 new Index();

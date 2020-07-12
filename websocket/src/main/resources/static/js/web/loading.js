@@ -47,7 +47,7 @@ export default class Loading extends Stage {
 
     init() {
         const thisLoading = this;
-        const total = Resource.instance.images.size;
+        const total = Resource.instance.images.size + Sound.instance.sounds.size;
         let loaded = 0;
 
         const event = function () {
@@ -61,6 +61,8 @@ export default class Loading extends Stage {
                 Resource.getRoot().nextStage();
             }
         };
+
+        //加载图片
         Resource.instance.images.forEach(function (image) {
             if (image.complete) {
                 event();
@@ -71,7 +73,35 @@ export default class Loading extends Stage {
             }
         });
 
-        //最大8秒直接进入游戏
+        //加载音频
+        createjs.Sound.alternateExtensions = ["mp3", "wav"];
+        createjs.Sound.on("fileload", event, this);
+        Sound.instance.sounds.forEach(function (sound) {
+            createjs.Sound.registerSound(sound.src, sound.id);
+            sound.play = function () {
+                if (sound.loop) {
+                    createjs.Sound.play(sound.id, {loop: -1});
+                } else {
+                    createjs.Sound.play(sound.id);
+                }
+            };
+            sound.stop = function () {
+                createjs.Sound.stop(sound.id);
+            };
+        });
+
+        //切换至后台时静音
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                createjs.Sound.volume = 0;
+            } else {
+                createjs.Sound.volume = 1;
+            }
+        }
+        document.addEventListener("visibilitychange", handleVisibilityChange, false);
+
+
+        //最大10秒直接进入游戏
         setTimeout(function () {
             if (thisLoading.percent >= 100) {
                 return;
@@ -79,6 +109,6 @@ export default class Loading extends Stage {
 
             thisLoading.percent = 100;
             Resource.getRoot().nextStage();
-        }, 8000);
+        }, 10000);
     }
 }
