@@ -100,15 +100,23 @@ export default class Loading extends Stage {
         }
         document.addEventListener("visibilitychange", handleVisibilityChange, false);
 
-
-        //最大10秒直接进入游戏
-        setTimeout(function () {
+        //每5秒检测一次，若5秒进度条未更新则直接进入
+        let lastPercent = thisLoading.percent;
+        const checkPercent = function() {
             if (thisLoading.percent >= 100) {
                 return;
             }
 
-            thisLoading.percent = 100;
-            Resource.getRoot().nextStage();
-        }, 10000);
+            if (thisLoading.percent > lastPercent) {
+                //进度条已更新
+                lastPercent = thisLoading.percent;
+                setTimeout(checkPercent(), 5000);
+            } else {
+                //进度条未更新,直接进入
+                thisLoading.percent = 100;
+                Resource.getRoot().nextStage();
+            }
+        };
+        setTimeout(checkPercent(), 5000);
     }
 }
