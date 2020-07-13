@@ -57,6 +57,9 @@ export default class Stage {
     processSocketMessage(messageDto) {
     }
 
+    /**
+     * 切换场景时运行
+     */
     init() {
     }
 }

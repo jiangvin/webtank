@@ -8,7 +8,6 @@ import Resource from "../share/tool/resource.js";
 import Stage from "../share/stage/stage.js"
 import Common from "../share/tool/common.js";
 import Control from "../share/tool/control.js";
-import Adapter from "../share/tool/adapter.js";
 
 export default class Home extends Stage {
     constructor() {
@@ -55,7 +54,6 @@ export default class Home extends Stage {
             Resource.setUserId(name);
             $('#input-name-div').css("visibility", "hidden");
             Common.nextStage();
-            Adapter.initInput();
         };
         $('#button1').bind('click', buttonEvent);
         $('#button2').bind('click', buttonEvent);

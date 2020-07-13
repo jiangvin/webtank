@@ -15,6 +15,7 @@ import Rect from "./rect.js";
 import Item from "./item.js";
 import Tank from "./tank.js";
 import Confirm from "./confirm.js";
+import Adapter from "../tool/adapter.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -59,6 +60,8 @@ export default class Room extends Stage {
         this.clear();
         Status.setStatus(Status.statusPause(), this.generateMaskInfo());
         Sound.bgm();
+
+        Adapter.instance.inputEnable = true;
     }
 
     clear() {

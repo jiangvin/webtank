@@ -17,10 +17,7 @@ export default class Adapter {
          */
         this.platform = 0;
 
-        /**
-         * input
-         * @type {boolean}
-         */
+        this.inputDisplay = false;
         this.inputEnable = false;
     }
 
@@ -64,12 +61,16 @@ export default class Adapter {
         input.addClass("input-message");
         document.addEventListener("keydown", function (e) {
             if (e.key === "Enter") {
-                Adapter.inputMessageWebEvent(true);
+                Adapter.inputMessageEvent(true);
             }
         });
     }
 
     static inputMessageEvent(inputFocus) {
+        if (!this.instance.inputEnable) {
+            return;
+        }
+
         if (this.instance.platform === 1) {
             Adapter.inputMessageWxEvent();
         } else {
@@ -96,7 +97,7 @@ export default class Adapter {
 
     static inputMessageWebEvent(inputFocus) {
         const input = $('#input');
-        if (Adapter.instance.inputEnable) {
+        if (Adapter.instance.inputDisplay) {
             //关闭输入框
             //关闭输入框前先处理文字信息
             const text = input.val();
@@ -104,11 +105,11 @@ export default class Adapter {
                 Connect.send("USER_MESSAGE", text);
                 input.val("");
             }
-            Adapter.instance.inputEnable = false;
+            Adapter.instance.inputDisplay = false;
             document.getElementById('input').style.visibility = 'hidden';
         } else {
             //打开输入框
-            Adapter.instance.inputEnable = true;
+            Adapter.instance.inputDisplay = true;
             document.getElementById('input').style.visibility = 'visible';
             if (inputFocus) {
                 input.focus();

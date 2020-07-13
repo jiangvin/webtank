@@ -80,6 +80,11 @@ export default class Menu extends Stage {
         this.loadButtons();
     }
 
+    init() {
+        Adapter.initInput();
+        Adapter.instance.inputEnable = false;
+    }
+
     initRoom(roomInfo) {
         Common.nextStage(roomInfo);
     }

@@ -33,7 +33,6 @@ export default class Index {
                 if (data) {
                     //旧用户
                     Resource.setUser(data);
-                    Adapter.initInput();
 
                     thisIndex.root.addStage(new Menu());
                     thisIndex.root.addStage(new Room());

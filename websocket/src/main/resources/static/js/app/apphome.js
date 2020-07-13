@@ -7,7 +7,6 @@
 import Stage from "../share/stage/stage.js";
 import Resource from "../share/tool/resource.js";
 import Common from "../share/tool/common.js";
-import Adapter from "../share/tool/adapter.js";
 
 export default class AppHome extends Stage {
     constructor() {
@@ -57,7 +56,6 @@ export default class AppHome extends Stage {
                 userDevice: Resource.getUser().deviceName
             });
             Common.nextStage();
-            Adapter.initInput();
         });
     }
 

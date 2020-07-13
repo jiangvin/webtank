@@ -98,7 +98,7 @@ export default class Loading extends Stage {
                 createjs.Sound.volume = 1;
             }
         }
-        document.addEventListener("visibilitychange", handleVisibilityChange, false);
+        document.addEventListener("visibilitychange", handleVisibilityChange);
 
         //每5秒检测一次，若5秒进度条未更新则直接进入
         let lastPercent = thisLoading.percent;
@@ -110,13 +110,13 @@ export default class Loading extends Stage {
             if (thisLoading.percent > lastPercent) {
                 //进度条已更新
                 lastPercent = thisLoading.percent;
-                setTimeout(checkPercent(), 5000);
+                setTimeout(checkPercent, 5000);
             } else {
                 //进度条未更新,直接进入
                 thisLoading.percent = 100;
                 Resource.getRoot().nextStage();
             }
         };
-        setTimeout(checkPercent(), 5000);
+        setTimeout(checkPercent, 5000);
     }
 }
