@@ -238,6 +238,7 @@ export default class Menu extends Stage {
 
         list[list.length] = new Button("关卡 02", Resource.width() * 0.5, this.getButtonPos(1), function () {
             if (Resource.getUser().stage < 1) {
+                Common.addMessage("未解锁, 请先通关之前的关卡!", "#FF0");
                 return;
             }
             const roomInfo = {
@@ -254,7 +255,20 @@ export default class Menu extends Stage {
             list[list.length - 1].image = Resource.getImage("button_disabled");
         }
 
-        list[list.length] = new Button("返回", Resource.width() * 0.5, this.getButtonPos(2), function () {
+        list[list.length] = new Button("关卡 03", Resource.width() * 0.5, this.getButtonPos(2), function () {
+            if (Resource.getUser().stage < 2) {
+                Common.addMessage("未解锁, 请先通关之前的关卡!", "#FF0");
+                return;
+            }
+
+            //TODO STAGE 03
+            Common.addMessage("暂未开放，敬请期待!");
+        });
+        if (Resource.getUser().stage < 2) {
+            list[list.length - 1].image = Resource.getImage("button_disabled");
+        }
+
+        list[list.length] = new Button("返回", Resource.width() * 0.5, this.getButtonPos(3), function () {
             if (isNet) {
                 thisMenu.switchToIndex(2);
             } else {
