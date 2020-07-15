@@ -286,7 +286,10 @@ export default class AiEngine extends Engine {
         //计算胜利分数
         if (win) {
             const gameSeconds = (new Date() - thisEngine.stageStartTime) / 1000;
-            let winScore = Math.floor(AiEngine.scoreWin - gameSeconds);
+            //困难模式加权
+            const hardMode = thisEngine.room.roomInfo.hardMode ? AiEngine.scoreHardMode : 0;
+
+            let winScore = Math.floor(AiEngine.scoreWin + hardMode - gameSeconds);
             if (winScore < 0) {
                 winScore = 0;
             }
@@ -444,7 +447,7 @@ export default class AiEngine extends Engine {
     }
 
     catchItem(tank) {
-        if (tank.item.teamId !== 1) {
+        if (tank.item.teamId !== 1 && !this.room.roomInfo.hardMode) {
             return;
         }
 
@@ -473,12 +476,11 @@ export default class AiEngine extends Engine {
                     this.removeGameItem(k);
                     break;
                 case "life":
-                    ++this.playerLifeCount;
-                    ++this.room.roomInfo.playerLife;
+                    this.addTankLife(tank);
                     this.removeGameItem(k);
                     break;
                 case "king":
-                    this.createKingShield();
+                    this.createKingShield(tank.item.teamId);
                     this.removeGameItem(k);
                     break;
                 case "bullet":
@@ -492,30 +494,55 @@ export default class AiEngine extends Engine {
                     }
                     break;
                 case "clock":
-                    this.createClock();
+                    this.createClock(tank.item.teamId);
                     this.removeGameItem(k);
                     break;
             }
         }
     }
 
-    createClock() {
-        Status.setStatus(Status.statusPauseBlue());
+    addTankLife(tank) {
+        if (tank.item.teamId === 1) {
+            ++this.playerLifeCount;
+            ++this.room.roomInfo.playerLife;
+            return;
+        }
+
+        ++this.computerLifeCount;
+        ++this.room.roomInfo.computerLife;
+
+        //添加类型，若存在则添加第一个类型的数量，若不存在则新增
+        if (this.mapInfo.computerTypeCountList.length !== 0) {
+            ++this.mapInfo.computerTypeCountList[0].value;
+        } else {
+            this.mapInfo.computerTypeCountList[0] = {
+                key: tank.typeId,
+                value: 1
+            }
+        }
+    }
+
+    createClock(teamId) {
+        if (teamId === 1) {
+            Status.setStatus(Status.statusPauseBlue());
+        } else {
+            Status.setStatus(Status.statusPauseRed());
+        }
         this.tanks.forEach(function (tank) {
-            if (tank.item.teamId !== 2) {
+            if (tank.item.teamId === teamId) {
                 return;
             }
 
             tank.item.action = 0;
         });
 
-        //10秒后变回来
+        //15秒后变回来
         this.addTimeEvent(15 * 60, function () {
             Status.setStatus(Status.statusNormal());
         });
     }
 
-    createKingShield() {
+    createKingShield(teamId) {
         const thisEngine = this;
         const kingKeys = [];
         this.mapInfo.itemList.forEach(function (item) {
@@ -555,25 +582,36 @@ export default class AiEngine extends Engine {
             return;
         }
 
-        //替换成铁
-        changeKeys.forEach(function (key) {
-            thisEngine.room.createOrUpdateMapItem({
-                id: key,
-                typeId: 2
-            });
-        });
-
-        //换回来
-        thisEngine.addTimeEvent(30 * 60, function () {
+        //若是玩家则替换成铁，否则删除周围的保护
+        if (teamId === 1) {
+            //替换成铁
             changeKeys.forEach(function (key) {
-                if (thisEngine.room.items.has(key)) {
-                    thisEngine.room.createOrUpdateMapItem({
-                        id: key,
-                        typeId: 0
-                    });
-                }
+                thisEngine.room.createOrUpdateMapItem({
+                    id: key,
+                    typeId: 2
+                });
             });
-        });
+
+            //换回来
+            thisEngine.addTimeEvent(30 * 60, function () {
+                changeKeys.forEach(function (key) {
+                    if (thisEngine.room.items.has(key)) {
+                        thisEngine.room.createOrUpdateMapItem({
+                            id: key,
+                            typeId: 0
+                        });
+                    }
+                });
+            });
+        } else {
+            //删除保护
+            changeKeys.forEach(function (key) {
+                Resource.getRoot().processSocketMessage({
+                    messageType: "REMOVE_MAP",
+                    message: key
+                });
+            });
+        }
     }
 
     removeGameItem(id) {
@@ -684,7 +722,7 @@ export default class AiEngine extends Engine {
 
 
     canPass(tank, orientation) {
-        if (this.collideWithTanks(tank.item, orientation)) {
+        if (!tank.item.hasGhost && this.collideWithTanks(tank.item, orientation)) {
             return false;
         }
 
@@ -822,6 +860,15 @@ export default class AiEngine extends Engine {
         }
 
         const tank = this.tanks.get(tankId);
+
+        if (Status.getValue() === Status.statusPauseRed() && tank.item.teamId === 1) {
+            return;
+        }
+
+        if (Status.getValue() === Status.statusPauseBlue() && tank.item.teamId === 2) {
+            return;
+        }
+
         if (tank.bulletCount <= 0) {
             return;
         }
@@ -925,3 +972,4 @@ AiEngine.maxItemLimit = 3;
 AiEngine.scoreComBoom = 10;
 AiEngine.scorePlayerBoom = -30;
 AiEngine.scoreWin = 500;
+AiEngine.scoreHardMode = 100;

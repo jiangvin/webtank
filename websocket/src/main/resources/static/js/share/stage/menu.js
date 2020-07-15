@@ -222,6 +222,8 @@ export default class Menu extends Stage {
         this.buttons[7] = this.shop.initShop();
 
         //this.buttons[8]为关卡选择
+
+        //this.buttons[9]为难度选择
     }
 
     initStagePve(isNet) {
@@ -230,15 +232,14 @@ export default class Menu extends Stage {
         const thisMenu = this;
 
         list[list.length] = new Button("关卡 01", Resource.width() * 0.5, this.getButtonPos(0), function () {
-            const roomInfo = {
+           thisMenu.roomCache = {
                 mapId: 1,
                 subId: 1,
                 roomType: "PVE",
                 roomId: isNet === true ? "多人模式" : "单人模式",
                 joinTeamType: "RED"
             };
-            thisMenu.initRoom(roomInfo);
-            Resource.getRoot().addEngine(isNet);
+           thisMenu.initStagePveMode(isNet);
         });
 
         list[list.length] = new Button("关卡 02", Resource.width() * 0.5, this.getButtonPos(1), function () {
@@ -246,15 +247,14 @@ export default class Menu extends Stage {
                 Common.addMessage("未解锁, 请先通关之前的关卡!", "#FF0");
                 return;
             }
-            const roomInfo = {
+            thisMenu.roomCache = {
                 mapId: 2,
                 subId: 1,
                 roomType: "PVE",
                 roomId: isNet === true ? "多人模式" : "单人模式",
                 joinTeamType: "RED"
             };
-            thisMenu.initRoom(roomInfo);
-            Resource.getRoot().addEngine(isNet);
+            thisMenu.initStagePveMode(isNet);
         });
         if (Resource.getUser().stage < 1) {
             list[list.length - 1].image = Resource.getImage("button_disabled");
@@ -282,6 +282,29 @@ export default class Menu extends Stage {
         });
 
         thisMenu.switchToIndex(8);
+    }
+
+    initStagePveMode(isNet) {
+        this.buttons[9] = [];
+        const list = this.buttons[9];
+        const thisMenu = this;
+
+        list[list.length] = new Button("简单", Resource.width() * 0.5, this.getButtonPos(0), function () {
+            thisMenu.initRoom(thisMenu.roomCache);
+            Resource.getRoot().addEngine(isNet);
+        });
+
+        list[list.length] = new Button("困难", Resource.width() * 0.5, this.getButtonPos(1), function () {
+            thisMenu.roomCache.hardMode = true;
+            thisMenu.initRoom(thisMenu.roomCache);
+            Resource.getRoot().addEngine(isNet);
+        });
+
+        list[list.length] = new Button("返回", Resource.width() * 0.5, this.getButtonPos(2), function () {
+            thisMenu.initStagePve(isNet);
+        });
+
+        thisMenu.switchToIndex(9);
     }
 
     loadRanks() {
