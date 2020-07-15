@@ -112,7 +112,7 @@ public class TankTypeDto {
                   "tank02",
                   null,
                   40,
-                  null,
+                  "tank08",
                   null);
         tankTypeMap.put(com.getTypeId(), com);
 
@@ -151,7 +151,7 @@ public class TankTypeDto {
                   "tank04",
                   2.5,
                   45,
-                  null,
+                  "tank09",
                   "tank11");
         tankTypeMap.put(com.getTypeId(), com);
 
@@ -160,7 +160,7 @@ public class TankTypeDto {
                   "tank03",
                   3.0,
                   35,
-                  null,
+                  "tank10",
                   "tank12");
         tankTypeMap.put(com.getTypeId(), com);
 
@@ -169,7 +169,7 @@ public class TankTypeDto {
                   "tank03",
                   4.0,
                   35,
-                  null,
+                  "tank11",
                   null);
         tankTypeMap.put(com.getTypeId(), com);
     }
