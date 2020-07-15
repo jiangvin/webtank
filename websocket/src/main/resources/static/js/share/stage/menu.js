@@ -22,7 +22,7 @@ export default class Menu extends Stage {
 
         this.buttons = [];
         this.buttonIndex = 0;
-        this.joinRoomCache = {};
+        this.roomCache = {};
 
         //排行榜
         this.rankIndex = 6;
@@ -165,13 +165,13 @@ export default class Menu extends Stage {
         //加入对战房间
         //对战模式
         const bt0601 = new Button("红队", Resource.width() * 0.5, this.getButtonPos(0), function () {
-            thisMenu.joinRoomCache.joinTeamType = "RED";
-            thisMenu.initRoom(thisMenu.joinRoomCache);
+            thisMenu.roomCache.joinTeamType = "RED";
+            thisMenu.initRoom(thisMenu.roomCache);
             Resource.getRoot().addEngine(true);
         });
         const bt0602 = new Button("蓝队", Resource.width() * 0.5, this.getButtonPos(1), function () {
-            thisMenu.joinRoomCache.joinTeamType = "BLUE";
-            thisMenu.initRoom(thisMenu.joinRoomCache);
+            thisMenu.roomCache.joinTeamType = "BLUE";
+            thisMenu.initRoom(thisMenu.roomCache);
             Resource.getRoot().addEngine(true);
         });
         const bt0603 = new Button("返回", Resource.width() * 0.5, this.getButtonPos(2), function () {
@@ -483,7 +483,7 @@ export default class Menu extends Stage {
                             thisMenu.initRoom(roomInfo);
                             Resource.getRoot().addEngine(true);
                         } else {
-                            thisMenu.joinRoomCache = {
+                            thisMenu.roomCache = {
                                 mapId: room.mapId,
                                 subId: room.subId,
                                 roomType: room.roomType,
