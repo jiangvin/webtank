@@ -111,14 +111,14 @@ public class SimpleBot extends BaseBot {
     }
 
     private void updateFire(Tank tank) {
-        if (tank.getBulletCount() != 0 && tank.getReloadTime() <= 0) {
+        if (tank.getBulletCount() > 0 && tank.getReloadTime() <= 0) {
             sendMessage(new MessageDto(tank.getId(), MessageType.UPDATE_TANK_FIRE));
             tank.setReloadTime(COMMON_RELOAD_TIME);
         }
     }
 
     private boolean canPass(Tank tank, OrientationType orientation) {
-        if (collideWithTanks(tank, orientation)) {
+        if (!tank.isHasGhost() && collideWithTanks(tank, orientation)) {
             return false;
         }
 
@@ -126,10 +126,10 @@ public class SimpleBot extends BaseBot {
         List<Point> corners = generateCorners(tank, orientation);
         Point corner1 = corners.get(0);
         Point corner2 = corners.get(1);
-        if (!canPass(corner1.x, corner1.y)) {
+        if (!canPass(corner1.x, corner1.y, tank.isHasGhost())) {
             return false;
         }
-        return canPass(corner2.x, corner2.y);
+        return canPass(corner2.x, corner2.y, tank.isHasGhost());
     }
 
     private List<Point> generateCorners(Tank tank, OrientationType orientation) {
@@ -179,9 +179,14 @@ public class SimpleBot extends BaseBot {
         return corners;
     }
 
-    private boolean canPass(double x, double y) {
+    private boolean canPass(double x, double y, boolean isGhost) {
         if (x < 0 || y < 0 || x >= mapDto.getWidth() || y >= mapDto.getHeight()) {
             return false;
+        }
+
+        //幽灵状态无视一切障碍
+        if (isGhost) {
+            return true;
         }
 
         return !collideWithMap(x, y);

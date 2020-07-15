@@ -62,6 +62,7 @@ public class StageRoom extends BaseStage {
     private static final int SCORE_COM_BOOM = 10;
     private static final int SCORE_PLAYER_BOOM = -30;
     private static final int SCORE_WIN = 500;
+    private static final int SCORE_HARD_MODE = 100;
 
     private ConcurrentHashMap<String, List<String>> gridTankMap = new ConcurrentHashMap<>();
 
@@ -89,6 +90,8 @@ public class StageRoom extends BaseStage {
     @Getter
     private String roomId;
 
+    private boolean hardMode;
+
     private UserBo creator;
 
     private MapMangerBo mapManger;
@@ -110,6 +113,7 @@ public class StageRoom extends BaseStage {
     public StageRoom(RoomDto roomDto, UserBo creator, MapMangerBo mapManger, MessageService messageService, UserService userService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
+        this.hardMode = roomDto.isHardMode();
         this.creator = creator;
         this.mapManger = mapManger;
         this.userService = userService;
@@ -462,7 +466,7 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean canCatchItem(TankBo tankBo) {
-        return getRoomType() != RoomType.PVE || tankBo.getTankId().equals(tankBo.getUserId());
+        return getRoomType() != RoomType.PVE || tankBo.getTankId().equals(tankBo.getUserId()) || hardMode;
     }
 
     private boolean catchItem(TankBo tankBo, ItemBo itemBo) {
@@ -487,7 +491,7 @@ public class StageRoom extends BaseStage {
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return true;
             case LIFE:
-                addLife(tankBo.getTeamType());
+                addLife(tankBo);
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return false;
@@ -529,9 +533,13 @@ public class StageRoom extends BaseStage {
         eventList.add(new ClockEvent());
     }
 
+    /**
+     * PVE模式下只作用于RED_KING
+     * @param teamType
+     */
     private void kingShield(TeamType teamType) {
         MapUnitType kingType;
-        if (teamType == TeamType.RED) {
+        if (teamType == TeamType.RED || getRoomType() == RoomType.PVE) {
             kingType = MapUnitType.RED_KING;
         } else {
             kingType = MapUnitType.BLUE_KING;
@@ -563,7 +571,6 @@ public class StageRoom extends BaseStage {
                     String changeKey = CommonUtil.generateKey(x, y);
                     MapUnitType changeType = unitMap.getOrDefault(changeKey, MapUnitType.BRICK);
                     if (changeType == MapUnitType.BRICK || changeType == MapUnitType.BROKEN_BRICK) {
-                        unitMap.put(changeKey, MapUnitType.IRON);
                         changeKeys.add(changeKey);
                     }
                 }
@@ -573,22 +580,37 @@ public class StageRoom extends BaseStage {
             return;
         }
 
-        sendMessageToRoom(getMapBo().toDto(changeKeys), MessageType.MAP);
-        this.eventList.add(new IronKingEvent(changeKeys));
+        //若是PVE模式则是拆掉基地附近的建筑
+        if (getRoomType() == RoomType.PVE && teamType == TeamType.BLUE) {
+            for (String changeKey : changeKeys) {
+                removeMap(changeKey);
+            }
+        } else {
+            for (String changeKey : changeKeys) {
+                unitMap.put(changeKey, MapUnitType.IRON);
+            }
+            sendMessageToRoom(getMapBo().toDto(changeKeys), MessageType.MAP);
+            this.eventList.add(new IronKingEvent(changeKeys));
+        }
+
     }
 
-    private void addLife(TeamType teamType) {
-        List<StringCountDto> life = getLifeMap(teamType);
+    private void addLife(TankBo tankBo) {
+        List<StringCountDto> life = getLifeMap(tankBo.getTeamType());
 
         if (!life.isEmpty()) {
             life.get(0).addValue(1);
         } else {
-            life.add(new StringCountDto("tank01", 1));
+            life.add(new StringCountDto(tankBo.getType().getTypeId(), 1));
 
             //将观看模式的用户加入战场
             for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
                 UserBo userBo = kv.getValue();
-                if (userBo.getTeamType() != teamType) {
+                if (isBot(userBo.getTeamType())) {
+                    continue;
+                }
+
+                if (userBo.getTeamType() != tankBo.getTeamType()) {
                     continue;
                 }
 
@@ -879,7 +901,11 @@ public class StageRoom extends BaseStage {
 
     private void updateScoreAfterWin() {
         int seconds = (int)((System.currentTimeMillis() - this.missionStartTime) / 1000);
-        int winScore = SCORE_WIN - seconds;
+
+        //困难模式加权
+        int hardModeScore = hardMode ? SCORE_HARD_MODE : 0;
+
+        int winScore = SCORE_WIN + hardModeScore - seconds;
         if (winScore > 0) {
             this.score += winScore;
         }

@@ -34,13 +34,7 @@ export default class NetEngine extends Engine {
                                 //set room id
                                 thisEngine.room.roomInfo.roomId = roomName;
 
-                                Connect.send("CREATE_ROOM", {
-                                    "roomId": thisEngine.room.roomInfo.roomId,
-                                    "mapId": thisEngine.room.roomInfo.mapId,
-                                    "subId": thisEngine.room.roomInfo.subId,
-                                    "roomType": thisEngine.room.roomInfo.roomType,
-                                    "joinTeamType": thisEngine.room.roomInfo.joinTeamType
-                                })
+                                Connect.send("CREATE_ROOM", thisEngine.room.roomInfo);
                             });
                     }, 40);
                 } else {

@@ -24,6 +24,7 @@ public class Tank {
     private int reloadTime;
     private int bulletCount;
     private double speed;
+    private boolean hasGhost = false;
     private OrientationType lastSendOrientation;
     private ActionType lastSendAction;
 
@@ -39,6 +40,7 @@ public class Tank {
         tank.setBulletCount(item.getBulletCount());
         tank.setUserId(item.getUserId());
         tank.setSpeed(item.getSpeed());
+        tank.setHasGhost(item.getHasGhost());
         return tank;
     }
 
@@ -46,6 +48,7 @@ public class Tank {
         reloadTime = tank.reloadTime;
         bulletCount = tank.bulletCount;
         speed = tank.speed;
+        hasGhost = tank.hasGhost;
 
         lastSendOrientation = tank.orientationType;
         lastSendAction = tank.actionType;
