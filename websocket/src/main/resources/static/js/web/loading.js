@@ -47,6 +47,8 @@ export default class Loading extends Stage {
 
     init() {
         const thisLoading = this;
+        //记录开始时间
+        thisLoading.startTime = new Date().getTime();
         const total = Resource.instance.images.size + Sound.instance.sounds.size;
         let loaded = 0;
 
@@ -96,6 +98,12 @@ export default class Loading extends Stage {
                 createjs.Sound.volume = 0;
             } else {
                 createjs.Sound.volume = 1;
+
+                //检测时间，如果超过24小时则重启
+                const currentTime = new Date().getTime();
+                if (currentTime - thisLoading.startTime >= 24 * 60 * 60 * 1000) {
+                    document.location.reload();
+                }
             }
         }
         document.addEventListener("visibilitychange", handleVisibilityChange);
