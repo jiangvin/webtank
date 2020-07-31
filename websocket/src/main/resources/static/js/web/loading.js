@@ -6,6 +6,7 @@
 import Stage from "../share/stage/stage.js";
 import Resource from "../share/tool/resource.js";
 import Sound from "../share/tool/sound.js";
+import Common from "../share/tool/common.js";
 
 export default class Loading extends Stage {
     constructor() {
@@ -94,6 +95,9 @@ export default class Loading extends Stage {
 
         //切换至后台时静音
         function handleVisibilityChange() {
+            //TODO - 测试代码
+            Common.addMessage("visibility change:" + document.visibilityState);
+
             if (document.hidden) {
                 createjs.Sound.volume = 0;
             } else {

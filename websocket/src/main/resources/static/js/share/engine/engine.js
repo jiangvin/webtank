@@ -27,6 +27,9 @@ export default class Engine {
         this.events.push(event);
     }
 
+    /**
+     * 暂停的时候不会更新任何事件
+     */
     update() {
         this.updateEvent();
         this.updateCenter(this.room)
@@ -337,7 +340,7 @@ export default class Engine {
             if (callback !== undefined) {
                 callback();
             }
-        }, 300);
+        }, 600);
     };
 
     /**

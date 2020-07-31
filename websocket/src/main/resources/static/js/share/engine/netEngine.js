@@ -77,7 +77,7 @@ export default class NetEngine extends Engine {
                 Common.getRequest("/multiplePlayers/ping", function () {
                     Resource.getRoot().netDelay = new Date().getTime() - start;
                 });
-                Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120, true);
+                thisEngine.addTimeEvent(120, callBack);
             } else {
                 Status.setStatus(Status.statusPause(), "与服务器断开！");
                 //再关闭一次，排除一些情况
@@ -103,7 +103,7 @@ export default class NetEngine extends Engine {
         };
 
         console.log("connect status will be checked per 120 frames...");
-        Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120);
+        thisEngine.addTimeEvent(120, callBack);
     }
 
     processControlEvent(control) {
