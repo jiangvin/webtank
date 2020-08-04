@@ -48,8 +48,6 @@ export default class Loading extends Stage {
 
     init() {
         const thisLoading = this;
-        //记录开始时间
-        thisLoading.startTime = new Date().getTime();
         const total = Resource.instance.images.size + Sound.instance.sounds.size;
         let loaded = 0;
 
@@ -95,17 +93,18 @@ export default class Loading extends Stage {
 
         //切换至后台时静音
         function handleVisibilityChange() {
-            //TODO - 测试代码
-            Common.addMessage("visibility change:" + document.visibilityState);
-
             if (document.hidden) {
+                //记录开始时间
+                thisLoading.startTime = new Date().getTime();
+
                 createjs.Sound.volume = 0;
             } else {
                 createjs.Sound.volume = 1;
 
-                //检测时间，如果超过24小时则重启
+                //检测时间，如果超过5分钟则重启
+                //TODO - 在安卓中会失效，暂无解决方案
                 const currentTime = new Date().getTime();
-                if (currentTime - thisLoading.startTime >= 24 * 60 * 60 * 1000) {
+                if (currentTime - thisLoading.startTime >= 5 * 60 * 1000) {
                     document.location.reload();
                 }
             }
