@@ -182,7 +182,9 @@ export default class Root {
         ctx.textAlign = 'right';
         ctx.textBaseline = 'bottom';
         ctx.fillStyle = '#ffffff';
-        ctx.fillText('© Created by Vin (QQ群: 87882492)', Resource.width() - 12, Resource.height() - 5);
+
+        // TODO QQ群信息
+        // ctx.fillText('© Created by Vin (QQ群: 87882492)', Resource.width() - 12, Resource.height() - 5);
 
         //帧率信息
         ctx.textAlign = 'left';

@@ -62,10 +62,11 @@ export default class Shop {
             background.x,
             background.y + background.height / 2 - 35,
             function () {
-                if (thisShop.shopItemStart < 12) {
-                    thisShop.shopItemStart += 6;
-                    thisShop.loadShopItems();
-                }
+                //TODO - 付费信息
+                // if (thisShop.shopItemStart < 12) {
+                //     thisShop.shopItemStart += 6;
+                //     thisShop.loadShopItems();
+                // }
             }, 110, 50, '24px Arial');
         items[items.length] = new Button("返回",
             background.x + 120,
@@ -124,28 +125,29 @@ export default class Shop {
         items[items.length] = new ShopButton(this, 1, 1, "三星坦克(限时)", Resource.getImage("tank03"), 3, 0, 40,
             ["效果：使你的坦克初始状态为三星坦克（限时一天）"],
             Resource.getUser().getTankType() === "tank03", "TANK03");
-        items[items.length] = new ShopButton(this, 2, 1, "X 50(首充)", Resource.getImage("coin"), 0, 1, 2,
-            ["获得50个金币（仅限一次）"]);
+        //TODO - 付费信息
+        // items[items.length] = new ShopButton(this, 2, 1, "X 50(首充)", Resource.getImage("coin"), 0, 1, 2,
+        //     ["获得50个金币（仅限一次）"]);
 
         //第二页
-        items[items.length] = new ShopButton(this, 0, 0, "X 60", Resource.getImage("coin"), 0, 1, 6,
-            ["获得60个金币"]);
-        items[items.length] = new ShopButton(this, 1, 0, "X 250", Resource.getImage("coin"), 0, 1, 24,
-            ["获得250个金币"]);
-        items[items.length] = new ShopButton(this, 2, 0, "X 500", Resource.getImage("coin"), 0, 1, 42,
-            ["获得500个金币"]);
-        items[items.length] = new ShopButton(this, 0, 1, "幽灵(永久)", Resource.getImage("item_ghost"), 0, 1, 12,
-            ["游戏中会随机出现幽灵道具",
-                "效果：使你的坦克变成半透明移动时无视一切障碍物"]);
-        items[items.length] = new ShopButton(this, 1, 1, "定时器(永久)", Resource.getImage("item_clock"), 0, 1, 15,
-            ["游戏中会随机出现定时器道具",
-                "效果：使敌方所有坦克15秒内不能移动"]);
-        items[items.length] = new ShopButton(this, 2, 1, "红星(永久)", Resource.getImage("item_red_star"), 0, 1, 18,
-            ["游戏中会随机出现红星道具",
-                "效果：使你的坦克直接升至四星坦克"]);
+        // items[items.length] = new ShopButton(this, 0, 0, "X 60", Resource.getImage("coin"), 0, 1, 6,
+        //     ["获得60个金币"]);
+        // items[items.length] = new ShopButton(this, 1, 0, "X 250", Resource.getImage("coin"), 0, 1, 24,
+        //     ["获得250个金币"]);
+        // items[items.length] = new ShopButton(this, 2, 0, "X 500", Resource.getImage("coin"), 0, 1, 42,
+        //     ["获得500个金币"]);
+        // items[items.length] = new ShopButton(this, 0, 1, "幽灵(永久)", Resource.getImage("item_ghost"), 0, 1, 12,
+        //     ["游戏中会随机出现幽灵道具",
+        //         "效果：使你的坦克变成半透明移动时无视一切障碍物"]);
+        // items[items.length] = new ShopButton(this, 1, 1, "定时器(永久)", Resource.getImage("item_clock"), 0, 1, 15,
+        //     ["游戏中会随机出现定时器道具",
+        //         "效果：使敌方所有坦克15秒内不能移动"]);
+        // items[items.length] = new ShopButton(this, 2, 1, "红星(永久)", Resource.getImage("item_red_star"), 0, 1, 18,
+        //     ["游戏中会随机出现红星道具",
+        //         "效果：使你的坦克直接升至四星坦克"]);
 
         //第三页
-        items[items.length] = new ShopButton(this, 0, 0, "黄金坦克(限时)", Resource.getImage("tank09"), 3, 1, 30,
-            ["效果：使你的坦克初始状态为黄金坦克（限时三天）"]);
+        // items[items.length] = new ShopButton(this, 0, 0, "黄金坦克(限时)", Resource.getImage("tank09"), 3, 1, 30,
+        //     ["效果：使你的坦克初始状态为黄金坦克（限时三天）"]);
     }
 }

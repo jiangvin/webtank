@@ -6,7 +6,6 @@
 import Stage from "../share/stage/stage.js";
 import Resource from "../share/tool/resource.js";
 import Sound from "../share/tool/sound.js";
-import Common from "../share/tool/common.js";
 
 export default class Loading extends Stage {
     constructor() {
