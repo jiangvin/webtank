@@ -132,6 +132,13 @@ export default class Control {
 
     static touchMoveControl(e) {
         const controlMode = Control.instance.controlMode;
+
+        //如果没有操作方向键，则返回
+        if (controlMode.touchX == null || controlMode.touchY == null) {
+            return;
+        }
+
+        //找寻操作点
         let touchMovePoint;
         let distance;
         for (let i = 0; i < e.touches.length; ++i) {
@@ -154,10 +161,6 @@ export default class Control {
             controlMode.touchX = x;
             controlMode.touchY = y;
         } else {
-            if (controlMode.touchX == null || controlMode.touchY == null) {
-                //从头到尾都超过外圆，不做任何操作
-                return;
-            }
             //开始计算圆外的点和圆心连线的交点
             //先将圆心移动到坐标原点
             x = x - controlMode.centerX;
@@ -210,19 +213,20 @@ export default class Control {
         }
 
         //way
-        distance = Common.distance(x, y, controlMode.centerX, controlMode.centerY);
-        if (distance > controlMode.radius) {
-            //超过外圆
+        //如果已经在触控方向盘则不做额外触控操作
+        if (controlMode.touchX && controlMode.touchY) {
             return;
         }
 
+        //在屏幕的左半边触控则直接返回
+        if (x >= Common.width() / 2) {
+            return;
+        }
+
+        controlMode.centerX = x;
+        controlMode.centerY = y;
         controlMode.touchX = x;
         controlMode.touchY = y;
-
-        //排除细微控制带来的干扰
-        if (distance >= controlMode.minRadius) {
-            Resource.getRoot().processControlEvent(Control.getControlEventFromTouch(controlMode));
-        }
     }
 
     static getControlEventFromTouch(controlMode) {
@@ -273,6 +277,11 @@ export default class Control {
 
         const thisControl = Control.instance;
         thisControl.controlMode = {};
+
+        //记录原始的位置
+        thisControl.controlMode.originCenterX = centerX;
+        thisControl.controlMode.originCenterY = centerY;
+
         thisControl.controlMode.centerX = centerX;
         thisControl.controlMode.centerY = centerY;
         thisControl.controlMode.radius = radius;
@@ -295,16 +304,18 @@ export default class Control {
 
         //外圆
         const controlMode = Control.instance.controlMode;
+        let x = controlMode.touchX ? controlMode.centerX : controlMode.originCenterX;
+        let y = controlMode.touchY ? controlMode.centerY : controlMode.originCenterY;
         const control1 = Resource.getImage("control1");
         ctx.drawImage(control1,
             0, 0,
             control1.width, control1.height,
-            controlMode.centerX - controlMode.radius, controlMode.centerY - controlMode.radius,
+            x - controlMode.radius, y - controlMode.radius,
             controlMode.radius * 2, controlMode.radius * 2);
 
         //内圆
-        let x = controlMode.touchX ? controlMode.touchX : controlMode.centerX;
-        let y = controlMode.touchY ? controlMode.touchY : controlMode.centerY;
+        x = controlMode.touchX ? controlMode.touchX : controlMode.originCenterX;
+        y = controlMode.touchY ? controlMode.touchY : controlMode.originCenterY;
         const control2 = Resource.getImage("control2");
         const centerRadius = controlMode.radius / 2;
         ctx.drawImage(control2,
