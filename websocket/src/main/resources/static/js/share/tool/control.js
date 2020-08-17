@@ -117,7 +117,7 @@ export default class Control {
             const touchPoint = Control.getTouchPoint(e.touches[i]);
             const distance = Common.distance(touchPoint.x, touchPoint.y, controlMode.centerX, controlMode.centerY);
             //还有手指在方向盘上，不停止
-            if (distance >= controlMode.minRadius && distance <= controlMode.maxRadius) {
+            if (distance <= controlMode.maxRadius) {
                 stop = false;
                 break;
             }
@@ -223,10 +223,21 @@ export default class Control {
             return;
         }
 
-        controlMode.centerX = x;
-        controlMode.centerY = y;
         controlMode.touchX = x;
         controlMode.touchY = y;
+
+        distance = Common.distance(x, y, controlMode.originCenterX, controlMode.originCenterY);
+        if (distance <= controlMode.radius) {
+            controlMode.centerX = controlMode.originCenterX;
+            controlMode.centerY = controlMode.originCenterY;
+            //排除细微控制带来的干扰
+            if (distance >= controlMode.minRadius) {
+                Resource.getRoot().processControlEvent(Control.getControlEventFromTouch(controlMode));
+            }
+        } else {
+            controlMode.centerX = x;
+            controlMode.centerY = y;
+        }
     }
 
     static getControlEventFromTouch(controlMode) {
