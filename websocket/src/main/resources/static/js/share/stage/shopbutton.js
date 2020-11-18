@@ -31,7 +31,7 @@ export default class ShopButton extends Button {
         //是否激活
         this.done = done;
         if (this.done) {
-            this.image = Resource.getImage("button_disabled");
+            this.image = Resource.getOrCreateImage("button_disabled");
         }
 
         this.generateControlUnit();
@@ -94,7 +94,7 @@ export default class ShopButton extends Button {
 
         ctx.textAlign = 'left';
         if (this.priceType === 0) {
-            const coin = Resource.getImage("coin");
+            const coin = Resource.getOrCreateImage("coin");
             ctx.drawImage(coin,
                 0, 0,
                 coin.width, coin.height,

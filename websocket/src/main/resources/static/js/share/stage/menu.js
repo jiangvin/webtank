@@ -40,7 +40,7 @@ export default class Menu extends Stage {
         this.initButtons();
 
         //背景
-        const bgImage = Resource.getImage("background_menu", "jpg");
+        const bgImage = Resource.getOrCreateImage("background_menu", "jpg");
         this.createItem({
             draw: function (ctx) {
                 ctx.drawImage(bgImage,
@@ -257,7 +257,7 @@ export default class Menu extends Stage {
             thisMenu.initStagePveMode(isNet);
         });
         if (Resource.getUser().stage < 1) {
-            list[list.length - 1].image = Resource.getImage("button_disabled");
+            list[list.length - 1].image = Resource.getOrCreateImage("button_disabled");
         }
 
         list[list.length] = new Button("关卡 03", Resource.width() * 0.5, this.getButtonPos(2), function () {
@@ -270,7 +270,7 @@ export default class Menu extends Stage {
             Common.addMessage("暂未开放，敬请期待!");
         });
         if (Resource.getUser().stage < 2) {
-            list[list.length - 1].image = Resource.getImage("button_disabled");
+            list[list.length - 1].image = Resource.getOrCreateImage("button_disabled");
         }
 
         list[list.length] = new Button("返回", Resource.width() * 0.5, this.getButtonPos(3), function () {

@@ -140,6 +140,35 @@ export default class Common {
     }
 }
 
+/**
+ * 居中显示资源里的图片(显示点为图片中心)
+ * @param imageId
+ * @param x
+ * @param y
+ * @param w 默认为图片本身宽度
+ * @param h 默认为同比例的高度
+ */
+CanvasRenderingContext2D.prototype.drawResourceCenter = function (imageId, x, y, w, h) {
+    const img = Resource.getImage(imageId);
+    if (!img) {
+        return;
+    }
+
+    if (!w) {
+        w = img.width;
+    }
+
+    if (!h) {
+        h = w * img.height / img.width;
+    }
+
+    this.drawImage(img,
+        0, 0,
+        img.width, img.height,
+        x - w / 2, y - h / 2,
+        w, h);
+};
+
 Date.prototype.format = function (fmt) {
     const o = {
         "M+": this.getMonth() + 1,                      //月份

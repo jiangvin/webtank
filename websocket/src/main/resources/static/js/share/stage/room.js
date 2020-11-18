@@ -29,10 +29,10 @@ export default class Room extends Stage {
         this.size = {};
         this.view = {x: 0, y: 0, center: null};
 
-        this.backgroundImage = Resource.getImage("background", "jpg");
+        this.backgroundImage = Resource.getOrCreateImage("background", "jpg");
 
         this.mask = true;
-        this.maskImage = Resource.getImage("background_loading", "jpg");
+        this.maskImage = Resource.getOrCreateImage("background_loading", "jpg");
         this.maskStartTime = 0;
         this.minMaskTime = 3000;
 
@@ -322,32 +322,32 @@ export default class Room extends Stage {
     setResourceImage(item, typeId) {
         switch (typeId) {
             case 0:
-                item.image = Resource.getImage("brick");
+                item.image = Resource.getOrCreateImage("brick");
                 item.orientation = 0;
                 break;
             case 1:
-                item.image = Resource.getImage("brick");
+                item.image = Resource.getOrCreateImage("brick");
                 item.orientation = 1;
                 break;
             case 2:
-                item.image = Resource.getImage("iron");
+                item.image = Resource.getOrCreateImage("iron");
                 item.orientation = 0;
                 break;
             case 3:
-                item.image = Resource.getImage("iron");
+                item.image = Resource.getOrCreateImage("iron");
                 item.orientation = 1;
                 break;
             case 4:
-                item.image = Resource.getImage("river");
+                item.image = Resource.getOrCreateImage("river");
                 break;
             case 5:
-                item.image = Resource.getImage("grass");
+                item.image = Resource.getOrCreateImage("grass");
                 break;
             case 6:
-                item.image = Resource.getImage("red_king");
+                item.image = Resource.getOrCreateImage("red_king");
                 break;
             case 7:
-                item.image = Resource.getImage("blue_king");
+                item.image = Resource.getOrCreateImage("blue_king");
                 break;
         }
     };
@@ -530,7 +530,7 @@ export default class Room extends Stage {
                 ctx.fillStyle = '#fff';
                 ctx.fillText("重玩本关", this.x - 95, this.y);
 
-                const coin = Resource.getImage("coin");
+                const coin = Resource.getOrCreateImage("coin");
                 ctx.drawImage(coin,
                     0, 0,
                     coin.width, coin.height,
@@ -600,7 +600,7 @@ export default class Room extends Stage {
         tankItem.speed = tankData.speed;
         tankItem.hasShield = tankData.hasShield;
         tankItem.hasGhost = tankData.hasGhost;
-        tankItem.image = Resource.getImage(tankData.typeId);
+        tankItem.image = Resource.getOrCreateImage(tankData.typeId);
     };
 
     updateTankControl(tankData, force) {
@@ -700,7 +700,7 @@ export default class Room extends Stage {
         item.orientation = 0;
         item.scale = bombScale;
         item.z = 10;
-        item.image = Resource.getImage("bomb");
+        item.image = Resource.getOrCreateImage("bomb");
         const thisRoom = this;
         item.play = new Play(
             6,
@@ -769,7 +769,7 @@ export default class Room extends Stage {
     createBullet(options) {
         const item = this.createItem(options);
         item.action = 1;
-        item.image = Resource.getImage("bullet");
+        item.image = Resource.getOrCreateImage("bullet");
         const thisStage = this;
         item.update = function () {
             thisStage.generalUpdateEvent(item);
@@ -789,7 +789,7 @@ export default class Room extends Stage {
                 x: itemData.x,
                 y: itemData.y,
                 typeId: itemData.typeId.toLowerCase(),
-                image: Resource.getImage(imageId)
+                image: Resource.getOrCreateImage(imageId)
             });
             gameItem.play = new Play(1, 15,
                 function () {

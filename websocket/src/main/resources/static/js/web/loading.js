@@ -14,33 +14,68 @@ export default class Loading extends Stage {
         this.percent = 0;
 
         const thisLoading = this;
+
+        //背景色图层
         this.createItem({
             draw: function (ctx) {
-                ctx.font = 'bold 30px Microsoft YaHei UI';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.fillStyle = '#FFF';
-                ctx.fillText('资源加载中 ' + thisLoading.percent + '%',
+                ctx.fillStyle = '#01A7EC';
+                ctx.fillRect(0, 0, Resource.width(), Resource.height());
+            }
+        });
+
+        //logo
+        this.createItem({
+            draw: function (ctx) {
+                ctx.drawResourceCenter("logo",
                     Resource.width() / 2,
-                    Resource.height() / 2 - 10);
+                    Resource.height() / 2 - 40,
+                    Resource.width() * .55);
+            }
+        });
 
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#FFF';
-                const width = Resource.width() * .35;
-                const height = 5;
+        this.createItem({
+            draw: function (ctx) {
+                const width = Resource.width() * .4;
+                const height = 25;
 
-                ctx.fillStyle = '#0F0';
-                ctx.fillRect(
+                const fillRoundRect = function (ctx, x, y, width, height) {
+                    const radio = height / 2;
+
+                    ctx.beginPath();
+                    ctx.arc(x + width, y, radio, -Math.PI / 2, Math.PI / 2);
+                    ctx.lineTo(x, y + radio);
+                    ctx.arc(x, y, radio, Math.PI / 2, Math.PI * 3 / 2);
+                    ctx.lineTo(x + width, y - radio);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                };
+
+                //进度条背景
+                ctx.fillStyle = '#FFF';
+                fillRoundRect(ctx,
                     Resource.width() * .5 - width / 2,
-                    Resource.height() * .5,
+                    Resource.height() * .5 + 60,
+                    width,
+                    height);
+
+                //进度条
+                ctx.fillStyle = '#028EE7';
+                fillRoundRect(ctx,
+                    Resource.width() * .5  - width / 2,
+                    Resource.height() * .5 + 60,
                     width * (thisLoading.percent / 100.0),
                     height);
 
-                ctx.strokeRect(
-                    Resource.width() * .5 - width / 2,
-                    Resource.height() * .5,
-                    width,
-                    height);
+                //文字
+                ctx.font = '18px Microsoft YaHei UI';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillStyle = '#FFF';
+                ctx.fillText('资源已加载' + thisLoading.percent + '%',
+                    Resource.width() / 2,
+                    Resource.height() / 2 + 82);
+
             }
         });
     }
@@ -108,11 +143,12 @@ export default class Loading extends Stage {
                 }
             }
         }
+
         document.addEventListener("visibilitychange", handleVisibilityChange);
 
         //每5秒检测一次，若5秒进度条未更新则直接进入
         let lastPercent = thisLoading.percent;
-        const checkPercent = function() {
+        const checkPercent = function () {
             if (thisLoading.percent >= 100) {
                 return;
             }

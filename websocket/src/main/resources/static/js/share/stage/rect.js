@@ -17,7 +17,7 @@ export default class Rect extends Item {
         if (image) {
             this.image = image;
         } else {
-            this.image = Resource.getImage("button");
+            this.image = Resource.getOrCreateImage("button");
         }
         this.z = 9;
     }

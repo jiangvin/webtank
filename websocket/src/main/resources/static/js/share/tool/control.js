@@ -317,7 +317,7 @@ export default class Control {
         const controlMode = Control.instance.controlMode;
         let x = controlMode.touchX ? controlMode.centerX : controlMode.originCenterX;
         let y = controlMode.touchY ? controlMode.centerY : controlMode.originCenterY;
-        const control1 = Resource.getImage("control1");
+        const control1 = Resource.getOrCreateImage("control1");
         ctx.drawImage(control1,
             0, 0,
             control1.width, control1.height,
@@ -327,7 +327,7 @@ export default class Control {
         //内圆
         x = controlMode.touchX ? controlMode.touchX : controlMode.originCenterX;
         y = controlMode.touchY ? controlMode.touchY : controlMode.originCenterY;
-        const control2 = Resource.getImage("control2");
+        const control2 = Resource.getOrCreateImage("control2");
         const centerRadius = controlMode.radius / 2;
         ctx.drawImage(control2,
             0, 0,
@@ -336,7 +336,7 @@ export default class Control {
             centerRadius * 2, centerRadius * 2);
 
         //右圆
-        const fire = Resource.getImage("fire");
+        const fire = Resource.getOrCreateImage("fire");
         ctx.drawImage(fire,
             0, 0,
             fire.width, fire.height,
@@ -344,7 +344,7 @@ export default class Control {
             controlMode.rightRadius * 2, controlMode.rightRadius * 2);
 
         //返回
-        const back = Resource.getImage("back");
+        const back = Resource.getOrCreateImage("back");
         ctx.drawImage(
             back,
             0, 0,
@@ -353,7 +353,7 @@ export default class Control {
             back.width, back.height);
 
         //talk
-        const talk = Resource.getImage("talk");
+        const talk = Resource.getOrCreateImage("talk");
         ctx.drawImage(
             talk,
             0, 0,

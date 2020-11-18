@@ -128,7 +128,7 @@ export default class Tank extends Item {
             return;
         }
 
-        const image = Resource.getImage("shield");
+        const image = Resource.getOrCreateImage("shield");
         const displayWidth = image.width / image.widthPics;
         const displayHeight = image.height / image.heightPics;
 

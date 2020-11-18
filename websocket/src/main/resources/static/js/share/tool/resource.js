@@ -21,6 +21,9 @@ export default class Resource {
     }
 
     initImage() {
+        //logo
+        this.loadAnimationImage("logo");
+
         //load all tank images
         for (let i = 1; i <= 12; ++i) {
             let id;
@@ -62,6 +65,9 @@ export default class Resource {
     }
 
     loadAnimationImage(imageId, widthPics, type) {
+        if (!widthPics) {
+            widthPics = 1;
+        }
         if (!type) {
             type = "png";
         }
@@ -144,7 +150,14 @@ export default class Resource {
         return Resource.instance.canvas.height;
     }
 
-    static getImage(id, type) {
+    static getImage(id) {
+        return Resource.instance.images.get(id);
+    }
+
+    /**
+     * 若图片已被加载，则可以不传type
+     */
+    static getOrCreateImage(id, type) {
         const images = Resource.instance.images;
         if (!images.has(id)) {
             Resource.instance.loadAnimationImage(id, 1, type);

@@ -29,7 +29,7 @@ export default class Shop {
         items[items.length] = background;
 
         // 金币
-        const coinImage = Resource.getImage("coin");
+        const coinImage = Resource.getOrCreateImage("coin");
         items[items.length] = new Item({
             draw: function (ctx) {
                 ctx.drawImage(coinImage,
@@ -107,22 +107,22 @@ export default class Shop {
         const items = this.totalShopItems;
 
         //第一页
-        items[items.length] = new ShopButton(this, 0, 0, "幽灵(限时)", Resource.getImage("item_ghost"), 0, 0, 8,
+        items[items.length] = new ShopButton(this, 0, 0, "幽灵(限时)", Resource.getOrCreateImage("item_ghost"), 0, 0, 8,
             ["游戏中会随机出现幽灵道具（限时一天）",
                 "效果：使你的坦克变成半透明移动时无视一切障碍物"],
             Resource.getUser().hasGhost(), "GHOST");
-        items[items.length] = new ShopButton(this, 1, 0, "定时器(限时)", Resource.getImage("item_clock"), 0, 0, 10,
+        items[items.length] = new ShopButton(this, 1, 0, "定时器(限时)", Resource.getOrCreateImage("item_clock"), 0, 0, 10,
             ["游戏中会随机出现定时器道具（限时一天）",
                 "效果：使敌方所有坦克15秒内不能移动"],
             Resource.getUser().hasClock(), "CLOCK");
-        items[items.length] = new ShopButton(this, 2, 0, "红星(限时)", Resource.getImage("item_red_star"), 0, 0, 12,
+        items[items.length] = new ShopButton(this, 2, 0, "红星(限时)", Resource.getOrCreateImage("item_red_star"), 0, 0, 12,
             ["游戏中会随机出现红星道具（限时一天）",
                 "效果：使你的坦克直接升至四星坦克"],
             Resource.getUser().hasRedStar(), "RED_STAR");
-        items[items.length] = new ShopButton(this, 0, 1, "二星坦克(限时)", Resource.getImage("tank02"), 3, 0, 20,
+        items[items.length] = new ShopButton(this, 0, 1, "二星坦克(限时)", Resource.getOrCreateImage("tank02"), 3, 0, 20,
             ["效果：使你的坦克初始状态为二星坦克（限时一天）"],
             Resource.getUser().getTankType() === "tank02", "TANK02");
-        items[items.length] = new ShopButton(this, 1, 1, "三星坦克(限时)", Resource.getImage("tank03"), 3, 0, 40,
+        items[items.length] = new ShopButton(this, 1, 1, "三星坦克(限时)", Resource.getOrCreateImage("tank03"), 3, 0, 40,
             ["效果：使你的坦克初始状态为三星坦克（限时一天）"],
             Resource.getUser().getTankType() === "tank03", "TANK03");
         //TODO - 付费信息

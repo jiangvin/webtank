@@ -13,7 +13,7 @@ export default class AppHome extends Stage {
         super();
 
         //背景
-        const bgImage = Resource.getImage("background_loading","jpg");
+        const bgImage = Resource.getOrCreateImage("background_loading","jpg");
         this.createItem({
             draw: function (ctx) {
                 ctx.drawImage(bgImage,
