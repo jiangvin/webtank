@@ -5,6 +5,8 @@
  */
 
 import Item from './item.js'
+import ControlUnit from "./controlunit.js";
+import Resource from "../tool/resource.js";
 
 export default class Stage {
     constructor() {
@@ -32,11 +34,19 @@ export default class Stage {
         }
     }
 
+    processSocketMessage(messageDto) {
+    }
+
     createItem(options) {
         const item = new Item(options);
         item.stage = this;
         this.items.set(item.id, item);
         return item;
+    }
+
+    createControlUnit(leftTop, rightBottom, callBack) {
+        const controlUnit = new ControlUnit(Resource.generateClientId(), leftTop, rightBottom, callBack);
+        this.controlUnits.set(controlUnit.id, controlUnit);
     }
 
     addItem(item) {
@@ -52,9 +62,6 @@ export default class Stage {
         if (item.controlUnit) {
             this.controlUnits.delete(item.controlUnit.id);
         }
-    }
-
-    processSocketMessage(messageDto) {
     }
 
     /**

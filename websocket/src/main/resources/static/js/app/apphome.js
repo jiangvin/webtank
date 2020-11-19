@@ -13,7 +13,7 @@ export default class AppHome extends Stage {
         super();
 
         //背景
-        const bgImage = Resource.getOrCreateImage("background_loading","jpg");
+        const bgImage = Resource.getImage("login");
         this.createItem({
             draw: function (ctx) {
                 ctx.drawImage(bgImage,
@@ -24,43 +24,67 @@ export default class AppHome extends Stage {
             }
         });
 
-        //标题
+        //logo
         this.createItem({
-            draw: function (context) {
-                context.font = 'bold 55px Helvetica';
-                context.textAlign = 'center';
-                context.textBaseline = 'middle';
-                context.fillStyle = '#FFF';
-                context.fillText('首次登录', Resource.width() / 2, 40);
+            draw: function (ctx) {
+                ctx.drawResourceCenter("logo",
+                    Resource.width() / 2,
+                    Resource.height() * .4,
+                    Resource.width() * .6);
             }
         });
 
-        const input = $('#input');
-        const button = $('#button1');
-        button.text("进入游戏");
-        button.css("top", "35%");
-        button.bind('click',function () {
-            //检测是否输入名字
-            const name = input.val();
-            if (name === "") {
-                Common.addMessage("名字不能为空!", "#ff0000");
-                return;
+        //按钮
+        this.createItem({
+            draw: function (ctx) {
+                ctx.drawResourceCenter("button_enter",
+                    Resource.width() / 2,
+                    Resource.height() * .58 + 75,
+                    350, 45);
             }
+        });
+        //按钮事件
+        this.createControlUnit(
+            {x: Resource.width() / 2 - 175, y: Resource.height() * .58 + 53},
+            {x: Resource.width() / 2 + 175, y: Resource.height() * .58 + 97},
+            function () {
+                //检测是否输入名字
+                const input = $('#input');
+                const name = input.val();
+                if (name === "") {
+                    Common.addMessage("名字不能为空!", "#ff0000");
+                    return;
+                }
 
-            input.css("visibility", "hidden");
-            button.css("visibility", "hidden");
-            Resource.setUserId(name);
-            Common.postRequest("/user/saveUser", {
-                userId: Resource.getUser().deviceId,
-                username: Resource.getUser().userId,
-                userDevice: Resource.getUser().deviceName
+                input.css("visibility", "hidden");
+                Resource.setUserId(name);
+                Common.postRequest("/user/saveUser", {
+                    userId: Resource.getUser().deviceId,
+                    username: Resource.getUser().userId,
+                    userDevice: Resource.getUser().deviceName
+                });
+                Common.nextStage();
             });
-            Common.nextStage();
+
+        //文字
+        this.createItem({
+            draw: function (context) {
+                context.font = '18px Helvetica';
+                context.textAlign = 'left';
+                context.textBaseline = 'middle';
+                context.fillStyle = '#FFF';
+                context.fillText('☑ 进入游戏即代表同意',
+                    Resource.width() / 2 - 160,
+                    Resource.height() * .58 + 125);
+                context.fillStyle = '#F00';
+                context.fillText('《游戏隐私协议》',
+                    Resource.width() / 2 + 20,
+                    Resource.height() * .58 + 125);
+            }
         });
     }
 
     init() {
         $('#input').css("visibility", "visible");
-        $('#button1').css("visibility", "visible");
     }
 }

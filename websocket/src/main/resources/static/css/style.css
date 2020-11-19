@@ -18,23 +18,22 @@ canvas {
 input {
     position: absolute;
     color: #5E6C77;
-    border: 2px solid #5E6C77;
-    font-size: 1.5em;
-    padding: .1em;
+    border: 1px solid #33C6E9;
+    font-size: 1.3em;
+    padding: .3em;
     border-radius: .25em;
-    background: #2b2b2b;
+    background: rgba(255,255,255,0.8);
     text-align: center;
 }
 input:focus {
     outline: none;
-    color: #A2ACB3;
-    border-color: #A2ACB3;
-    text-align: center;
+    border-color: #33C6E9;
 }
 input.input-name {
-    left: 33%;
-    top: 70px;
-    width: 34%;
+    left: 50%;
+    top: 58%;
+    width: 330px;
+    transform: translateX(-170px);
 }
 input.input-message {
     left: 15%;
