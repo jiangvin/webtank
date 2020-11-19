@@ -28,7 +28,7 @@ export default class Loading extends Stage {
             draw: function (ctx) {
                 ctx.drawResourceCenter("logo",
                     Resource.width() / 2,
-                    Resource.height() / 2 - 40,
+                    Resource.height() * .45,
                     Resource.width() * .55);
             }
         });
@@ -55,15 +55,15 @@ export default class Loading extends Stage {
                 ctx.fillStyle = '#FFF';
                 fillRoundRect(ctx,
                     Resource.width() * .5 - width / 2,
-                    Resource.height() * .5 + 60,
+                    Resource.height() * .62,
                     width,
                     height);
 
                 //进度条
                 ctx.fillStyle = '#028EE7';
                 fillRoundRect(ctx,
-                    Resource.width() * .5  - width / 2,
-                    Resource.height() * .5 + 60,
+                    Resource.width() * .5 - width / 2,
+                    Resource.height() * .62,
                     width * (thisLoading.percent / 100.0),
                     height);
 
@@ -74,7 +74,7 @@ export default class Loading extends Stage {
                 ctx.fillStyle = '#FFF';
                 ctx.fillText('资源已加载' + thisLoading.percent + '%',
                     Resource.width() / 2,
-                    Resource.height() / 2 + 82);
+                    Resource.height() * .62 + 22);
 
             }
         });
