@@ -56,6 +56,7 @@ export default class AppHome extends Stage {
                         return;
                     }
 
+                    input.removeClass("input-name");
                     input.css("visibility", "hidden");
                     Resource.setUserId(name);
                     Common.postRequest("/user/saveUser", {
@@ -87,6 +88,8 @@ export default class AppHome extends Stage {
     }
 
     init() {
-        $('#input').css("visibility", "visible");
+        const input = $('#input');
+        input.addClass("input-name");
+        input.css("visibility", "visible");
     }
 }

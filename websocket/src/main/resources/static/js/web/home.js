@@ -40,7 +40,8 @@ export default class Home extends Stage {
 
         //绑定事件
         const buttonEvent = function (e) {
-            const name = $('#input').val();
+            const input = $('#input');
+            const name = input.val();
 
             //检测是否输入名字
             if (name === "") {
@@ -52,6 +53,7 @@ export default class Home extends Stage {
             Control.setControlMode(isTouch);
 
             Resource.setUserId(name);
+            input.removeClass("input-name-web");
             $('#input-name-div').css("visibility", "hidden");
             Common.nextStage();
         };
@@ -63,6 +65,7 @@ export default class Home extends Stage {
     }
 
     init() {
+        $('#input').addClass("input-name-web");
         $('#input-name-div').css("visibility", "visible");
     }
 }

@@ -18,22 +18,37 @@ canvas {
 input {
     position: absolute;
     color: #5E6C77;
-    border: 1px solid #33C6E9;
-    font-size: 1.3em;
-    padding: .3em;
-    border-radius: .25em;
-    background: rgba(255,255,255,0.8);
+    border: 2px solid #5E6C77;
+    font-size: 1.5em;
+    padding: .1em;
+    background: #2b2b2b;
     text-align: center;
+    border-radius: .25em;
 }
 input:focus {
     outline: none;
-    border-color: #33C6E9;
+    color: #A2ACB3;
+    border-color: #A2ACB3;
+}
+input.input-name-web {
+    left: 33%;
+    top: 70px;
+    width: 34%;
 }
 input.input-name {
+    border: 1px solid #33C6E9;
+    font-size: 1.3em;
+    padding: .3em;
+    background: rgba(255,255,255,0.8);
     left: 50%;
     top: 58%;
     width: 330px;
     transform: translateX(-170px);
+}
+input.input-name:focus {
+    outline: none;
+    border-color: #33C6E9;
+    color: #343434;
 }
 input.input-message {
     left: 15%;
