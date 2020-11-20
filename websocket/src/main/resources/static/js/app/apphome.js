@@ -7,6 +7,7 @@
 import Stage from "../share/stage/stage.js";
 import Resource from "../share/tool/resource.js";
 import Common from "../share/tool/common.js";
+import ControlUnit from "../share/stage/controlunit.js";
 
 export default class AppHome extends Stage {
     constructor() {
@@ -41,30 +42,31 @@ export default class AppHome extends Stage {
                     Resource.width() / 2,
                     Resource.height() * .58 + 75,
                     350, 45);
-            }
-        });
-        //按钮事件
-        this.createControlUnit(
-            {x: Resource.width() / 2 - 175, y: Resource.height() * .58 + 53},
-            {x: Resource.width() / 2 + 175, y: Resource.height() * .58 + 97},
-            function () {
-                //检测是否输入名字
-                const input = $('#input');
-                const name = input.val();
-                if (name === "") {
-                    Common.addMessage("名字不能为空!", "#ff0000");
-                    return;
-                }
+            },
+            controlUnit: new ControlUnit(
+                Resource.generateClientId(),
+                {x: Resource.width() / 2 - 175, y: Resource.height() * .58 + 53},
+                {x: Resource.width() / 2 + 175, y: Resource.height() * .58 + 97},
+                function () {
+                    //检测是否输入名字
+                    const input = $('#input');
+                    const name = input.val();
+                    if (name === "") {
+                        Common.addMessage("名字不能为空!", "#ff0000");
+                        return;
+                    }
 
-                input.css("visibility", "hidden");
-                Resource.setUserId(name);
-                Common.postRequest("/user/saveUser", {
-                    userId: Resource.getUser().deviceId,
-                    username: Resource.getUser().userId,
-                    userDevice: Resource.getUser().deviceName
-                });
-                Common.nextStage();
-            });
+                    input.css("visibility", "hidden");
+                    Resource.setUserId(name);
+                    Common.postRequest("/user/saveUser", {
+                        userId: Resource.getUser().deviceId,
+                        username: Resource.getUser().userId,
+                        userDevice: Resource.getUser().deviceName
+                    });
+                    Common.nextStage();
+                }
+            )
+        });
 
         //文字
         this.createItem({

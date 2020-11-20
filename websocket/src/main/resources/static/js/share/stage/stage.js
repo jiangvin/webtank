@@ -5,8 +5,6 @@
  */
 
 import Item from './item.js'
-import ControlUnit from "./controlunit.js";
-import Resource from "../tool/resource.js";
 
 export default class Stage {
     constructor() {
@@ -40,13 +38,8 @@ export default class Stage {
     createItem(options) {
         const item = new Item(options);
         item.stage = this;
-        this.items.set(item.id, item);
+        this.addItem(item);
         return item;
-    }
-
-    createControlUnit(leftTop, rightBottom, callBack) {
-        const controlUnit = new ControlUnit(Resource.generateClientId(), leftTop, rightBottom, callBack);
-        this.controlUnits.set(controlUnit.id, controlUnit);
     }
 
     addItem(item) {
