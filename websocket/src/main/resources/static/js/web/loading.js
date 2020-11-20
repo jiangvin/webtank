@@ -55,7 +55,7 @@ export default class Loading extends Stage {
                 ctx.fillStyle = '#FFF';
                 fillRoundRect(ctx,
                     Resource.width() * .5 - width / 2,
-                    Resource.height() * .62,
+                    Resource.height() * .63,
                     width,
                     height);
 
@@ -63,7 +63,7 @@ export default class Loading extends Stage {
                 ctx.fillStyle = '#028EE7';
                 fillRoundRect(ctx,
                     Resource.width() * .5 - width / 2,
-                    Resource.height() * .62,
+                    Resource.height() * .63,
                     width * (thisLoading.percent / 100.0),
                     height);
 
@@ -74,7 +74,7 @@ export default class Loading extends Stage {
                 ctx.fillStyle = '#FFF';
                 ctx.fillText('资源已加载' + thisLoading.percent + '%',
                     Resource.width() / 2,
-                    Resource.height() * .62 + 22);
+                    Resource.height() * .63 + 22);
 
             }
         });
