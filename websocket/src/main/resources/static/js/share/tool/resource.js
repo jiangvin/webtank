@@ -28,6 +28,9 @@ export default class Resource {
         this.loadAnimationImage("rank_board", 1, "jpg");
         this.loadAnimationImage("button_next");
         this.loadAnimationImage("button_next_disable");
+        this.loadAnimationImage("rank_1");
+        this.loadAnimationImage("rank_2");
+        this.loadAnimationImage("rank_3");
 
         //load all tank images
         for (let i = 1; i <= 12; ++i) {
