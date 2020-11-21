@@ -6,9 +6,7 @@
 
 import Resource from "../share/tool/resource.js";
 import Home from "../web/home.js"
-import Menu from "../share/stage/menu.js";
 import Control from "../share/tool/control.js";
-import Room from "../share/stage/room.js"
 import Root from "../share/root.js";
 import Adapter from "../share/tool/adapter.js";
 import Common from "../share/tool/common.js";
@@ -34,22 +32,19 @@ export default class Index {
                     //旧用户
                     Resource.setUser(data);
 
-                    thisIndex.root.addStage(new Menu());
-                    thisIndex.root.addStage(new Room());
+                    thisIndex.root.addGameStage();
                     thisIndex.start();
                 } else {
                     //新用户
                     thisIndex.root.addStage(new AppHome());
-                    thisIndex.root.addStage(new Menu());
-                    thisIndex.root.addStage(new Room());
+                    thisIndex.root.addGameStage();
                     thisIndex.start();
                 }
             })
         } else {
             //web
             this.root.addStage(new Home());
-            this.root.addStage(new Menu());
-            this.root.addStage(new Room());
+            this.root.addGameStage();
             this.start();
         }
     }

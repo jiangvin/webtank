@@ -15,11 +15,13 @@ import Item from "./item.js";
 import Adapter from "../tool/adapter.js";
 import Sound from "../tool/sound.js";
 import Shop from "./shop.js";
+import ControlUnit from "./controlunit.js";
 
 export default class Menu extends Stage {
     constructor() {
         super();
 
+        const thisMenu = this;
         //背景
         const bgImage = Resource.getImage("menu");
         this.createItem({
@@ -33,23 +35,42 @@ export default class Menu extends Stage {
         });
 
         //信息
-        this.createItem( {
-           draw: function (ctx) {
-               ctx.font = 'bold 13px Arial';
-               ctx.textAlign = 'center';
-               ctx.textBaseline = 'middle';
-               ctx.fillStyle = '#FFF';
+        this.createItem({
+            draw: function (ctx) {
+                ctx.font = 'bold 13px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#FFF';
 
-               //姓名
-               ctx.fillText(Resource.getUser().userId, Resource.width() * .18, Resource.height() * .068);
-               //金币
-               ctx.fillText(Resource.getUser().coin, Resource.width() * .39, Resource.height() * .068);
-               //排名
-               ctx.fillText(Resource.getUser().rank, Resource.width() * .62, Resource.height() * .068);
-               //积分
-               ctx.fillText(Resource.getUser().score, Resource.width() * .84, Resource.height() * .068);
-           }
+                //姓名
+                ctx.fillText(Resource.getUser().userId, Resource.width() * .18, Resource.height() * .068);
+                //金币
+                ctx.fillText(Resource.getUser().coin, Resource.width() * .39, Resource.height() * .068);
+                //排名
+                ctx.fillText(Resource.getUser().rank, Resource.width() * .62, Resource.height() * .068);
+                //积分
+                ctx.fillText(Resource.getUser().score, Resource.width() * .84, Resource.height() * .068);
+            }
         });
+
+        //排行榜打开按钮
+        const buttonOpenRankBoard = new ControlUnit(
+            Resource.generateClientId(),
+            {x: Resource.width() * .09, y: Resource.height() * .69},
+            {x: Resource.width() * .196, y: Resource.height() * .96},
+            function () {
+                Common.nextStage();
+            });
+        this.controlUnits.set(buttonOpenRankBoard.id, buttonOpenRankBoard);
+
+        // //加载主页面事件
+        // this.mainCotrol = new Map();
+        // this.mainCotrol.set(buttonOpenRankBoard.id, buttonOpenRankBoard);
+        // this.controlUnits = this.mainCotrol;
+        // //加载排行榜事件
+        // this.rankBoardCotrol = new Map();
+        // this.rankBoardCotrol.set(buttonCloseRankBoard.id, buttonCloseRankBoard);
+
 
         // this.buttons = [];
         // this.buttonIndex = 0;
@@ -99,10 +120,35 @@ export default class Menu extends Stage {
         // this.loadButtons();
     }
 
-    init() {
-        // Adapter.initInput();
-        // Adapter.instance.inputEnable = false;
-    }
+    // openRankBoard() {
+    //     this.createItem({
+    //         id: "rank_board",
+    //         draw: function (ctx) {
+    //             //遮罩
+    //             ctx.globalAlpha = 0.5;
+    //             ctx.fillStyle = "#000";
+    //             ctx.fillRect(0, 0, Resource.width(), Resource.height());
+    //             ctx.globalAlpha = 1;
+    //
+    //             ctx.drawResourceCenter("rank_board",
+    //                 Resource.width() / 2,
+    //                 Resource.height() / 2,
+    //                 Resource.width(),
+    //                 Resource.height());
+    //         }
+    //     });
+    //     this.controlUnits = this.rankBoardCotrol;
+    // }
+    //
+    // closeRankBoard() {
+    //     this.items.delete("rank_board");
+    //     this.controlUnits = this.mainCotrol;
+    // }
+
+    // init() {
+    // Adapter.initInput();
+    // Adapter.instance.inputEnable = false;
+    // }
 
     // initRoom(roomInfo) {
     //     Common.nextStage(roomInfo);

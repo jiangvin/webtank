@@ -1,9 +1,6 @@
 import '../share/libs/jsencrypt.min.js'
-
-import Menu from "../share/stage/menu";
 import Resource from '../share/tool/resource'
 import Control from "../share/tool/control";
-import Room from "../share/stage/room";
 import Adapter from "../share/tool/adapter";
 import Root from "../share/root.js";
 import Sound from "../share/tool/sound.js";
@@ -59,8 +56,7 @@ export default class Main {
         Resource.setRoot(this.root);
 
         //因为小程序是读取本地文件和使用微信账户，所以不需要资源加载页面和登录页面
-        this.root.addStage(new Menu());
-        this.root.addStage(new Room());
+        this.root.addGameStage();
 
         this.root.currentStage().init();
         //渲染层

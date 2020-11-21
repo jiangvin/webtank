@@ -10,6 +10,9 @@ import Status from "./tool/status.js"
 import Common from "./tool/common.js"
 import NetEngine from "./engine/netEngine.js";
 import AiEngine from "./engine/aiEngine.js";
+import Menu from "./stage/menu.js";
+import Rank from "./stage/rank.js";
+import Room from "./stage/room.js";
 
 export default class Root {
     constructor() {
@@ -55,6 +58,12 @@ export default class Root {
         const messageEvent = {};
         messageEvent.callback = callBack;
         this.messageEvents.set(eventType, messageEvent);
+    }
+
+    addGameStage() {
+        this.addStage(new Menu());
+        this.addStage(new Rank());
+        this.addStage(new Room());
     }
 
     addStage(stage) {

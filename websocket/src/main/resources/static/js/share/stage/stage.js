@@ -22,6 +22,16 @@ export default class Stage {
         this.items.forEach(function (item) {
             item.draw(ctx);
         });
+
+        //测试代码, 显示事件区域
+        this.controlUnits.forEach(function (unit) {
+            ctx.strokeStyle = '#F00';
+            ctx.strokeRect(
+                unit.leftTop.x,
+                unit.leftTop.y,
+                unit.rightBottom.x - unit.leftTop.x,
+                unit.rightBottom.y - unit.leftTop.y);
+        })
     }
 
     processPointDownEvent(point) {
