@@ -244,45 +244,6 @@ export default class Menu extends Stage {
     //     });
     //     this.buttons[5] = [bt0601, bt0602, bt0603];
     //
-    //     //排行榜
-    //     const rect0701 = new Rect(Resource.width() / 2, Resource.height() * .57, Resource.width() * .6, Resource.height() * .65);
-    //     thisMenu.rankRect = rect0701;
-    //     const bt0701 = new Button("上一页",
-    //         rect0701.x - 120,
-    //         rect0701.y + rect0701.height / 2 - 35,
-    //         function () {
-    //             if (thisMenu.rankStart > 0) {
-    //                 thisMenu.rankStart -= 10;
-    //                 thisMenu.loadRanks();
-    //             }
-    //         }, 110, 50, '24px Arial');
-    //     const bt0702 = new Button("下一页",
-    //         rect0701.x,
-    //         rect0701.y + rect0701.height / 2 - 35,
-    //         function () {
-    //             thisMenu.rankStart += 10;
-    //             thisMenu.loadRanks();
-    //         }, 110, 50, '24px Arial');
-    //     const bt0703 = new Button("返回",
-    //         rect0701.x + 120,
-    //         rect0701.y + rect0701.height / 2 - 35,
-    //         function () {
-    //             thisMenu.switchButtons(-6);
-    //         }, 110, 50, '24px Arial');
-    //     const header = new Item({
-    //         draw: function (ctx) {
-    //             ctx.font = '20px Helvetica';
-    //             ctx.textAlign = 'center';
-    //             ctx.textBaseline = 'bottom';
-    //             ctx.fillStyle = '#FFF';
-    //             const y = rect0701.y - rect0701.height / 2 + 33;
-    //             ctx.fillText("排名", rect0701.x - 184, y);
-    //             ctx.fillText("玩家", rect0701.x - 47, y);
-    //             ctx.fillText("分数", rect0701.x + 83, y);
-    //             ctx.fillText("模式", rect0701.x + 186, y);
-    //         }
-    //     });
-    //     this.buttons[6] = [rect0701, bt0701, bt0702, bt0703, header];
     //
     //     this.buttons[7] = this.shop.initShop();
     //
@@ -372,58 +333,6 @@ export default class Menu extends Stage {
     //     thisMenu.switchToIndex(9);
     // }
     //
-    // loadRanks() {
-    //     const thisMenu = this;
-    //     Common.getRequest("/user/getRankList?limit=10&start=" + this.rankStart,
-    //         /**
-    //          *
-    //          * @param dataList {{score,username,gameType}}
-    //          */
-    //         function (dataList) {
-    //             if (thisMenu.buttonIndex !== thisMenu.rankIndex) {
-    //                 return;
-    //             }
-    //
-    //             thisMenu.removeRankInfos();
-    //             const x = thisMenu.rankRect.x;
-    //             const y = thisMenu.rankRect.y - thisMenu.rankRect.height / 2 + 58;
-    //             for (let i = 0; i < 10; ++i) {
-    //                 const rankNumber = new Item({
-    //                     draw: function (ctx) {
-    //                         //rank
-    //                         ctx.font = '20px Helvetica';
-    //                         ctx.textAlign = 'center';
-    //                         ctx.textBaseline = 'bottom';
-    //                         ctx.fillStyle = '#FFF';
-    //
-    //                         //rank
-    //                         ctx.fillText(thisMenu.rankStart + 1 + i + "", x - 184, y + i * 22);
-    //                         if (!dataList[i]) {
-    //                             return;
-    //                         }
-    //
-    //                         const data = dataList[i];
-    //                         //name
-    //                         ctx.fillText(data.username, x - 47, y + i * 22);
-    //                         //score
-    //                         ctx.fillText(data.score, x + 83, y + i * 22);
-    //                         //mode
-    //                         ctx.fillText(data.gameType === 0 ? "单人" : "联机", x + 186, y + i * 22);
-    //                     }
-    //                 });
-    //                 thisMenu.rankInfos[thisMenu.rankInfos.length] = rankNumber;
-    //                 thisMenu.addItem(rankNumber);
-    //             }
-    //         })
-    // }
-    //
-    // removeRankInfos() {
-    //     const thisMenu = this;
-    //     thisMenu.rankInfos.forEach(function (info) {
-    //         thisMenu.removeItem(info);
-    //     });
-    //     thisMenu.rankInfos = [];
-    // }
     //
     // loadButtons() {
     //     const buttons = this.buttons[this.buttonIndex];
