@@ -1,7 +1,7 @@
 import Rect from "./rect.js";
 import Resource from "../tool/resource.js";
 import Button from "./button.js";
-import Item from "./item.js";
+import Item from "../item/item.js";
 import ShopButton from "./shopbutton.js";
 
 /**

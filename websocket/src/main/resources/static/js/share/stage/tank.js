@@ -3,7 +3,7 @@
  * @description
  * @date 2020/6/23
  */
-import Item from "./item.js";
+import Item from "../item/item.js";
 import Resource from "../tool/resource.js";
 import Play from "./play.js";
 import Status from "../tool/status.js";

@@ -4,7 +4,7 @@
  * @date 2020/5/26
  */
 
-import Item from './item.js'
+import Item from '../item/item.js'
 
 export default class Stage {
     constructor() {

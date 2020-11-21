@@ -3,7 +3,7 @@
  * @description
  * @date 2020/6/17
  */
-import Item from "../share/stage/item.js";
+import Item from "../share/item/item.js";
 import ControlUnit from "../share/stage/controlunit.js";
 
 export default class WxInput extends Item {

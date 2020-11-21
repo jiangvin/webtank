@@ -12,7 +12,7 @@ import Control from "../tool/control.js";
 import Button from "./button.js";
 import Sound from "../tool/sound.js";
 import Rect from "./rect.js";
-import Item from "./item.js";
+import Item from "../item/item.js";
 import Tank from "./tank.js";
 import Confirm from "./confirm.js";
 import Adapter from "../tool/adapter.js";

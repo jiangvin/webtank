@@ -11,7 +11,7 @@ import RoomButton from "./roombutton.js";
 import Common from "../tool/common.js";
 import Connect from "../tool/connect.js";
 import Rect from "./rect.js";
-import Item from "./item.js";
+import Item from "../item/item.js";
 import Adapter from "../tool/adapter.js";
 import Sound from "../tool/sound.js";
 import Shop from "./shop.js";
