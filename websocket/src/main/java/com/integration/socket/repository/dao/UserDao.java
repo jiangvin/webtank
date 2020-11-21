@@ -4,7 +4,6 @@ import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.jooq.tables.records.RankBoardRecord;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
-import org.jooq.impl.DSL;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
@@ -67,11 +66,6 @@ public class UserDao extends BaseDao {
                    .orderBy(RANK_BOARD.RANK)
                    .limit(1).fetchOne();
         }
-    }
-
-    public Integer queryRankFromUserId(String userId) {
-        return create.select(DSL.min(RANK_BOARD.RANK)).from(RANK_BOARD)
-               .where(RANK_BOARD.USER_ID.eq(userId)).fetchOneInto(Integer.class);
     }
 
     public void updateBoardRank(int start, Integer end) {

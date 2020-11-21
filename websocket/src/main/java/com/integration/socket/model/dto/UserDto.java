@@ -22,6 +22,7 @@ public class UserDto {
     private int coin;
     private int stage;
     private Integer rank;
+    private Integer score;
     private String tankType;
     private Timestamp tankTypeExpired;
     private Timestamp redStarExpired;

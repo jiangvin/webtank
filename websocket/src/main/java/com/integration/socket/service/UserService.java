@@ -42,8 +42,12 @@ public class UserService {
         userDao.updateLoginTime(userRecord);
         UserDto userDto = UserDto.convert(userRecord);
 
-        //查询排名
-        userDto.setRank(userDao.queryRankFromUserId(userId));
+        //查询排名和积分
+        RankBoardRecord record = userDao.queryFirstRank(userId, null);
+        if (record != null) {
+            userDto.setRank(record.getRank());
+            userDto.setScore(record.getScore());
+        }
         return userDto;
     }
 

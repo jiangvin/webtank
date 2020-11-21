@@ -24,6 +24,7 @@ export default class Resource {
         this.loadAnimationImage("logo");
         this.loadAnimationImage("login", 1, "jpg");
         this.loadAnimationImage("button_enter");
+        this.loadAnimationImage("menu", 1, "jpg");
 
         //load all tank images
         for (let i = 1; i <= 12; ++i) {
@@ -60,7 +61,6 @@ export default class Resource {
 
         //menu
         this.loadAnimationImage("background_loading", 1, "jpg");
-        this.loadAnimationImage("background_menu", 1, "jpg");
         this.loadAnimationImage("button", 1);
         this.loadAnimationImage("button_disabled", 1);
     }
