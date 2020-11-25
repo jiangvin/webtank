@@ -6,6 +6,7 @@
 
 import Item from '../item/item.js'
 import Resource from "../tool/resource.js";
+import ControlUnit from "../item/controlunit.js";
 
 export default class Stage {
     constructor() {
@@ -72,6 +73,28 @@ export default class Stage {
         item.stage = this;
         this.addItem(item);
         return item;
+    }
+
+    createControl(options) {
+        const controlUnit = new ControlUnit(
+            Resource.generateClientId(),
+            {x: Resource.width() * .1, y: Resource.height() * .1},
+            {x: Resource.width() * .9, y: Resource.height() * .9},
+            function () {
+
+            });
+        for (let key in options) {
+            controlUnit[key] = options[key];
+        }
+
+        //根据长宽重新计算右下角的位置
+        if (options.size) {
+            controlUnit.rightBottom = {
+                x: controlUnit.leftTop.x + options.size.w,
+                y: controlUnit.leftTop.y + options.size.h
+            }
+        }
+        this.controlUnits.set(controlUnit.id, controlUnit);
     }
 
     addItem(item) {

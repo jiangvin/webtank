@@ -152,4 +152,8 @@ export default class Menu extends Stage {
             enterDoor2: false
         };
     }
+
+    getId() {
+        return "menu";
+    }
 }
