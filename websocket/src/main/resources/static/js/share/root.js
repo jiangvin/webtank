@@ -156,10 +156,11 @@ export default class Root {
         }
     }
 
-    lastStage() {
+    lastStage(options) {
         if (this.stageIndex > 0) {
             --this.stageIndex;
         }
+        this.currentStage().init(options);
     }
 
     drawMessage(ctx) {

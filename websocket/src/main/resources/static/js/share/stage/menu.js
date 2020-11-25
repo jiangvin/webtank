@@ -95,17 +95,11 @@ export default class Menu extends Stage {
     }
 
     createDoor() {
-        this.doorStatus = {
-            indexDoor1: 0,
-            enterDoor1: false,
-            indexDoor2: 0,
-            enterDoor2: false
-        };
         const speed = 0.5;
 
-        const doorStatus = this.doorStatus;
         this.createItem({
             draw: function (ctx) {
+                const doorStatus = this.stage.doorStatus;
                 if (doorStatus.enterDoor1 && doorStatus.indexDoor1 < 22) {
                     doorStatus.indexDoor1 += speed;
                 }
@@ -136,13 +130,14 @@ export default class Menu extends Stage {
         });
 
         //事件处理
+        const thisMenu = this;
         //单人模式
         const singleMode = new ControlUnit(
             Resource.generateClientId(),
             {x: Resource.width() * .29, y: Resource.height() * .57},
             {x: Resource.width() * .39, y: Resource.height() * .87},
             function () {
-                doorStatus.enterDoor1 = true;
+                thisMenu.doorStatus.enterDoor1 = true;
             }
         );
         this.controlUnits.set(singleMode.id, singleMode);
@@ -153,9 +148,18 @@ export default class Menu extends Stage {
             {x: Resource.width() * .636, y: Resource.height() * .57},
             {x: Resource.width() * .736, y: Resource.height() * .87},
             function () {
-                doorStatus.enterDoor2 = true;
+                thisMenu.doorStatus.enterDoor2 = true;
             }
         );
         this.controlUnits.set(multipleMode.id, multipleMode);
+    }
+
+    init() {
+        this.doorStatus = {
+            indexDoor1: 0,
+            enterDoor1: false,
+            indexDoor2: 0,
+            enterDoor2: false
+        };
     }
 }
