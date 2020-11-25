@@ -21,10 +21,15 @@ export default class Resource {
     }
 
     initImage() {
+        //login
         this.loadAnimationImage("logo");
         this.loadAnimationImage("login", 1, "jpg");
         this.loadAnimationImage("button_enter");
-        this.loadAnimationImage("menu", 1, "jpg");
+
+        //menu
+        this.loadMenuResource();
+
+        //rank board
         this.loadAnimationImage("rank_board", 1, "jpg");
         this.loadAnimationImage("button_next");
         this.loadAnimationImage("button_next_disable");
@@ -71,18 +76,43 @@ export default class Resource {
         this.loadAnimationImage("button_disabled", 1);
     }
 
+    loadMenuResource() {
+        this.loadImage(
+            "menu_background",
+            "menu/background",
+            "jpg"
+        );
+        this.loadImage("menu_wall", "menu/wall");
+        this.loadImage("menu_bullet", "menu/bullet");
+
+        //load door
+        for (let i = 0; i < 23; ++i) {
+            this.loadImage("menu_door_" + i, "menu/door/" + (i + 1));
+        }
+    }
+
     loadAnimationImage(imageId, widthPics, type) {
+        this.loadImage(imageId, null, type, widthPics);
+    }
+
+    loadImage(imageId, path, type, widthPics, heightPics) {
+        if (!heightPics) {
+            heightPics = 1;
+        }
         if (!widthPics) {
             widthPics = 1;
         }
         if (!type) {
             type = "png";
         }
+        if (!path) {
+            path = imageId;
+        }
 
         const img = document.createElement('img');
-        img.src = 'image/' + imageId + '.' + type;
+        img.src = 'image/' + path + '.' + type;
         img.widthPics = widthPics;
-        img.heightPics = 1;
+        img.heightPics = heightPics;
         img.displayWidth = img.width / img.widthPics;
         img.displayHeight = img.height / img.heightPics;
         this.images.set(imageId, img);
