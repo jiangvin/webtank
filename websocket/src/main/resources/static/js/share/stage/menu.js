@@ -13,10 +13,10 @@ export default class Menu extends Stage {
     constructor() {
         super();
 
-        this.createFullScreenImage("menu_background");
+        this.createFullScreenItem("menu_background");
         this.createBullet();
         this.createDoor();
-        this.createFullScreenImage("menu_wall");
+        this.createFullScreenItem("menu_wall");
 
         //信息
         this.createItem({
@@ -47,20 +47,6 @@ export default class Menu extends Stage {
             }
         );
         this.controlUnits.set(buttonOpenRankBoard.id, buttonOpenRankBoard);
-    }
-
-    createFullScreenImage(id) {
-        const image = Resource.getImage(id);
-        this.createItem({
-            draw: function (ctx) {
-                ctx.drawImage(
-                    image,
-                    0, 0,
-                    image.width, image.height,
-                    0, 0,
-                    Resource.width(), Resource.height());
-            }
-        });
     }
 
     createBullet() {
@@ -100,8 +86,12 @@ export default class Menu extends Stage {
         this.createItem({
             draw: function (ctx) {
                 const doorStatus = this.stage.doorStatus;
-                if (doorStatus.enterDoor1 && doorStatus.indexDoor1 < 22) {
-                    doorStatus.indexDoor1 += speed;
+                if (doorStatus.enterDoor1) {
+                    if (doorStatus.indexDoor1 < 22) {
+                        doorStatus.indexDoor1 += speed;
+                    } else {
+                        Common.gotoStage("mission");
+                    }
                 }
                 if (doorStatus.enterDoor2 && doorStatus.indexDoor2 < 22) {
                     doorStatus.indexDoor2 += speed;

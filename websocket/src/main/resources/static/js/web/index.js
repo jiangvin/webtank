@@ -24,6 +24,12 @@ export default class Index {
         this.root = new Root();
         Resource.setRoot(this.root);
         this.root.addStage(new Loading());
+
+        const debug = Adapter.getQueryString("debug");
+        if (debug) {
+            Resource.setDebug(debug);
+        }
+
         const thisIndex = this;
         if (Adapter.isApp()) {
             Control.setControlMode(true);

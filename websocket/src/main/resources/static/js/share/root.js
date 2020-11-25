@@ -13,6 +13,7 @@ import AiEngine from "./engine/aiEngine.js";
 import Menu from "./stage/menu.js";
 import Rank from "./stage/rank.js";
 import Room from "./stage/room.js";
+import Mission from "./stage/mission.js";
 
 export default class Root {
     constructor() {
@@ -63,6 +64,7 @@ export default class Root {
     addGameStage() {
         this.addStage(new Menu());
         this.addStage(new Rank());
+        this.addStage(new Mission());
         this.addStage(new Room());
     }
 
@@ -161,6 +163,16 @@ export default class Root {
             --this.stageIndex;
         }
         this.currentStage().init(options);
+    }
+
+    gotoStage(id, options) {
+        for (let i = 0; i < this.stages.length; ++i) {
+            if (this.stages[i].getId() === id) {
+                this.stageIndex = i;
+                this.currentStage().init(options);
+                return;
+            }
+        }
     }
 
     drawMessage(ctx) {

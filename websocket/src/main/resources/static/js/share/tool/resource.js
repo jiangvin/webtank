@@ -15,6 +15,7 @@ export default class Resource {
         this.itemId = 1;
         this.scale = 1;
         this.host = "";
+        this.debug = false;
         this.encrypt = new JSEncrypt();
         this.encrypt.setPublicKey('MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCGLK2SvOA8W84X/w9IDld7MiO+eEFCCiCeK0czeB+yS2dsQ7FAfReeZrNznJCzJvMwr2RWir/0+xngvyZOcPCM3P1SSYZHUQXzrEGSXTcaqKGvRHEnbWnpsGacccidomfsvHYHHoeCqkprk/rWWoRiAR7HI6riwHQNb0FE/MwukwIDAQAB');
         this.initImage();
@@ -28,6 +29,9 @@ export default class Resource {
 
         //menu
         this.loadMenuResource();
+
+        //mission
+        this.loadMissionResource();
 
         //rank board
         this.loadAnimationImage("rank_board", 1, "jpg");
@@ -91,6 +95,14 @@ export default class Resource {
         }
     }
 
+    loadMissionResource() {
+        this.loadImage(
+            "mission_background",
+            "mission/background",
+            "jpg"
+        );
+    }
+
     loadAnimationImage(imageId, widthPics, type) {
         this.loadImage(imageId, null, type, widthPics);
     }
@@ -116,6 +128,14 @@ export default class Resource {
         img.displayWidth = img.width / img.widthPics;
         img.displayHeight = img.height / img.heightPics;
         this.images.set(imageId, img);
+    }
+
+    static isDebug() {
+        return Resource.instance.debug;
+    }
+
+    static setDebug(debug) {
+        Resource.instance.debug = debug;
     }
 
     static generateClientId() {

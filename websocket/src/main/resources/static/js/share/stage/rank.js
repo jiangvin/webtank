@@ -18,16 +18,7 @@ export default class Rank extends Stage {
         this.isRankEnd = false;
 
         //背景
-        const bgImage = Resource.getImage("rank_board");
-        this.createItem({
-            draw: function (ctx) {
-                ctx.drawImage(bgImage,
-                    0, 0,
-                    bgImage.width, bgImage.height,
-                    0, 0,
-                    Resource.width(), Resource.height());
-            }
-        });
+        this.createFullScreenItem("rank_board");
 
         //返回按钮事件
         const buttonCloseRankBoard = new ControlUnit(

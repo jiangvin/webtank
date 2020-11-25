@@ -18,8 +18,12 @@ export default class Common {
         Resource.getRoot().nextStage(options);
     }
 
-    static lastStage() {
-        Resource.getRoot().lastStage();
+    static lastStage(options) {
+        Resource.getRoot().lastStage(options);
+    }
+
+    static gotoStage(id, options) {
+        Resource.getRoot().gotoStage(id, options);
     }
 
     static addTimeEvent(eventType, callBack, timeout, ignoreLog) {

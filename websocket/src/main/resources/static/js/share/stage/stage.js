@@ -5,6 +5,7 @@
  */
 
 import Item from '../item/item.js'
+import Resource from "../tool/resource.js";
 
 export default class Stage {
     constructor() {
@@ -24,14 +25,17 @@ export default class Stage {
         });
 
         //测试代码, 显示事件区域
-        // this.controlUnits.forEach(function (unit) {
-        //     ctx.strokeStyle = '#F00';
-        //     ctx.strokeRect(
-        //         unit.leftTop.x,
-        //         unit.leftTop.y,
-        //         unit.rightBottom.x - unit.leftTop.x,
-        //         unit.rightBottom.y - unit.leftTop.y);
-        // })
+        if (!Resource.isDebug()) {
+            return;
+        }
+        this.controlUnits.forEach(function (unit) {
+            ctx.strokeStyle = '#F00';
+            ctx.strokeRect(
+                unit.leftTop.x,
+                unit.leftTop.y,
+                unit.rightBottom.x - unit.leftTop.x,
+                unit.rightBottom.y - unit.leftTop.y);
+        })
     }
 
     processPointDownEvent(point) {
@@ -43,6 +47,24 @@ export default class Stage {
     }
 
     processSocketMessage(messageDto) {
+    }
+
+    createFullScreenItem(imageId) {
+        const image = Resource.getImage(imageId);
+        if (!image) {
+            return;
+        }
+
+        this.createItem({
+            draw: function (ctx) {
+                ctx.drawImage(
+                    image,
+                    0, 0,
+                    image.width, image.height,
+                    0, 0,
+                    Resource.width(), Resource.height());
+            }
+        });
     }
 
     createItem(options) {
@@ -71,5 +93,14 @@ export default class Stage {
      * 切换场景时运行
      */
     init() {
+    }
+
+    /**
+     *
+     * 场景的标识符
+     * @returns {string}
+     */
+    getId() {
+        return "stage";
     }
 }
