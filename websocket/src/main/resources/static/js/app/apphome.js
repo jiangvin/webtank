@@ -7,7 +7,7 @@
 import Stage from "../share/stage/stage.js";
 import Resource from "../share/tool/resource.js";
 import Common from "../share/tool/common.js";
-import ControlUnit from "../share/stage/controlunit.js";
+import ControlUnit from "../share/item/controlunit.js";
 
 export default class AppHome extends Stage {
     constructor() {

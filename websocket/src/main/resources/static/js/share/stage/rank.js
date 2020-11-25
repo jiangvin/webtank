@@ -6,7 +6,7 @@
 
 import Stage from "./stage.js";
 import Resource from "../tool/resource.js";
-import ControlUnit from "./controlunit.js";
+import ControlUnit from "../item/controlunit.js";
 import Common from "../tool/common.js";
 
 export default class Rank extends Stage {

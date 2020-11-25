@@ -6,15 +6,15 @@
 import Stage from "./stage.js";
 import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
-import Play from "./play.js";
+import Play from "../item/play.js";
 import Status from "../tool/status.js";
 import Control from "../tool/control.js";
-import Button from "./button.js";
+import Button from "../item/button.js";
 import Sound from "../tool/sound.js";
-import Rect from "./rect.js";
+import Rect from "../item/rect.js";
 import Item from "../item/item.js";
-import Tank from "./tank.js";
-import Confirm from "./confirm.js";
+import Tank from "../item/tank.js";
+import Confirm from "../item/confirm.js";
 import Adapter from "../tool/adapter.js";
 
 export default class Room extends Stage {

@@ -3,7 +3,7 @@
  * @description
  * @date 2020/6/13
  */
-import Item from "../item/item.js";
+import Item from "./item.js";
 import Resource from "../tool/resource.js";
 
 export default class Rect extends Item {

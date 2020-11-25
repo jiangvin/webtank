@@ -8,7 +8,7 @@ import Engine from "./engine.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
-import Button from "../stage/button.js";
+import Button from "../item/button.js";
 import Connect from "../tool/connect.js";
 
 export default class NetEngine extends Engine {

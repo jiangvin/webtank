@@ -7,7 +7,7 @@
 import Stage from "./stage.js";
 import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
-import ControlUnit from "./controlunit.js";
+import ControlUnit from "../item/controlunit.js";
 
 export default class Menu extends Stage {
     constructor() {

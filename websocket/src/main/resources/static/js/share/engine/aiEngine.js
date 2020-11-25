@@ -7,7 +7,7 @@ import Engine from "./engine.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
-import Button from "../stage/button.js";
+import Button from "../item/button.js";
 import Sound from "../tool/sound.js";
 
 export default class AiEngine extends Engine {
