@@ -8,6 +8,7 @@ import Stage from "./stage.js";
 import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
 import ControlUnit from "../item/controlunit.js";
+import RoomInfo from "../item/roominfo.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -90,7 +91,7 @@ export default class Menu extends Stage {
                     if (doorStatus.indexDoor1 < 22) {
                         doorStatus.indexDoor1 += speed;
                     } else {
-                        Common.gotoStage("mission");
+                        Common.gotoStage("mission", new RoomInfo());
                     }
                 }
                 if (doorStatus.enterDoor2 && doorStatus.indexDoor2 < 22) {

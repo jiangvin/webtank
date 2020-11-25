@@ -101,6 +101,8 @@ export default class Resource {
             "mission/background",
             "jpg"
         );
+        this.loadImage("mission_easy","mission/easy");
+        this.loadImage("mission_hard","mission/hard");
     }
 
     loadAnimationImage(imageId, widthPics, type) {
