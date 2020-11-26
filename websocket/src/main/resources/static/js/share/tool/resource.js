@@ -101,8 +101,11 @@ export default class Resource {
             "mission/background",
             "jpg"
         );
-        this.loadImage("mission_easy","mission/easy");
-        this.loadImage("mission_hard","mission/hard");
+        this.loadImage("mission_easy", "mission/easy");
+        this.loadImage("mission_hard", "mission/hard");
+        this.loadImage("mission_map_rect", "mission/map_rect");
+        this.loadImage("mission_map_rect_selected", "mission/map_rect_selected");
+        this.loadImage("mission_map", "mission/map");
     }
 
     loadAnimationImage(imageId, widthPics, type) {

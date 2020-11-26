@@ -7,5 +7,6 @@
 export default class RoomInfo {
     constructor() {
         this.hardMode = false;
+        this.mapId = 1;
     }
 }
