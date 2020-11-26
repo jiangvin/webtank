@@ -20,8 +20,8 @@ export default class Mission extends Stage {
             draw: function (ctx) {
                 ctx.drawResourceCenter(
                     thisMission.roomInfo.hardMode ? "mission_hard" : "mission_easy",
-                    Resource.width() / 2, Resource.height() / 2,
-                    Resource.width(), Resource.height());
+                    Resource.width() / 2, Resource.height() * .54,
+                    Resource.width() * .92, Resource.height() * .84);
             }
         });
         this.initControlEvent();
