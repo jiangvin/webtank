@@ -18,7 +18,7 @@ export default class AppHome extends Stage {
         //logo
         this.createItem({
             draw: function (ctx) {
-                ctx.displayCenter("logo",
+                ctx.displayCenterRate("logo",
                     .5,
                     .4,
                     .6);
@@ -28,7 +28,7 @@ export default class AppHome extends Stage {
         //按钮
         this.createItem({
             draw: function (ctx) {
-                ctx.drawResourceCenter("button_enter",
+                ctx.displayCenter("button_enter",
                     Resource.width() / 2,
                     Resource.height() * .58 + 75,
                     350, 45);

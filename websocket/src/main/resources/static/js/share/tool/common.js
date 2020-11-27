@@ -152,7 +152,7 @@ export default class Common {
  * @param w 默认为图片本身宽度
  * @param h 默认为同比例的高度
  */
-CanvasRenderingContext2D.prototype.drawResourceCenter = function (imageId, x, y, w, h) {
+CanvasRenderingContext2D.prototype.displayCenter = function (imageId, x, y, w, h) {
     const img = Resource.getImage(imageId);
     if (!img) {
         return;
@@ -193,11 +193,12 @@ CanvasRenderingContext2D.prototype.drawResourceLeft = function (imageId, x, y, w
         x, y,
         w, h);
 };
-CanvasRenderingContext2D.prototype.displayCenter = function (imageId, rateX, rateY, rateW, rateH) {
-    this.displayRaw(imageId, rateX, rateY, rateW, rateH, "center");
+
+CanvasRenderingContext2D.prototype.displayCenterRate = function (imageId, rateX, rateY, rateW, rateH) {
+    this.displayRate(imageId, rateX, rateY, rateW, rateH, "center");
 };
 
-CanvasRenderingContext2D.prototype.displayRaw = function (imageId, rateX, rateY, rateW, rateH, align) {
+CanvasRenderingContext2D.prototype.displayRate = function (imageId, rateX, rateY, rateW, rateH, align) {
     const img = Resource.getImage(imageId);
     if (!img) {
         return;

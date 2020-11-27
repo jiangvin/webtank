@@ -18,7 +18,7 @@ export default class Mission extends Stage {
         const thisMission = this;
         this.createItem({
             draw: function (ctx) {
-                ctx.drawResourceCenter(
+                ctx.displayCenter(
                     thisMission.roomInfo.hardMode ? "mission_hard" : "mission_easy",
                     Resource.width() / 2, Resource.height() * .54,
                     Resource.width() * .92, Resource.height() * .84);

@@ -26,7 +26,7 @@ export default class Loading extends Stage {
         //logo
         this.createItem({
             draw: function (ctx) {
-                ctx.displayCenter("logo",
+                ctx.displayCenterRate("logo",
                     .5,
                     .45,
                     .55);

@@ -72,7 +72,7 @@ export default class Menu extends Stage {
                     bullet.x -= 10 * bullet.scale;
                     bullet.y -= 10 * bullet.scale;
                     const width = bulletWidth * bullet.scale;
-                    ctx.drawResourceCenter("menu_bullet", bullet.x, bullet.y, width);
+                    ctx.displayCenter("menu_bullet", bullet.x, bullet.y, width);
                     if (bullet.x <= -width) {
                         bulletMap.delete(bullet.id);
                     }

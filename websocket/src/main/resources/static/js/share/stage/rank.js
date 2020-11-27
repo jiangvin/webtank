@@ -42,7 +42,7 @@ export default class Rank extends Stage {
                 ctx.translate(Resource.width(), 0);
                 ctx.scale(-1, 1);
 
-                ctx.drawResourceCenter(
+                ctx.displayCenter(
                     thisRank.lastButtonStyle(),
                     Resource.width() * .565,
                     Resource.height() * .86,
@@ -76,7 +76,7 @@ export default class Rank extends Stage {
         //下一页按钮
         this.createItem({
             draw: function (ctx) {
-                ctx.drawResourceCenter(
+                ctx.displayCenter(
                     thisRank.nextButtonStyle(),
                     Resource.width() * .565,
                     Resource.height() * .86,
@@ -180,7 +180,7 @@ export default class Rank extends Stage {
 
     drawRankNumber(ctx, number, x, y) {
         if (number <= 3) {
-            ctx.drawResourceCenter("rank_" + number,
+            ctx.displayCenter("rank_" + number,
                 x,
                 y,
                 40)

@@ -53,7 +53,7 @@ export default class Stage {
     createFullScreenItem(imageId) {
         this.createItem({
             draw: function (ctx) {
-                ctx.displayCenter(imageId, 0.5, 0.5, 1);
+                ctx.displayCenterRate(imageId, 0.5, 0.5, 1);
             }
         });
     }
