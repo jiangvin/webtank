@@ -23,8 +23,8 @@ export default class Rank extends Stage {
         //返回按钮事件
         const buttonCloseRankBoard = new ControlUnit(
             Resource.generateClientId(),
-            {x: Resource.width() * .953, y: Resource.height() * .03},
-            {x: Resource.width() * .997, y: Resource.height() * .11},
+            {x: 915, y: 16},
+            {x: 958, y: 59},
             function () {
                 Common.lastStage();
             });
@@ -32,8 +32,8 @@ export default class Rank extends Stage {
 
         //按钮大小
         const buttonSize = {
-            w: Resource.width() * .1,
-            h: Resource.width() * .1 * 45 / 118
+            w: 96,
+            h: 36
         };
         //上一页按钮
         this.createItem({
@@ -44,8 +44,8 @@ export default class Rank extends Stage {
 
                 ctx.displayCenter(
                     thisRank.lastButtonStyle(),
-                    Resource.width() * .565,
-                    Resource.height() * .86,
+                    542,
+                    464,
                     buttonSize.w,
                     buttonSize.h);
 
@@ -55,12 +55,12 @@ export default class Rank extends Stage {
             controlUnit: new ControlUnit(
                 Resource.generateClientId(),
                 {
-                    x: Resource.width() * .435 - buttonSize.w / 2,
-                    y: Resource.height() * .86 - buttonSize.h / 2
+                    x: 418 - buttonSize.w / 2,
+                    y: 464 - buttonSize.h / 2
                 },
                 {
-                    x: Resource.width() * .435 + buttonSize.w / 2,
-                    y: Resource.height() * .86 + buttonSize.h / 2
+                    x: 418 + buttonSize.w / 2,
+                    y: 464 + buttonSize.h / 2
                 },
                 function () {
                     if (thisRank.rankStart <= 0) {
@@ -78,19 +78,20 @@ export default class Rank extends Stage {
             draw: function (ctx) {
                 ctx.displayCenter(
                     thisRank.nextButtonStyle(),
-                    Resource.width() * .565,
-                    Resource.height() * .86,
-                    Resource.width() * .1);
+                    542,
+                    464,
+                    buttonSize.w,
+                    buttonSize.h);
             },
             controlUnit: new ControlUnit(
                 Resource.generateClientId(),
                 {
-                    x: Resource.width() * .565 - buttonSize.w / 2,
-                    y: Resource.height() * .86 - buttonSize.h / 2
+                    x: 542 - buttonSize.w / 2,
+                    y: 464 - buttonSize.h / 2
                 },
                 {
-                    x: Resource.width() * .565 + buttonSize.w / 2,
-                    y: Resource.height() * .86 + buttonSize.h / 2
+                    x: 542 + buttonSize.w / 2,
+                    y: 464 + buttonSize.h / 2
                 },
                 function () {
                     if (thisRank.isRankEnd) {
@@ -130,10 +131,10 @@ export default class Rank extends Stage {
                 thisRank.createItem({
                     id: "rank_board_info",
                     draw: function (ctx) {
-                        const x = Resource.width() * .15;
-                        const y = Resource.height() * .31;
+                        const x = 144 + Resource.getOffset().x;
+                        const y = 167 + Resource.getOffset().y;
 
-                        const interval = Resource.height() * .106;
+                        const interval = 57;
 
                         ctx.font = '20px Helvetica';
                         ctx.textAlign = 'center';
@@ -149,12 +150,12 @@ export default class Rank extends Stage {
 
                             const data = dataList[i];
                             //name
-                            ctx.fillText(data.username, x + Resource.width() * .22, y + i * interval);
+                            ctx.fillText(data.username, x + 211, y + i * interval);
                             //score
-                            ctx.fillText(data.score, x + Resource.width() * .45, y + i * interval);
+                            ctx.fillText(data.score, x + 432, y + i * interval);
                             //mode
                             ctx.fillText(data.gameType === 0 ? "单人模式" : "联机模式",
-                                x + Resource.width() * .67,
+                                x + 643,
                                 y + i * interval);
                         }
                     }
@@ -180,10 +181,16 @@ export default class Rank extends Stage {
 
     drawRankNumber(ctx, number, x, y) {
         if (number <= 3) {
-            ctx.displayCenter("rank_" + number,
-                x,
-                y,
-                40)
+            const img = Resource.getImage("rank_" + number);
+            const w = 40;
+            const h = 37;
+            ctx.drawImage(
+                img,
+                0, 0,
+                img.width, img.height,
+                x - w / 2, y - h / 2,
+                w, h
+            );
         } else {
             ctx.fillText(number + "", x, y);
         }
