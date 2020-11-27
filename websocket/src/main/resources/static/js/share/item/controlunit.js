@@ -5,6 +5,7 @@
  */
 
 import Sound from "../tool/sound.js";
+import Resource from "../tool/resource.js";
 
 export default class ControlUnit {
     constructor(id, leftTop, rightBottom, callBack) {
@@ -15,10 +16,11 @@ export default class ControlUnit {
     }
 
     process(point) {
-        if (point.x >= this.leftTop.x &&
-            point.x <= this.rightBottom.x &&
-            point.y >= this.leftTop.y &&
-            point.y <= this.rightBottom.y) {
+        const offset = Resource.getOffset();
+        if (point.x >= this.leftTop.x + offset.x &&
+            point.x <= this.rightBottom.x + offset.x &&
+            point.y >= this.leftTop.y + offset.y &&
+            point.y <= this.rightBottom.y + offset.y) {
             Sound.click();
             this.callBack();
             return true;

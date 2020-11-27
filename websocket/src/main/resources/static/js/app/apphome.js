@@ -29,14 +29,14 @@ export default class AppHome extends Stage {
         this.createItem({
             draw: function (ctx) {
                 ctx.displayCenter("button_enter",
-                    Resource.width() / 2,
-                    Resource.height() * .58 + 75,
+                    Resource.displayW() / 2,
+                    Resource.displayH() * .58 + 75,
                     350, 45);
             },
             controlUnit: new ControlUnit(
                 Resource.generateClientId(),
-                {x: Resource.width() / 2 - 175, y: Resource.height() * .58 + 53},
-                {x: Resource.width() / 2 + 175, y: Resource.height() * .58 + 97},
+                {x: Resource.displayW() / 2 - 175, y: Resource.displayH() * .58 + 53},
+                {x: Resource.displayW() / 2 + 175, y: Resource.displayH() * .58 + 97},
                 function () {
                     //检测是否输入名字
                     const input = $('#input');
@@ -46,8 +46,7 @@ export default class AppHome extends Stage {
                         return;
                     }
 
-                    input.removeClass("input-name");
-                    input.css("visibility", "hidden");
+                    $('#main').empty();
                     Resource.setUserId(name);
                     Common.postRequest("/user/saveUser", {
                         userId: Resource.getUser().deviceId,
@@ -78,8 +77,11 @@ export default class AppHome extends Stage {
     }
 
     init() {
-        const input = $('#input');
-        input.addClass("input-name");
-        input.css("visibility", "visible");
+        this.input = $("<input/>");
+        this.input.attr("id", "input");
+        this.input.attr("type", "text");
+        this.input.attr("placeholder", "请输入名字");
+        this.input.addClass("input-name");
+        $("#main").append(this.input);
     }
 }

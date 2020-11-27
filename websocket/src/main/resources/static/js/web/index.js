@@ -157,6 +157,15 @@ export default class Index {
         }
         let wrapper = document.getElementById("wrapper");
         wrapper.style.cssText = style;
+
+        //标准窗口的位移偏移
+        let main = document.getElementById("main");
+        if (Resource.getOffset().x) {
+            main.style.cssText = "transform: translateX(" + Resource.getOffset().x + "px);"
+        } else {
+            main.style.cssText = "transform: translateY(" + Resource.getOffset().y + "px);"
+        }
+
         Control.setPortrait(height > width);
         //窗口变化时重新计算触控栏位置
         Control.generateTouchModeInfo();

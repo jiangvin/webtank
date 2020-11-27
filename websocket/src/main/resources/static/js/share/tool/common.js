@@ -144,33 +144,8 @@ export default class Common {
     }
 }
 
-/**
- * 居中显示资源里的图片(显示点为图片中心)
- * @param imageId
- * @param x
- * @param y
- * @param w 默认为图片本身宽度
- * @param h 默认为同比例的高度
- */
 CanvasRenderingContext2D.prototype.displayCenter = function (imageId, x, y, w, h) {
-    const img = Resource.getImage(imageId);
-    if (!img) {
-        return;
-    }
-
-    if (!w) {
-        w = img.width;
-    }
-
-    if (!h) {
-        h = w * img.height / img.width;
-    }
-
-    this.drawImage(img,
-        0, 0,
-        img.width, img.height,
-        x - w / 2, y - h / 2,
-        w, h);
+    this.displayBase(imageId, x, y, w, h, "center");
 };
 
 CanvasRenderingContext2D.prototype.drawResourceLeft = function (imageId, x, y, w, h) {
@@ -225,9 +200,21 @@ CanvasRenderingContext2D.prototype.displayRate = function (imageId, rateX, rateY
         }
         h = w * img.height / img.width;
     }
-    
-    let x = Resource.displayW() * rateX + Resource.getOffset().x;
-    let y = Resource.displayH() * rateY + Resource.getOffset().y;
+
+    const x = Resource.displayW() * rateX;
+    const y = Resource.displayH() * rateY;
+
+    this.displayBase(imageId, x, y, w, h, align);
+};
+
+CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, align) {
+    const img = Resource.getImage(imageId);
+    if (!img) {
+        return;
+    }
+
+    x = x + Resource.getOffset().x;
+    y = y + Resource.getOffset().y;
 
     switch (align) {
         case "center":

@@ -29,11 +29,12 @@ export default class Stage {
         if (!Resource.isDebug()) {
             return;
         }
+        const offset = Resource.getOffset();
         this.controlUnits.forEach(function (unit) {
             ctx.strokeStyle = '#F00';
             ctx.strokeRect(
-                unit.leftTop.x,
-                unit.leftTop.y,
+                unit.leftTop.x + offset.x,
+                unit.leftTop.y + offset.y,
                 unit.rightBottom.x - unit.leftTop.x,
                 unit.rightBottom.y - unit.leftTop.y);
         })

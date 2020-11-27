@@ -6,13 +6,18 @@
 html, body {
     height: 100%;
     width: 100%;
-    overflow:hidden;
+    overflow: hidden;
 }
 
 canvas {
     position: absolute;
     display: block;
     background: #000000;
+}
+
+div.rect-16to9 {
+    width: 960px;
+    height: 540px;
 }
 
 input {
@@ -25,36 +30,42 @@ input {
     text-align: center;
     border-radius: .25em;
 }
+
 input:focus {
     outline: none;
     color: #A2ACB3;
     border-color: #A2ACB3;
 }
+
 input.input-name-web {
     left: 33%;
     top: 70px;
     width: 34%;
 }
+
 input.input-name {
     border: 1px solid #33C6E9;
     font-size: 1.3em;
     padding: .3em;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.8);
     left: 50%;
     top: 58%;
     width: 330px;
     transform: translateX(-170px);
 }
+
 input.input-name:focus {
     outline: none;
     border-color: #33C6E9;
     color: #343434;
 }
+
 input.input-message {
     left: 15%;
     top: 70px;
     width: 70%;
 }
+
 input.input-room-name {
     position: relative;
     text-align: center;
@@ -71,7 +82,7 @@ select {
     color: #5e6c77;
     background: #ffffff;
     border: 2px solid #ffffff;
-    outline:none;
+    outline: none;
     top: -0.5em;
 }
 
@@ -91,25 +102,30 @@ button {
     color: #5e6c77;
     background: #ffffff;
     border: 2px solid #ffffff;
-    outline:none;
+    outline: none;
 }
+
 button:hover {
     color: #ffffff;
     background: #5e6c77;
     border: 2px solid #5E6C77;
 }
+
 button:active {
     border: 2px solid #2b2b2b;
 }
+
 button.connect {
     width: 26%;
     height: 4em;
     position: absolute;
     left: 37%;
 }
+
 button.action {
     width: 8em;
 }
+
 button.right {
     float: right;
 }
@@ -127,10 +143,12 @@ div.select-window {
     padding: .5em;
     margin: 0.5rem;
 }
+
 .select-item input[type="radio"] {
     position: absolute;
     opacity: 0;
 }
+
 .select-item input[type="radio"] + .radio-label:before {
     content: '';
     background: #f4f4f4;
@@ -149,22 +167,27 @@ div.select-window {
     -webkit-transition: all 250ms ease;
     transition: all 250ms ease;
 }
+
 .select-item input[type="radio"]:checked + .radio-label:before {
     background-color: #ee5752;
     box-shadow: inset 0 0 0 4px #f4f4f4;
 }
+
 .select-item input[type="radio"]:focus + .radio-label:before {
     outline: none;
     border-color: #ee5752;
 }
+
 .select-item input[type="radio"]:disabled + .radio-label:before {
     box-shadow: inset 0 0 0 4px #f4f4f4;
     border-color: #b4b4b4;
     background: #b4b4b4;
 }
+
 .select-item input[type="radio"] + .radio-label:empty:before {
     margin-right: 0;
 }
+
 .radio-label {
     margin-right: 1%;
     color: #ffffff;
