@@ -19,7 +19,7 @@ export default class User {
         this.tankType = "tank01";
         this.tankTypeExpired = null;
 
-        this.stage = 0;
+        this.stage = 1;
         this.hardStage = 0;
         this.rank = 0;
     }
