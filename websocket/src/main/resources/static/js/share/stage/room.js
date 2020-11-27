@@ -32,7 +32,6 @@ export default class Room extends Stage {
         this.backgroundImage = Resource.getOrCreateImage("background", "jpg");
 
         this.mask = true;
-        this.maskImage = Resource.getOrCreateImage("background_loading", "jpg");
         this.maskStartTime = 0;
         this.minMaskTime = 3000;
 
@@ -52,6 +51,10 @@ export default class Room extends Stage {
             x: 0,
             y: 0
         };
+
+        //加载字体
+        const myFont = new FontFace('gameTitle','url(../../../font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
+        myFont.load().then(font => {document.fonts.add(font)});
     }
 
     init(roomInfo) {
@@ -96,6 +99,9 @@ export default class Room extends Stage {
             return "RED vs BLUE";
         }
 
+        if (!this.roomInfo.isNet) {
+            return "单人模式 " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
+        }
         return "MISSION " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
     }
 
@@ -228,16 +234,18 @@ export default class Room extends Stage {
             return;
         }
 
-        ctx.drawImage(this.maskImage,
-            0, 0,
-            this.maskImage.width, this.maskImage.height,
-            0, 0,
-            Resource.width(), Resource.height());
+        ctx.fillStyle = '#01A7EC';
+        ctx.fillRect(0, 0, Resource.width(), Resource.height());
+
+        ctx.fillStyle = '#22b2ee';
+        ctx.fillRect(0, Resource.height() * .32,
+            Resource.width(),
+            Resource.height() * .25);
     }
 
     drawStatus(ctx) {
         if (Status.getMessage()) {
-            ctx.font = 'bold 55px Microsoft YaHei UI';
+            ctx.font = '50px gameTitle';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = '#FFF';

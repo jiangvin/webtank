@@ -75,7 +75,6 @@ export default class Resource {
         this.loadAnimationImage("blue_king", 2);
 
         //menu
-        this.loadAnimationImage("background_loading", 1, "jpg");
         this.loadAnimationImage("button", 1);
         this.loadAnimationImage("button_disabled", 1);
     }

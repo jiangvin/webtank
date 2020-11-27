@@ -9,6 +9,11 @@ html, body {
     overflow: hidden;
 }
 
+@font-face {
+    font-family: "gameTitle";
+    src: url('../font/RuiZiZhenYanTiMianFeiShangYong-2.ttf')
+}
+
 canvas {
     position: absolute;
     display: block;
