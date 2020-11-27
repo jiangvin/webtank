@@ -5,7 +5,6 @@
  */
 
 import Stage from "./stage.js";
-import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
 
 export default class Mission extends Stage {
@@ -18,10 +17,10 @@ export default class Mission extends Stage {
         const thisMission = this;
         this.createItem({
             draw: function (ctx) {
-                ctx.displayCenter(
+                ctx.displayCenterRate(
                     thisMission.roomInfo.hardMode ? "mission_hard" : "mission_easy",
-                    Resource.width() / 2, Resource.height() * .54,
-                    Resource.width() * .92, Resource.height() * .84);
+                    .5, .54,
+                    .92, .84);
             }
         });
 
@@ -34,10 +33,10 @@ export default class Mission extends Stage {
         const mapMaxId = 4;
         const thisMission = this;
         const rectSelected = {
-            w: Resource.width() * .2,
-            h: Resource.height() * .12,
-            x: Resource.width() * .043,
-            y: Resource.height() * .25,
+            w: 192,
+            h: 64,
+            x: 41,
+            y: 135,
         };
         const rect = {
             w: rectSelected.w * .85,
@@ -59,13 +58,13 @@ export default class Mission extends Stage {
                 for (let i = 0; i < mapMaxId; ++i) {
                     //选择框
                     if (i === thisMission.roomInfo.mapId - 1) {
-                        ctx.drawResourceLeft("mission_map_rect_selected",
+                        ctx.displayTopLeft("mission_map_rect_selected",
                             rectSelected.x,
                             rectSelected.y + i * (rectSelected.h * 1.1),
                             rectSelected.w,
                             rectSelected.h)
                     } else {
-                        ctx.drawResourceLeft("mission_map_rect",
+                        ctx.displayTopLeft("mission_map_rect",
                             rect.x,
                             rect.y + i * (rectSelected.h * 1.1),
                             rect.w,
@@ -73,7 +72,7 @@ export default class Mission extends Stage {
                     }
 
                     //底图
-                    ctx.drawResourceLeft("mission_map",
+                    ctx.displayTopLeft("mission_map",
                         map.x,
                         map.y + i * (rectSelected.h * 1.1),
                         map.w,
@@ -86,8 +85,8 @@ export default class Mission extends Stage {
         for (let i = 0; i < mapMaxId; ++i) {
             this.createControl({
                 leftTop: {
-                    x: Resource.width() * .043 + (rectSelected.w - rect.w),
-                    y: Resource.height() * .25 + i * (rectSelected.h * 1.1)
+                    x: 41 + (rectSelected.w - rect.w),
+                    y: 135 + i * (rectSelected.h * 1.1)
                 },
                 size: rect,
                 callBack: function () {
@@ -101,12 +100,12 @@ export default class Mission extends Stage {
         const thisMission = this;
         this.createControl({
             leftTop: {
-                x: Resource.width() * .93,
-                y: Resource.height() * .03
+                x: 892,
+                y: 16
             },
             size: {
-                w: Resource.width() * .045,
-                h: Resource.height() * .09
+                w: 43,
+                h: 48
             },
             callBack: function () {
                 Common.gotoStage("menu");
@@ -115,12 +114,12 @@ export default class Mission extends Stage {
 
         this.createControl({
             leftTop: {
-                x: Resource.width() * .05,
-                y: Resource.height() * .13
+                x: 48,
+                y: 70
             },
             size: {
-                w: Resource.width() * .1,
-                h: Resource.height() * .046
+                w: 96,
+                h: 25
             },
             callBack: function () {
                 thisMission.roomInfo.hardMode = false;
@@ -128,12 +127,12 @@ export default class Mission extends Stage {
         });
         this.createControl({
             leftTop: {
-                x: Resource.width() * .175,
-                y: Resource.height() * .13
+                x: 168,
+                y: 70
             },
             size: {
-                w: Resource.width() * .1,
-                h: Resource.height() * .046
+                w: 96,
+                h: 25
             },
             callBack: function () {
                 thisMission.roomInfo.hardMode = true;

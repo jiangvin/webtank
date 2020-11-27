@@ -152,27 +152,6 @@ CanvasRenderingContext2D.prototype.displayTopLeft = function (imageId, x, y, w, 
     this.displayBase(imageId, x, y, w, h, "topLeft");
 };
 
-CanvasRenderingContext2D.prototype.drawResourceLeft = function (imageId, x, y, w, h) {
-    const img = Resource.getImage(imageId);
-    if (!img) {
-        return;
-    }
-
-    if (!w) {
-        w = img.width;
-    }
-
-    if (!h) {
-        h = w * img.height / img.width;
-    }
-
-    this.drawImage(img,
-        0, 0,
-        img.width, img.height,
-        x, y,
-        w, h);
-};
-
 CanvasRenderingContext2D.prototype.displayCenterRate = function (imageId, rateX, rateY, rateW, rateH) {
     this.displayRate(imageId, rateX, rateY, rateW, rateH, "center");
 };
