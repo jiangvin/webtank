@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class User extends TableImpl<UserRecord> {
 
-    private static final long serialVersionUID = -2079440026;
+    private static final long serialVersionUID = 1259230238;
 
     /**
      * The reference instance of <code>user</code>
@@ -124,7 +124,12 @@ public class User extends TableImpl<UserRecord> {
     /**
      * The column <code>user.stage</code>.
      */
-    public final TableField<UserRecord, Integer> STAGE = createField("stage", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+    public final TableField<UserRecord, Integer> STAGE = createField("stage", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("1", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>user.hard_stage</code>.
+     */
+    public final TableField<UserRecord, Integer> HARD_STAGE = createField("hard_stage", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * Create a <code>user</code> table reference

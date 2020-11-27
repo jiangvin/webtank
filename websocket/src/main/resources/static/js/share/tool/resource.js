@@ -106,6 +106,7 @@ export default class Resource {
         this.loadImage("mission_map_rect", "mission/map_rect");
         this.loadImage("mission_map_rect_selected", "mission/map_rect_selected");
         this.loadImage("mission_map", "mission/map");
+        this.loadImage("mission_map_disable", "mission/map_disable");
     }
 
     loadAnimationImage(imageId, widthPics, type) {

@@ -20,6 +20,7 @@ export default class User {
         this.tankTypeExpired = null;
 
         this.stage = 0;
+        this.hardStage = 0;
         this.rank = 0;
     }
 
@@ -32,6 +33,7 @@ export default class User {
         this.tankType = data.tankType;
         this.tankTypeExpired = data.tankTypeExpired;
         this.stage = data.stage;
+        this.hardStage = data.hardStage;
 
         //更新排名和积分
         if (data.rank) {

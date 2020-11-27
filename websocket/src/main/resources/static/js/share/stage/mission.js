@@ -6,6 +6,7 @@
 
 import Stage from "./stage.js";
 import Common from "../tool/common.js";
+import Resource from "../tool/resource.js";
 
 export default class Mission extends Stage {
     constructor() {
@@ -72,7 +73,7 @@ export default class Mission extends Stage {
                     }
 
                     //底图
-                    ctx.displayTopLeft("mission_map",
+                    ctx.displayTopLeft(thisMission.getMapImage(i),
                         map.x,
                         map.y + i * (rectSelected.h * 1.1),
                         map.w,
@@ -90,10 +91,26 @@ export default class Mission extends Stage {
                 },
                 size: rect,
                 callBack: function () {
+                    if (thisMission.hasLock(i)) {
+                        return;
+                    }
                     thisMission.roomInfo.mapId = i + 1;
                 }
             })
         }
+    }
+
+    getMapImage(mapIndex) {
+        if (!this.hasLock(mapIndex)) {
+            return "mission_map";
+        } else {
+            return "mission_map_disable";
+        }
+    }
+
+    hasLock(mapIndex) {
+        const userMapIndex = this.roomInfo.hardMode ? Resource.getUser().hardStage : Resource.getUser().stage;
+        return userMapIndex <= mapIndex;
     }
 
     initControlEvent() {
@@ -123,6 +140,7 @@ export default class Mission extends Stage {
             },
             callBack: function () {
                 thisMission.roomInfo.hardMode = false;
+                thisMission.roomInfo.mapId = 1;
             }
         });
         this.createControl({
@@ -136,6 +154,11 @@ export default class Mission extends Stage {
             },
             callBack: function () {
                 thisMission.roomInfo.hardMode = true;
+                if (thisMission.hasLock(0)) {
+                    thisMission.roomInfo.mapId = 0;
+                } else {
+                    thisMission.roomInfo.mapId = 1;
+                }
             }
         });
     }

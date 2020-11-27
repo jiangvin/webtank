@@ -1,0 +1,10 @@
+ALTER TABLE user
+CHANGE COLUMN `stage` `stage` INT(11) NOT NULL DEFAULT 1 ;
+
+ALTER TABLE user
+ADD COLUMN `hard_stage` INT(11) NOT NULL DEFAULT 0 AFTER `stage`;
+
+set SQL_SAFE_UPDATES = 0;
+update user set stage = stage + 1;
+update user set hard_stage = 1 where stage > 1;
+set SQL_SAFE_UPDATES = 1;
