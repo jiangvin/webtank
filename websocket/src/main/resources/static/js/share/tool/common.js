@@ -196,6 +196,14 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
         return;
     }
 
+    if (!w) {
+        //未加载完毕的情况
+        if (!img.width) {
+            return;
+        }
+        w = img.width;
+    }
+
     if (!h) {
         //未加载完毕的情况
         if (!img.width || !img.height) {

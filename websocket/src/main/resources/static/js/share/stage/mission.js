@@ -53,9 +53,15 @@ export default class Mission extends Stage {
         map.x = rect.x + (rect.w - map.w) / 2;
         map.y = rect.y + (rect.h - map.h) / 2;
 
+        const text = ["第一关", "第二关", "第三关", "第四关"];
 
         this.createItem({
             draw: function (ctx) {
+                ctx.font = 'bold 16px HanSans';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#FFF';
+
                 for (let i = 0; i < mapMaxId; ++i) {
                     //选择框
                     if (i === thisMission.roomInfo.mapId - 1) {
@@ -77,7 +83,17 @@ export default class Mission extends Stage {
                         map.x,
                         map.y + i * (rectSelected.h * 1.1),
                         map.w,
-                        map.h)
+                        map.h);
+
+                    if (thisMission.hasLock(i)) {
+                        ctx.displayCenter("mission_lock",
+                            167, 167 + i * (rectSelected.h * 1.1), 22);
+                    }
+
+                    //文字
+                    ctx.fillText(text[i],
+                        100 + Resource.getOffset().x,
+                        170 + Resource.getOffset().y + i * (rectSelected.h * 1.1));
                 }
             }
         });
