@@ -148,6 +148,10 @@ CanvasRenderingContext2D.prototype.displayCenter = function (imageId, x, y, w, h
     this.displayBase(imageId, x, y, w, h, "center");
 };
 
+CanvasRenderingContext2D.prototype.displayTopLeft = function (imageId, x, y, w, h) {
+    this.displayBase(imageId, x, y, w, h, "topLeft");
+};
+
 CanvasRenderingContext2D.prototype.drawResourceLeft = function (imageId, x, y, w, h) {
     const img = Resource.getImage(imageId);
     if (!img) {
@@ -211,6 +215,14 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
     const img = Resource.getImage(imageId);
     if (!img) {
         return;
+    }
+
+    if (!h) {
+        //未加载完毕的情况
+        if (!img.width || !img.height) {
+            return;
+        }
+        h = w * img.height / img.width;
     }
 
     //全屏模式的优化处理
