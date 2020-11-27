@@ -132,8 +132,8 @@ export default class Index {
         const height = document.documentElement.clientHeight;
         const scale = Resource.calculateScale(width, height);
 
-        const newWidth = width / scale;
-        const newHeight = height / scale;
+        const newWidth = Math.round(width / scale);
+        const newHeight = Math.round(height / scale);
         let style = "";
         //变形的中心点为左上角
         style += "-webkit-transform-origin: 0 0;";

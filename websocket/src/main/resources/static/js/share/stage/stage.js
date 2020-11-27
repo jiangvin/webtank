@@ -51,19 +51,9 @@ export default class Stage {
     }
 
     createFullScreenItem(imageId) {
-        const image = Resource.getImage(imageId);
-        if (!image) {
-            return;
-        }
-
         this.createItem({
             draw: function (ctx) {
-                ctx.drawImage(
-                    image,
-                    0, 0,
-                    image.width, image.height,
-                    0, 0,
-                    Resource.width(), Resource.height());
+                ctx.displayCenter(imageId, 0.5, 0.5, 1);
             }
         });
     }

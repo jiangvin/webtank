@@ -155,10 +155,6 @@ export default class Resource {
         return Resource.instance.root;
     }
 
-    static getScale() {
-        return Resource.instance.scale;
-    }
-
     static setHost(host) {
         Resource.instance.host = host;
     }
@@ -181,11 +177,39 @@ export default class Resource {
             width = d2;
             height = d1;
         }
-        let scaleX = width / 800;
-        let scaleY = height / 500;
+        let scaleX = width / Resource.displayW();
+        let scaleY = height / Resource.displayH();
         Resource.instance.scale = scaleX > scaleY ? scaleY : scaleX;
-        Resource.instance.scale = Resource.instance.scale < 1 ? Resource.instance.scale : 1;
+
+        Resource.instance.offset = {
+            x: Math.floor((width / Resource.getScale() - Resource.displayW()) / 2),
+            y: Math.floor((height / Resource.getScale() - Resource.displayH()) / 2)
+        };
         return Resource.instance.scale;
+    }
+
+    static getScale() {
+        return Resource.instance.scale;
+    }
+
+    static getOffset() {
+        return Resource.instance.offset;
+    }
+
+    static displayW() {
+        return 960;
+    }
+
+    static displayH() {
+        return 540;
+    }
+
+    static width() {
+        return Resource.instance.canvas.width;
+    }
+
+    static height() {
+        return Resource.instance.canvas.height;
     }
 
     static setCanvas(canvas) {
@@ -202,14 +226,6 @@ export default class Resource {
 
     static getUser() {
         return Resource.instance.user;
-    }
-
-    static width() {
-        return Resource.instance.canvas.width;
-    }
-
-    static height() {
-        return Resource.instance.canvas.height;
     }
 
     static getImage(id) {

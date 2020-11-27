@@ -13,25 +13,15 @@ export default class AppHome extends Stage {
     constructor() {
         super();
 
-        //背景
-        const bgImage = Resource.getImage("login");
-        this.createItem({
-            draw: function (ctx) {
-                ctx.drawImage(bgImage,
-                    0, 0,
-                    bgImage.width, bgImage.height,
-                    0, 0,
-                    Resource.width(), Resource.height());
-            }
-        });
+        this.createFullScreenItem("login");
 
         //logo
         this.createItem({
             draw: function (ctx) {
-                ctx.drawResourceCenter("logo",
-                    Resource.width() / 2,
-                    Resource.height() * .4,
-                    Resource.width() * .6);
+                ctx.displayCenter("logo",
+                    .5,
+                    .4,
+                    .6);
             }
         });
 

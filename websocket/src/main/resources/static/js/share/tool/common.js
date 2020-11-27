@@ -193,6 +193,54 @@ CanvasRenderingContext2D.prototype.drawResourceLeft = function (imageId, x, y, w
         x, y,
         w, h);
 };
+CanvasRenderingContext2D.prototype.displayCenter = function (imageId, rateX, rateY, rateW, rateH) {
+    this.displayRaw(imageId, rateX, rateY, rateW, rateH, "center");
+};
+
+CanvasRenderingContext2D.prototype.displayRaw = function (imageId, rateX, rateY, rateW, rateH, align) {
+    const img = Resource.getImage(imageId);
+    if (!img) {
+        return;
+    }
+
+    let w;
+    if (rateW) {
+        w = Resource.displayW() * rateW;
+    } else {
+        //未加载完毕的情况
+        if (!img.width) {
+            return;
+        }
+        w = img.width;
+    }
+
+    let h;
+    if (rateH) {
+        h = Resource.displayH() * rateH;
+    } else {
+        //未加载完毕的情况
+        if (!img.width || !img.height) {
+            return;
+        }
+        h = w * img.height / img.width;
+    }
+    
+    let x = Resource.displayW() * rateX + Resource.getOffset().x;
+    let y = Resource.displayH() * rateY + Resource.getOffset().y;
+
+    switch (align) {
+        case "center":
+            x = x - w / 2;
+            y = y - h / 2;
+            break;
+    }
+
+    this.drawImage(img,
+        0, 0,
+        img.width, img.height,
+        x, y,
+        w, h);
+};
 
 Date.prototype.format = function (fmt) {
     const o = {

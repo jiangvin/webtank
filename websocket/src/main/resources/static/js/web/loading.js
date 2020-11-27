@@ -26,17 +26,21 @@ export default class Loading extends Stage {
         //logo
         this.createItem({
             draw: function (ctx) {
-                ctx.drawResourceCenter("logo",
-                    Resource.width() / 2,
-                    Resource.height() * .45,
-                    Resource.width() * .55);
+                ctx.displayCenter("logo",
+                    .5,
+                    .45,
+                    .55);
             }
         });
 
         this.createItem({
             draw: function (ctx) {
-                const width = Resource.width() * .4;
+                const width = Resource.displayW() * .4;
                 const height = 25;
+                const pos = {
+                    x: Resource.displayW() * .5 - width / 2 + Resource.getOffset().x,
+                    y: Resource.displayH() * .63 + Resource.getOffset().y
+                };
 
                 const fillRoundRect = function (ctx, x, y, width, height) {
                     const radio = height / 2;
@@ -54,16 +58,16 @@ export default class Loading extends Stage {
                 //进度条背景
                 ctx.fillStyle = '#FFF';
                 fillRoundRect(ctx,
-                    Resource.width() * .5 - width / 2,
-                    Resource.height() * .63,
+                    pos.x,
+                    pos.y,
                     width,
                     height);
 
                 //进度条
                 ctx.fillStyle = '#028EE7';
                 fillRoundRect(ctx,
-                    Resource.width() * .5 - width / 2,
-                    Resource.height() * .63,
+                    pos.x,
+                    pos.y,
                     width * (thisLoading.percent / 100.0),
                     height);
 
@@ -73,8 +77,8 @@ export default class Loading extends Stage {
                 ctx.textBaseline = 'top';
                 ctx.fillStyle = '#FFF';
                 ctx.fillText('资源已加载' + thisLoading.percent + '%',
-                    Resource.width() / 2,
-                    Resource.height() * .63 + 22);
+                    pos.x + width / 2,
+                    pos.y + 22);
 
             }
         });
