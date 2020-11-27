@@ -213,8 +213,15 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
         return;
     }
 
-    x = x + Resource.getOffset().x;
-    y = y + Resource.getOffset().y;
+    //全屏模式的优化处理
+    if (Math.abs(Resource.width() - w) < 2 &&
+        Math.abs(Resource.height() - h) < 2) {
+        w = Resource.width();
+        h = Resource.height();
+    } else {
+        x = x + Resource.getOffset().x;
+        y = y + Resource.getOffset().y;
+    }
 
     switch (align) {
         case "center":
