@@ -133,6 +133,26 @@ export default class Mission extends Stage {
         const thisMission = this;
         this.createControl({
             leftTop: {
+                x: 743,
+                y: 452
+            },
+            size: {
+                w: 120,
+                h: 35
+            },
+            callBack: function () {
+                //困难模式未解锁的情况
+                if (thisMission.roomInfo.mapId < 1) {
+                    return;
+                }
+
+                Common.nextStage(thisMission.roomInfo);
+                Resource.getRoot().addEngine(thisMission.roomInfo.isNet);
+            }
+        });
+
+        this.createControl({
+            leftTop: {
                 x: 892,
                 y: 16
             },
