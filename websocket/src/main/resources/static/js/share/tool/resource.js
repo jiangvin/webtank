@@ -33,6 +33,9 @@ export default class Resource {
         //mission
         this.loadMissionResource();
 
+        //room
+        this.loadRoomResource();
+
         //rank board
         this.loadAnimationImage("rank_board", 1, "jpg");
         this.loadAnimationImage("button_next");
@@ -107,6 +110,13 @@ export default class Resource {
         this.loadImage("mission_map", "mission/map");
         this.loadImage("mission_map_disable", "mission/map_disable");
         this.loadImage("mission_lock", "mission/lock");
+    }
+
+    loadRoomResource() {
+        this.loadImage("player_life", "room/player_life");
+        this.loadImage("enemy_life", "room/enemy_life");
+        this.loadImage("room_easy", "room/easy");
+        this.loadImage("room_hard", "room/hard");
     }
 
     loadAnimationImage(imageId, widthPics, type) {

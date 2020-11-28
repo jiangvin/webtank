@@ -53,8 +53,10 @@ export default class Room extends Stage {
         };
 
         //加载字体
-        const myFont = new FontFace('gameTitle','url(../../../font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
-        myFont.load().then(font => {document.fonts.add(font)});
+        const myFont = new FontFace('gameTitle', 'url(../../../font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
+        myFont.load().then(font => {
+            document.fonts.add(font)
+        });
     }
 
     init(roomInfo) {
@@ -64,6 +66,7 @@ export default class Room extends Stage {
         Status.setStatus(Status.statusPause(), this.generateMaskInfo());
         Sound.bgm();
 
+        //TODO 输入框相关，后期优化
         Adapter.instance.inputEnable = true;
     }
 
@@ -77,6 +80,10 @@ export default class Room extends Stage {
     showMask() {
         this.maskStartTime = new Date().getTime();
         this.mask = true;
+
+        //初始化玩家/敌方生命，为开头显示生命信息做准备
+        this.maskPlayerLife = null;
+        this.maskEnemyLife = null;
     }
 
     hideMask() {
@@ -234,13 +241,58 @@ export default class Room extends Stage {
             return;
         }
 
+        //绘制背景
         ctx.fillStyle = '#01A7EC';
         ctx.fillRect(0, 0, Resource.width(), Resource.height());
-
         ctx.fillStyle = '#22b2ee';
         ctx.fillRect(0, Resource.height() * .32,
             Resource.width(),
-            Resource.height() * .25);
+            135);
+
+        //显示难度
+        const img = Resource.getImage(this.roomInfo.hardMode ? "room_hard" : "room_easy");
+        ctx.drawImage(img,
+            0, 0,
+            img.width, img.height,
+            Resource.width() * .85, 0,
+            img.width, img.height);
+
+        //绘制生命
+        if (!this.maskPlayerLife || !this.maskEnemyLife) {
+            if (!this.roomInfo.playerLife || !this.roomInfo.computerLife) {
+                //还未加载完毕，不显示生命
+                return;
+            } else {
+                //赋值，防止后面做变更
+                this.maskPlayerLife = this.roomInfo.playerLife;
+                this.maskEnemyLife = this.roomInfo.computerLife;
+            }
+        }
+
+        ctx.font = '22px gameTitle';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#FFF';
+
+        const playerLife = Resource.getImage("player_life");
+        ctx.drawImage(playerLife,
+            0, 0,
+            playerLife.width, playerLife.height,
+            Resource.width() / 2 - 100, Resource.height() * .32 + 85,
+            50, 50);
+        ctx.fillText("x" + this.maskPlayerLife,
+            Resource.width() / 2 - 45,
+            Resource.height() * .32 + 108);
+
+        const enemyLife = Resource.getImage("enemy_life");
+        ctx.drawImage(enemyLife,
+            0, 0,
+            enemyLife.width, enemyLife.height,
+            Resource.width() / 2 + 10, Resource.height() * .32 + 85,
+            50, 50);
+        ctx.fillText("x" + this.maskEnemyLife,
+            Resource.width() / 2 + 65,
+            Resource.height() * .32 + 108);
     }
 
     drawStatus(ctx) {
