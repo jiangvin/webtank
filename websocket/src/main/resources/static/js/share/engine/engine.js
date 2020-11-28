@@ -15,8 +15,7 @@ export default class Engine {
 
         //连接超时调用
         this.addConnectTimeoutEvent(function () {
-            Common.lastStage();
-            Resource.getRoot().currentStage().initMenu();
+            Common.gotoStage("menu");
         });
     }
 
