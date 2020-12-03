@@ -29,8 +29,6 @@ export default class Room extends Stage {
         this.size = {};
         this.view = {x: 0, y: 0, center: null};
 
-        this.backgroundImage = Resource.getOrCreateImage("background", "jpg");
-
         this.mask = true;
         this.maskStartTime = 0;
         this.minMaskTime = 3000;
@@ -72,9 +70,15 @@ export default class Room extends Stage {
 
     clear() {
         this.showMask();
+        this.reloadBackground();
         this.items.clear();
         this.controlUnits.clear();
         this.view.center = null;
+    }
+
+    reloadBackground() {
+        const imageId = "room_background_" + (Math.round(Math.random()) + 1);
+        this.backgroundImage = Resource.getImage(imageId);
     }
 
     showMask() {
@@ -448,6 +452,12 @@ export default class Room extends Stage {
     calculateBackgroundRepeat() {
         this.backgroundImage.repeatX = Math.round(this.size.width / this.backgroundImage.width);
         this.backgroundImage.repeatY = Math.round(this.size.height / this.backgroundImage.height);
+        if (this.backgroundImage.repeatX === 0) {
+            this.backgroundImage.repeatX = 1;
+        }
+        if (this.backgroundImage.repeatY === 0) {
+            this.backgroundImage.repeatY = 1;
+        }
 
         this.backgroundImage.sizeX = this.size.width / this.backgroundImage.repeatX;
         this.backgroundImage.sizeY = this.size.height / this.backgroundImage.repeatY;
@@ -486,7 +496,6 @@ export default class Room extends Stage {
                 break;
             case "MAP":
                 this.loadMap(messageDto.message);
-                this.sortItems();
                 break;
             case "REMOVE_MAP":
                 this.itemBomb({id: messageDto.message});
