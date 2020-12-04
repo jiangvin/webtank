@@ -377,7 +377,7 @@ export default class Room extends Stage {
         if (data.width && data.height) {
             this.mapSize = {
                 width: data.width,
-                height: data.width
+                height: data.height
             };
             this.size.width = data.width * Resource.getRoomScale();
             this.size.height = data.height * Resource.getRoomScale();
