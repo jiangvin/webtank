@@ -251,7 +251,7 @@ export default class Room extends Stage {
         ctx.fillStyle = '#22b2ee';
         ctx.fillRect(0, Resource.height() * .32,
             Resource.width(),
-            135);
+            270);
 
         //显示难度
         const img = Resource.getImage(this.roomInfo.hardMode ? "room_hard" : "room_easy");
@@ -259,7 +259,7 @@ export default class Room extends Stage {
             0, 0,
             img.width, img.height,
             Resource.width() * .85, 0,
-            img.width, img.height);
+            img.width * 2, img.height * 2);
 
         //绘制生命
         if (!this.maskPlayerLife || !this.maskEnemyLife) {
@@ -273,7 +273,7 @@ export default class Room extends Stage {
             }
         }
 
-        ctx.font = '22px gameTitle';
+        ctx.font = '44px gameTitle';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
@@ -282,26 +282,26 @@ export default class Room extends Stage {
         ctx.drawImage(playerLife,
             0, 0,
             playerLife.width, playerLife.height,
-            Resource.width() / 2 - 100, Resource.height() * .32 + 85,
-            50, 50);
+            Resource.width() / 2 - 200, Resource.height() * .32 + 170,
+            100, 100);
         ctx.fillText("x" + this.maskPlayerLife,
-            Resource.width() / 2 - 45,
-            Resource.height() * .32 + 108);
+            Resource.width() / 2 - 90,
+            Resource.height() * .32 + 216);
 
         const enemyLife = Resource.getImage("enemy_life");
         ctx.drawImage(enemyLife,
             0, 0,
             enemyLife.width, enemyLife.height,
-            Resource.width() / 2 + 10, Resource.height() * .32 + 85,
-            50, 50);
+            Resource.width() / 2 + 20, Resource.height() * .32 + 170,
+            100, 100);
         ctx.fillText("x" + this.maskEnemyLife,
-            Resource.width() / 2 + 65,
-            Resource.height() * .32 + 108);
+            Resource.width() / 2 + 130,
+            Resource.height() * .32 + 216);
     }
 
     drawStatus(ctx) {
         if (Status.getMessage()) {
-            ctx.font = '50px gameTitle';
+            ctx.font = '100px gameTitle';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = '#FFF';
