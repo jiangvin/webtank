@@ -913,7 +913,7 @@ export default class Room extends Stage {
                 return;
             }
             const imageId = "item_" + itemData.typeId.toLowerCase();
-            const gameItem = thisRoom.createItem({
+            const gameItem = thisRoom.createMapItem({
                 id: itemData.id,
                 x: itemData.x,
                 y: itemData.y,
