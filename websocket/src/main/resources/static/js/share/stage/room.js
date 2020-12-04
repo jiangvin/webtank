@@ -181,6 +181,16 @@ export default class Room extends Stage {
     }
 
     drawBackground(ctx) {
+        //背景图
+        const img = Resource.getImage("room_background");
+        ctx.drawImage(
+            img,
+            0, 0,
+            img.width, img.height,
+            0, 0,
+            Resource.width(), Resource.height()
+        );
+
         if (!this.size.width || !this.size.height || !this.backgroundImage) {
             return;
         }

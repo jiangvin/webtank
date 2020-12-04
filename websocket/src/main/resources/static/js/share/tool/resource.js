@@ -118,6 +118,7 @@ export default class Resource {
         this.loadImage("room_easy", "room/easy");
         this.loadImage("room_hard", "room/hard");
 
+        this.loadImage("room_background", "room/background/0");
         this.loadImage("room_background_1", "room/background/1", "jpg");
         this.loadImage("room_background_2", "room/background/2", "jpg");
     }
