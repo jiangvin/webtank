@@ -125,7 +125,7 @@ export default class Engine {
             return;
         }
 
-        const speed = 5.0;
+        const speed = 10.0;
         switch (event) {
             case "Up":
                 if (this.room.size.height > Common.height()) {
@@ -313,7 +313,7 @@ export default class Engine {
     };
 
     isBarrier(stage, point, ghost) {
-        if (point.x < 0 || point.y < 0 || point.x > stage.size.width || point.y > stage.size.height) {
+        if (point.x < 0 || point.y < 0 || point.x > stage.mapSize.width || point.y > stage.mapSize.height) {
             return true;
         }
 

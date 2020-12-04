@@ -8,7 +8,7 @@ import Resource from "../../tool/resource.js";
 
 export default class MapItem extends Item {
     constructor(options) {
-        super(options);
+        super();
 
         this.image = null;
 
@@ -42,7 +42,9 @@ export default class MapItem extends Item {
         //先更新动画,保证事件顺利进行
         this.updateAnimation();
 
-        this.screenPoint = this.stage.convertToScreenPoint({x: this.x, y: this.y});
+        this.screenPoint = this.stage.convertToScreenPoint({
+            x: this.x * Resource.getRoomScale(),
+            y: this.y * Resource.getRoomScale()});
         const point = this.screenPoint;
         const half = Resource.getUnitSize() / 2;
         if (point.x <= -half ||
@@ -69,6 +71,10 @@ export default class MapItem extends Item {
         if (!displayHeight) {
             displayHeight = this.image.height / this.image.heightPics * this.scale;
         }
+
+        displayWidth *= Resource.getRoomScale();
+        displayHeight *= Resource.getRoomScale();
+
 
         context.drawImage(this.image,
             this.orientation * this.image.width / this.image.widthPics, 0,

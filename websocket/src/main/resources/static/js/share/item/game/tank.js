@@ -3,12 +3,12 @@
  * @description
  * @date 2020/6/23
  */
-import Item from "./item.js";
-import Resource from "../tool/resource.js";
-import Play from "./play.js";
-import Status from "../tool/status.js";
+import Resource from "../../tool/resource.js";
+import Play from "../play.js";
+import Status from "../../tool/status.js";
+import MapItem from "./mapitem.js";
 
-export default class Tank extends Item {
+export default class Tank extends MapItem {
     constructor(options) {
         super();
 

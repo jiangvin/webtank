@@ -167,8 +167,8 @@ export default class AiEngine extends Engine {
 
             if (bullet.item.x < 0 ||
                 bullet.item.y < 0 ||
-                bullet.item.x > thisEngine.room.size.width ||
-                bullet.item.y > thisEngine.room.size.height) {
+                bullet.item.x > thisEngine.mapInfo.width ||
+                bullet.item.y > thisEngine.mapInfo.height) {
                 thisEngine.removeBullet(bullet);
                 return;
             }

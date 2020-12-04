@@ -13,9 +13,10 @@ import Button from "../item/button.js";
 import Sound from "../tool/sound.js";
 import Rect from "../item/rect.js";
 import Item from "../item/item.js";
-import Tank from "../item/tank.js";
+import Tank from "../item/game/tank.js";
 import Confirm from "../item/confirm.js";
 import Adapter from "../tool/adapter.js";
+import MapItem from "../item/game/mapitem.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -145,8 +146,13 @@ export default class Room extends Stage {
             return;
         }
 
+        const center = {
+            x: this.view.center.x * Resource.getRoomScale(),
+            y: this.view.center.y * Resource.getRoomScale()
+        };
+
         if (!updateX) {
-            this.view.x = this.view.center.x - Resource.width() / 2;
+            this.view.x = center.x - Resource.width() / 2;
             if (this.view.x < 0) {
                 this.view.x = 0;
             }
@@ -156,7 +162,7 @@ export default class Room extends Stage {
         }
 
         if (!updateY) {
-            this.view.y = this.view.center.y - Resource.height() / 2;
+            this.view.y = center.y - Resource.height() / 2;
             if (this.view.y < 0) {
                 this.view.y = 0;
             }
@@ -369,8 +375,12 @@ export default class Room extends Stage {
             this.roomInfo.computerLife = data.computerLife;
         }
         if (data.width && data.height) {
-            this.size.width = data.width;
-            this.size.height = data.height;
+            this.mapSize = {
+                width: data.width,
+                height: data.width
+            };
+            this.size.width = data.width * Resource.getRoomScale();
+            this.size.height = data.height * Resource.getRoomScale();
             this.calculateBackgroundRepeat();
         }
 
@@ -385,12 +395,19 @@ export default class Room extends Stage {
         this.sortItems();
     }
 
+    createMapItem(options) {
+        const item = new MapItem(options);
+        item.stage = this;
+        this.addItem(item);
+        return item;
+    }
+
     createOrUpdateMapItem(data) {
         let item;
         if (this.items.has(data.id)) {
             item = this.items.get(data.id);
         } else {
-            item = this.createItem({id: data.id})
+            item = this.createMapItem({id: data.id})
         }
 
         const typeId = parseInt(data.typeId);
@@ -686,7 +703,6 @@ export default class Room extends Stage {
             } else {
                 const tankItem = thisStage.createTank({
                     id: tank.id,
-                    showId: true,
                     teamId: tank.teamId,
                     scale: 0.1
                 });
@@ -745,10 +761,10 @@ export default class Room extends Stage {
             }
         }
 
-        if (thisRoom.roomInfo.roomType === "PVE" && item.teamId === 2) {
-            item.showId = false;
-        } else if (thisRoom.roomInfo.roomType === "EVE") {
-            item.showId = false;
+        if (thisRoom.roomInfo.roomType === "PVE" &&
+            thisRoom.roomInfo.isNet &&
+            item.teamId === 1) {
+            item.showId = true;
         }
         return item;
     };
@@ -880,7 +896,7 @@ export default class Room extends Stage {
     }
 
     createBullet(options) {
-        const item = this.createItem(options);
+        const item = this.createMapItem(options);
         item.action = 1;
         item.image = Resource.getOrCreateImage("bullet");
         const thisStage = this;
