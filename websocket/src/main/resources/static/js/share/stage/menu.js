@@ -9,6 +9,8 @@ import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
 import ControlUnit from "../item/controlunit.js";
 import RoomInfo from "../item/roominfo.js";
+import Connect from "../tool/connect.js";
+import Sound from "../tool/sound.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -153,6 +155,15 @@ export default class Menu extends Stage {
             indexDoor2: 0,
             enterDoor2: false
         };
+
+        //同步用户信息(获得的金币等)
+        Common.syncUserData();
+
+        Connect.disconnect();
+        Sound.stopAll();
+        Resource.getRoot().engine = null;
+        Resource.getRoot().users = null;
+        Resource.getRoot().netDelay = 0;
     }
 
     getId() {

@@ -69,7 +69,8 @@ export default class Tank extends MapItem {
             this.z = 0;
         }
 
-        const inScreen = super.draw(ctx, 36, 36);
+        const size = 36 * this.scale;
+        const inScreen = super.draw(ctx, size, size);
         ctx.globalAlpha = 1.0;
 
         if (inScreen) {
@@ -129,8 +130,8 @@ export default class Tank extends MapItem {
         }
 
         const image = Resource.getOrCreateImage("shield");
-        const displayWidth = image.width / image.widthPics;
-        const displayHeight = image.height / image.heightPics;
+        const displayWidth = image.width / image.widthPics * Resource.getRoomScale() * 0.9;
+        const displayHeight = image.height / image.heightPics * Resource.getRoomScale() * 0.9;
 
         context.globalAlpha = 0.7;
         context.drawImage(image,

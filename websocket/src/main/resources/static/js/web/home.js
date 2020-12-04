@@ -46,14 +46,14 @@ export default class Home extends Stage {
 
         const keyboardMode = $("<button/>");
         keyboardMode.addClass("connect");
-        keyboardMode.css("top", "45%");
+        keyboardMode.css("top", "47%");
         keyboardMode.text("键盘控制");
         mainWindow.append(keyboardMode);
 
         const touchMode = $("<button/>");
         touchMode.addClass("connect");
         touchMode.attr("id","touchMode");
-        touchMode.css("top", "59%");
+        touchMode.css("top", "60%");
         touchMode.text("触屏控制");
         mainWindow.append(touchMode);
 

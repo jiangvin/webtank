@@ -147,7 +147,6 @@ export default class Mission extends Stage {
                 }
 
                 Common.nextStage(thisMission.roomInfo);
-                Resource.getRoot().addEngine(thisMission.roomInfo.isNet);
             }
         });
 

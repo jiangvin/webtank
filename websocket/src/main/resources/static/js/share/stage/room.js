@@ -61,6 +61,7 @@ export default class Room extends Stage {
     init(roomInfo) {
         this.roomInfo = roomInfo;
         this.showTeam = roomInfo.showTeam;
+        Resource.getRoot().addEngine(roomInfo.isNet);
         this.clear();
         Status.setStatus(Status.statusPause(), this.generateMaskInfo());
         Sound.bgm();
@@ -273,7 +274,7 @@ export default class Room extends Stage {
                 100, 100
             );
 
-            ctx.fillText(infos[i], 330 + i * interval, 80);
+            ctx.fillText(infos[i], 340 + i * interval, 80);
         }
 
         ctx.font = '28px Helvetica';
@@ -645,8 +646,7 @@ export default class Room extends Stage {
         Status.setStatus(Status.statusPause(), status.message, titleHeight);
         if (status.type === "WIN") {
             const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
-                Resource.getRoot().lastStage();
-                Resource.getRoot().currentStage().initMenu();
+                Resource.getRoot().gotoStage("menu");
             });
             this.addItem(back);
         } else if (status.type === "LOSE") {
@@ -673,8 +673,7 @@ export default class Room extends Stage {
             this.addItem(again);
             buttonHeight += 75;
             const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
-                Resource.getRoot().lastStage();
-                Resource.getRoot().currentStage().initMenu();
+                Resource.getRoot().gotoStage("menu");
             });
             this.addItem(back);
         }
@@ -944,8 +943,7 @@ export default class Room extends Stage {
             "返回主菜单",
             ["返回主菜单将不会获得任何积分和金币，确定要返回吗？"],
             function () {
-                Resource.getRoot().lastStage();
-                Resource.getRoot().currentStage().initMenu();
+                Resource.getRoot().gotoStage("menu");
             });
     }
 }
