@@ -34,10 +34,10 @@ export default class Mission extends Stage {
         const mapMaxId = 4;
         const thisMission = this;
         const rectSelected = {
-            w: 192,
-            h: 64,
-            x: 41,
-            y: 135,
+            w: 384,
+            h: 128,
+            x: 82,
+            y: 270,
         };
         const rect = {
             w: rectSelected.w * .85,
@@ -57,7 +57,7 @@ export default class Mission extends Stage {
 
         this.createItem({
             draw: function (ctx) {
-                ctx.font = 'bold 16px HanSans';
+                ctx.font = 'bold 32px HanSans';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#FFF';
@@ -87,13 +87,13 @@ export default class Mission extends Stage {
 
                     if (thisMission.hasLock(i)) {
                         ctx.displayCenter("mission_lock",
-                            167, 167 + i * (rectSelected.h * 1.1), 22);
+                            334, 334 + i * (rectSelected.h * 1.1), 44);
                     }
 
                     //文字
                     ctx.fillText(text[i],
-                        100 + Resource.getOffset().x,
-                        170 + Resource.getOffset().y + i * (rectSelected.h * 1.1));
+                        200 + Resource.getOffset().x,
+                        340 + Resource.getOffset().y + i * (rectSelected.h * 1.1));
                 }
             }
         });
@@ -102,8 +102,8 @@ export default class Mission extends Stage {
         for (let i = 0; i < mapMaxId; ++i) {
             this.createControl({
                 leftTop: {
-                    x: 41 + (rectSelected.w - rect.w),
-                    y: 135 + i * (rectSelected.h * 1.1)
+                    x: 82 + (rectSelected.w - rect.w),
+                    y: 270 + i * (rectSelected.h * 1.1)
                 },
                 size: rect,
                 callBack: function () {
@@ -133,12 +133,12 @@ export default class Mission extends Stage {
         const thisMission = this;
         this.createControl({
             leftTop: {
-                x: 743,
-                y: 452
+                x: 1486,
+                y: 904
             },
             size: {
-                w: 120,
-                h: 35
+                w: 240,
+                h: 70
             },
             callBack: function () {
                 //困难模式未解锁的情况
@@ -153,12 +153,12 @@ export default class Mission extends Stage {
 
         this.createControl({
             leftTop: {
-                x: 892,
-                y: 16
+                x: 1784,
+                y: 32
             },
             size: {
-                w: 43,
-                h: 48
+                w: 86,
+                h: 96
             },
             callBack: function () {
                 Common.gotoStage("menu");
@@ -167,12 +167,12 @@ export default class Mission extends Stage {
 
         this.createControl({
             leftTop: {
-                x: 48,
-                y: 70
+                x: 96,
+                y: 140
             },
             size: {
-                w: 96,
-                h: 25
+                w: 192,
+                h: 50
             },
             callBack: function () {
                 thisMission.roomInfo.hardMode = false;
@@ -181,12 +181,12 @@ export default class Mission extends Stage {
         });
         this.createControl({
             leftTop: {
-                x: 168,
-                y: 70
+                x: 336,
+                y: 140
             },
             size: {
-                w: 96,
-                h: 25
+                w: 192,
+                h: 50
             },
             callBack: function () {
                 thisMission.roomInfo.hardMode = true;

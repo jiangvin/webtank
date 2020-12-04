@@ -31,6 +31,7 @@ export default class Stage {
         }
         const offset = Resource.getOffset();
         this.controlUnits.forEach(function (unit) {
+            ctx.lineWidth = 4;
             ctx.strokeStyle = '#F00';
             ctx.strokeRect(
                 unit.leftTop.x + offset.x,

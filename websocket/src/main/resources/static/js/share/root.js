@@ -176,8 +176,8 @@ export default class Root {
     }
 
     drawMessage(ctx) {
-        let height = 80;
-        ctx.font = '16px Helvetica';
+        let height = 160;
+        ctx.font = '30px Helvetica';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
         this.messages.forEach(function (message) {
@@ -186,8 +186,8 @@ export default class Root {
             }
             ctx.globalAlpha = (message.lifetime / 300);
             ctx.fillStyle = message.color;
-            ctx.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context, 80, height);
-            height += 18;
+            ctx.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context, 160, height);
+            height += 35;
         });
 
         ctx.globalAlpha = 1;
@@ -200,7 +200,7 @@ export default class Root {
 
     drawTips(ctx) {
         //版权信息
-        ctx.font = '14px Helvetica';
+        ctx.font = '28px Helvetica';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'bottom';
         ctx.fillStyle = '#ffffff';

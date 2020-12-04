@@ -30,13 +30,13 @@ export default class AppHome extends Stage {
             draw: function (ctx) {
                 ctx.displayCenter("button_enter",
                     Resource.displayW() / 2,
-                    Resource.displayH() * .58 + 75,
-                    350, 45);
+                    Resource.displayH() * .58 + 150,
+                    700, 90);
             },
             controlUnit: new ControlUnit(
                 Resource.generateClientId(),
-                {x: Resource.displayW() / 2 - 175, y: Resource.displayH() * .58 + 53},
-                {x: Resource.displayW() / 2 + 175, y: Resource.displayH() * .58 + 97},
+                {x: Resource.displayW() / 2 - 350, y: Resource.displayH() * .58 + 105},
+                {x: Resource.displayW() / 2 + 350, y: Resource.displayH() * .58 + 195},
                 function () {
                     //检测是否输入名字
                     const input = $('#input');
@@ -61,17 +61,17 @@ export default class AppHome extends Stage {
         //文字
         this.createItem({
             draw: function (context) {
-                context.font = '18px Helvetica';
+                context.font = '36px Helvetica';
                 context.textAlign = 'left';
                 context.textBaseline = 'middle';
                 context.fillStyle = '#FFF';
                 context.fillText('☑ 进入游戏即代表同意',
-                    Resource.width() / 2 - 160,
-                    Resource.height() * .58 + 125);
+                    Resource.width() / 2 - 320,
+                    Resource.height() * .58 + 230);
                 context.fillStyle = '#F00';
                 context.fillText('《游戏隐私协议》',
-                    Resource.width() / 2 + 20,
-                    Resource.height() * .58 + 125);
+                    Resource.width() / 2 + 40,
+                    Resource.height() * .58 + 230);
             }
         });
     }

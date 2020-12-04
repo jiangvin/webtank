@@ -23,8 +23,8 @@ export default class Rank extends Stage {
         //返回按钮事件
         const buttonCloseRankBoard = new ControlUnit(
             Resource.generateClientId(),
-            {x: 915, y: 16},
-            {x: 958, y: 59},
+            {x: 1830, y: 32},
+            {x: 1916, y: 118},
             function () {
                 Common.lastStage();
             });
@@ -32,8 +32,8 @@ export default class Rank extends Stage {
 
         //按钮大小
         const buttonSize = {
-            w: 96,
-            h: 36
+            w: 192,
+            h: 72
         };
         //上一页按钮
         this.createItem({
@@ -44,8 +44,8 @@ export default class Rank extends Stage {
 
                 ctx.displayCenter(
                     thisRank.lastButtonStyle(),
-                    542,
-                    464,
+                    1084,
+                    928,
                     buttonSize.w,
                     buttonSize.h);
 
@@ -55,12 +55,12 @@ export default class Rank extends Stage {
             controlUnit: new ControlUnit(
                 Resource.generateClientId(),
                 {
-                    x: 418 - buttonSize.w / 2,
-                    y: 464 - buttonSize.h / 2
+                    x: 836 - buttonSize.w / 2,
+                    y: 928 - buttonSize.h / 2
                 },
                 {
-                    x: 418 + buttonSize.w / 2,
-                    y: 464 + buttonSize.h / 2
+                    x: 836 + buttonSize.w / 2,
+                    y: 928 + buttonSize.h / 2
                 },
                 function () {
                     if (thisRank.rankStart <= 0) {
@@ -78,20 +78,20 @@ export default class Rank extends Stage {
             draw: function (ctx) {
                 ctx.displayCenter(
                     thisRank.nextButtonStyle(),
-                    542,
-                    464,
+                    1084,
+                    928,
                     buttonSize.w,
                     buttonSize.h);
             },
             controlUnit: new ControlUnit(
                 Resource.generateClientId(),
                 {
-                    x: 542 - buttonSize.w / 2,
-                    y: 464 - buttonSize.h / 2
+                    x: 1084 - buttonSize.w / 2,
+                    y: 928 - buttonSize.h / 2
                 },
                 {
-                    x: 542 + buttonSize.w / 2,
-                    y: 464 + buttonSize.h / 2
+                    x: 1084 + buttonSize.w / 2,
+                    y: 928 + buttonSize.h / 2
                 },
                 function () {
                     if (thisRank.isRankEnd) {
@@ -131,12 +131,12 @@ export default class Rank extends Stage {
                 thisRank.createItem({
                     id: "rank_board_info",
                     draw: function (ctx) {
-                        const x = 144 + Resource.getOffset().x;
-                        const y = 167 + Resource.getOffset().y;
+                        const x = 288 + Resource.getOffset().x;
+                        const y = 334 + Resource.getOffset().y;
 
-                        const interval = 57;
+                        const interval = 114;
 
-                        ctx.font = '20px Helvetica';
+                        ctx.font = '40px Helvetica';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillStyle = '#040141';
@@ -150,12 +150,12 @@ export default class Rank extends Stage {
 
                             const data = dataList[i];
                             //name
-                            ctx.fillText(data.username, x + 211, y + i * interval);
+                            ctx.fillText(data.username, x + 422, y + i * interval);
                             //score
-                            ctx.fillText(data.score, x + 432, y + i * interval);
+                            ctx.fillText(data.score, x + 864, y + i * interval);
                             //mode
                             ctx.fillText(data.gameType === 0 ? "单人模式" : "联机模式",
-                                x + 643,
+                                x + 1286,
                                 y + i * interval);
                         }
                     }
@@ -182,8 +182,8 @@ export default class Rank extends Stage {
     drawRankNumber(ctx, number, x, y) {
         if (number <= 3) {
             const img = Resource.getImage("rank_" + number);
-            const w = 40;
-            const h = 37;
+            const w = 80;
+            const h = 74;
             ctx.drawImage(
                 img,
                 0, 0,

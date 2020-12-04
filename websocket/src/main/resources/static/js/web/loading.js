@@ -36,7 +36,7 @@ export default class Loading extends Stage {
         this.createItem({
             draw: function (ctx) {
                 const width = Resource.displayW() * .4;
-                const height = 25;
+                const height = 50;
                 const pos = {
                     x: Resource.displayW() * .5 - width / 2 + Resource.getOffset().x,
                     y: Resource.displayH() * .63 + Resource.getOffset().y
@@ -72,13 +72,13 @@ export default class Loading extends Stage {
                     height);
 
                 //文字
-                ctx.font = '18px Microsoft YaHei UI';
+                ctx.font = '36px Microsoft YaHei UI';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
                 ctx.fillStyle = '#FFF';
                 ctx.fillText('资源已加载' + thisLoading.percent + '%',
                     pos.x + width / 2,
-                    pos.y + 22);
+                    pos.y + 44);
 
             }
         });

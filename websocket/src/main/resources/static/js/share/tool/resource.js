@@ -211,11 +211,11 @@ export default class Resource {
     }
 
     static displayW() {
-        return 960;
+        return 1920;
     }
 
     static displayH() {
-        return 540;
+        return 1080;
     }
 
     static width() {

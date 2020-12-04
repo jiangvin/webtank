@@ -22,30 +22,30 @@ export default class Menu extends Stage {
         //信息
         this.createItem({
             draw: function (ctx) {
-                ctx.font = 'bold 13px Arial';
+                ctx.font = 'bold 26px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#FFF';
                 const pos = {
-                    x: 172 + Resource.getOffset().x,
-                    y: 36 + Resource.getOffset().y
+                    x: 344 + Resource.getOffset().x,
+                    y: 72 + Resource.getOffset().y
                 };
                 //姓名
                 ctx.fillText(Resource.getUser().userId, pos.x, pos.y);
                 //金币
-                ctx.fillText(Resource.getUser().coin, pos.x + 200, pos.y);
+                ctx.fillText(Resource.getUser().coin, pos.x + 400, pos.y);
                 //排名
-                ctx.fillText(Resource.getUser().rank, pos.x + 422, pos.y);
+                ctx.fillText(Resource.getUser().rank, pos.x + 844, pos.y);
                 //积分
-                ctx.fillText(Resource.getUser().score, pos.x + 633, pos.y);
+                ctx.fillText(Resource.getUser().score, pos.x + 1266, pos.y);
             }
         });
 
         //排行榜打开按钮
         const buttonOpenRankBoard = new ControlUnit(
             Resource.generateClientId(),
-            {x: 86, y: 372},
-            {x: 188, y: 518},
+            {x: 172, y: 744},
+            {x: 376, y: 1036},
             function () {
                 Common.nextStage();
             }
@@ -55,7 +55,7 @@ export default class Menu extends Stage {
 
     createBullet() {
         const bulletMap = new Map();
-        const bulletWidth = 80;
+        const bulletWidth = 160;
 
         this.createItem({
             draw: function (ctx) {
@@ -72,8 +72,8 @@ export default class Menu extends Stage {
 
                 //draw
                 bulletMap.forEach(bullet => {
-                    bullet.x -= 10 * bullet.scale;
-                    bullet.y -= 10 * bullet.scale;
+                    bullet.x -= 20 * bullet.scale;
+                    bullet.y -= 20 * bullet.scale;
                     const width = bulletWidth * bullet.scale;
                     ctx.displayCenter("menu_bullet", bullet.x, bullet.y, width);
                     if (bullet.x <= -width) {
@@ -102,20 +102,20 @@ export default class Menu extends Stage {
                 }
 
                 const doorSize = {
-                    w: 180,
-                    h: 200
+                    w: 360,
+                    h: 400
                 };
 
                 ctx.displayTopLeft(
                     "menu_door_" + Math.floor(doorStatus.indexDoor1),
-                    244,
-                    292,
+                    488,
+                    584,
                     doorSize.w,
                     doorSize.h);
                 ctx.displayTopLeft(
                     "menu_door_" + Math.floor(doorStatus.indexDoor2),
-                    576,
-                    292,
+                    1152,
+                    584,
                     doorSize.w,
                     doorSize.h);
             }
@@ -126,8 +126,8 @@ export default class Menu extends Stage {
         //单人模式
         const singleMode = new ControlUnit(
             Resource.generateClientId(),
-            {x: 278, y: 307},
-            {x: 374, y: 470},
+            {x: 556, y: 614},
+            {x: 748, y: 940},
             function () {
                 thisMenu.doorStatus.enterDoor1 = true;
             }
@@ -137,8 +137,8 @@ export default class Menu extends Stage {
         //多人模式
         const multipleMode = new ControlUnit(
             Resource.generateClientId(),
-            {x: 610, y: 307},
-            {x: 706, y: 470},
+            {x: 1220, y: 614},
+            {x: 1412, y: 940},
             function () {
                 thisMenu.doorStatus.enterDoor2 = true;
             }

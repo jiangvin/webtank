@@ -16,19 +16,19 @@ canvas {
 }
 
 div.rect-16to9 {
-    width: 960px;
-    height: 540px;
+    width: 1920px;
+    height: 1080px;
 }
 
 input {
     border: 1px solid #33C6E9;
-    font-size: 1.3em;
+    font-size: 2em;
     padding: .3em;
     background: rgba(255, 255, 255, 0.8);
     position: absolute;
     color: #5E6C77;
     text-align: center;
-    border-radius: .25em;
+    border-radius: .5em;
 }
 
 input:focus {
@@ -39,21 +39,23 @@ input:focus {
 
 input.input-name-web {
     left: 29%;
-    top: 180px;
+    top: 360px;
     width: 40%;
+    height: 2em;
 }
 
 input.input-name {
+    height: 1.8em;
     left: 50%;
     top: 58%;
-    width: 330px;
-    transform: translateX(-170px);
+    width: 660px;
+    transform: translateX(-338px);
 }
 
 button {
     min-width: 10%;
     text-align: center;
-    font-size: 1.3em;
+    font-size: 2em;
     padding: .3em;
     margin: .2em;
     border-radius: .4em;
@@ -74,8 +76,8 @@ button:active {
 }
 
 button.connect {
-    width: 400px;
-    height: 3em;
+    width: 800px;
+    height: 3.5em;
     position: absolute;
     left: 28.5%;
 }
