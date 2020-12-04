@@ -39,7 +39,7 @@ export default class Item {
 
     }
 
-    draw(ctx) {
+    draw(ctx, displayWidth, displayHeight) {
         //先更新动画,保证事件顺利进行
         this.updateAnimation();
 
@@ -53,7 +53,7 @@ export default class Item {
             return false;
         }
 
-        this.drawImage(ctx);
+        this.drawImage(ctx, displayWidth, displayHeight);
         return true;
     }
 
@@ -63,9 +63,13 @@ export default class Item {
         }
     }
 
-    drawImage(context) {
-        const displayWidth = this.image.width / this.image.widthPics * this.scale;
-        const displayHeight = this.image.height / this.image.heightPics * this.scale;
+    drawImage(context, displayWidth, displayHeight) {
+        if (!displayWidth) {
+            displayWidth = this.image.width / this.image.widthPics * this.scale;
+        }
+        if (!displayHeight) {
+            displayHeight = this.image.height / this.image.heightPics * this.scale;
+        }
 
         context.drawImage(this.image,
             this.orientation * this.image.width / this.image.widthPics, 0,

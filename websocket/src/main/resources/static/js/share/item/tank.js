@@ -69,7 +69,7 @@ export default class Tank extends Item {
             this.z = 0;
         }
 
-        const inScreen = super.draw(ctx);
+        const inScreen = super.draw(ctx, 36, 36);
         ctx.globalAlpha = 1.0;
 
         if (inScreen) {
@@ -105,7 +105,7 @@ export default class Tank extends Item {
         context.fillStyle = this.getColor();
 
         const x = this.screenPoint.x;
-        const y = this.screenPoint.y - (this.image.height / this.image.heightPics) * this.scale / 2 - 5;
+        const y = this.screenPoint.y - 36 * this.scale / 2 - 5;
         context.fillText(this.id, x, y);
     }
 
