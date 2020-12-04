@@ -251,7 +251,7 @@ export default class Room extends Stage {
         ];
 
         ctx.font = '40px gameTitle';
-        ctx.textAlign = 'middle';
+        ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
 
@@ -273,7 +273,7 @@ export default class Room extends Stage {
                 100, 100
             );
 
-            ctx.fillText(infos[i], 320 + i * interval, 80);
+            ctx.fillText(infos[i], 330 + i * interval, 80);
         }
 
         ctx.font = '28px Helvetica';
