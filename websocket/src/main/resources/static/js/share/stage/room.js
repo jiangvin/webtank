@@ -175,9 +175,9 @@ export default class Room extends Stage {
         this.drawBackground(ctx);
         super.draw(ctx);
         Control.draw(ctx);
+        this.drawRoomInfo(ctx);
         this.drawMask(ctx);
         this.drawStatus(ctx);
-        this.drawRoomInfo(ctx);
     }
 
     drawBackground(ctx) {
@@ -227,7 +227,50 @@ export default class Room extends Stage {
     }
 
     drawRoomInfo(ctx) {
-        ctx.font = '14px Helvetica';
+        const rect = Resource.getImage("room_rect");
+        const interval = 320;
+
+        const icons = [
+            Resource.getImage("room_stage"),
+            Resource.getImage("player_life"),
+            Resource.getImage("enemy_life"),
+            Resource.getImage("room_gold")
+        ];
+
+        const infos = [
+            this.roomInfo.mapId + "-" + this.roomInfo.subId,
+            "x" + this.roomInfo.playerLife,
+            "x" + this.roomInfo.computerLife,
+            Resource.getUser().coin
+        ];
+
+        ctx.font = '40px gameTitle';
+        ctx.textAlign = 'middle';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#FFF';
+
+        for (let i = 0; i < 4; ++i) {
+            ctx.drawImage(
+                rect,
+                0, 0,
+                rect.width, rect.height,
+                180 + i * interval, 50,
+                rect.width * 1.7, rect.height * 1.5
+            );
+
+            const icon = icons[i];
+            ctx.drawImage(
+                icon,
+                0, 0,
+                icon.width, icon.height,
+                180 + i * interval, 30,
+                100, 100
+            );
+
+            ctx.fillText(infos[i], 320 + i * interval, 80);
+        }
+
+        ctx.font = '28px Helvetica';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
         ctx.fillStyle = '#ffffff';
@@ -238,15 +281,6 @@ export default class Room extends Stage {
                 " 关卡:" + this.roomInfo.mapId + "-" + this.roomInfo.subId +
                 " [" + this.roomInfo.roomType + "]";
             ctx.fillText(tipMessage, 10, 6);
-        }
-
-        //相关信息
-        if (this.roomInfo.roomType === 'PVE' && this.roomInfo.playerLife !== undefined) {
-            ctx.fillText("玩家剩余生命:" + this.roomInfo.playerLife, 10, 24);
-            ctx.fillText("电脑剩余生命:" + this.roomInfo.computerLife, 10, 40);
-        } else if (this.roomInfo.playerLife !== undefined) {
-            ctx.fillText("红队剩余生命:" + this.roomInfo.playerLife, 10, 24);
-            ctx.fillText("蓝队剩余生命:" + this.roomInfo.computerLife, 10, 40);
         }
     }
 

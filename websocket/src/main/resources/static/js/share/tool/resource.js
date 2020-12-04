@@ -115,12 +115,17 @@ export default class Resource {
     loadRoomResource() {
         this.loadImage("player_life", "room/player_life");
         this.loadImage("enemy_life", "room/enemy_life");
+        this.loadImage("room_stage", "room/stage");
+        this.loadImage("room_gold", "room/gold");
+
         this.loadImage("room_easy", "room/easy");
         this.loadImage("room_hard", "room/hard");
 
         this.loadImage("room_background", "room/background/0");
         this.loadImage("room_background_1", "room/background/1", "jpg");
         this.loadImage("room_background_2", "room/background/2", "jpg");
+
+        this.loadImage("room_rect", "room/rect");
     }
 
     loadAnimationImage(imageId, widthPics, type) {
