@@ -44,17 +44,6 @@ export default class Resource {
         this.loadAnimationImage("rank_2");
         this.loadAnimationImage("rank_3");
 
-        //load all tank images
-        for (let i = 1; i <= 12; ++i) {
-            let id;
-            if (i < 10) {
-                id = "tank0" + i;
-            } else {
-                id = "tank" + i;
-            }
-            this.loadAnimationImage(id, 4);
-        }
-
         //animation
         this.loadAnimationImage("shield", 4);
         this.loadAnimationImage("bomb", 6);
@@ -126,6 +115,17 @@ export default class Resource {
         this.loadImage("room_background_2", "room/background/2", "jpg");
 
         this.loadImage("room_rect", "room/rect");
+
+        //load all tank images
+        for (let i = 1; i <= 12; ++i) {
+            let id;
+            if (i < 10) {
+                id = "0" + i;
+            } else {
+                id = "" + i;
+            }
+            this.loadImage("tank" + id, "room/tank/" + id, "png", 4);
+        }
     }
 
     loadAnimationImage(imageId, widthPics, type) {
