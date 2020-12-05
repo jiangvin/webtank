@@ -271,27 +271,29 @@ export default class Room extends Stage {
             Resource.getImage("room_stage"),
             Resource.getImage("player_life"),
             Resource.getImage("enemy_life"),
-            Resource.getImage("room_gold")
+            Resource.getImage("room_gold"),
+            Resource.getImage("room")
         ];
 
         const infos = [
             this.roomInfo.mapId + "-" + this.roomInfo.subId,
             "x" + this.roomInfo.playerLife,
             "x" + this.roomInfo.computerLife,
-            Resource.getUser().coin
+            Resource.getUser().coin,
+            this.roomInfo.roomId
         ];
 
-        ctx.font = '40px gameTitle';
+        ctx.font = '36px gameTitle';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
 
-        for (let i = 0; i < 4; ++i) {
+        for (let i = 0; i < 5; ++i) {
             ctx.drawImage(
                 rect,
                 0, 0,
                 rect.width, rect.height,
-                180 + i * interval, 50,
+                100 + i * interval, 50,
                 rect.width * 1.7, rect.height * 1.5
             );
 
@@ -300,11 +302,11 @@ export default class Room extends Stage {
                 icon,
                 0, 0,
                 icon.width, icon.height,
-                180 + i * interval, 30,
+                100 + i * interval, 30,
                 100, 100
             );
 
-            ctx.fillText(infos[i], 340 + i * interval, 80);
+            ctx.fillText(infos[i], 272 + i * interval, 82);
         }
 
         //返回按钮
@@ -316,18 +318,6 @@ export default class Room extends Stage {
             Resource.width() - 130, 30,
             100, 100
         );
-
-        //标题
-        ctx.font = '28px Helvetica';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = '#ffffff';
-        if (this.roomInfo.roomId && this.roomInfo.mapId && this.roomInfo.subId) {
-            const tipMessage = '房间号:' + this.roomInfo.roomId +
-                " 关卡:" + this.roomInfo.mapId + "-" + this.roomInfo.subId +
-                " [" + this.roomInfo.roomType + "]";
-            ctx.fillText(tipMessage, 10, 6);
-        }
     }
 
     drawMask(ctx) {

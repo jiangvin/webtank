@@ -106,6 +106,7 @@ export default class Resource {
         this.loadImage("enemy_life", "room/enemy_life");
         this.loadImage("room_stage", "room/stage");
         this.loadImage("room_gold", "room/gold");
+        this.loadImage("room", "room/room");
         this.loadImage("room_rect", "room/rect");
 
         this.loadImage("room_easy", "room/easy");
