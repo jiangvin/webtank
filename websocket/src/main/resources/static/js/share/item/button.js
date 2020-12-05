@@ -36,6 +36,7 @@ export default class Button extends Rect {
             leftTop,
             rightBottom,
             callBack);
+        this.controlUnit.needOffset = false;
     }
 
     draw(ctx) {
