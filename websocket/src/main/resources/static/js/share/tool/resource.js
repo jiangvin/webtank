@@ -48,16 +48,6 @@ export default class Resource {
         this.loadAnimationImage("shield", 4);
         this.loadAnimationImage("bomb", 6);
 
-        //item
-        this.loadAnimationImage("item_bullet", 2);
-        this.loadAnimationImage("item_clock", 2);
-        this.loadAnimationImage("item_ghost", 2);
-        this.loadAnimationImage("item_star", 2);
-        this.loadAnimationImage("item_shield", 2);
-        this.loadAnimationImage("item_red_star", 2);
-        this.loadAnimationImage("item_king", 2);
-        this.loadAnimationImage("item_life", 2);
-
         //map unit
         this.loadAnimationImage("bullet", 4);
         this.loadAnimationImage("brick", 2);
@@ -108,6 +98,16 @@ export default class Resource {
         this.loadImage("room_gold", "room/gold");
         this.loadImage("room", "room/room");
         this.loadImage("room_rect", "room/rect");
+
+        //item
+        this.loadImage("item_bullet", "room/item/item_bullet");
+        this.loadImage("item_clock", "room/item/item_clock");
+        this.loadImage("item_ghost", "room/item/item_ghost");
+        this.loadImage("item_star", "room/item/item_star");
+        this.loadImage("item_shield", "room/item/item_shield");
+        this.loadImage("item_red_star", "room/item/item_red_star");
+        this.loadImage("item_king", "room/item/item_king");
+        this.loadImage("item_life", "room/item/item_life");
 
         this.loadImage("room_easy", "room/easy");
         this.loadImage("room_hard", "room/hard");

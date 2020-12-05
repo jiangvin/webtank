@@ -946,11 +946,16 @@ export default class Room extends Stage {
                 x: itemData.x,
                 y: itemData.y,
                 typeId: itemData.typeId.toLowerCase(),
-                image: Resource.getOrCreateImage(imageId)
+                image: Resource.getImage(imageId),
+                scale: 0.28
             });
             gameItem.play = new Play(1, 15,
                 function () {
-                    gameItem.orientation = (gameItem.orientation + 1) % 2;
+                    if (gameItem.scale === 0.28) {
+                        gameItem.scale = 0.22;
+                    } else {
+                        gameItem.scale = 0.28;
+                    }
                 }, function () {
                     this.frames = 1;
                 });
