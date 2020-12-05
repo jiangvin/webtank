@@ -15,7 +15,6 @@ import Rect from "../item/rect.js";
 import Item from "../item/item.js";
 import Tank from "../item/game/tank.js";
 import Confirm from "../item/confirm.js";
-import Adapter from "../tool/adapter.js";
 import MapItem from "../item/game/mapitem.js";
 
 export default class Room extends Stage {
@@ -58,6 +57,36 @@ export default class Room extends Stage {
         });
     }
 
+    initControlEvent() {
+        const thisRoom = this;
+        //返回按钮
+        thisRoom.createControl({
+            leftTop: {
+                x: -130,
+                y: 30
+            },
+            size: {
+                w: 100,
+                h: 100
+            },
+            needOffset: false,
+            callBack: function () {
+                //返回主菜单(暂停状态不能返回)
+                if (!Status.isGaming()) {
+                    return;
+                }
+
+                new Confirm(
+                    thisRoom,
+                    "返回主菜单",
+                    ["返回主菜单将不会获得任何积分和金币，确定要返回吗？"],
+                    function () {
+                        Resource.getRoot().gotoStage("menu");
+                    });
+            }
+        })
+    }
+
     init(roomInfo) {
         this.roomInfo = roomInfo;
         this.showTeam = roomInfo.showTeam;
@@ -67,7 +96,7 @@ export default class Room extends Stage {
         Sound.bgm();
 
         //TODO 输入框相关，后期优化
-        Adapter.instance.inputEnable = true;
+        //Adapter.instance.inputEnable = true;
     }
 
     clear() {
@@ -75,6 +104,7 @@ export default class Room extends Stage {
         this.reloadBackground();
         this.items.clear();
         this.controlUnits.clear();
+        this.initControlEvent();
         this.view.center = null;
     }
 
@@ -277,12 +307,21 @@ export default class Room extends Stage {
             ctx.fillText(infos[i], 340 + i * interval, 80);
         }
 
+        //返回按钮
+        const back = Resource.getImage("back");
+        ctx.drawImage(
+            back,
+            0, 0,
+            back.width, back.height,
+            Resource.width() - 130, 30,
+            100, 100
+        );
+
+        //标题
         ctx.font = '28px Helvetica';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
         ctx.fillStyle = '#ffffff';
-
-        //标题
         if (this.roomInfo.roomId && this.roomInfo.mapId && this.roomInfo.subId) {
             const tipMessage = '房间号:' + this.roomInfo.roomId +
                 " 关卡:" + this.roomInfo.mapId + "-" + this.roomInfo.subId +
@@ -927,23 +966,4 @@ export default class Room extends Stage {
                 });
         });
     };
-
-    processPointDownEvent(point) {
-        super.processPointDownEvent(point);
-
-        //返回主菜单(暂停状态不能返回)
-        if (point.x < Resource.width() - 140 ||
-            point.y > 40 ||
-            !Status.isGaming()) {
-            return;
-        }
-
-        new Confirm(
-            this,
-            "返回主菜单",
-            ["返回主菜单将不会获得任何积分和金币，确定要返回吗？"],
-            function () {
-                Resource.getRoot().gotoStage("menu");
-            });
-    }
 }

@@ -29,15 +29,16 @@ export default class Stage {
         if (!Resource.isDebug()) {
             return;
         }
-        const offset = Resource.getOffset();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#F00';
         this.controlUnits.forEach(function (unit) {
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = '#F00';
+            const leftTop = unit.getLeftTop();
+            const rightBottom = unit.getRightBottom();
             ctx.strokeRect(
-                unit.leftTop.x + offset.x,
-                unit.leftTop.y + offset.y,
-                unit.rightBottom.x - unit.leftTop.x,
-                unit.rightBottom.y - unit.leftTop.y);
+                leftTop.x,
+                leftTop.y,
+                rightBottom.x - leftTop.x,
+                rightBottom.y - leftTop.y);
         })
     }
 

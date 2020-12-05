@@ -106,6 +106,7 @@ export default class Resource {
         this.loadImage("enemy_life", "room/enemy_life");
         this.loadImage("room_stage", "room/stage");
         this.loadImage("room_gold", "room/gold");
+        this.loadImage("room_rect", "room/rect");
 
         this.loadImage("room_easy", "room/easy");
         this.loadImage("room_hard", "room/hard");
@@ -114,7 +115,7 @@ export default class Resource {
         this.loadImage("room_background_1", "room/background/1", "jpg");
         this.loadImage("room_background_2", "room/background/2", "jpg");
 
-        this.loadImage("room_rect", "room/rect");
+        this.loadImage("back", "room/back");
 
         //load all tank images
         for (let i = 1; i <= 12; ++i) {

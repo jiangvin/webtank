@@ -343,23 +343,23 @@ export default class Control {
             controlMode.rightCenterX - controlMode.rightRadius, controlMode.rightCenterY - controlMode.rightRadius,
             controlMode.rightRadius * 2, controlMode.rightRadius * 2);
 
-        //返回
-        const back = Resource.getOrCreateImage("back");
-        ctx.drawImage(
-            back,
-            0, 0,
-            back.width, back.height,
-            Resource.width() - back.width, 0,
-            back.width, back.height);
-
-        //talk
-        const talk = Resource.getOrCreateImage("talk");
-        ctx.drawImage(
-            talk,
-            0, 0,
-            talk.width, talk.height,
-            controlMode.talkCenterX - controlMode.talkRadius, controlMode.talkCenterY - controlMode.talkRadius,
-            controlMode.talkRadius * 2, controlMode.talkRadius * 2);
+        //TODO 输入框相关，后期优化
+        // //返回
+        // const back = Resource.getOrCreateImage("back");
+        // ctx.drawImage(
+        //     back,
+        //     0, 0,
+        //     back.width, back.height,
+        //     Resource.width() - back.width, 0,
+        //     back.width, back.height);
+        // //talk
+        // const talk = Resource.getOrCreateImage("talk");
+        // ctx.drawImage(
+        //     talk,
+        //     0, 0,
+        //     talk.width, talk.height,
+        //     controlMode.talkCenterX - controlMode.talkRadius, controlMode.talkCenterY - controlMode.talkRadius,
+        //     controlMode.talkRadius * 2, controlMode.talkRadius * 2);
     }
 
     static getTouchPoint(eventPoint) {

@@ -13,19 +13,64 @@ export default class ControlUnit {
         this.leftTop = leftTop;
         this.rightBottom = rightBottom;
         this.callBack = callBack;
+
+        /**
+         * 是否根据16:9的画面做偏移
+         * @type {boolean}
+         */
+        this.needOffset = true;
     }
 
     process(point) {
-        const offset = Resource.getOffset();
-        if (point.x >= this.leftTop.x + offset.x &&
-            point.x <= this.rightBottom.x + offset.x &&
-            point.y >= this.leftTop.y + offset.y &&
-            point.y <= this.rightBottom.y + offset.y) {
+        const leftTop = this.getLeftTop();
+        const rightBottom = this.getRightBottom();
+
+        if (point.x >= leftTop.x &&
+            point.x <= rightBottom.x &&
+            point.y >= leftTop.y &&
+            point.y <= rightBottom.y) {
             Sound.click();
             this.callBack();
             return true;
         } else {
             return false;
+        }
+    }
+
+    getLeftTop() {
+        return this.getPos(this.leftTop);
+    }
+
+    getRightBottom() {
+        return this.getPos(this.rightBottom);
+    }
+
+    getPos(point) {
+        const pos = {
+            x: point.x,
+            y: point.y
+        };
+        if (pos.x < 0) {
+            pos.x = Resource.width() + pos.x;
+        }
+        if (pos.y < 0) {
+            pos.y = Resource.height() + pos.y;
+        }
+
+        const offset = this.getOffset();
+        pos.x += offset.x;
+        pos.y += offset.y;
+        return pos;
+    }
+
+    getOffset() {
+        if (this.needOffset) {
+            return Resource.getOffset();
+        } else {
+            return {
+                x: 0,
+                y: 0
+            }
         }
     }
 }
