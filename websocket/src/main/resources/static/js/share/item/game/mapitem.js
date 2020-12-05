@@ -22,9 +22,14 @@ export default class MapItem extends Item {
         this.speed = 0;
 
         //动作,0是停,1是走
+        //子弹和坦克需要
         this.action = 0;
+
         //当前定位方向,0-3 上下左右
         this.orientation = 0;
+
+        //子弹和坦克需要
+        this.teamId = 0;
 
         //动画相关
         this.play = null;

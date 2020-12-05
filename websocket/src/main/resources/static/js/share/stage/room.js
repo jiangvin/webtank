@@ -16,6 +16,7 @@ import Item from "../item/item.js";
 import Tank from "../item/game/tank.js";
 import Confirm from "../item/confirm.js";
 import MapItem from "../item/game/mapitem.js";
+import Bullet from "../item/game/bullet.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -906,7 +907,8 @@ export default class Room extends Stage {
                     x: ammo.x,
                     y: ammo.y,
                     orientation: ammo.orientation,
-                    speed: ammo.speed
+                    speed: ammo.speed,
+                    teamId: ammo.teamId
                 });
 
                 if (thisStage.view.center) {
@@ -924,7 +926,9 @@ export default class Room extends Stage {
     }
 
     createBullet(options) {
-        const item = this.createMapItem(options);
+        const item = new Bullet(options);
+        item.stage = this;
+        this.addItem(item);
         item.action = 1;
         item.image = Resource.getOrCreateImage("bullet");
         const thisStage = this;

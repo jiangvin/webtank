@@ -13,7 +13,6 @@ export default class Tank extends MapItem {
         super();
 
         this.showId = false;
-        this.teamId = 0;
 
         //是否有护盾
         this.hasShield = false;

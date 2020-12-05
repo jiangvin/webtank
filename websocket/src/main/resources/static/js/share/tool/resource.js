@@ -49,7 +49,6 @@ export default class Resource {
         this.loadAnimationImage("bomb", 6);
 
         //map unit
-        this.loadAnimationImage("bullet", 4);
         this.loadAnimationImage("brick", 2);
         this.loadAnimationImage("iron", 2);
         this.loadAnimationImage("river", 2);
@@ -98,6 +97,8 @@ export default class Resource {
         this.loadImage("room_gold", "room/gold");
         this.loadImage("room", "room/room");
         this.loadImage("room_rect", "room/rect");
+
+        this.loadImage("bullet", "room/bullet", "png", 4);
 
         //item
         this.loadImage("item_bullet", "room/item/item_bullet");

@@ -898,6 +898,7 @@ export default class AiEngine extends Engine {
                 y: pos.y,
                 orientation: tank.item.orientation,
                 speed: tankType.ammoSpeed,
+                teamId: tank.item.teamId
             }]
         });
         this.bullets.get(id).item = this.room.items.get(id);
