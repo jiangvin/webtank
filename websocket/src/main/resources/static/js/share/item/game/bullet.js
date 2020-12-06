@@ -11,7 +11,7 @@ export default class Bullet extends MapItem {
     constructor(options) {
         super(options);
 
-        this.scale = 0.5;
+        this.scale = 0.4;
 
         this.bulletType = 0;
         switch (this.teamId) {
@@ -28,28 +28,38 @@ export default class Bullet extends MapItem {
         const displayWidth = this.image.width / this.image.widthPics * this.scale * Resource.getRoomScale();
         const displayHeight = this.image.height / this.image.heightPics * this.scale * Resource.getRoomScale();
 
-
         //已经爆炸
         if (this.action === 0) {
             this.bulletType = this.orientation;
         }
 
-        this.rotate(context, this.screenPoint);
-
+        //左右的时候子弹稍微上偏
+        let offsetY = 0;
+        if (this.orientation > 1) {
+            offsetY = -10;
+        }
         const center = {
-            x: this.screenPoint.x - displayWidth / 2,
-            y: this.screenPoint.y - displayHeight / 2
+            x: this.screenPoint.x,
+            y: this.screenPoint.y + offsetY
         };
+
+        this.rotate(context, center);
+
         context.drawImage(this.image,
             this.bulletType * this.image.width / this.image.widthPics, 0,
             this.image.width / this.image.widthPics, this.image.height / this.image.heightPics,
-            center.x, center.y,
+            center.x - displayWidth / 2, center.y - displayHeight / 2,
             displayWidth, displayHeight);
 
-        this.rotate(context, this.screenPoint, true);
+        this.rotate(context, center, true);
     };
 
     rotate(ctx, center, isBack) {
+        //已经爆炸
+        if (this.action === 0) {
+            return;
+        }
+
         //将绘图原点移到画布中点
         ctx.translate(center.x, center.y);
 
