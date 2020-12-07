@@ -27,10 +27,6 @@ export default class Tank extends MapItem {
         }
     }
 
-    getType() {
-        return "game_tank"
-    }
-
     update() {
         if (this.play) {
             this.play.update();

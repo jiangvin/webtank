@@ -220,7 +220,7 @@ export default class Room extends Stage {
         const gameItems = [];
         const commonItems = [];
         this.items.forEach(item => {
-            if (item.getType().startsWith("game")) {
+            if (item.getType() === "game") {
                 //滤掉屏幕外的元素
                 if (!item.isInScreen()) {
                     return;
@@ -252,7 +252,7 @@ export default class Room extends Stage {
     }
 
     drawEffect(target, container) {
-        if (target.getType() !== "game_tank") {
+        if (target.constructor.name !== "Tank") {
             return;
         }
 
