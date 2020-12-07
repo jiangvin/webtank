@@ -1,5 +1,6 @@
 import MapItem from "./mapitem.js";
 import Resource from "../../tool/resource.js";
+import Height from "./height.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -12,6 +13,7 @@ export default class Bullet extends MapItem {
         super(options);
 
         this.scale = 0.4;
+        this.z = Height.bullet();
 
         this.bulletType = 0;
         switch (this.teamId) {

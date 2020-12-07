@@ -17,6 +17,7 @@ import Tank from "../item/game/tank.js";
 import Confirm from "../item/confirm.js";
 import MapItem from "../item/game/mapitem.js";
 import Bullet from "../item/game/bullet.js";
+import Height from "../item/game/height.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -205,17 +206,69 @@ export default class Room extends Stage {
     };
 
     draw(ctx) {
-        //每秒排序一次
-        if (Resource.getRoot().frontFrame.totalFrames % 60 === 0) {
-            this.sortItems();
-        }
-
         this.drawBackground(ctx);
-        super.draw(ctx);
-        Control.draw(ctx);
+        this.drawItems(ctx);
+        this.drawControl(ctx);
         this.drawRoomInfo(ctx);
         this.drawMask(ctx);
         this.drawStatus(ctx);
+    }
+
+    drawItems(ctx) {
+        //获取并排序所有屏幕内的元素
+        //先绘制GameItem，再绘制CommonItem
+        const gameItems = [];
+        const commonItems = [];
+        this.items.forEach(item => {
+            if (item.getType().startsWith("game")) {
+                //滤掉屏幕外的元素
+                if (!item.isInScreen()) {
+                    return;
+                }
+                gameItems[gameItems.length] = item;
+                this.drawEffect(item, gameItems);
+            } else {
+                commonItems[commonItems.length] = item;
+            }
+        });
+        gameItems.sort((item1, item2) => {
+            if (item1.z !== item2.z) {
+                return item1.z - item2.z;
+            }
+            if (item1.y !== item2.y) {
+                return item1.y - item2.y;
+            }
+            return item1.x - item2.x;
+        });
+
+        //开始绘制
+        gameItems.forEach(item => {
+            item.draw(ctx);
+        });
+        commonItems.forEach(item => {
+            item.draw(ctx);
+        });
+        this.drawHotZone(ctx);
+    }
+
+    drawEffect(target, container) {
+        if (target.getType() !== "game_tank") {
+            return;
+        }
+
+        const shield = target.getEffectForShield();
+        if (shield) {
+            container[container.length] = shield;
+        }
+
+        const id = target.getEffectForId();
+        if (id) {
+            container[container.length] = id;
+        }
+    }
+
+    drawControl(ctx) {
+        Control.draw(ctx);
     }
 
     drawBackground(ctx) {
@@ -416,14 +469,11 @@ export default class Room extends Stage {
         }
 
         // load mapItem
-        const thisRoom = this;
         if (data.itemList) {
-            data.itemList.forEach(function (itemData) {
-                thisRoom.createOrUpdateMapItem(itemData);
+            data.itemList.forEach(itemData => {
+                this.createOrUpdateMapItem(itemData);
             })
         }
-
-        this.sortItems();
     }
 
     createMapItem(options) {
@@ -452,13 +502,6 @@ export default class Room extends Stage {
         const position = Common.getPositionFromId(data.id);
         item.x = position.x;
         item.y = position.y;
-
-        //调整z值
-        if (typeId === 5) {
-            item.z = 4;
-        } else if (typeId === 4) {
-            item.z = -4;
-        }
 
         //播放动画
         switch (typeId) {
@@ -495,9 +538,11 @@ export default class Room extends Stage {
                 break;
             case 4:
                 item.image = Resource.getOrCreateImage("river");
+                item.z = Height.river();
                 break;
             case 5:
                 item.image = Resource.getOrCreateImage("grass");
+                item.z = Height.grass();
                 break;
             case 6:
                 item.image = Resource.getOrCreateImage("red_king");
@@ -513,33 +558,6 @@ export default class Room extends Stage {
             item.isBarrier = true;
         }
     }
-
-    sortItems() {
-        //支援ES5的兼容写法
-        const array = [];
-        this.items.forEach(function (item) {
-            array[array.length] = item;
-        });
-
-        array.sort(function (item1, item2) {
-            if (item1.z !== item2.z) {
-                return item1.z - item2.z;
-            }
-
-            if (item1.y !== item2.y) {
-                return item1.y - item2.y;
-            }
-
-            return item1.x - item2.x;
-        });
-
-        this.items = new Map();
-        const map = this.items;
-        array.forEach(function (item) {
-            map.set(item.id, item);
-        })
-    };
-
 
     calculateBackgroundRepeat() {
         this.backgroundImage.repeatX = Math.round(this.size.width / this.backgroundImage.width);
@@ -857,7 +875,7 @@ export default class Room extends Stage {
         item.action = 0;
         item.orientation = 0;
         item.scale = bombScale;
-        item.z = 10;
+        item.z = Height.bomb();
         item.image = Resource.getOrCreateImage("bomb");
         const thisRoom = this;
         item.play = new Play(
@@ -868,10 +886,6 @@ export default class Room extends Stage {
             }, function () {
                 thisRoom.items.delete(item.id);
             });
-
-        //删除重加，确保在最上层绘制
-        this.items.delete(item.id);
-        this.items.set(item.id, item);
 
         //remove center
         if (item === this.view.center) {
@@ -894,14 +908,12 @@ export default class Room extends Stage {
     };
 
     createOrUpdateBullets(ammoList) {
-        let addNew = false;
         const thisStage = this;
         ammoList.forEach(function (ammo) {
             if (thisStage.items.has(ammo.id)) {
                 //已存在
                 thisStage.generalUpdateAttribute(ammo);
             } else {
-                addNew = true;
                 const bullet = thisStage.createBullet({
                     id: ammo.id,
                     x: ammo.x,
@@ -920,9 +932,6 @@ export default class Room extends Stage {
                 }
             }
         });
-        if (addNew) {
-            thisStage.sortItems();
-        }
     }
 
     createBullet(options) {
@@ -949,6 +958,7 @@ export default class Room extends Stage {
                 id: itemData.id,
                 x: itemData.x,
                 y: itemData.y,
+                z: Height.item(),
                 typeId: itemData.typeId.toLowerCase(),
                 image: Resource.getImage(imageId),
                 scale: 0.28

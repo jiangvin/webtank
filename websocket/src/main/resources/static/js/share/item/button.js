@@ -14,7 +14,7 @@ export default class Button extends Rect {
         }
         super(x, y, width, height);
         this.text = text;
-        this.z = 10;
+        this.z = 150;
         if (font) {
             this.font = font;
         } else {

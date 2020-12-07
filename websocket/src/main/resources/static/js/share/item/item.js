@@ -27,4 +27,8 @@ export default class Item {
     draw(ctx) {
     }
 
+    getType() {
+        return "common";
+    }
+
 }

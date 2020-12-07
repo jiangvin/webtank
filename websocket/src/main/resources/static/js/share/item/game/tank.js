@@ -7,6 +7,8 @@ import Resource from "../../tool/resource.js";
 import Play from "../play.js";
 import Status from "../../tool/status.js";
 import MapItem from "./mapitem.js";
+import Height from "./height.js";
+import Item from "../item.js";
 
 export default class Tank extends MapItem {
     constructor(options) {
@@ -23,6 +25,10 @@ export default class Tank extends MapItem {
         for (let key in options) {
             this[key] = options[key];
         }
+    }
+
+    getType() {
+        return "game_tank"
     }
 
     update() {
@@ -62,56 +68,59 @@ export default class Tank extends MapItem {
         //是否半透明效果
         if (this.hasGhost) {
             ctx.globalAlpha = 0.5;
-            this.z = 2;
+            this.z = Height.ghostTank();
         } else {
             ctx.globalAlpha = 1;
-            this.z = 0;
+            this.z = Height.common();
         }
 
         const size = 36 * this.scale;
-        const inScreen = super.draw(ctx, size, size);
+        super.draw(ctx, size, size);
         ctx.globalAlpha = 1.0;
-
-        if (inScreen) {
-            this.drawId(ctx);
-            this.drawShield(ctx);
-            this.drawTeam(ctx);
-        }
     }
 
-    getColor() {
-        if (!this.stage.showTeam) {
-            return "#FFF";
-        }
-
-        switch (this.teamId) {
-            case 1:
-                return '#F00';
-            case 2:
-                return '#00F';
-            default:
-                return "#FFF";
-        }
-    };
-
-    drawId(context) {
+    getEffectForId() {
         if (!this.showId) {
-            return;
+            return null;
         }
 
-        context.font = '14px Helvetica';
-        context.textAlign = 'center';
-        context.textBaseline = 'bottom';
-        context.fillStyle = this.getColor();
+        //ID
+        const id = this.id;
 
+        //ID颜色
+        let color = "#FFF";
+        if (this.stage.showTeam) {
+            switch (this.teamId) {
+                case 1:
+                    color = '#F00';
+                    break;
+                case 2:
+                    color = '#00F';
+                    break;
+            }
+        }
+
+        //ID坐标
         const x = this.screenPoint.x;
-        const y = this.screenPoint.y - 36 * this.scale / 2 - 5;
-        context.fillText(this.id, x, y);
+        const y = this.screenPoint.y - Resource.getUnitSize() * Resource.getRoomScale() * this.scale / 2 - 5;
+
+        return new Item({
+            x: x,
+            y: y,
+            z: Height.tankId(),
+            draw: function (ctx) {
+                ctx.font = '14px Helvetica';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillStyle = color;
+                ctx.fillText(id, x, y);
+            }
+        });
     }
 
-    drawShield(context) {
+    getEffectForShield() {
         if (!this.hasShield) {
-            return;
+            return null;
         }
 
         const thisItem = this;
@@ -124,30 +133,40 @@ export default class Tank extends MapItem {
                 });
             thisItem.play.shieldFrame = 0;
         }
+
         if (thisItem.play.shieldFrame === undefined) {
-            return;
+            return null;
         }
 
-        const image = Resource.getOrCreateImage("shield");
-        const displayWidth = image.width / image.widthPics * Resource.getRoomScale() * 0.9;
-        const displayHeight = image.height / image.heightPics * Resource.getRoomScale() * 0.9;
+        const shieldFrame = thisItem.play.shieldFrame;
 
-        context.globalAlpha = 0.7;
-        context.drawImage(image,
-            this.play.shieldFrame * image.width / image.widthPics, 0,
-            image.width / image.widthPics, image.height / image.heightPics,
-            this.screenPoint.x - displayWidth / 2, this.screenPoint.y - displayHeight / 2,
-            displayWidth, displayHeight);
-        context.globalAlpha = 1.0;
+        return new Item({
+            x: thisItem.screenPoint.x,
+            y: thisItem.screenPoint.y,
+            z: Height.shield(),
+            draw: function (ctx) {
+                const image = Resource.getOrCreateImage("shield");
+                const displayWidth = image.width / image.widthPics * Resource.getRoomScale() * 0.9;
+                const displayHeight = image.height / image.heightPics * Resource.getRoomScale() * 0.9;
+
+                ctx.globalAlpha = 0.7;
+                ctx.drawImage(image,
+                    shieldFrame * image.width / image.widthPics, 0,
+                    image.width / image.widthPics, image.height / image.heightPics,
+                    this.x - displayWidth / 2, this.y - displayHeight / 2,
+                    displayWidth, displayHeight);
+                ctx.globalAlpha = 1.0;
+            }
+        });
     };
 
-    drawTeam(context) {
-        if (!this.stage.showTeam || this.teamId <= 0 || this.teamId > 2) {
-            return;
-        }
-
-        context.strokeStyle = this.getColor();
-        const size = Resource.getUnitSize();
-        context.strokeRect(this.screenPoint.x - size / 2, this.screenPoint.y - size / 2, size, size);
-    };
+    // drawTeam(context) {
+    //     if (!this.stage.showTeam || this.teamId <= 0 || this.teamId > 2) {
+    //         return;
+    //     }
+    //
+    //     context.strokeStyle = this.getColor();
+    //     const size = Resource.getUnitSize();
+    //     context.strokeRect(this.screenPoint.x - size / 2, this.screenPoint.y - size / 2, size, size);
+    // };
 }

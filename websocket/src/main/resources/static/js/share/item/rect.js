@@ -19,7 +19,7 @@ export default class Rect extends Item {
         } else {
             this.image = Resource.getOrCreateImage("button");
         }
-        this.z = 9;
+        this.z = 100;
     }
 
     draw(ctx) {

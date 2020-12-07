@@ -5,6 +5,7 @@
  */
 import Item from "../item.js";
 import Resource from "../../tool/resource.js";
+import Height from "./height.js";
 
 export default class MapItem extends Item {
     constructor(options) {
@@ -14,7 +15,7 @@ export default class MapItem extends Item {
 
         this.x = 0;
         this.y = 0;
-        this.z = 0;
+        this.z = Height.common();
 
         this.scale = 1.0;
         //屏幕坐标
@@ -47,20 +48,7 @@ export default class MapItem extends Item {
         //先更新动画,保证事件顺利进行
         this.updateAnimation();
 
-        this.screenPoint = this.stage.convertToScreenPoint({
-            x: this.x * Resource.getRoomScale(),
-            y: this.y * Resource.getRoomScale()});
-        const point = this.screenPoint;
-        const half = Resource.getUnitSize() / 2;
-        if (point.x <= -half ||
-            point.y <= -half ||
-            point.x >= Resource.width() + half ||
-            point.y >= Resource.height() + half) {
-            return false;
-        }
-
         this.drawImage(ctx, displayWidth, displayHeight);
-        return true;
     }
 
     updateAnimation() {
@@ -87,4 +75,26 @@ export default class MapItem extends Item {
             this.screenPoint.x - displayWidth / 2, this.screenPoint.y - displayHeight / 2,
             displayWidth, displayHeight);
     };
+
+    getType() {
+        return "game";
+    }
+
+    /**
+     * 是否在画面中
+     */
+    isInScreen() {
+        const half = Resource.getUnitSize() * Resource.getRoomScale() / 2;
+
+        this.screenPoint = this.stage.convertToScreenPoint({
+            x: this.x * Resource.getRoomScale(),
+            y: this.y * Resource.getRoomScale()
+        });
+
+        return !(this.screenPoint.x <= -half ||
+            this.screenPoint.y <= -half ||
+            this.screenPoint.x >= Resource.width() + half ||
+            this.screenPoint.y >= Resource.height() + half);
+
+    }
 }
