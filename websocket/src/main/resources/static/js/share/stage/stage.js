@@ -25,6 +25,14 @@ export default class Stage {
             item.draw(ctx);
         });
 
+        this.drawHotZone(ctx);
+    }
+
+    /**
+     * 在debug模式下显示热区
+     * @param ctx
+     */
+    drawHotZone(ctx) {
         //测试代码, 显示事件区域
         if (!Resource.isDebug()) {
             return;
