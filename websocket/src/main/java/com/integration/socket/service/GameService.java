@@ -158,7 +158,7 @@ public class GameService {
         }
 
         //check room
-        if (!roomService.roomNameExists(roomDto.getRoomId())) {
+        if (!roomService.roomIdExists(roomDto.getRoomId())) {
             throw new CustomException("房间不存在:" + roomDto.getRoomId());
         }
 
@@ -167,7 +167,7 @@ public class GameService {
     }
 
     private StageRoom currentStage(UserBo userBo) {
-        if (StringUtils.isEmpty(userBo.getRoomId()) || !roomService.roomNameExists(userBo.getRoomId())) {
+        if (StringUtils.isEmpty(userBo.getRoomId()) || !roomService.roomIdExists(userBo.getRoomId())) {
             log.warn("can not find room:{} from user:{}", userBo.getRoomId(), userBo.getUsername());
             return null;
         }

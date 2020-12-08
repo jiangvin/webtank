@@ -47,8 +47,8 @@ public class RoomService {
         roomList.remove(room);
     }
 
-    public boolean roomNameExists(String roomName) {
-        return roomMap.containsKey(roomName);
+    public boolean roomIdExists(String roomId) {
+        return roomMap.containsKey(roomId);
     }
 
     public RoomListDto getRoomListDto(int start, int limit, String search) {
@@ -80,7 +80,7 @@ public class RoomService {
     }
 
     StageRoom create(RoomDto roomDto, UserBo creator) {
-        if (roomNameExists(roomDto.getRoomId())) {
+        if (roomIdExists(roomDto.getRoomId())) {
             throw new CustomException("房间名重复:" + roomDto.getRoomId());
         }
 

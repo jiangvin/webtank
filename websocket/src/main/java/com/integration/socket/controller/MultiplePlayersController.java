@@ -23,6 +23,7 @@ public class MultiplePlayersController {
 
     private static final int NAME_START = 2;
     private static final int NAME_LIMIT = 99;
+    private int roomId = 1;
 
     @Autowired
     private OnlineUserService onlineUserService;
@@ -46,16 +47,12 @@ public class MultiplePlayersController {
         return CommonUtil.getId();
     }
 
-    @GetMapping("/getRoomName")
-    public String getRoomName(@RequestParam(value = "roomName") String roomName) {
-        if (!roomService.roomNameExists(roomName)) {
-            return roomName;
-        }
-
+    @GetMapping("/getRoomId")
+    public String getRoomId() {
         for (int i = NAME_START; i <= NAME_LIMIT; ++i) {
-            String newRoomName = String.format("%s(%d)", roomName, i);
-            if (!roomService.roomNameExists(newRoomName)) {
-                return newRoomName;
+            String newRoomId = String.format("%03d", this.roomId++);
+            if (!roomService.roomIdExists(newRoomId)) {
+                return newRoomId;
             }
         }
 

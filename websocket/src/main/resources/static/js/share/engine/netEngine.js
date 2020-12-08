@@ -29,11 +29,9 @@ export default class NetEngine extends Engine {
                 //create room
                 if (!room.roomInfo.joinRoom) {
                     Common.addTimeEvent("CREATE_ROOM", function () {
-                        Common.getRequest("/multiplePlayers/getRoomName?roomName=" + Resource.getUser().userId + "的房间",
-                            function (roomName) {
-                                //set room id
-                                thisEngine.room.roomInfo.roomId = roomName;
-
+                        Common.getRequest("/multiplePlayers/getRoomId",
+                            function (roomId) {
+                                thisEngine.room.roomInfo.roomId = roomId;
                                 Connect.send("CREATE_ROOM", thisEngine.room.roomInfo);
                             });
                     }, 40);
