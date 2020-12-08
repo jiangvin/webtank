@@ -131,6 +131,8 @@ export default class Mission extends Stage {
 
     initControlEvent() {
         const thisMission = this;
+
+        //start game
         this.createControl({
             leftTop: {
                 x: 1486,
@@ -143,6 +145,7 @@ export default class Mission extends Stage {
             callBack: function () {
                 //困难模式未解锁的情况
                 if (thisMission.roomInfo.mapId < 1) {
+                    Common.addMessage("请先解锁普通模式!", "#F00");
                     return;
                 }
 
@@ -150,6 +153,7 @@ export default class Mission extends Stage {
             }
         });
 
+        //back
         this.createControl({
             leftTop: {
                 x: 1784,
@@ -160,10 +164,11 @@ export default class Mission extends Stage {
                 h: 96
             },
             callBack: function () {
-                Common.gotoStage("menu");
+                Common.preStage();
             }
         });
 
+        //select normal mode
         this.createControl({
             leftTop: {
                 x: 96,
@@ -178,6 +183,8 @@ export default class Mission extends Stage {
                 thisMission.roomInfo.mapId = 1;
             }
         });
+
+        //select hard mode
         this.createControl({
             leftTop: {
                 x: 336,

@@ -23,6 +23,7 @@ export default class Root {
 
         this.stages = [];
         this.stageIndex = 0;
+        this.preStageIndex = -1;
 
         this.messages = [];
 
@@ -157,21 +158,31 @@ export default class Root {
 
     nextStage(options) {
         if (this.stageIndex < this.stages.length - 1) {
-            ++this.stageIndex;
+            this.preStageIndex = this.stageIndex++;
             this.currentStage().init(options);
         }
     }
 
     lastStage(options) {
         if (this.stageIndex > 0) {
-            --this.stageIndex;
+            this.preStageIndex = this.stageIndex--;
+            this.currentStage().init(options);
         }
+    }
+
+    preStage(options) {
+        if (this.preStageIndex < 0 || this.preStageIndex === this.stageIndex) {
+            return;
+        }
+        this.stageIndex = this.preStageIndex;
+        this.preStageIndex = -1;
         this.currentStage().init(options);
     }
 
     gotoStage(id, options) {
         for (let i = 0; i < this.stages.length; ++i) {
             if (this.stages[i].getId() === id) {
+                this.preStageIndex = this.stageIndex;
                 this.stageIndex = i;
                 this.currentStage().init(options);
                 return;

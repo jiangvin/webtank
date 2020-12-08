@@ -22,6 +22,10 @@ export default class Common {
         Resource.getRoot().lastStage(options);
     }
 
+    static preStage(options) {
+        Resource.getRoot().preStage(options);
+    }
+
     static gotoStage(id, options) {
         Resource.getRoot().gotoStage(id, options);
     }
