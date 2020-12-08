@@ -141,13 +141,13 @@ export default class Room extends Stage {
 
     generateMaskInfo() {
         if (this.roomInfo.roomType === "PVP") {
-            return "RED vs BLUE";
+            return "对抗模式";
         }
 
         if (!this.roomInfo.isNet) {
             return "单人模式 " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
         }
-        return "MISSION " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
+        return "多人模式 " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
     }
 
     update() {
