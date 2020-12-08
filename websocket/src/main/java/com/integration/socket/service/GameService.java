@@ -1,6 +1,5 @@
 package com.integration.socket.service;
 
-import com.integration.dto.bot.BotDto;
 import com.integration.dto.bot.BotType;
 import com.integration.dto.message.MessageDto;
 import com.integration.dto.message.MessageType;
@@ -8,6 +7,7 @@ import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
 import com.integration.dto.room.TeamType;
 import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.bot.BaseBotBo;
 import com.integration.socket.model.stage.BaseStage;
 import com.integration.socket.model.stage.StageRoom;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
@@ -126,19 +126,17 @@ public class GameService {
         //add into new stage
         room.addUser(userBo);
 
-        addBot(roomDto);
+        addBot(room, roomDto.getRoomType());
     }
 
-    private void addBot(RoomDto roomDto) {
-        if (roomDto.getRoomType() != RoomType.PVE) {
+    private void addBot(StageRoom room, RoomType roomType) {
+        if (roomType != RoomType.PVE) {
             return;
         }
 
-        BotDto botDto = new BotDto();
-        botDto.setBotType(BotType.SIMPLE);
-        botDto.setRoomId(roomDto.getRoomId());
-        botDto.setTeamType(TeamType.BLUE);
-//        HttpUtil.postJsonRequest(String.format("http://%s/requestBot", botHost), String.class, botDto);
+        BaseBotBo bot = BaseBotBo.getInstance(BotType.SIMPLE);
+        bot.setTeamType(TeamType.BLUE);
+        room.addBot(bot);
     }
 
     private void joinRoom(MessageDto messageDto, String sendFrom) {

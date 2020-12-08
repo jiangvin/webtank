@@ -13,6 +13,7 @@ import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public abstract class BaseStage {
 
     ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
 
+    @Getter
     ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
     ConcurrentHashMap<String, BulletBo> bulletMap = new ConcurrentHashMap<>();
@@ -41,6 +43,7 @@ public abstract class BaseStage {
     /**
      * 游戏状态相关
      */
+    @Getter
     GameStatusDto gameStatus = new GameStatusDto();
 
     BaseStage(MessageService messageService) {
@@ -53,6 +56,7 @@ public abstract class BaseStage {
 
     /**
      * 处理消息入口
+     *
      * @param messageDto
      * @param sendFrom
      */
@@ -72,7 +76,7 @@ public abstract class BaseStage {
         }
     }
 
-    private void processTankFire(String tankId, String sendFrom) {
+    public void processTankFire(String tankId, String sendFrom) {
         if (tankId == null) {
             tankId = sendFrom;
         }
@@ -105,6 +109,7 @@ public abstract class BaseStage {
 
     /**
      * 拓展函数
+     *
      * @param ammo
      */
     void processTankFireExtension(BulletBo ammo) {
@@ -130,6 +135,7 @@ public abstract class BaseStage {
 
     /**
      * 更新控制，房间内的更新只更新网格
+     *
      * @param tankDto
      * @return
      */
@@ -158,6 +164,7 @@ public abstract class BaseStage {
 
     /**
      * 继承扩展函数
+     *
      * @param tankBo
      * @param tankDto
      */
@@ -173,18 +180,21 @@ public abstract class BaseStage {
 
     /**
      * 用户离开时触发
+     *
      * @param username 离开的用户名
      */
     public abstract void removeUser(String username);
 
     /**
      * 获取用户列表
+     *
      * @return 用户列表
      */
     abstract List<String> getUserList();
 
     /**
      * 获取房间号
+     *
      * @return 房间号
      */
     public abstract String getRoomId();
@@ -241,6 +251,7 @@ public abstract class BaseStage {
 
     /**
      * 删除tank的扩展函数
+     *
      * @param tankBo
      */
     void removeTankExtension(TankBo tankBo) {

@@ -18,6 +18,7 @@ import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.bot.BaseBotBo;
 import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.event.BaseEvent;
@@ -41,9 +42,11 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -80,7 +83,13 @@ public class StageRoom extends BaseStage {
     /**
      * 要更新的坦克列表，保证坦克每秒和客户端同步一次
      */
-    private List<TankBo> syncTankList = new ArrayList<>();
+    @Getter
+    private Set<TankBo> syncTankList = new HashSet<>();
+
+    /**
+     * BOT列表
+     */
+    private Map<String, BaseBotBo> botMap = new ConcurrentHashMap<>();
 
     /**
      * 在通关后记录玩家属性
@@ -185,7 +194,7 @@ public class StageRoom extends BaseStage {
         return mapManger.getRoomType();
     }
 
-    private MapBo getMapBo() {
+    public MapBo getMapBo() {
         return mapManger.getMapBo();
     }
 
@@ -210,6 +219,10 @@ public class StageRoom extends BaseStage {
 
         if (gameStatus.isPause()) {
             return;
+        }
+
+        for (Map.Entry<String, BaseBotBo> kv : botMap.entrySet()) {
+            kv.getValue().update();
         }
 
         for (Map.Entry<String, BulletBo> kv : bulletMap.entrySet()) {
@@ -256,7 +269,9 @@ public class StageRoom extends BaseStage {
 
     private void processEvent(BaseEvent event) {
         //先检查是否执行
-        if (!StringUtils.isEmpty(event.getUsernameCheck()) && !this.userMap.containsKey(event.getUsernameCheck())) {
+        if (!StringUtils.isEmpty(event.getUsernameCheck()) &&
+                !this.userMap.containsKey(event.getUsernameCheck()) &&
+                !this.botMap.containsKey(event.getUsernameCheck())) {
             return;
         }
 
@@ -287,6 +302,9 @@ public class StageRoom extends BaseStage {
             //1 ~ 5 秒陆续出现坦克
             for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
                 createTankForUser(kv.getValue(), random.nextInt(60 * 4) + 60);
+            }
+            for (Map.Entry<String, BaseBotBo> kv : botMap.entrySet()) {
+                createTankForUser(kv.getValue().getBotUser(), random.nextInt(60 * 4) + 60);
             }
             return;
         }
@@ -535,6 +553,7 @@ public class StageRoom extends BaseStage {
 
     /**
      * PVE模式下只作用于RED_KING
+     *
      * @param teamType
      */
     private void kingShield(TeamType teamType) {
@@ -800,7 +819,7 @@ public class StageRoom extends BaseStage {
 
         sendMessageToRoom(String.format("%s 选择了续关,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
         gameStatus.setType(GameStatusType.PAUSE);
-        gameStatus.setMessage(String.format("MISSION %d-%d", getMapId(), getSubId()));
+        gameStatus.setMessage(String.format("多人模式 %d-%d", getMapId(), getSubId()));
         init();
         processNextMapEvent(5, "重新开始");
     }
@@ -872,7 +891,7 @@ public class StageRoom extends BaseStage {
         sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
 
         //修改标题，下次使用
-        gameStatus.setMessage(String.format("MISSION %d-%d", getMapId(), getSubId()));
+        gameStatus.setMessage(String.format("多人模式 %d-%d", getMapId(), getSubId()));
         return gameStatus.getType() == GameStatusType.PAUSE;
     }
 
@@ -1011,8 +1030,12 @@ public class StageRoom extends BaseStage {
         }
 
         sendTankBombMessage(tankBo);
+
         //recreate
         UserBo userBo = this.userMap.get(tankBo.getUserId());
+        if (userBo == null && this.botMap.containsKey(tankBo.getUserId())) {
+            userBo = this.botMap.get(tankBo.getUserId()).getBotUser();
+        }
         if (userBo != null) {
             this.eventList.add(new CreateTankEvent(userBo, tankBo.getTankId(), 60 * 3));
         }
@@ -1125,6 +1148,18 @@ public class StageRoom extends BaseStage {
                 break;
         }
         return teamStr;
+    }
+
+    public void addBot(BaseBotBo bot) {
+        bot.setStage(this);
+        botMap.put(bot.getId(), bot);
+
+        //每有一个玩家加入，玩家生命+1
+        if (getRoomType() == RoomType.PVE && bot.getTeamType() == TeamType.RED) {
+            getMapBo().addPlayerLife(1);
+        }
+
+        createTankForUser(bot.getBotUser(), 60 * 3);
     }
 
     public void addUser(UserBo userBo) {
