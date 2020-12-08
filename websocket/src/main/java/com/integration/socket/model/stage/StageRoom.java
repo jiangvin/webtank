@@ -286,7 +286,7 @@ public class StageRoom extends BaseStage {
             sendMessageToRoom(null, MessageType.SERVER_READY);
             //1 ~ 5 秒陆续出现坦克
             for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-                createTankForUser(kv.getValue(), kv.getValue().getTeamType(), random.nextInt(60 * 4) + 60);
+                createTankForUser(kv.getValue(), random.nextInt(60 * 4) + 60);
             }
             return;
         }
@@ -1127,7 +1127,7 @@ public class StageRoom extends BaseStage {
         return teamStr;
     }
 
-    public void addUser(UserBo userBo, TeamType teamType) {
+    public void addUser(UserBo userBo) {
         //TODO - 暂停状态不允许加入,需要后期优化
         if (gameStatus.isPause()) {
             return;
@@ -1135,11 +1135,10 @@ public class StageRoom extends BaseStage {
 
         userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
-        userBo.setTeamType(teamType);
         sendStatusAndMessage(userBo, false);
 
         //每有一个玩家加入，玩家生命+1
-        if (getRoomType() == RoomType.PVE && teamType == TeamType.RED) {
+        if (getRoomType() == RoomType.PVE && userBo.getTeamType() == TeamType.RED) {
             getMapBo().addPlayerLife(1);
         }
 
@@ -1149,12 +1148,12 @@ public class StageRoom extends BaseStage {
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
         sendMessageToUser(getItemPool(), MessageType.ITEM, userBo.getUsername());
 
-        createTankForUser(userBo, teamType, 60 * 3);
+        createTankForUser(userBo, 60 * 3);
         sendReady(userBo.getUsername());
     }
 
-    private void createTankForUser(UserBo userBo, TeamType teamType, int timeoutForPlayer) {
-        if (isBot(teamType)) {
+    private void createTankForUser(UserBo userBo, int timeoutForPlayer) {
+        if (isBot(userBo.getTeamType())) {
             int count = getMapBo().getComputerStartCount();
             for (int i = 0; i < count; ++i) {
                 this.eventList.add(new CreateTankEvent(userBo, CommonUtil.getId(), 60 * random.nextInt(count)));

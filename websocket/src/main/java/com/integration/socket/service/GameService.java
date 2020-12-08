@@ -12,12 +12,10 @@ import com.integration.socket.model.stage.BaseStage;
 import com.integration.socket.model.stage.StageRoom;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import com.integration.util.CommonUtil;
-import com.integration.util.http.HttpUtil;
 import com.integration.util.model.CustomException;
 import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -32,10 +30,6 @@ import java.util.List;
 @Service
 @Slf4j
 public class GameService {
-
-    @Value("${bot.host:localhost:8200}")
-    private String botHost;
-
     /**
      * 用户管理
      */
@@ -96,6 +90,7 @@ public class GameService {
 
     /**
      * 续关
+     *
      * @param userId
      */
     UserRecord restartStage(String userId) {
@@ -126,9 +121,10 @@ public class GameService {
         }
 
         StageRoom room = roomService.create(roomDto, userBo);
+        userBo.setTeamType(roomDto.getJoinTeamType());
 
         //add into new stage
-        room.addUser(userBo, roomDto.getJoinTeamType());
+        room.addUser(userBo);
 
         addBot(roomDto);
     }
@@ -142,7 +138,7 @@ public class GameService {
         botDto.setBotType(BotType.SIMPLE);
         botDto.setRoomId(roomDto.getRoomId());
         botDto.setTeamType(TeamType.BLUE);
-        HttpUtil.postJsonRequest(String.format("http://%s/requestBot", botHost), String.class, botDto);
+//        HttpUtil.postJsonRequest(String.format("http://%s/requestBot", botHost), String.class, botDto);
     }
 
     private void joinRoom(MessageDto messageDto, String sendFrom) {
@@ -161,9 +157,10 @@ public class GameService {
         if (!roomService.roomIdExists(roomDto.getRoomId())) {
             throw new CustomException("房间不存在:" + roomDto.getRoomId());
         }
+        userBo.setTeamType(roomDto.getJoinTeamType());
 
         //add into new stage
-        roomService.get(roomDto.getRoomId()).addUser(userBo, roomDto.getJoinTeamType());
+        roomService.get(roomDto.getRoomId()).addUser(userBo);
     }
 
     private StageRoom currentStage(UserBo userBo) {
