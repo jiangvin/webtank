@@ -12,6 +12,8 @@ export default class Status {
         this.value = Status.statusPause();
         this.message = null;
         this.height = 0;
+
+        this.ack = false;
     }
 
     static setStatus(value, message, height) {
@@ -59,6 +61,14 @@ export default class Status {
 
     static statusPauseBlue() {
         return "pauseBlue";
+    }
+
+    static setAck(ack) {
+        Status.instance.ack = ack;
+    }
+
+    static getAck() {
+        return Status.instance.ack;
     }
 }
 Status.instance = new Status();

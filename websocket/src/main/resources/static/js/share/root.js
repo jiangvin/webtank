@@ -277,6 +277,7 @@ export default class Root {
     }
 
     serverReady() {
+        Status.setAck(true);
         if (Status.getValue() !== Status.statusPause()) {
             return;
         }

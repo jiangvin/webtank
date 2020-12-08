@@ -330,8 +330,9 @@ export default class Engine {
     };
 
     addConnectTimeoutEvent(callback) {
+        Status.setAck(false);
         Common.addTimeEvent("connect_timeout", function () {
-            if (Status.getValue() !== Status.statusPause()) {
+            if (Status.getAck()) {
                 return;
             }
 
