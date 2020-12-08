@@ -99,8 +99,12 @@ export default class Menu extends Stage {
                         Common.gotoStage("mission", new RoomInfo());
                     }
                 }
-                if (doorStatus.enterDoor2 && doorStatus.indexDoor2 < 22) {
-                    doorStatus.indexDoor2 += speed;
+                if (doorStatus.enterDoor2) {
+                    if (doorStatus.indexDoor2 < 22) {
+                        doorStatus.indexDoor2 += speed;
+                    } else {
+                        Common.gotoStage("net_list");
+                    }
                 }
 
                 const doorSize = {

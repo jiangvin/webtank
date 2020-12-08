@@ -98,14 +98,14 @@ export default class Tank extends MapItem {
 
         //ID坐标
         const x = this.screenPoint.x;
-        const y = this.screenPoint.y - Resource.getUnitSize() * Resource.getRoomScale() * this.scale / 2 - 5;
+        const y = this.screenPoint.y - Resource.getUnitSize() * Resource.getRoomScale() * this.scale / 2;
 
         return new Item({
             x: x,
             y: y,
             z: Height.tankId(),
             draw: function (ctx) {
-                ctx.font = '14px Helvetica';
+                ctx.font = '26px Helvetica';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 ctx.fillStyle = color;

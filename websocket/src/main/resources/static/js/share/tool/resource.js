@@ -36,6 +36,9 @@ export default class Resource {
         //room
         this.loadRoomResource();
 
+        //net
+        this.loadNetResource();
+
         //rank board
         this.loadAnimationImage("rank_board", 1, "jpg");
         this.loadAnimationImage("button_next");
@@ -88,6 +91,20 @@ export default class Resource {
         this.loadImage("mission_map", "mission/map");
         this.loadImage("mission_map_disable", "mission/map_disable");
         this.loadImage("mission_lock", "mission/lock");
+    }
+
+    loadNetResource() {
+        this.loadImage(
+            "net_background",
+            "net/background",
+            "jpg"
+        );
+
+        this.loadImage(
+            "net_create",
+            "net/create",
+            "jpg"
+        );
     }
 
     loadRoomResource() {
