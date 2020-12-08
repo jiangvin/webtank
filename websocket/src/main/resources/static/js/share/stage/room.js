@@ -730,7 +730,7 @@ export default class Room extends Stage {
             Sound.lose();
         } else if (status.message.indexOf("恭喜") >= 0 || status.message.indexOf("胜利") >= 0) {
             Sound.win();
-        } else if (status.message.indexOf("MISSION") >= 0 || status.message.indexOf("vs") >= 0) {
+        } else {
             Sound.bgm();
         }
     }
