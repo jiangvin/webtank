@@ -113,6 +113,14 @@ export default class Stage {
         }
     }
 
+    removeItemFromId(itemId) {
+        const item = this.items.get(itemId);
+        if (!item) {
+            return;
+        }
+        this.removeItem(item);
+    }
+
     /**
      * 切换场景时运行
      */

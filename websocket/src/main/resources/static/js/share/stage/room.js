@@ -122,6 +122,8 @@ export default class Room extends Stage {
         //初始化玩家/敌方生命，为开头显示生命信息做准备
         this.maskPlayerLife = null;
         this.maskEnemyLife = null;
+        this.roomInfo.playerLife = null;
+        this.roomInfo.computerLife = null;
     }
 
     hideMask() {
@@ -396,8 +398,8 @@ export default class Room extends Stage {
             img.width * 2, img.height * 2);
 
         //绘制生命
-        if (!this.maskPlayerLife || !this.maskEnemyLife) {
-            if (!this.roomInfo.playerLife || !this.roomInfo.computerLife) {
+        if (this.maskPlayerLife === null || this.maskEnemyLife === null) {
+            if (this.roomInfo.playerLife === null || this.roomInfo.computerLife === null) {
                 //还未加载完毕，不显示生命
                 return;
             } else {
@@ -975,4 +977,8 @@ export default class Room extends Stage {
                 });
         });
     };
+
+    getId() {
+        return "room";
+    }
 }

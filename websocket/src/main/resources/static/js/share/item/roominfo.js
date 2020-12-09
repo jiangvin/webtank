@@ -6,6 +6,8 @@
 
 export default class RoomInfo {
     constructor(isNet) {
+        this.playerLife = null;
+        this.computerLife = null;
         this.hardMode = false;
         this.mapId = 1;
         this.subId = 1;

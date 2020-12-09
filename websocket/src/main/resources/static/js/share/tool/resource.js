@@ -105,6 +105,8 @@ export default class Resource {
             "net/create",
             "jpg"
         );
+
+        this.loadImage("enter", "net/enter");
     }
 
     loadRoomResource() {

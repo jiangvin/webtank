@@ -28,6 +28,7 @@ export default class Index {
         const debug = Adapter.getQueryString("debug");
         if (debug) {
             Resource.setDebug(debug);
+            this.initTouchDebug();
         }
 
         const thisIndex = this;
@@ -53,6 +54,15 @@ export default class Index {
             this.root.addGameStage();
             this.start();
         }
+    }
+
+    initTouchDebug() {
+        document.addEventListener('touchstart', function (e) {
+            for (let i = 0; i < e.touches.length; ++i) {
+                const touchPoint = Control.getTouchPoint(e.touches[i]);
+                console.log("point: " + touchPoint.x + "," + touchPoint.y);
+            }
+        });
     }
 
     initEvent() {
