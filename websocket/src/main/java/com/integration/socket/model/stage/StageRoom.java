@@ -1359,8 +1359,8 @@ public class StageRoom extends BaseStage {
         if (tankDto.getX() != null && tankDto.getY() != null) {
             tankBo.setX(tankDto.getX());
             tankBo.setY(tankDto.getY());
+            refreshTankGridMap(tankBo);
         }
-        refreshTankGridMap(tankBo);
     }
 
     private void refreshTankGridMap(TankBo tankBo) {
