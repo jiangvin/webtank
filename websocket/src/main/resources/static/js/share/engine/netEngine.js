@@ -144,6 +144,8 @@ export default class NetEngine extends Engine {
         Common.postEncrypt("/shop/buyWithCoin", {
             userId: Resource.getUser().deviceId,
             buyType: "AGAIN_FOR_NET"
+        }, function (data) {
+            Resource.setUser(data);
         });
     }
 }
