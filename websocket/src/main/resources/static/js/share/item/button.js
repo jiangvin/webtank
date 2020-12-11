@@ -9,8 +9,8 @@ import Rect from "./rect.js";
 export default class Button extends Rect {
     constructor(text, x, y, callBack, width, height, font) {
         if (!width || !height) {
-            width = 284;
-            height = 65;
+            width = 560;
+            height = 130;
         }
         super(x, y, width, height);
         this.text = text;
@@ -18,7 +18,7 @@ export default class Button extends Rect {
         if (font) {
             this.font = font;
         } else {
-            this.font = '30px Arial';
+            this.font = '60px Arial';
         }
 
         this.generateControlUnit(callBack);

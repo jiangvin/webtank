@@ -676,17 +676,17 @@ export default class Room extends Stage {
             const score = new Item({
                 z: 10,
                 draw: function (ctx) {
-                    ctx.font = 'bold 30px Microsoft YaHei UI';
+                    ctx.font = 'bold 60px Microsoft YaHei UI';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillStyle = '#FFF';
                     ctx.fillText("当前得分: " + status.score,
                         Resource.width() / 2,
-                        Resource.height() * .3 + 60);
+                        Resource.height() * .3 + 120);
 
                     ctx.fillText("当前排名: " + status.rank,
                         Resource.width() / 2,
-                        Resource.height() * .3 + 100);
+                        Resource.height() * .3 + 200);
                 }
             });
             this.addItem(score);
@@ -704,24 +704,24 @@ export default class Room extends Stage {
                 Resource.getRoot().engine.again();
             });
             again.drawText = function (ctx) {
-                ctx.font = '30px Arial';
+                ctx.font = '60px Arial';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#fff';
-                ctx.fillText("重玩本关", this.x - 95, this.y);
+                ctx.fillText("重玩本关", this.x - 190, this.y);
 
                 const coin = Resource.getOrCreateImage("coin");
                 ctx.drawImage(coin,
                     0, 0,
                     coin.width, coin.height,
-                    this.x + 27, this.y - 15,
-                    30, 30);
+                    this.x + 54, this.y - 30,
+                    60, 60);
 
-                ctx.font = '20px Arial';
-                ctx.fillText("x 30", this.x + 60, this.y);
+                ctx.font = '40px Arial';
+                ctx.fillText("x 30", this.x + 120, this.y);
             };
             this.addItem(again);
-            buttonHeight += 75;
+            buttonHeight += 150;
             const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
                 Resource.getRoot().gotoStage("menu");
             });
