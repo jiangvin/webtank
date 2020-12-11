@@ -61,19 +61,6 @@ public class OnlineUserService {
         log.info("user:{} add into the cache(count:{})", userBo.getUsername(), newUserCache.size());
     }
 
-    public void subscribeInUserCache(String username, String destination) {
-        if (!newUserCache.containsKey(username)) {
-            return;
-        }
-        UserBo userBo = newUserCache.get(username);
-        if (userBo.getSubscribeList().contains(destination)) {
-            return;
-        }
-
-        log.info("user:{} subscribe the path:{}", username, destination);
-        userBo.getSubscribeList().add(destination);
-    }
-
     UserBo remove(String key) {
         removeInCache(key);
         return removeInUserMap(key);

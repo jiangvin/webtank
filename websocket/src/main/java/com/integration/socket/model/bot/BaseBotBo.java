@@ -21,7 +21,7 @@ public abstract class BaseBotBo {
     private UserBo botUser;
 
     BaseBotBo() {
-        botUser = new UserBo(CommonUtil.getId(), CommonUtil.getId());
+        botUser = new UserBo(CommonUtil.getId());
     }
 
     public void setTeamType(TeamType teamType) {

@@ -7,9 +7,6 @@ import lombok.Data;
 import lombok.NonNull;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -21,14 +18,11 @@ public class UserBo {
      * 全局唯一, 但会根据重名情况进行变化
      */
     @NonNull private String username;
-    @NonNull private String socketSessionId;
 
     /**
      * 网页用户没有userId
      */
     private String userId;
-
-    final private List<String> subscribeList = new ArrayList<>();
 
     /**
      * 用户当前所在的房间号

@@ -24,7 +24,7 @@ public class SocketUserBo extends UserBo {
     private final Session session;
 
     private SocketUserBo(Session session, String username, String userId) {
-        super(username, session.getId());
+        super(username);
         this.session = session;
         this.setUserId(userId);
     }
