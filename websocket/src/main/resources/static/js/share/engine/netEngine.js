@@ -114,23 +114,13 @@ export default class NetEngine extends Engine {
         }
     }
 
-    sendSyncMessage(send, center) {
-        if (center.x === send.x
-            && center.y === send.y
-            && center.orientation === send.orientation
-            && center.action === send.action) {
-            return;
-        }
-        send.x = center.x;
-        send.y = center.y;
-        send.orientation = center.orientation;
-        send.action = center.action;
+    sendSyncMessage(center) {
         Connect.send("UPDATE_TANK_CONTROL",
             {
-                orientation: send.orientation,
-                action: send.action,
-                x: send.x,
-                y: send.y
+                orientation: center.orientation,
+                action: center.action,
+                x: center.x,
+                y: center.y
             });
     };
 

@@ -88,7 +88,7 @@ export default class Engine {
         }
 
         if (needSend) {
-            this.sendSyncMessage(room.send, center);
+            this.sendSyncMessage(center);
         }
     }
 
@@ -174,15 +174,14 @@ export default class Engine {
         } else {
             center.orientation = newControl.orientation;
         }
-        this.sendSyncMessage(room.send, center);
+        this.sendSyncMessage(center);
     }
 
     /**
      * 在netEngine中重载
-     * @param send
      * @param center
      */
-    sendSyncMessage(send, center) {
+    sendSyncMessage(center) {
     };
 
     generateNewControl(stage, tank, orientation, action) {
