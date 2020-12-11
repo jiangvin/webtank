@@ -8,7 +8,6 @@ import com.integration.util.CommonUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,18 +21,10 @@ import java.util.List;
 @Service
 @Slf4j
 public class MessageService {
-    private static final String QUEUE_PATH = "/queue/send";
-
     private static final int MAX_LOG_LENGTH = 256;
 
     @Autowired
     private OnlineUserService onlineUserService;
-
-    private final SimpMessagingTemplate simpMessagingTemplate;
-
-    public MessageService(SimpMessagingTemplate simpMessagingTemplate) {
-        this.simpMessagingTemplate = simpMessagingTemplate;
-    }
 
     public void sendMessage(MessageDto messageDto) {
         List<String> sendToList = messageDto.getSendToList();
@@ -64,11 +55,6 @@ public class MessageService {
             if (userBo instanceof SocketUserBo) {
                 SocketUserBo socketUserBo = (SocketUserBo) userBo;
                 socketUserBo.sendMessage(messageDto);
-            } else {
-                simpMessagingTemplate.convertAndSendToUser(
-                    userId,
-                    QUEUE_PATH,
-                    messageDto);
             }
         } catch (Exception e) {
             log.error("catch send user:{} message error:", userBo.getUsername(), e);
