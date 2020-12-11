@@ -27,14 +27,6 @@ public class MainController {
         return mav;
     }
 
-    @GetMapping("/chat")
-    public ModelAndView chat() {
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("chat");
-        mav.getModel().put("name", "chat");
-        return mav;
-    }
-
     @GetMapping("/map")
     public ModelAndView map() {
         ModelAndView mav = new ModelAndView();
