@@ -1,5 +1,7 @@
 package com.integration.dto.map;
 
+import java.util.Random;
+
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -44,5 +46,9 @@ public enum OrientationType {
             }
         }
         return OrientationType.UNKNOWN;
+    }
+
+    public static OrientationType getRandomOrientation() {
+        return convert(new Random().nextInt(4));
     }
 }

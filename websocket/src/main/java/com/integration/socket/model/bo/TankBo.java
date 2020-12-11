@@ -22,7 +22,7 @@ import java.util.List;
 public class TankBo {
     private String tankId;
     private String userId;
-    private OrientationType orientationType = OrientationType.UP;
+    private OrientationType orientationType = OrientationType.getRandomOrientation();
     private ActionType actionType = ActionType.STOP;
     private TeamType teamType;
     private double x;

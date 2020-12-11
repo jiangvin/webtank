@@ -800,7 +800,7 @@ export default class AiEngine extends Engine {
                 hasShield: hasShield,
                 x: point.x,
                 y: point.y,
-                orientation: 0,
+                orientation: Math.floor(Math.random() * 4),
                 action: 0,
                 speed: thisEngine.tankTypes[typeId].speed
             }]
