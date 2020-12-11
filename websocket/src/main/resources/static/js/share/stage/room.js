@@ -53,7 +53,7 @@ export default class Room extends Stage {
         };
 
         //加载字体
-        const myFont = new FontFace('gameTitle', 'url(../../../font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
+        const myFont = new FontFace('gameFont', 'url(font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
         myFont.load().then(font => {
             document.fonts.add(font)
         });
@@ -339,7 +339,7 @@ export default class Room extends Stage {
             this.roomInfo.roomId
         ];
 
-        ctx.font = '36px gameTitle';
+        ctx.font = '36px gameFont';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
@@ -409,7 +409,7 @@ export default class Room extends Stage {
             }
         }
 
-        ctx.font = '44px gameTitle';
+        ctx.font = '44px gameFont';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
@@ -437,7 +437,7 @@ export default class Room extends Stage {
 
     drawStatus(ctx) {
         if (Status.getMessage()) {
-            ctx.font = '100px gameTitle';
+            ctx.font = '100px gameFont';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = '#FFF';
