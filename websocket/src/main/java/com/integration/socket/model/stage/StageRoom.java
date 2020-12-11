@@ -36,6 +36,7 @@ import com.integration.util.model.CustomException;
 import com.integration.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.StringUtils;
 
 import java.awt.Point;
@@ -214,6 +215,7 @@ public class StageRoom extends BaseStage {
     }
 
     @Override
+    @Async
     public void update() {
         processEvent();
 
@@ -231,8 +233,7 @@ public class StageRoom extends BaseStage {
         removeBullets();
 
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            TankBo tankBo = kv.getValue();
-            updateTank(tankBo);
+            updateTank(kv.getValue());
         }
         syncTanks();
     }
@@ -837,26 +838,27 @@ public class StageRoom extends BaseStage {
     }
 
     private void processNextMapEvent(int loadSeconds, String tips) {
-        int clearSeconds = loadSeconds - 2;
         for (int i = 1; i <= loadSeconds; ++i) {
             String content = String.format("%d秒后%s...", i, tips);
             MessageEvent messageEvent = new MessageEvent(content, MessageType.SYSTEM_MESSAGE);
             messageEvent.setTimeout((loadSeconds - i) * 60);
             this.eventList.add(messageEvent);
         }
+
+        int frames = loadSeconds * 60;
         //清空地图
         MessageEvent cleanEvent = new MessageEvent(null, MessageType.CLEAR_MAP);
-        cleanEvent.setTimeout(clearSeconds * 60);
+        cleanEvent.setTimeout(frames++);
         this.eventList.add(cleanEvent);
 
         //更改标题
         MessageEvent changeTitle = new MessageEvent(new GameStatusDto(GameStatusType.PAUSE, gameStatus.getMessage()), MessageType.GAME_STATUS);
-        changeTitle.setTimeout(clearSeconds * 60);
+        changeTitle.setTimeout(frames++);
         this.eventList.add(changeTitle);
 
         //加载地图
         LoadMapEvent loadEvent = new LoadMapEvent();
-        loadEvent.setTimeout(loadSeconds * 60);
+        loadEvent.setTimeout(frames);
         this.eventList.add(loadEvent);
     }
 
