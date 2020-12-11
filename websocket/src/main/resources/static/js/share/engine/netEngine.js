@@ -93,8 +93,7 @@ export default class NetEngine extends Engine {
 
                 //显示返回按钮
                 const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
-                    Resource.getRoot().lastStage();
-                    Resource.getRoot().currentStage().initMenu();
+                    Resource.getRoot().gotoStage("menu");
                 });
                 thisEngine.room.addItem(back);
             }
