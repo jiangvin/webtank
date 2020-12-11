@@ -49,41 +49,41 @@ export default class Confirm {
 
                 //标题
                 if (thisConfirm.title) {
-                    ctx.font = '26px Arial';
+                    ctx.font = '52px Arial';
                     ctx.fillText(
                         thisConfirm.title,
                         Resource.width() / 2,
-                        Resource.height() / 2 - thisConfirm.background.height / 2 + 30);
+                        Resource.height() / 2 - thisConfirm.background.height / 2 + 60);
                 }
 
                 //描述
-                ctx.font = '18px Arial';
-                let height = Resource.height() / 2 - 20;
+                ctx.font = '36px Arial';
+                let height = Resource.height() / 2 - 40;
                 thisConfirm.textList.forEach(function (tex) {
                     ctx.fillText(tex, Resource.width() / 2, height);
-                    height += 20;
+                    height += 40;
                 });
             }
         });
         this.stage.addItem(thisConfirm.font);
 
         thisConfirm.ok = new Button(thisConfirm.buttonText,
-            thisConfirm.background.x - 70,
-            thisConfirm.background.y + thisConfirm.background.height / 2 - 35,
+            thisConfirm.background.x - 140,
+            thisConfirm.background.y + thisConfirm.background.height / 2 - 70,
             function () {
                 thisConfirm.callback();
                 if (thisConfirm.autoClose) {
                     thisConfirm.close();
                 }
-            }, 110, 50, '24px Arial');
+            }, 220, 100, '48px Arial');
         this.stage.addItem(thisConfirm.ok);
 
         thisConfirm.cancel = new Button("取消",
-            thisConfirm.background.x + 70,
-            thisConfirm.background.y + thisConfirm.background.height / 2 - 35,
+            thisConfirm.background.x + 140,
+            thisConfirm.background.y + thisConfirm.background.height / 2 - 70,
             function () {
                 thisConfirm.close();
-            }, 110, 50, '24px Arial');
+            }, 220, 100, '48px Arial');
         this.stage.addItem(thisConfirm.cancel);
     }
 
