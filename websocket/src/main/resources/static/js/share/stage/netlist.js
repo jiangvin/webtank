@@ -3,6 +3,7 @@ import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import ControlUnit from "../item/controlunit.js";
 import RoomInfo from "../item/roominfo.js";
+import TeamSelector from "../item/teamselector.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -80,7 +81,7 @@ export default class NetList extends Stage {
                     }
                     this.createItem({
                         id: "button_" + i,
-                        draw: function (ctx) {
+                        draw: ctx => {
                             ctx.displayCenter("enter",
                                 1668,
                                 380 + i * interval,
@@ -96,12 +97,22 @@ export default class NetList extends Stage {
                                 x: 1753,
                                 y: 412 + i * interval
                             },
-                            function () {
+                            () => {
                                 const room = roomList[i];
                                 const roomInfo = new RoomInfo(true);
                                 roomInfo.roomId = room.roomId;
+                                roomInfo.roomType = room.roomType;
                                 roomInfo.joinRoom = true;
-                                Common.gotoStage("room", roomInfo);
+                                if (room.roomType === "PVE") {
+                                    //闯关模式
+                                    Common.gotoStage("room", roomInfo);
+                                } else {
+                                    //对抗模式
+                                    new TeamSelector(this, (teamType) => {
+                                        roomInfo.joinTeamType = teamType;
+                                        Common.gotoStage("room", roomInfo);
+                                    })
+                                }
                             }
                         )
                     })
