@@ -198,6 +198,7 @@ export default class Resource {
 
     static setDebug(debug) {
         Resource.instance.debug = debug;
+        Resource.instance.user.setDebug(debug);
     }
 
     static generateClientId() {
