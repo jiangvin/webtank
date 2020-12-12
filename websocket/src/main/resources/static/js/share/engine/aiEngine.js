@@ -22,8 +22,6 @@ export default class AiEngine extends Engine {
         thisEngine.playerLifeCount = 0;
         thisEngine.computerLifeCount = 0;
 
-        thisEngine.playerTypeId = Resource.getUser().getTankType();
-
         //整理随机道具池
         thisEngine.itemTypes = ["star", "shield", "life", "king", "bullet"];
         if (Resource.getUser().hasRedStar()) {
@@ -317,23 +315,7 @@ export default class AiEngine extends Engine {
                 const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.68, function () {
                     //进入下一关
                     ++thisEngine.room.roomInfo.subId;
-                    Status.setStatus(null, thisEngine.room.generateMaskInfo());
-
-                    //保存坦克类型和数量,排除同归于尽的情况
-                    if (thisEngine.tanks.has(Resource.getUser().userId)) {
-                        thisEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
-                    }
-
-                    //清空场景
-                    thisEngine.events = [];
-                    thisEngine.tanks.clear();
-                    thisEngine.bullets.clear();
-                    thisEngine.items.clear();
-                    thisEngine.room.clear();
-
-                    //进入下一关
-                    thisEngine.initStage();
-                    Sound.bgm();
+                    thisEngine.startGame();
                 });
                 thisEngine.room.addItem(next);
             });
@@ -465,7 +447,7 @@ export default class AiEngine extends Engine {
             const item = v;
 
             const distance = Common.distance(tank.item.x, tank.item.y, item.x, item.y);
-            if (distance > Resource.getUnitSize()) {
+            if (distance >= Resource.getUnitSize()) {
                 continue;
             }
 
@@ -495,6 +477,7 @@ export default class AiEngine extends Engine {
                     break;
                 case "bullet":
                     tank.bulletCount += 1;
+                    tank.maxBulletCount += 1;
                     this.removeGameItem(k);
                     break;
                 case "ghost":
@@ -798,6 +781,7 @@ export default class AiEngine extends Engine {
             id: id,
             shieldTimeout: hasShield ? 60 * 3 : 0,
             typeId: typeId,
+            maxBulletCount: thisEngine.tankTypes[typeId].ammoMaxCount,
             bulletCount: thisEngine.tankTypes[typeId].ammoMaxCount,
             bulletReloadTime: thisEngine.tankTypes[typeId].ammoReloadTime
         });
@@ -819,15 +803,30 @@ export default class AiEngine extends Engine {
     }
 
     createPlayerTank() {
-        const thisEngine = this;
-        this.addTimeEvent(Math.random() * 60 * 3 + 60, function () {
-            --thisEngine.room.roomInfo.playerLife;
-            thisEngine.createTank(thisEngine.mapInfo.playerStartPos,
-                Resource.getUser().userId,
-                thisEngine.playerTypeId,
-                1, true);
-            //恢复玩家保存的类型
-            thisEngine.playerTypeId = Resource.getUser().getTankType();
+        //获取类型
+        let tankType;
+        if (this.playerTankStatus) {
+            tankType = this.playerTankStatus.typeId;
+        } else {
+            tankType = Resource.getUser().getTankType();
+        }
+
+        const id = Resource.getUser().userId;
+        this.addTimeEvent(Math.random() * 60 * 3 + 60, () => {
+            --this.room.roomInfo.playerLife;
+            this.createTank(this.mapInfo.playerStartPos,
+                id,
+                tankType,
+                1,
+                true);
+
+            //复制并恢复玩家保存的类型
+            if (this.playerTankStatus) {
+                this.tanks.get(id).bulletCount = this.playerTankStatus.maxBulletCount;
+                this.tanks.get(id).maxBulletCount = this.playerTankStatus.maxBulletCount;
+                this.tanks.get(id).item.hasGhost = this.playerTankStatus.item.hasGhost;
+                this.playerTankStatus = null;
+            }
         });
     }
 
@@ -949,28 +948,30 @@ export default class AiEngine extends Engine {
             Resource.setUser(data);
             Common.addMessage("续关成功!", '#FF0');
 
-            //续关
-            Status.setStatus(null, thisEngine.room.generateMaskInfo());
-
             //重置初始生命
             thisEngine.playerLifeCount = 0;
 
-            //保存坦克类型
-            if (thisEngine.tanks.get(Resource.getUser().userId)) {
-                thisEngine.playerTypeId = thisEngine.tanks.get(Resource.getUser().userId).typeId;
-            }
-
-            //清空场景
-            thisEngine.events = [];
-            thisEngine.tanks.clear();
-            thisEngine.bullets.clear();
-            thisEngine.items.clear();
-            thisEngine.room.clear();
-
-            //进入下一关
-            thisEngine.initStage();
-            Sound.bgm();
+            thisEngine.startGame();
         });
+    }
+
+    startGame() {
+        //关卡信息
+        Status.setStatus(null, this.room.generateMaskInfo());
+
+        //保存坦克状态,用于下一关使用
+        this.playerTankStatus = this.tanks.get(Resource.getUser().userId);
+
+        //清空场景
+        this.events = [];
+        this.tanks.clear();
+        this.bullets.clear();
+        this.items.clear();
+        this.room.clear();
+
+        //进入下一关
+        this.initStage();
+        Sound.bgm();
     }
 }
 AiEngine.keepGoingRate = 120;

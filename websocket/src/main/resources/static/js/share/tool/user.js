@@ -3,6 +3,7 @@
  * @description
  * @date 2020/5/26
  */
+import Resource from "./resource.js";
 
 export default class User {
     constructor() {
@@ -54,14 +55,23 @@ export default class User {
     }
 
     hasRedStar() {
+        if (Resource.isDebug()) {
+            return true;
+        }
         return this.redStarExpired && this.redStarExpired > new Date().getTime();
     }
 
     hasGhost() {
+        if (Resource.isDebug()) {
+            return true;
+        }
         return this.ghostExpired && this.ghostExpired > new Date().getTime();
     }
 
     hasClock() {
+        if (Resource.isDebug()) {
+            return true;
+        }
         return this.clockExpired && this.clockExpired > new Date().getTime();
     }
 
