@@ -95,7 +95,7 @@ public class StageRoom extends BaseStage {
     /**
      * 在通关后记录玩家属性
      */
-    private Map<String, TankTypeDto> tankTypeSaveMap = new ConcurrentHashMap<>();
+    private Map<String, TankBo> tankStatusSaveMap = new ConcurrentHashMap<>();
 
     @Getter
     private String roomId;
@@ -172,15 +172,15 @@ public class StageRoom extends BaseStage {
     }
 
     private int saveTankType() {
-        this.tankTypeSaveMap.clear();
+        this.tankStatusSaveMap.clear();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo tankBo = kv.getValue();
             if (tankBo.isBot()) {
                 continue;
             }
-            this.tankTypeSaveMap.put(tankBo.getUserId(), tankBo.getType());
+            this.tankStatusSaveMap.put(tankBo.getUserId(), tankBo);
         }
-        return this.tankTypeSaveMap.size();
+        return this.tankStatusSaveMap.size();
     }
 
     private int getMapId() {
@@ -521,6 +521,7 @@ public class StageRoom extends BaseStage {
                 return false;
             case BULLET:
                 tankBo.setBulletCount(tankBo.getBulletCount() + 1);
+                tankBo.setMaxBulletCount(tankBo.getMaxBulletCount() + 1);
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return true;
@@ -1225,24 +1226,27 @@ public class StageRoom extends BaseStage {
         tankBo.setTankId(tankId);
         tankBo.setUserId(userBo.getUsername());
         tankBo.setTeamType(userBo.getTeamType());
-
-        //设定类型
-        TankTypeDto initType = getTankType(lifeMap, userBo);
-        TankTypeDto saveType = this.tankTypeSaveMap.get(userBo.getUsername());
-        if (saveType != null) {
-            tankBo.setType(saveType);
-            this.tankTypeSaveMap.remove(userBo.getUsername());
-        } else {
-            tankBo.setType(initType);
-        }
-
+        setStartPoint(tankBo);
         if (!tankBo.isBot()) {
             tankBo.setShieldTimeout(DEFAULT_SHIELD_TIME_FOR_NEW_TANK);
         }
-        setStartPoint(tankBo);
-        tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
-        tankMap.put(tankBo.getTankId(), tankBo);
 
+        //复制并恢复玩家保存的状态
+        TankTypeDto initType = getTankType(lifeMap, userBo);
+        TankBo saveTank = this.tankStatusSaveMap.get(userBo.getUsername());
+        if (saveTank == null) {
+            tankBo.setType(initType);
+            tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
+            tankBo.setMaxBulletCount(tankBo.getType().getAmmoMaxCount());
+        } else {
+            this.tankStatusSaveMap.remove(userBo.getUsername());
+            tankBo.setType(saveTank.getType());
+            tankBo.setBulletCount(saveTank.getMaxBulletCount());
+            tankBo.setMaxBulletCount(saveTank.getMaxBulletCount());
+            tankBo.setHasGhost(saveTank.isHasGhost());
+        }
+
+        tankMap.put(tankBo.getTankId(), tankBo);
         sendTankToRoom(tankBo);
     }
 

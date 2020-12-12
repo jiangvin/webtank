@@ -30,6 +30,7 @@ public class TankBo {
     private TankTypeDto type;
     private int reloadTime;
     private int bulletCount;
+    private int maxBulletCount;
     private List<String> gridKeyList = new ArrayList<>();
     private int shieldTimeout = 0;
     private boolean hasGhost = false;
