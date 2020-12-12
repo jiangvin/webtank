@@ -96,6 +96,7 @@ export default class Stage {
             }
         }
         this.controlUnits.set(controlUnit.id, controlUnit);
+        return controlUnit;
     }
 
     addItem(item) {
@@ -111,6 +112,10 @@ export default class Stage {
         if (item.controlUnit) {
             this.controlUnits.delete(item.controlUnit.id);
         }
+    }
+
+    removeControl(control) {
+        this.controlUnits.delete(control.id);
     }
 
     removeItemFromId(itemId) {

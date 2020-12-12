@@ -1,6 +1,7 @@
 import Stage from "./stage.js";
 import Common from "../tool/common.js";
 import RoomInfo from "../item/roominfo.js";
+import TeamSelector from "../item/teamselector.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -54,8 +55,13 @@ export default class NetCreate extends Stage {
                 w: 540,
                 h: 635
             },
-            callBack: function () {
-
+            callBack: () => {
+                new TeamSelector(this, (teamType) => {
+                    const roomInfo = new RoomInfo(true);
+                    roomInfo.roomType = "PVP";
+                    roomInfo.joinTeamType = teamType;
+                    Common.gotoStage("room", roomInfo);
+                });
             }
         });
     }

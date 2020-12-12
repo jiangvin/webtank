@@ -107,6 +107,9 @@ export default class Resource {
         );
 
         this.loadImage("enter", "net/enter");
+
+        this.loadImage("join_red", "net/join_red");
+        this.loadImage("join_blue", "net/join_blue");
     }
 
     loadRoomResource() {
