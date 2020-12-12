@@ -901,16 +901,23 @@ public class StageRoom extends BaseStage {
      * 保持通关记录
      */
     private void saveStage() {
-        if (creator.getUserRecord() == null) {
-            return;
-        }
-
         UserRecord userRecord = creator.getUserRecord();
-        if (userRecord.getStage() >= getMapId()) {
+        if (userRecord == null) {
             return;
         }
 
-        userRecord.setStage(getMapId());
+        if (hardMode) {
+            if (userRecord.getHardStage() < getMapId() + 1) {
+                userRecord.setHardStage(getMapId() + 1);
+            }
+        } else {
+            if (userRecord.getStage() < getMapId() + 1) {
+                userRecord.setStage(getMapId() + 1);
+                if (userRecord.getHardStage() == 0) {
+                    userRecord.setHardStage(1);
+                }
+            }
+        }
         userRecord.update();
     }
 

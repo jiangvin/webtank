@@ -352,11 +352,21 @@ export default class AiEngine extends Engine {
 
     saveStage() {
         const thisEngine = this;
-        Common.postEncrypt("/singlePlayer/saveStage",
-            {
-                userId: Resource.getUser().deviceId,
-                stage: thisEngine.room.roomInfo.mapId
-            });
+        const request = {
+            userId: Resource.getUser().deviceId,
+            stage: thisEngine.room.roomInfo.mapId,
+            hardStage: thisEngine.room.roomInfo.mapId
+        };
+
+        if (thisEngine.room.roomInfo.hardMode) {
+            ++request.hardStage;
+        } else {
+            ++request.stage;
+        }
+
+        Common.postEncrypt("/singlePlayer/saveStage", request, data => {
+            Resource.setUser(data);
+        });
     }
 
     saveRank() {

@@ -67,12 +67,22 @@ public class UserService {
         return userDao.queryRank(score);
     }
 
-    public void saveStageForSinglePlayer(UserDto userDto) {
+    public UserDto saveStageForSinglePlayer(UserDto userDto) {
         UserRecord userRecord = userDao.queryUser(userDto.getUserId());
+        if (userRecord == null) {
+            return null;
+        }
         if (userRecord.getStage() < userDto.getStage()) {
             userRecord.setStage(userDto.getStage());
-            userRecord.update();
+            if (userRecord.getHardStage() == 0) {
+                userRecord.setHardStage(1);
+            }
         }
+        if (userRecord.getHardStage() < userDto.getHardStage()) {
+            userRecord.setHardStage(userDto.getHardStage());
+        }
+        userRecord.update();
+        return UserDto.convert(userRecord);
     }
 
     public void saveRankForSinglePlayer(RankDto rankDto) {

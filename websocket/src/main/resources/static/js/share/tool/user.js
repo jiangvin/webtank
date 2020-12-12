@@ -25,6 +25,10 @@ export default class User {
     }
 
     setData(data) {
+        if (!data) {
+            return;
+        }
+
         this.setUserId(data.username);
         this.coin = data.coin;
         this.redStarExpired = data.redStarExpired;
