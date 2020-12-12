@@ -91,7 +91,6 @@ export default class Room extends Stage {
 
     init(roomInfo) {
         this.roomInfo = roomInfo;
-        this.showTeam = roomInfo.showTeam;
         Resource.getRoot().addEngine(roomInfo.isNet);
         this.clear();
         Status.setStatus(Status.statusPause(), this.generateMaskInfo());
@@ -99,6 +98,10 @@ export default class Room extends Stage {
 
         //TODO 输入框相关，后期优化
         //Adapter.instance.inputEnable = true;
+    }
+
+    showTeam() {
+        return this.roomInfo.roomType === "PVP";
     }
 
     clear() {
@@ -778,8 +781,17 @@ export default class Room extends Stage {
         tankItem.speed = tankData.speed;
         tankItem.hasShield = tankData.hasShield;
         tankItem.hasGhost = tankData.hasGhost;
-        tankItem.image = Resource.getOrCreateImage(tankData.typeId);
+        tankItem.image = this.getTankImageFromTankData(tankData);
     };
+
+    getTankImageFromTankData(data) {
+        if (this.showTeam()) {
+            const team = data.teamId === 1 ? "red_" : "blue_";
+            return Resource.getImage(team + data.typeId);
+        } else {
+            return Resource.getImage(data.typeId);
+        }
+    }
 
     updateTankControl(tankData, force) {
         const tankItem = this.items.get(tankData.id);
@@ -810,13 +822,22 @@ export default class Room extends Stage {
             }
         }
 
-        if (thisRoom.roomInfo.roomType === "PVE" &&
-            thisRoom.roomInfo.isNet &&
-            item.teamId === 1) {
-            item.showId = true;
-        }
+        item.showId = thisRoom.isShowId(item.teamId);
         return item;
     };
+
+    isShowId(teamId) {
+        if (!this.roomInfo.isNet) {
+            return false;
+        }
+
+        if (this.roomInfo.roomType === "PVP") {
+            return true;
+        }
+
+        return teamId === 1;
+
+    }
 
     generalUpdateEvent(item) {
         if (item.play) {

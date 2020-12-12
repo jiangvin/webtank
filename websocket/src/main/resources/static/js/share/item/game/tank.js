@@ -85,7 +85,7 @@ export default class Tank extends MapItem {
 
         //ID颜色
         let color = "#FFF";
-        if (this.stage.showTeam) {
+        if (this.stage.showTeam()) {
             switch (this.teamId) {
                 case 1:
                     color = '#F00';
@@ -155,14 +155,4 @@ export default class Tank extends MapItem {
             }
         });
     };
-
-    // drawTeam(context) {
-    //     if (!this.stage.showTeam || this.teamId <= 0 || this.teamId > 2) {
-    //         return;
-    //     }
-    //
-    //     context.strokeStyle = this.getColor();
-    //     const size = Resource.getUnitSize();
-    //     context.strokeRect(this.screenPoint.x - size / 2, this.screenPoint.y - size / 2, size, size);
-    // };
 }

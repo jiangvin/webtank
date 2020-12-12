@@ -151,6 +151,18 @@ export default class Resource {
             }
             this.loadImage("tank" + id, "room/tank/" + id, "png", 4);
         }
+
+        //load pvp tank images
+        for (let i = 1; i <= 4; ++i) {
+            let id;
+            if (i < 10) {
+                id = "0" + i;
+            } else {
+                id = "" + i;
+            }
+            this.loadImage("red_tank" + id, "room/tank/red/" + id, "png", 4);
+            this.loadImage("blue_tank" + id, "room/tank/blue/" + id, "png", 4);
+        }
     }
 
     loadAnimationImage(imageId, widthPics, type) {
