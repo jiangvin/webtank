@@ -28,9 +28,7 @@ export default class Tank extends MapItem {
     }
 
     update() {
-        if (this.play) {
-            this.play.update();
-        }
+        super.update();
 
         if (this.action === 0) {
             return;

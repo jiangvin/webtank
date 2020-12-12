@@ -839,31 +839,6 @@ export default class Room extends Stage {
 
     }
 
-    generalUpdateEvent(item) {
-        if (item.play) {
-            item.play.update();
-        }
-
-        if (item.action === 0) {
-            return;
-        }
-
-        switch (item.orientation) {
-            case 0:
-                item.y -= item.speed;
-                break;
-            case 1:
-                item.y += item.speed;
-                break;
-            case 2:
-                item.x -= item.speed;
-                break;
-            case 3:
-                item.x += item.speed;
-                break;
-        }
-    };
-
     boomTank(data) {
         const tank = this.itemBomb(data);
         if (tank.id === Resource.getUser().userId) {
@@ -963,10 +938,6 @@ export default class Room extends Stage {
         this.addItem(item);
         item.action = 1;
         item.image = Resource.getOrCreateImage("bullet");
-        const thisStage = this;
-        item.update = function () {
-            thisStage.generalUpdateEvent(item);
-        };
         return item;
     };
 

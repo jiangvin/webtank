@@ -88,4 +88,27 @@ export default class Bullet extends MapItem {
         //还原原点
         ctx.translate(-center.x, -center.y);
     }
+
+    update() {
+        super.update();
+
+        if (this.action === 0) {
+            return;
+        }
+
+        switch (this.orientation) {
+            case 0:
+                this.y -= this.speed;
+                break;
+            case 1:
+                this.y += this.speed;
+                break;
+            case 2:
+                this.x -= this.speed;
+                break;
+            case 3:
+                this.x += this.speed;
+                break;
+        }
+    }
 }

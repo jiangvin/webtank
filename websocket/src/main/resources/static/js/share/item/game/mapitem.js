@@ -41,13 +41,10 @@ export default class MapItem extends Item {
     }
 
     update() {
-
+        this.updateAnimation();
     }
 
     draw(ctx, displayWidth, displayHeight) {
-        //先更新动画,保证事件顺利进行
-        this.updateAnimation();
-
         this.drawImage(ctx, displayWidth, displayHeight);
     }
 
