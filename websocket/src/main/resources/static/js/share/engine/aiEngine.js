@@ -646,6 +646,7 @@ export default class AiEngine extends Engine {
 
         tank.bulletReloadTime += newType.ammoReloadTime - oldType.ammoReloadTime;
         tank.bulletCount += newType.ammoMaxCount - oldType.ammoMaxCount;
+        tank.maxBulletCount += newType.ammoMaxCount - oldType.ammoMaxCount;
         tank.typeId = typeId;
 
         Resource.getRoot().processSocketMessage({

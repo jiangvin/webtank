@@ -97,6 +97,7 @@ public class TankBo {
         }
         reloadTime += newType.getAmmoReloadTime() - type.getAmmoReloadTime();
         bulletCount += newType.getAmmoMaxCount() - type.getAmmoMaxCount();
+        maxBulletCount += newType.getAmmoMaxCount() - type.getAmmoMaxCount();
         type = newType;
         return true;
     }
