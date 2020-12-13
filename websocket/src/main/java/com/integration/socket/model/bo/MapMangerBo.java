@@ -1,8 +1,6 @@
 package com.integration.socket.model.bo;
 
 import com.integration.dto.room.RoomType;
-import com.integration.socket.model.Constant;
-import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.service.MapService;
 import lombok.Data;
 
@@ -38,7 +36,6 @@ public class MapMangerBo {
         } else {
             this.mapBo = mapService.loadRandomMap(loadedMapNames, roomType);
         }
-        initPlayerLife();
         this.mapId = mapBo.getMapId();
         this.subId = mapBo.getSubId();
     }
@@ -76,18 +73,5 @@ public class MapMangerBo {
 
         this.mapBo = mapBo;
         return true;
-    }
-
-    private static List<StringCountDto> initPlayerLifeInPve() {
-        List<StringCountDto> list = new ArrayList<>();
-        list.add(new StringCountDto(Constant.DEFAULT_TANK_TYPE, 4));
-        return list;
-    }
-
-    private void initPlayerLife() {
-        if (roomType != RoomType.PVE) {
-            return;
-        }
-        this.mapBo.setPlayerLife(initPlayerLifeInPve());
     }
 }

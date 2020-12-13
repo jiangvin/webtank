@@ -1155,11 +1155,7 @@ public class StageRoom extends BaseStage {
     public void addBot(BaseBotBo bot) {
         bot.setStage(this);
         botMap.put(bot.getId(), bot);
-
-        //每有一个玩家加入，玩家生命+1
-        if (getRoomType() == RoomType.PVE && bot.getTeamType() == TeamType.RED) {
-            getMapBo().addPlayerLife(1);
-        }
+        addPlayerLifeForNewComer(bot.getTeamType());
 
         createTankForUser(bot.getBotUser(), 60 * 3);
     }
@@ -1174,10 +1170,7 @@ public class StageRoom extends BaseStage {
         userBo.setRoomId(this.roomId);
         sendStatusAndMessage(userBo, false);
 
-        //每有一个玩家加入，玩家生命+1
-        if (getRoomType() == RoomType.PVE && userBo.getTeamType() == TeamType.RED) {
-            getMapBo().addPlayerLife(1);
-        }
+        addPlayerLifeForNewComer(userBo.getTeamType());
 
         //发送场景信息
         sendMessageToUser(getMapBo().toDto(), MessageType.MAP, userBo.getUsername());
@@ -1187,6 +1180,25 @@ public class StageRoom extends BaseStage {
 
         createTankForUser(userBo, 60 * 3);
         sendReady(userBo.getUsername());
+    }
+
+    /**
+     * 防止新用户进来没有生命的情况
+     */
+    private void addPlayerLifeForNewComer(TeamType teamType) {
+        if (getRoomType() != RoomType.PVE) {
+            return;
+        }
+
+        if (teamType != TeamType.RED) {
+            return;
+        }
+
+        if (!getMapBo().getPlayerLife().isEmpty()) {
+            return;
+        }
+
+        getMapBo().addPlayerLife(1);
     }
 
     private void createTankForUser(UserBo userBo, int timeoutForPlayer) {
