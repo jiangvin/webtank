@@ -5,6 +5,7 @@ import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.message.MessageType;
+import com.integration.dto.room.GameStatusDto;
 import com.integration.dto.room.GameStatusType;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
@@ -936,13 +937,19 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean processGameOverPvp(TeamType winTeam) {
+        userMap.forEach((key, value) -> {
+            if (value.getTeamType() == winTeam) {
+                sendMessageToUser(new GameStatusDto(GameStatusType.END), MessageType.GAME_STATUS, value.getUsername());
+            } else {
+                sendMessageToUser(new GameStatusDto(GameStatusType.LOSE_PVP), MessageType.GAME_STATUS, value.getUsername());
+            }
+        });
+
         if (!mapManger.loadRandomMapPvp()) {
             gameStatus.setType(GameStatusType.WIN);
         } else {
             gameStatus.setType(GameStatusType.END);
         }
-
-        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
         return gameStatus.getType() == GameStatusType.END;
     }
 

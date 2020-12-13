@@ -16,6 +16,10 @@ public class GameStatusDto {
     private Integer score;
     private Integer rank;
 
+    public GameStatusDto(GameStatusType type) {
+        this.type = type;
+    }
+
     public boolean isPause() {
         return type == GameStatusType.PAUSE ||
                type == GameStatusType.END ||

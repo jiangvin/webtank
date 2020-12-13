@@ -666,83 +666,23 @@ export default class Room extends Stage {
             return;
         }
 
-        if (status.type === "LOSE") {
-            new Failed(this, status.score, status.rank);
+        if (status.type === "WIN") {
+            new Success(this, status.score, status.rank);
+            //没有关卡了，回到主页
+            Common.addTimeEvent("back_to_menu", function () {
+                Common.gotoStage("menu");
+            }, 480);
+            return;
         }
 
-        //其他结束状态
-        // let titleHeight = Resource.height() * .4;
-        // let buttonHeight = Resource.height() * 0.55;
-        // if (status.score && status.rank) {
-        //     //计分板
-        //     const rect = new Rect(
-        //         Resource.width() / 2,
-        //         Resource.height() * .4,
-        //         Resource.width() * .6,
-        //         Resource.height() * .4);
-        //     this.addItem(rect);
-        //     const score = new Item({
-        //         z: 10,
-        //         draw: function (ctx) {
-        //             ctx.font = 'bold 60px Microsoft YaHei UI';
-        //             ctx.textAlign = 'center';
-        //             ctx.textBaseline = 'middle';
-        //             ctx.fillStyle = '#FFF';
-        //             ctx.fillText("当前得分: " + status.score,
-        //                 Resource.width() / 2,
-        //                 Resource.height() * .3 + 120);
-        //
-        //             ctx.fillText("当前排名: " + status.rank,
-        //                 Resource.width() / 2,
-        //                 Resource.height() * .3 + 200);
-        //         }
-        //     });
-        //     this.addItem(score);
-        //     titleHeight = Resource.height() * .3;
-        //     buttonHeight = Resource.height() * 0.68;
-        // }
-        // Status.setStatus(Status.statusPause(), status.message, titleHeight);
-        // if (status.type === "WIN") {
-        //     const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
-        //         Resource.getRoot().gotoStage("menu");
-        //     });
-        //     this.addItem(back);
-        // } else if (status.type === "LOSE") {
-        //     const again = new Button("", Resource.width() * 0.5, buttonHeight, function () {
-        //         Resource.getRoot().engine.again();
-        //     });
-        //     again.drawText = function (ctx) {
-        //         ctx.font = '60px Arial';
-        //         ctx.textAlign = 'left';
-        //         ctx.textBaseline = 'middle';
-        //         ctx.fillStyle = '#fff';
-        //         ctx.fillText("重玩本关", this.x - 190, this.y);
-        //
-        //         const coin = Resource.getOrCreateImage("coin");
-        //         ctx.drawImage(coin,
-        //             0, 0,
-        //             coin.width, coin.height,
-        //             this.x + 54, this.y - 30,
-        //             60, 60);
-        //
-        //         ctx.font = '40px Arial';
-        //         ctx.fillText("x 30", this.x + 120, this.y);
-        //     };
-        //     this.addItem(again);
-        //     buttonHeight += 150;
-        //     const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
-        //         Resource.getRoot().gotoStage("menu");
-        //     });
-        //     this.addItem(back);
-        // }
-        //
-        // if (status.message.indexOf("失败") >= 0) {
-        //     Sound.lose();
-        // } else if (status.message.indexOf("恭喜") >= 0 || status.message.indexOf("胜利") >= 0) {
-        //     Sound.win();
-        // } else {
-        //     Sound.bgm();
-        // }
+        if (status.type === "LOSE") {
+            new Failed(this, status.score, status.rank);
+            return;
+        }
+
+        if (status.type === "LOSE_PVP") {
+            new Failed(this, status.score, status.rank, true);
+        }
     }
 
     createOrUpdateTanks(tanks, force) {

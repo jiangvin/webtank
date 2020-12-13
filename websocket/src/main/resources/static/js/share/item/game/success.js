@@ -9,9 +9,17 @@ import Sound from "../../tool/sound.js";
 export default class Success {
     constructor(stage, score, rank) {
         this.stage = stage;
-        this.score = score < 0 ? 0 : score;
-        this.rank = rank < 0 ? "--" : rank;
+        this.score = score;
+        this.rank = rank;
 
+        this.center = {
+            x: Resource.width() / 2,
+            y: Resource.height() * .45
+        };
+        if (!score || score < 0 || !rank) {
+            this.center.y = 540;
+            this.ignoreInfo = true;
+        }
         this.init();
         Sound.win();
     }
@@ -40,11 +48,6 @@ export default class Success {
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, Resource.width(), Resource.height());
                 ctx.globalAlpha = 1;
-
-                this.center = {
-                    x: Resource.width() / 2,
-                    y: Resource.height() * .45
-                };
 
                 //light
                 if (this.boardSize.scale === 1) {
@@ -78,7 +81,9 @@ export default class Success {
                 );
 
                 //info
-                Success.drawInfo(ctx, this.center, this.score, this.rank);
+                if (!this.ignoreInfo) {
+                    Success.drawInfo(ctx, this.center, this.score, this.rank);
+                }
 
             }
         });

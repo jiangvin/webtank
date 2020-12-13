@@ -10,19 +10,28 @@ import Success from "./success.js";
 import Common from "../../tool/common.js";
 
 export default class Failed {
-    constructor(stage, score, rank) {
+    constructor(stage, score, rank, ignoreButton) {
         this.stage = stage;
-        this.score = score < 0 ? 0 : score;
-        this.rank = rank < 0 ? "--" : rank;
+        this.score = score;
+        this.rank = rank;
+        this.center = {
+            x: 960,
+            y: 350
+        };
+        if (ignoreButton) {
+            this.center.y = 460;
+            this.addEnd = true;
+        }
+        if (!score || score < 0 || !rank) {
+            this.center.y = 540;
+            this.ignoreInfo = true;
+        }
+
         this.init();
         Sound.lose();
     }
 
     init() {
-        this.center = {
-            x: 960,
-            y: 350
-        };
 
         const board = {
             w: 627,
@@ -52,7 +61,9 @@ export default class Failed {
 
                 //info
                 if (board.isEnd()) {
-                    Success.drawInfo(ctx, this.center, this.score, this.rank);
+                    if (!this.ignoreInfo) {
+                        Success.drawInfo(ctx, this.center, this.score, this.rank);
+                    }
                     this.addButton();
                 }
             }

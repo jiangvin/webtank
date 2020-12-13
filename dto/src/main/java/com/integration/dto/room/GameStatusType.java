@@ -23,6 +23,10 @@ public enum GameStatusType {
      */
     LOSE,
     /**
+     * PVP的失败(只显示失败，不显示按钮)
+     */
+    LOSE_PVP,
+    /**
      * 红队暂停事件
      */
     PAUSE_RED,
