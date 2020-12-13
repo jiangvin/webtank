@@ -77,17 +77,22 @@ export default class NetEngine extends Engine {
                 });
                 thisEngine.addTimeEvent(120, callBack);
             } else {
-                Status.setStatus(Status.statusPause(), "与服务器断开！");
+                Status.setStatus(Status.statusPause());
                 //再关闭一次，排除一些情况
                 Connect.disconnect();
-                //显示蒙版
+                //显示蒙版和文字
                 thisEngine.room.createItem({
-                    z: 8,
                     draw: function (ctx) {
                         ctx.globalAlpha = 0.5;
                         ctx.fillStyle = '#000000';
                         ctx.fillRect(0, 0, Resource.width(), Resource.height());
                         ctx.globalAlpha = 1;
+
+                        ctx.font = '100px gameFont';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = '#FFF';
+                        ctx.fillText("与服务器连接断开", Resource.width() / 2, Resource.height() * .4);
                     }
                 });
 
