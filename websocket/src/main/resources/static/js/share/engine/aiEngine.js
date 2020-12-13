@@ -7,8 +7,6 @@ import Engine from "./engine.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
-import Button from "../item/button.js";
-import Sound from "../tool/sound.js";
 
 export default class AiEngine extends Engine {
     constructor(room) {
@@ -295,7 +293,6 @@ export default class AiEngine extends Engine {
             Common.getRequest("/singlePlayer/getRank?score=" + thisEngine.score, function (rank) {
                 if (thisEngine.room.roomInfo.subId >= thisEngine.maxSubId) {
                     thisEngine.room.gameStatus({
-                        message: "恭喜全部通关",
                         type: "WIN",
                         score: thisEngine.score,
                         rank: rank
@@ -306,18 +303,15 @@ export default class AiEngine extends Engine {
                 }
 
                 thisEngine.room.gameStatus({
-                    message: "恭喜通关",
-                    type: "PAUSE",
+                    type: "END",
                     score: thisEngine.score,
                     rank: rank
                 });
-
-                const next = new Button("进入下一关", Resource.width() * 0.5, Resource.height() * 0.68, function () {
+                Common.addTimeEvent("next", function () {
                     //进入下一关
                     ++thisEngine.room.roomInfo.subId;
                     thisEngine.startGame();
-                });
-                thisEngine.room.addItem(next);
+                }, 480);
             });
         } else {
             Common.getRequest("/singlePlayer/getRank?score=" + thisEngine.score, function (rank) {
@@ -957,9 +951,6 @@ export default class AiEngine extends Engine {
     }
 
     startGame() {
-        //关卡信息
-        Status.setStatus(null, this.room.generateMaskInfo());
-
         //保存坦克状态,用于下一关使用
         this.playerTankStatus = this.tanks.get(Resource.getUser().userId);
 
@@ -972,7 +963,6 @@ export default class AiEngine extends Engine {
 
         //进入下一关
         this.initStage();
-        Sound.bgm();
     }
 }
 AiEngine.keepGoingRate = 120;

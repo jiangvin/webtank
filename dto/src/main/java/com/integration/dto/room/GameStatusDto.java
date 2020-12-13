@@ -13,17 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GameStatusDto {
     private GameStatusType type;
-    private String message;
     private Integer score;
     private Integer rank;
 
-    public GameStatusDto(GameStatusType type, String message) {
-        this.type = type;
-        this.message = message;
-    }
-
     public boolean isPause() {
         return type == GameStatusType.PAUSE ||
+               type == GameStatusType.END ||
                type == GameStatusType.WIN ||
                type == GameStatusType.LOSE;
     }

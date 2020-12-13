@@ -47,15 +47,28 @@ public class MapBo {
 
     private List<String> computerStartPoints = new ArrayList<>();
 
-    public MapDto convertToDto() {
+    public MapDto toDto() {
         MapDto mapDto = new MapDto();
         copyProperties(mapDto);
         return mapDto;
     }
 
-    public MapDto toDto(List<String> keys) {
+    public MapDto toDtoWithKeys(List<String> keys) {
         MapDto mapDto = new MapDto();
         copyProperties(mapDto, keys);
+        return mapDto;
+    }
+
+    public MapDto convertMapIdToDto() {
+        MapDto mapDto = new MapDto();
+        mapDto.setMapId(this.mapId);
+        mapDto.setSubId(this.subId);
+        return mapDto;
+    }
+
+    public MapDto convertLifeCountToDto() {
+        MapDto mapDto = new MapDto();
+        copyLifeCountProperties(mapDto);
         return mapDto;
     }
 
@@ -104,12 +117,6 @@ public class MapBo {
         mapDetailDto.setMaxGridX(this.maxGridX);
         mapDetailDto.setMaxGridY(this.maxGridY);
         return mapDetailDto;
-    }
-
-    public MapDto convertLifeCountToDto() {
-        MapDto mapDto = new MapDto();
-        copyLifeCountProperties(mapDto);
-        return mapDto;
     }
 
     private void copyLifeCountProperties(MapDto mapDto) {

@@ -9,15 +9,13 @@ import Common from "../tool/common.js";
 import Play from "../item/play.js";
 import Status from "../tool/status.js";
 import Control from "../tool/control.js";
-import Button from "../item/button.js";
 import Sound from "../tool/sound.js";
-import Rect from "../item/rect.js";
-import Item from "../item/item.js";
 import Tank from "../item/game/tank.js";
 import Confirm from "../item/confirm.js";
 import MapItem from "../item/game/mapitem.js";
 import Bullet from "../item/game/bullet.js";
 import Height from "../item/game/height.js";
+import Success from "../item/game/success.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -93,8 +91,7 @@ export default class Room extends Stage {
         this.roomInfo = roomInfo;
         Resource.getRoot().addEngine(roomInfo.isNet);
         this.clear();
-        Status.setStatus(Status.statusPause(), this.generateMaskInfo());
-        Sound.bgm();
+        Status.setStatus(Status.statusPause());
 
         //TODO 输入框相关，后期优化
         //Adapter.instance.inputEnable = true;
@@ -121,6 +118,7 @@ export default class Room extends Stage {
     showMask() {
         this.maskStartTime = new Date().getTime();
         this.mask = true;
+        Sound.bgm();
 
         //初始化玩家/敌方生命，为开头显示生命信息做准备
         this.maskPlayerLife = null;
@@ -139,7 +137,6 @@ export default class Room extends Stage {
         }
         const thisRoom = this;
         Common.addTimeEvent("hide_mask", function () {
-            Status.setStatus(null, null);
             thisRoom.mask = false;
         }, frames);
     }
@@ -148,11 +145,11 @@ export default class Room extends Stage {
         if (this.roomInfo.roomType === "PVP") {
             return "对抗模式";
         }
-
         if (!this.roomInfo.isNet) {
             return "单人模式 " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
+        } else {
+            return "合作模式 " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
         }
-        return "多人模式 " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
     }
 
     update() {
@@ -216,7 +213,6 @@ export default class Room extends Stage {
         this.drawControl(ctx);
         this.drawRoomInfo(ctx);
         this.drawMask(ctx);
-        this.drawStatus(ctx);
     }
 
     drawItems(ctx) {
@@ -392,6 +388,13 @@ export default class Room extends Stage {
             Resource.width(),
             270);
 
+        //显示标题
+        ctx.font = '100px gameFont';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#FFF';
+        ctx.fillText(this.generateMaskInfo(), Resource.width() / 2, Resource.height() * .4);
+
         //显示难度
         const img = Resource.getImage(this.roomInfo.hardMode ? "room_hard" : "room_easy");
         ctx.drawImage(img,
@@ -436,16 +439,6 @@ export default class Room extends Stage {
         ctx.fillText("x" + this.maskEnemyLife,
             Resource.width() / 2 + 130,
             Resource.height() * .32 + 216);
-    }
-
-    drawStatus(ctx) {
-        if (Status.getMessage()) {
-            ctx.font = '100px gameFont';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#FFF';
-            ctx.fillText(Status.getMessage(), Resource.width() / 2, Status.getHeight());
-        }
     }
 
     /**
@@ -665,79 +658,86 @@ export default class Room extends Stage {
             return;
         }
 
+        Status.setStatus(Status.statusPause());
+
+        if (status.type === "END") {
+            new Success(this, status.score, status.rank);
+            return;
+        }
+
         //其他结束状态
-        let titleHeight = Resource.height() * .4;
-        let buttonHeight = Resource.height() * 0.55;
-        if (status.score && status.rank) {
-            //计分板
-            const rect = new Rect(
-                Resource.width() / 2,
-                Resource.height() * .4,
-                Resource.width() * .6,
-                Resource.height() * .4);
-            this.addItem(rect);
-            const score = new Item({
-                z: 10,
-                draw: function (ctx) {
-                    ctx.font = 'bold 60px Microsoft YaHei UI';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = '#FFF';
-                    ctx.fillText("当前得分: " + status.score,
-                        Resource.width() / 2,
-                        Resource.height() * .3 + 120);
-
-                    ctx.fillText("当前排名: " + status.rank,
-                        Resource.width() / 2,
-                        Resource.height() * .3 + 200);
-                }
-            });
-            this.addItem(score);
-            titleHeight = Resource.height() * .3;
-            buttonHeight = Resource.height() * 0.68;
-        }
-        Status.setStatus(Status.statusPause(), status.message, titleHeight);
-        if (status.type === "WIN") {
-            const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
-                Resource.getRoot().gotoStage("menu");
-            });
-            this.addItem(back);
-        } else if (status.type === "LOSE") {
-            const again = new Button("", Resource.width() * 0.5, buttonHeight, function () {
-                Resource.getRoot().engine.again();
-            });
-            again.drawText = function (ctx) {
-                ctx.font = '60px Arial';
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#fff';
-                ctx.fillText("重玩本关", this.x - 190, this.y);
-
-                const coin = Resource.getOrCreateImage("coin");
-                ctx.drawImage(coin,
-                    0, 0,
-                    coin.width, coin.height,
-                    this.x + 54, this.y - 30,
-                    60, 60);
-
-                ctx.font = '40px Arial';
-                ctx.fillText("x 30", this.x + 120, this.y);
-            };
-            this.addItem(again);
-            buttonHeight += 150;
-            const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
-                Resource.getRoot().gotoStage("menu");
-            });
-            this.addItem(back);
-        }
-
-        if (status.message.indexOf("失败") >= 0) {
-            Sound.lose();
-        } else if (status.message.indexOf("恭喜") >= 0 || status.message.indexOf("胜利") >= 0) {
-            Sound.win();
-        } else {
-            Sound.bgm();
-        }
+        // let titleHeight = Resource.height() * .4;
+        // let buttonHeight = Resource.height() * 0.55;
+        // if (status.score && status.rank) {
+        //     //计分板
+        //     const rect = new Rect(
+        //         Resource.width() / 2,
+        //         Resource.height() * .4,
+        //         Resource.width() * .6,
+        //         Resource.height() * .4);
+        //     this.addItem(rect);
+        //     const score = new Item({
+        //         z: 10,
+        //         draw: function (ctx) {
+        //             ctx.font = 'bold 60px Microsoft YaHei UI';
+        //             ctx.textAlign = 'center';
+        //             ctx.textBaseline = 'middle';
+        //             ctx.fillStyle = '#FFF';
+        //             ctx.fillText("当前得分: " + status.score,
+        //                 Resource.width() / 2,
+        //                 Resource.height() * .3 + 120);
+        //
+        //             ctx.fillText("当前排名: " + status.rank,
+        //                 Resource.width() / 2,
+        //                 Resource.height() * .3 + 200);
+        //         }
+        //     });
+        //     this.addItem(score);
+        //     titleHeight = Resource.height() * .3;
+        //     buttonHeight = Resource.height() * 0.68;
+        // }
+        // Status.setStatus(Status.statusPause(), status.message, titleHeight);
+        // if (status.type === "WIN") {
+        //     const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
+        //         Resource.getRoot().gotoStage("menu");
+        //     });
+        //     this.addItem(back);
+        // } else if (status.type === "LOSE") {
+        //     const again = new Button("", Resource.width() * 0.5, buttonHeight, function () {
+        //         Resource.getRoot().engine.again();
+        //     });
+        //     again.drawText = function (ctx) {
+        //         ctx.font = '60px Arial';
+        //         ctx.textAlign = 'left';
+        //         ctx.textBaseline = 'middle';
+        //         ctx.fillStyle = '#fff';
+        //         ctx.fillText("重玩本关", this.x - 190, this.y);
+        //
+        //         const coin = Resource.getOrCreateImage("coin");
+        //         ctx.drawImage(coin,
+        //             0, 0,
+        //             coin.width, coin.height,
+        //             this.x + 54, this.y - 30,
+        //             60, 60);
+        //
+        //         ctx.font = '40px Arial';
+        //         ctx.fillText("x 30", this.x + 120, this.y);
+        //     };
+        //     this.addItem(again);
+        //     buttonHeight += 150;
+        //     const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
+        //         Resource.getRoot().gotoStage("menu");
+        //     });
+        //     this.addItem(back);
+        // }
+        //
+        // if (status.message.indexOf("失败") >= 0) {
+        //     Sound.lose();
+        // } else if (status.message.indexOf("恭喜") >= 0 || status.message.indexOf("胜利") >= 0) {
+        //     Sound.win();
+        // } else {
+        //     Sound.bgm();
+        // }
     }
 
     createOrUpdateTanks(tanks, force) {

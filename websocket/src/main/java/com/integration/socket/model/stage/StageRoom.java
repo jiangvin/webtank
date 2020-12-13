@@ -5,7 +5,6 @@ import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.message.MessageType;
-import com.integration.dto.room.GameStatusDto;
 import com.integration.dto.room.GameStatusType;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
@@ -297,7 +296,7 @@ public class StageRoom extends BaseStage {
         }
 
         if (event instanceof LoadMapEvent) {
-            sendMessageToRoom(getMapBo().convertToDto(), MessageType.MAP);
+            sendMessageToRoom(getMapBo().toDto(), MessageType.MAP);
             gameStatus.setType(GameStatusType.NORMAL);
             sendMessageToRoom(null, MessageType.SERVER_READY);
             //1 ~ 5 秒陆续出现坦克
@@ -322,7 +321,7 @@ public class StageRoom extends BaseStage {
                     getMapBo().getUnitMap().put(key, MapUnitType.BRICK);
                 }
             }
-            sendMessageToRoom(getMapBo().toDto(keys), MessageType.MAP);
+            sendMessageToRoom(getMapBo().toDtoWithKeys(keys), MessageType.MAP);
             return;
         }
 
@@ -610,7 +609,7 @@ public class StageRoom extends BaseStage {
             for (String changeKey : changeKeys) {
                 unitMap.put(changeKey, MapUnitType.IRON);
             }
-            sendMessageToRoom(getMapBo().toDto(changeKeys), MessageType.MAP);
+            sendMessageToRoom(getMapBo().toDtoWithKeys(changeKeys), MessageType.MAP);
             this.eventList.add(new IronKingEvent(changeKeys));
         }
 
@@ -821,13 +820,11 @@ public class StageRoom extends BaseStage {
 
         sendMessageToRoom(String.format("%s 选择了续关,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
         gameStatus.setType(GameStatusType.PAUSE);
-        gameStatus.setMessage(String.format("多人模式 %d-%d", getMapId(), getSubId()));
         init();
         processNextMapEvent(5, "重新开始");
     }
 
     private void processGameOver(TeamType winTeam) {
-        gameStatus.setType(GameStatusType.PAUSE);
         if (getRoomType() == RoomType.PVE && !processGameOverPve(winTeam)) {
             return;
         } else if (getRoomType() != RoomType.PVE && !processGameOverPvp(winTeam)) {
@@ -847,15 +844,16 @@ public class StageRoom extends BaseStage {
         }
 
         int frames = loadSeconds * 60;
+
+        //更改关卡信息
+        MessageEvent changeTitle = new MessageEvent(getMapBo().convertMapIdToDto(), MessageType.MAP);
+        changeTitle.setTimeout(frames++);
+        this.eventList.add(changeTitle);
+
         //清空地图
         MessageEvent cleanEvent = new MessageEvent(null, MessageType.CLEAR_MAP);
         cleanEvent.setTimeout(frames++);
         this.eventList.add(cleanEvent);
-
-        //更改标题
-        MessageEvent changeTitle = new MessageEvent(new GameStatusDto(GameStatusType.PAUSE, gameStatus.getMessage()), MessageType.GAME_STATUS);
-        changeTitle.setTimeout(frames++);
-        this.eventList.add(changeTitle);
 
         //加载地图
         LoadMapEvent loadEvent = new LoadMapEvent();
@@ -871,13 +869,12 @@ public class StageRoom extends BaseStage {
             gameStatus.setScore(this.score);
             gameStatus.setRank(userService.getRank(this.score));
             if (!mapManger.loadNextMapPve(saveLife)) {
-                gameStatus.setMessage("恭喜全部通关");
                 gameStatus.setType(GameStatusType.WIN);
                 userService.saveRankForMultiplePlayers(this.creator, gameStatus);
                 saveStage();
                 getAndSaveCoin();
             } else {
-                gameStatus.setMessage("恭喜通关");
+                gameStatus.setType(GameStatusType.END);
             }
         } else {
             if (this.score < 0) {
@@ -885,7 +882,6 @@ public class StageRoom extends BaseStage {
             }
             gameStatus.setScore(this.score);
             gameStatus.setRank(userService.getRank(this.score));
-            gameStatus.setMessage("游戏失败");
             gameStatus.setType(GameStatusType.LOSE);
             userService.saveRankForMultiplePlayers(this.creator, gameStatus);
             getAndSaveCoin();
@@ -893,9 +889,8 @@ public class StageRoom extends BaseStage {
 
         sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
 
-        //修改标题，下次使用
-        gameStatus.setMessage(String.format("多人模式 %d-%d", getMapId(), getSubId()));
-        return gameStatus.getType() == GameStatusType.PAUSE;
+        //修改关卡信息
+        return gameStatus.getType() == GameStatusType.END;
     }
 
     /**
@@ -941,17 +936,14 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean processGameOverPvp(TeamType winTeam) {
-        gameStatus.setMessage(getTeam(winTeam) + "胜利!");
-
         if (!mapManger.loadRandomMapPvp()) {
             gameStatus.setType(GameStatusType.WIN);
+        } else {
+            gameStatus.setType(GameStatusType.END);
         }
 
         sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
-
-        //修改标题，下次使用
-        gameStatus.setMessage("RED vs BLUE");
-        return gameStatus.getType() == GameStatusType.PAUSE;
+        return gameStatus.getType() == GameStatusType.END;
     }
 
     private void changeMap(String key, MapUnitType type) {
@@ -1188,7 +1180,7 @@ public class StageRoom extends BaseStage {
         }
 
         //发送场景信息
-        sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUsername());
+        sendMessageToUser(getMapBo().toDto(), MessageType.MAP, userBo.getUsername());
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
         sendMessageToUser(getItemPool(), MessageType.ITEM, userBo.getUsername());
