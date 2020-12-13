@@ -78,19 +78,24 @@ export default class Success {
                 );
 
                 //info
-                ctx.font = '60px gameFont';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#FFF';
-                ctx.fillText("当前得分: " + this.score,
-                    this.center.x,
-                    this.center.y + 300);
+                Success.drawInfo(ctx, this.center, this.score, this.rank);
 
-                ctx.fillText("当前排名: " + this.rank,
-                    this.center.x,
-                    this.center.y + 430);
             }
         });
+    }
+
+    static drawInfo(ctx, center, score, rank) {
+        ctx.font = '60px gameFont';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#FFF';
+        ctx.fillText("当前得分: " + score,
+            center.x,
+            center.y + 270);
+
+        ctx.fillText("当前排名: " + rank,
+            center.x,
+            center.y + 400);
     }
 
     rotate(ctx, center, angle) {

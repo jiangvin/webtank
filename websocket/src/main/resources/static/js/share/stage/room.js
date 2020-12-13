@@ -16,6 +16,7 @@ import MapItem from "../item/game/mapitem.js";
 import Bullet from "../item/game/bullet.js";
 import Height from "../item/game/height.js";
 import Success from "../item/game/success.js";
+import Failed from "../item/game/failed.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -663,6 +664,10 @@ export default class Room extends Stage {
         if (status.type === "END") {
             new Success(this, status.score, status.rank);
             return;
+        }
+
+        if (status.type === "LOSE") {
+            new Failed(this, status.score, status.rank);
         }
 
         //其他结束状态

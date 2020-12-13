@@ -141,8 +141,12 @@ export default class Resource {
 
         this.loadImage("back", "room/back");
 
+        this.loadImage("failed", "room/failed");
         this.loadImage("success", "room/success");
         this.loadImage("success_light", "room/success_light");
+
+        this.loadImage("button_home", "room/button_home");
+        this.loadImage("button_again", "room/button_again");
 
         //load all tank images
         for (let i = 1; i <= 12; ++i) {
