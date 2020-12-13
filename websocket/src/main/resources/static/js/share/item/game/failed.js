@@ -84,16 +84,16 @@ export default class Failed {
         this.stage.createItem({
             draw: ctx => {
                 ctx.displayCenter("button_again",
-                    this.center.x - 160,
-                    this.center.y + 560,
+                    800,
+                    910,
                     button.w, button.h);
             }
         });
 
         this.stage.createControl({
             leftTop: {
-                x: this.center.x - 160 - button.w / 2,
-                y: this.center.y + 560 - button.h / 2
+                x: 800 - button.w / 2,
+                y: 910 - button.h / 2
             },
             size: button,
             callBack: () => {
@@ -104,16 +104,16 @@ export default class Failed {
         this.stage.createItem({
             draw: ctx => {
                 ctx.displayCenter("button_home",
-                    this.center.x + 160,
-                    this.center.y + 560,
+                    1120,
+                    910,
                     button.w, button.h);
             }
         });
 
         this.stage.createControl({
             leftTop: {
-                x: this.center.x + 160 - button.w / 2,
-                y: this.center.y + 560 - button.h / 2
+                x: 1120 - button.w / 2,
+                y: 910 - button.h / 2
             },
             size: button,
             callBack: () => {
