@@ -95,12 +95,12 @@ export default class Success {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
         ctx.fillText("当前得分: " + score,
-            center.x,
-            center.y + 270);
+            center.x + Resource.getOffset().x,
+            center.y + 270 + Resource.getOffset().y);
 
         ctx.fillText("当前排名: " + rank,
-            center.x,
-            center.y + 400);
+            center.x + Resource.getOffset().x,
+            center.y + 400 + Resource.getOffset().y);
     }
 
     rotate(ctx, center, angle) {
