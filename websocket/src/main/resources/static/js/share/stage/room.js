@@ -163,10 +163,6 @@ export default class Room extends Stage {
             return;
         }
 
-        if (Status.getValue() === Status.statusPause()) {
-            return;
-        }
-
         let updateX = false;
         let updateY = false;
         if (this.size.width < Resource.width()) {
