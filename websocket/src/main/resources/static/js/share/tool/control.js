@@ -6,7 +6,6 @@
 
 import Resource from "./resource.js";
 import Common from "./common.js";
-import Adapter from "./adapter.js";
 
 export default class Control {
 
@@ -206,11 +205,11 @@ export default class Control {
         }
 
         //talk
-        distance = Common.distance(x, y, controlMode.talkCenterX, controlMode.talkCenterY);
-        if (distance < controlMode.talkRadius) {
-            Adapter.inputMessageEvent(false);
-            return;
-        }
+        // distance = Common.distance(x, y, controlMode.talkCenterX, controlMode.talkCenterY);
+        // if (distance < controlMode.talkRadius) {
+        //     Adapter.inputMessageEvent(false);
+        //     return;
+        // }
 
         //way
         //如果已经在触控方向盘则不做额外触控操作
@@ -219,7 +218,7 @@ export default class Control {
         }
 
         //在屏幕的左半边触控则直接返回
-        if (x >= Common.width() / 2) {
+        if (x >= Common.width() * .3) {
             return;
         }
 
@@ -270,7 +269,7 @@ export default class Control {
 
         let centerX = Common.width() / 4 / 2;
         let centerY = Common.height() / 2 / 2;
-        let radius = centerX > centerY ? centerY : centerX;
+        let radius = 160;
         centerY *= 3;
 
         let rightCenterX = centerX * 7;
@@ -303,9 +302,9 @@ export default class Control {
         thisControl.controlMode.rightCenterY = rightCenterY;
         thisControl.controlMode.rightRadius = rightRadius;
 
-        thisControl.controlMode.talkRadius = 37;
-        thisControl.controlMode.talkCenterX = Resource.width() - 61;
-        thisControl.controlMode.talkCenterY = 92;
+        // thisControl.controlMode.talkRadius = 37;
+        // thisControl.controlMode.talkCenterX = Resource.width() - 61;
+        // thisControl.controlMode.talkCenterY = 92;
     };
 
     static draw(ctx) {
@@ -344,14 +343,6 @@ export default class Control {
             controlMode.rightRadius * 2, controlMode.rightRadius * 2);
 
         //TODO 输入框相关，后期优化
-        // //返回
-        // const back = Resource.getOrCreateImage("back");
-        // ctx.drawImage(
-        //     back,
-        //     0, 0,
-        //     back.width, back.height,
-        //     Resource.width() - back.width, 0,
-        //     back.width, back.height);
         // //talk
         // const talk = Resource.getOrCreateImage("talk");
         // ctx.drawImage(
