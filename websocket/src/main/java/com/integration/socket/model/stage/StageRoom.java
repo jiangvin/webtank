@@ -127,20 +127,38 @@ public class StageRoom extends BaseStage {
         this.creator = creator;
         this.mapManger = mapManger;
         this.userService = userService;
-        initItemPool(creator);
-
         init();
     }
 
-    private void initItemPool(UserBo creator) {
+    private void initItemPool() {
+        itemTypePool.clear();
         itemTypePool.addAll(Arrays.asList(ItemType.values()));
-        if (!creator.hasRedStar()) {
+        boolean hasRedStar = false;
+        boolean hasGhost = false;
+        boolean hasClock = false;
+        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
+            UserBo user = kv.getValue();
+            if (!hasRedStar && user.hasRedStar()) {
+                hasRedStar = true;
+            }
+            if (!hasGhost && user.hasGhost()) {
+                hasGhost = true;
+            }
+            if (!hasClock && user.hasClock()) {
+                hasClock = true;
+            }
+            if (hasRedStar && hasGhost && hasClock) {
+                break;
+            }
+        }
+
+        if (!hasRedStar) {
             itemTypePool.remove(ItemType.RED_STAR);
         }
-        if (!creator.hasGhost()) {
+        if (!hasGhost) {
             itemTypePool.remove(ItemType.GHOST);
         }
-        if (!creator.hasClock()) {
+        if (!hasClock) {
             itemTypePool.remove(ItemType.CLOCK);
         }
     }
@@ -166,6 +184,8 @@ public class StageRoom extends BaseStage {
         this.eventList.clear();
         this.syncTankList.clear();
         this.missionStartTime = System.currentTimeMillis();
+
+        initItemPool();
         this.gameStatus.init();
 
         this.eventList.add(new CreateItemEvent());
@@ -1178,6 +1198,7 @@ public class StageRoom extends BaseStage {
         sendStatusAndMessage(userBo, false);
 
         addPlayerLifeForNewComer(userBo.getTeamType());
+        initItemPool();
 
         //发送场景信息
         sendMessageToUser(getMapBo().toDto(), MessageType.MAP, userBo.getUsername());
