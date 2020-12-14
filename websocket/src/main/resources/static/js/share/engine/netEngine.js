@@ -47,11 +47,7 @@ export default class NetEngine extends Engine {
 
                 //注册消息事件
                 Common.addMessageEvent("SERVER_READY", function () {
-                    if (Status.getValue() !== Status.statusPause()) {
-                        return;
-                    }
                     thisEngine.addConnectCheckEvent();
-                    Status.setStatus(Status.statusNormal());
                 })
             })
         })
