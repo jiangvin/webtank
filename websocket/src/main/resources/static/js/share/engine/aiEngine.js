@@ -649,6 +649,7 @@ export default class AiEngine extends Engine {
                 id: tank.id,
                 typeId: tank.typeId,
                 hasShield: tank.item.hasShield,
+                hasGhost: tank.item.hasGhost,
                 x: tank.item.x,
                 y: tank.item.y,
                 orientation: tank.item.orientation,
