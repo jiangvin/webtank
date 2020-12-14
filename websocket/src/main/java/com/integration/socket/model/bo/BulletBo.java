@@ -24,8 +24,6 @@ public class BulletBo {
     private double speed;
     private boolean brokenIron;
     OrientationType orientationType;
-    private String startGridKey;
-    private String endGridKey;
 
     public ItemDto convertToDto() {
         ItemDto ammoDto = new ItemDto();

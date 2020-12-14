@@ -2,14 +2,12 @@ package com.integration.socket.model.bot;
 
 import com.integration.dto.bot.BotType;
 import com.integration.dto.map.ActionType;
-import com.integration.dto.map.MapUnitType;
 import com.integration.dto.map.OrientationType;
+import com.integration.socket.model.CollideType;
 import com.integration.socket.model.bo.TankBo;
-import com.integration.util.CommonUtil;
 import lombok.Data;
 import lombok.NonNull;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,24 +68,24 @@ class SimpleBotBo extends BaseBotBo {
         updateFire(tank);
 
         tank.setActionType(ActionType.RUN);
-        boolean forward = canPass(tank, tank.getOrientationType());
+        boolean forward = getStage().canPass(tank) == CollideType.COLLIDE_NONE;
         if (forward && random.nextInt(KEEP_GOING_RATE) != 0) {
             return;
         }
 
         List<OrientationType> sideList = new ArrayList<>();
         if (tank.getOrientationType() == OrientationType.UP || tank.getOrientationType() == OrientationType.DOWN) {
-            if (canPass(tank, OrientationType.LEFT)) {
+            if (getStage().canPass(tank, OrientationType.LEFT) == CollideType.COLLIDE_NONE) {
                 sideList.add(OrientationType.LEFT);
             }
-            if (canPass(tank, OrientationType.RIGHT)) {
+            if (getStage().canPass(tank, OrientationType.RIGHT) == CollideType.COLLIDE_NONE) {
                 sideList.add(OrientationType.RIGHT);
             }
         } else {
-            if (canPass(tank, OrientationType.UP)) {
+            if (getStage().canPass(tank, OrientationType.UP) == CollideType.COLLIDE_NONE) {
                 sideList.add(OrientationType.UP);
             }
-            if (canPass(tank, OrientationType.DOWN)) {
+            if (getStage().canPass(tank, OrientationType.DOWN) == CollideType.COLLIDE_NONE) {
                 sideList.add(OrientationType.DOWN);
             }
         }
@@ -104,7 +102,7 @@ class SimpleBotBo extends BaseBotBo {
         }
 
         OrientationType back = tank.getOrientationType().getBack();
-        if (!canPass(tank, back)) {
+        if (getStage().canPass(tank, back) != CollideType.COLLIDE_NONE) {
             back = null;
         }
 
@@ -124,127 +122,5 @@ class SimpleBotBo extends BaseBotBo {
         if (tank.getBulletCount() > 0 && tank.getReloadTime() <= 0) {
             getStage().processTankFire(tank.getTankId(), getBotUser().getUsername());
         }
-    }
-
-    private boolean canPass(TankBo tank, OrientationType orientation) {
-        if (!tank.isHasGhost() && collideWithTanks(tank, orientation)) {
-            return false;
-        }
-
-        //获取前方的两个角的坐标（顺时针获取）
-        List<Point> corners = generateCorners(tank, orientation);
-        Point corner1 = corners.get(0);
-        Point corner2 = corners.get(1);
-        if (!canPass(corner1.x, corner1.y, tank.isHasGhost())) {
-            return false;
-        }
-        return canPass(corner2.x, corner2.y, tank.isHasGhost());
-    }
-
-    private boolean canPass(double x, double y, boolean isGhost) {
-        if (x < 0 || y < 0 || x >= getStage().getMapBo().getWidth() || y >= getStage().getMapBo().getHeight()) {
-            return false;
-        }
-
-        //幽灵状态无视一切障碍
-        if (isGhost) {
-            return true;
-        }
-
-        return !collideWithMap(x, y);
-    }
-
-    private boolean collideWithMap(double x, double y) {
-        String key = CommonUtil.generateGridKey(x, y);
-        if (!getStage().getMapBo().getUnitMap().containsKey(key)) {
-            return false;
-        }
-
-        return getStage().getMapBo().getUnitMap().get(key) != MapUnitType.GRASS;
-    }
-
-    private boolean collideWithTanks(TankBo tank, OrientationType orientation) {
-        for (Map.Entry<String, TankBo> kv : getStage().getTankMap().entrySet()) {
-            TankBo target = kv.getValue();
-            if (target.getTankId().equals(tank.getTankId())) {
-                continue;
-            }
-
-            double distance = Point.distance(tank.getX(), tank.getY(), target.getX(), target.getY());
-            if (distance <= CommonUtil.UNIT_SIZE) {
-                switch (orientation) {
-                    case UP:
-                        if (tank.getY() > target.getY()) {
-                            return true;
-                        }
-                        break;
-                    case DOWN:
-                        if (tank.getY() < target.getY()) {
-                            return true;
-                        }
-                        break;
-                    case LEFT:
-                        if (tank.getX() > target.getX()) {
-                            return true;
-                        }
-                        break;
-                    case RIGHT:
-                        if (tank.getX() < target.getX()) {
-                            return true;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        return false;
-    }
-
-    private List<Point> generateCorners(TankBo tank, OrientationType orientation) {
-        int x = (int) tank.getX();
-        int y = (int) tank.getY();
-        int size = CommonUtil.UNIT_SIZE;
-        int halfLite = size / 2 - 1;
-
-        //获取前方的两个角的坐标（顺时针获取）
-        Point corner1 = new Point();
-        Point corner2 = new Point();
-        switch (orientation) {
-            case UP:
-                y -= tank.getType().getSpeed();
-                corner1.x = x - halfLite;
-                corner1.y = y - halfLite;
-                corner2.x = x + halfLite;
-                corner2.y = y - halfLite;
-                break;
-            case DOWN:
-                y += tank.getType().getSpeed();
-                corner1.x = x + halfLite;
-                corner1.y = y + halfLite;
-                corner2.x = x - halfLite;
-                corner2.y = y + halfLite;
-                break;
-            case LEFT:
-                x -= tank.getType().getSpeed();
-                corner1.x = x - halfLite;
-                corner1.y = y + halfLite;
-                corner2.x = x - halfLite;
-                corner2.y = y - halfLite;
-                break;
-            case RIGHT:
-                x += tank.getType().getSpeed();
-                corner1.x = x + halfLite;
-                corner1.y = y - halfLite;
-                corner2.x = x + halfLite;
-                corner2.y = y + halfLite;
-                break;
-            default:
-                break;
-        }
-        List<Point> corners = new ArrayList<>();
-        corners.add(corner1);
-        corners.add(corner2);
-        return corners;
     }
 }
