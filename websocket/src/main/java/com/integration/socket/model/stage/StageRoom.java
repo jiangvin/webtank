@@ -502,6 +502,10 @@ public class StageRoom extends BaseStage {
                 continue;
             }
 
+            if (target.isHasGhost()) {
+                continue;
+            }
+
             double distance = Point.distance(tank.getX(), tank.getY(), target.getX(), target.getY());
             if (distance <= CommonUtil.UNIT_SIZE) {
                 switch (orientation) {

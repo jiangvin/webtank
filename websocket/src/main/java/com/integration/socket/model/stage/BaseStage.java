@@ -102,18 +102,8 @@ public abstract class BaseStage {
         if (ammo == null) {
             return;
         }
-        processTankFireExtension(ammo);
         bulletMap.put(ammo.getId(), ammo);
         sendMessageToRoom(Collections.singletonList(ammo.convertToDto()), MessageType.BULLET);
-    }
-
-    /**
-     * 拓展函数
-     *
-     * @param ammo
-     */
-    void processTankFireExtension(BulletBo ammo) {
-
     }
 
     private void processTankControl(MessageDto messageDto, String sendFrom) {
