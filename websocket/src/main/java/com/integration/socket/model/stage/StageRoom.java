@@ -837,6 +837,8 @@ public class StageRoom extends BaseStage {
 
             double distance = Point.distance(ammo.getX(), ammo.getY(), target.getX(), target.getY());
             if (distance <= CommonUtil.AMMO_SIZE) {
+                this.removeBulletIds.add(ammo.getId());
+                this.removeBulletIds.add(target.getId());
                 return true;
             }
         }
