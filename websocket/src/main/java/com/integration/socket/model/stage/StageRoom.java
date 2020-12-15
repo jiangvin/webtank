@@ -476,7 +476,7 @@ public class StageRoom extends BaseStage {
     }
 
     private CollideType canPass(Point point, boolean hasGhost) {
-        if (point.x < 0 || point.y < 0 || point.x > getMapBo().getWidth() || point.y > getMapBo().getHeight()) {
+        if (point.x < 0 || point.y < 0 || point.x >= getMapBo().getWidth() || point.y >= getMapBo().getHeight()) {
             return CollideType.COLLIDE_BOUNDARY;
         }
 
@@ -771,7 +771,7 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean collideWithAll(BulletBo bullet) {
-        if (bullet.getX() <= 0 || bullet.getY() <= 0 || bullet.getX() >= getMapBo().getWidth() || bullet.getY() >= getMapBo().getHeight()) {
+        if (bullet.getX() < 0 || bullet.getY() < 0 || bullet.getX() >= getMapBo().getWidth() || bullet.getY() >= getMapBo().getHeight()) {
             //超出范围
             this.removeBulletIds.add(bullet.getId());
             return true;
