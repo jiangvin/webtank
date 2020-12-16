@@ -327,20 +327,31 @@ export default class AiEngine extends Engine {
     }
 
     saveStage() {
-        const thisEngine = this;
-        const request = {
-            userId: Resource.getUser().deviceId,
-            stage: thisEngine.room.roomInfo.mapId,
-            hardStage: thisEngine.room.roomInfo.mapId
-        };
-
-        if (thisEngine.room.roomInfo.hardMode) {
-            ++request.hardStage;
+        const user = Resource.getUser();
+        const isHardMode = this.room.roomInfo.hardMode;
+        const mapId = this.room.roomInfo.mapId;
+        if (isHardMode) {
+            if (user.hardStage === mapId) {
+                ++user.hardStage;
+            }
         } else {
-            ++request.stage;
+            if (user.stage === mapId) {
+                ++user.stage;
+                if (user.hardStage === 0) {
+                    ++user.hardStage;
+                }
+            }
         }
 
-        Common.postEncrypt("/singlePlayer/saveStage", request, data => {
+        if (!user.deviceId) {
+            return;
+        }
+
+        const request = {
+            stage: user.stage,
+            hardStage: user.hardStage
+        };
+        Common.postEncrypt("/singlePlayer/saveStage?userId=" + user.deviceId, request, data => {
             Resource.setUser(data);
         });
     }

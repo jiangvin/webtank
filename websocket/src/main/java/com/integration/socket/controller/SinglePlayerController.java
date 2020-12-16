@@ -77,12 +77,13 @@ public class SinglePlayerController {
     }
 
     @PostMapping("/saveStage")
-    public UserDto saveStage(@RequestBody EncryptDto encryptDto) {
+    public UserDto saveStage(@RequestParam("userId") String userId,
+                             @RequestBody EncryptDto encryptDto) {
         UserDto userDto = ObjectUtil.readValue(encryptDto.decrypt(), UserDto.class);
-        if (userDto == null || StringUtils.isEmpty(userDto.getUserId())) {
+        if (userDto == null || StringUtils.isEmpty(userId)) {
             return null;
         }
-
+        userDto.setUserId(userId);
         return userService.saveStageForSinglePlayer(userDto);
     }
 }
