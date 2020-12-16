@@ -346,12 +346,14 @@ export default class AiEngine extends Engine {
     }
 
     saveRank() {
-        const thisEngine = this;
-        Common.getRequest("/user/getToken", function (token) {
-            Common.postEncrypt("/singlePlayer/saveRank?username=" + Resource.getUser().userId,
+        Common.getRequest("/user/getToken", token => {
+            let parameters = "?username=" + Resource.getUser().userId;
+            if (Resource.getUser().deviceId) {
+                parameters += "&userId=" + Resource.getUser().deviceId;
+            }
+            Common.postEncrypt("/singlePlayer/saveRank" + parameters,
                 {
-                    score: thisEngine.score,
-                    userId: Resource.getUser().deviceId,
+                    score: this.score,
                     token: token
                 });
         });

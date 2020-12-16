@@ -62,13 +62,15 @@ public class SinglePlayerController {
 
     @PostMapping("/saveRank")
     public boolean saveRank(@RequestParam("username") String username,
+                            @RequestParam(value = "userId", required = false) String userId,
                             @RequestBody EncryptDto encryptDto) {
         RankDto rankDto = ObjectUtil.readValue(encryptDto.decrypt(), RankDto.class);
         if (rankDto == null) {
             return false;
         }
-        //账号名如果是表情则会出现乱码，所以这里账号名单独传递
+        //账号信息单独传递，减少加密文件的大小
         rankDto.setUsername(username);
+        rankDto.setUserId(userId);
 
         userService.saveRankForSinglePlayer(rankDto);
         return true;
