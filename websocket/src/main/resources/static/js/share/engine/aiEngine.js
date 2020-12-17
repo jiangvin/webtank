@@ -14,7 +14,8 @@ export default class AiEngine extends Engine {
 
         const thisEngine = this;
 
-        thisEngine.score = 0;
+        thisEngine.totalScore = 0;
+        thisEngine.currentScore = 0;
         thisEngine.stageStartTime = 0;
 
         thisEngine.playerLifeCount = 0;
@@ -278,50 +279,62 @@ export default class AiEngine extends Engine {
     }
 
     processGameOver(win) {
-        const thisEngine = this;
         //计算胜利分数
         if (win) {
-            const gameSeconds = (new Date() - thisEngine.stageStartTime) / 1000;
+            const gameSeconds = (new Date() - this.stageStartTime) / 1000;
             //困难模式加权
-            const hardMode = thisEngine.room.roomInfo.hardMode ? AiEngine.scoreHardMode : 0;
+            const hardMode = this.room.roomInfo.hardMode ? AiEngine.scoreHardMode : 0;
 
             let winScore = Math.floor(AiEngine.scoreWin + hardMode - gameSeconds);
             if (winScore < 0) {
                 winScore = 0;
             }
-            thisEngine.score += winScore;
-            Common.getRequest("/singlePlayer/getRank?score=" + thisEngine.score, function (rank) {
-                if (thisEngine.room.roomInfo.subId >= thisEngine.maxSubId) {
-                    thisEngine.room.gameStatus({
+            this.currentScore += winScore;
+            this.totalScore += this.currentScore;
+            Common.getRequest("/singlePlayer/getMapEndInfo?currentScore=" + this.currentScore +
+                "&totalScore=" + this.totalScore +
+                "&mapId=" + this.room.roomInfo.mapId +
+                "&subId=" + this.room.roomInfo.subId +
+                "&hardMode=" + this.room.roomInfo.hardMode,
+                mapEndDto => {
+                if (this.room.roomInfo.subId >= this.maxSubId) {
+                    this.room.gameStatus({
                         type: "WIN",
-                        score: thisEngine.score,
-                        rank: rank
+                        score: this.totalScore,
+                        star: mapEndDto.star,
+                        rank: mapEndDto.rank
                     });
-                    thisEngine.saveRank();
-                    thisEngine.saveStage();
+                    this.saveRank();
+                    this.saveStage();
                     return;
                 }
 
-                thisEngine.room.gameStatus({
+                this.room.gameStatus({
                     type: "END",
-                    score: thisEngine.score,
-                    rank: rank
+                    score: this.totalScore,
+                    star: mapEndDto.star,
+                    rank: mapEndDto.rank
                 });
-                Common.addTimeEvent("next", function () {
+                Common.addTimeEvent("next", () => {
                     //进入下一关
-                    ++thisEngine.room.roomInfo.subId;
-                    thisEngine.startGame();
+                    ++this.room.roomInfo.subId;
+                    this.startGame();
                 }, 480);
             });
         } else {
-            Common.getRequest("/singlePlayer/getRank?score=" + thisEngine.score, function (rank) {
-                thisEngine.room.gameStatus({
-                    message: "游戏失败",
-                    type: "LOSE",
-                    score: thisEngine.score,
-                    rank: rank
-                });
-                thisEngine.saveRank();
+            this.totalScore += this.currentScore;
+            Common.getRequest("/singlePlayer/getMapEndInfo?currentScore=" + this.currentScore +
+                "&totalScore=" + this.totalScore +
+                "&mapId=" + this.room.roomInfo.mapId +
+                "&subId=" + this.room.roomInfo.subId +
+                "&hardMode=" + this.room.roomInfo.hardMode,
+                mapEndDto => {
+                    this.room.gameStatus({
+                        type: "LOSE",
+                        score: this.totalScore,
+                        rank: mapEndDto.rank
+                    });
+                this.saveRank();
             });
         }
     }
@@ -364,7 +377,7 @@ export default class AiEngine extends Engine {
             }
             Common.postEncrypt("/singlePlayer/saveRank" + parameters,
                 {
-                    score: this.score,
+                    score: this.totalScore,
                     token: token
                 });
         });
@@ -394,7 +407,7 @@ export default class AiEngine extends Engine {
         });
 
         if (tank.item.teamId === 1) {
-            this.score += AiEngine.scorePlayerBoom;
+            this.currentScore += AiEngine.scorePlayerBoom;
             --this.playerLifeCount;
             if (this.playerLifeCount === 0) {
                 this.processGameOver(false);
@@ -404,7 +417,7 @@ export default class AiEngine extends Engine {
             return;
         }
 
-        this.score += AiEngine.scoreComBoom;
+        this.currentScore += AiEngine.scoreComBoom;
         --this.computerLifeCount;
         if (this.computerLifeCount === 0) {
             this.processGameOver(true);
@@ -969,6 +982,7 @@ export default class AiEngine extends Engine {
         this.playerTankStatus = this.tanks.get(Resource.getUser().userId);
 
         //清空场景
+        this.currentScore = 0;
         this.events = [];
         this.tanks.clear();
         this.bullets.clear();

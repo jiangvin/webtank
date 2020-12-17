@@ -3,11 +3,13 @@ package com.integration.socket.controller;
 import com.integration.dto.room.RoomType;
 import com.integration.socket.model.dto.EncryptDto;
 import com.integration.socket.model.dto.MapDetailDto;
+import com.integration.socket.model.dto.MapEndDto;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.service.MapService;
+import com.integration.socket.service.MapStarService;
 import com.integration.socket.service.UserService;
 import com.integration.util.object.ObjectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,9 @@ public class SinglePlayerController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private MapStarService mapStarService;
+
     @GetMapping("/getMapFromId")
     public MapDetailDto getMapFromId(@RequestParam(value = "id") int id, @RequestParam(value = "subId") int subId) {
         return mapService.loadMap(id, subId, RoomType.PVE).toDetailDto();
@@ -55,9 +60,15 @@ public class SinglePlayerController {
         return mapDao.queryMaxSubId(id);
     }
 
-    @GetMapping("/getRank")
-    public int getRank(@RequestParam(value = "score") int score) {
-        return userService.getRank(score);
+    @GetMapping("/getMapEndInfo")
+    public MapEndDto getRank(@RequestParam(value = "currentScore") int currentScore,
+                             @RequestParam(value = "totalScore") int totalScore,
+                             @RequestParam(value = "mapId") int mapId,
+                             @RequestParam(value = "subId") int subId,
+                             @RequestParam(value = "hardMode") boolean hardMode) {
+        return new MapEndDto(
+                   userService.getRank(totalScore),
+                   mapStarService.getStarCount(mapId, subId, hardMode, currentScore));
     }
 
     @PostMapping("/saveRank")
