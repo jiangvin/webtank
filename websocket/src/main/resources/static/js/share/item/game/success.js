@@ -7,14 +7,15 @@ import Resource from "../../tool/resource.js";
 import Sound from "../../tool/sound.js";
 
 export default class Success {
-    constructor(stage, score, rank) {
+    constructor(stage, score, rank, star) {
         this.stage = stage;
         this.score = score;
         this.rank = rank;
+        this.star = star;
 
         this.center = {
-            x: Resource.width() / 2,
-            y: Resource.height() * .45
+            x: 960,
+            y: 460
         };
         if (!score || score < 0 || !rank) {
             this.center.y = 540;
@@ -37,9 +38,19 @@ export default class Success {
             speed: 1 / 180,
             angle: 0
         };
-
-        const imgLight = Resource.getImage("success_light");
-        const imgBoard = Resource.getImage("success");
+        this.starInfo = {
+            index: 0,
+            scale: 0,
+            speed: 0.15,
+            x: this.center.x,
+            y: this.center.y + 260,
+            size: 80
+        };
+        if (this.star === 3) {
+            this.starInfo.x -= 100;
+        } else if (this.star === 2) {
+            this.starInfo.x -= 50;
+        }
 
         this.item = this.stage.createItem({
             draw: ctx => {
@@ -53,14 +64,9 @@ export default class Success {
                 if (this.boardSize.scale === 1) {
                     this.lightSize.angle += this.lightSize.speed;
                     this.rotate(ctx, this.center, Math.PI * this.lightSize.angle);
-                    ctx.drawImage(
-                        imgLight,
-                        0, 0,
-                        imgLight.width, imgLight.height,
-                        this.center.x - this.lightSize.w / 2,
-                        this.center.y - this.lightSize.h / 2,
-                        this.lightSize.w, this.lightSize.h
-                    );
+                    ctx.displayCenter("success_light",
+                        this.center.x, this.center.y,
+                        this.lightSize.w, this.lightSize.h);
                     this.rotate(ctx, this.center, -Math.PI * this.lightSize.angle);
                 }
 
@@ -70,23 +76,58 @@ export default class Success {
                 } else {
                     this.boardSize.scale = 1;
                 }
-                ctx.drawImage(
-                    imgBoard,
-                    0, 0,
-                    imgBoard.width, imgBoard.height,
-                    this.center.x - this.boardSize.w / 2 * this.boardSize.scale,
-                    this.center.y - this.boardSize.h / 2 * this.boardSize.scale,
+                ctx.displayCenter("success",
+                    this.center.x, this.center.y,
                     this.boardSize.w * this.boardSize.scale,
-                    this.boardSize.h * this.boardSize.scale
-                );
+                    this.boardSize.h * this.boardSize.scale);
 
                 //info
                 if (!this.ignoreInfo) {
-                    Success.drawInfo(ctx, this.center, this.score, this.rank);
+                    this.drawStar(ctx);
+                    Success.drawInfo(ctx, {
+                        x: this.center.x,
+                        y: this.center.y + 100
+                    }, this.score, this.rank);
                 }
 
             }
         });
+    }
+
+    drawStar(ctx) {
+        //等待之前的动画完成
+        if (this.boardSize.scale < 1) {
+            return;
+        }
+
+        //动画
+        if (this.starInfo.scale < 1) {
+            this.starInfo.scale += this.starInfo.speed;
+        } else {
+            if (this.starInfo.index < this.star - 1) {
+                ++this.starInfo.index;
+                this.starInfo.scale = this.starInfo.speed;
+            } else {
+                this.starInfo.scale = 1;
+            }
+        }
+
+        for (let i = 0; i < this.star; ++i) {
+            let scale;
+            if (i > this.starInfo.index) {
+                break;
+            }
+            if (i < this.starInfo.index) {
+                scale = 1;
+            } else {
+                scale = this.starInfo.scale;
+            }
+
+            ctx.displayCenter("star",
+                this.starInfo.x + i * 100, this.starInfo.y,
+                scale * this.starInfo.size,
+                scale * this.starInfo.size);
+        }
     }
 
     static drawInfo(ctx, center, score, rank) {

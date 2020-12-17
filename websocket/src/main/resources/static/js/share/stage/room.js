@@ -658,12 +658,12 @@ export default class Room extends Stage {
         Status.setStatus(Status.statusPause());
 
         if (status.type === "END") {
-            new Success(this, status.score, status.rank);
+            new Success(this, status.score, status.rank, status.star);
             return;
         }
 
         if (status.type === "WIN") {
-            new Success(this, status.score, status.rank);
+            new Success(this, status.score, status.rank, status.star);
             //没有关卡了，回到主页
             Common.addTimeEvent("back_to_menu", function () {
                 Common.gotoStage("menu");

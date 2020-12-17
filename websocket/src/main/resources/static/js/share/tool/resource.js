@@ -61,6 +61,9 @@ export default class Resource {
         //menu
         this.loadAnimationImage("button", 1);
         this.loadAnimationImage("button_disabled", 1);
+
+        //other
+        this.loadAnimationImage("star");
     }
 
     loadMenuResource() {
