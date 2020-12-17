@@ -1,3 +1,4 @@
+#2.0.0
 ALTER TABLE user
 CHANGE COLUMN `stage` `stage` INT(11) NOT NULL DEFAULT 1 ;
 
@@ -8,3 +9,14 @@ set SQL_SAFE_UPDATES = 0;
 update user set stage = stage + 1;
 update user set hard_stage = 1 where stage > 1;
 set SQL_SAFE_UPDATES = 1;
+
+#2.1.0
+CREATE TABLE star (
+  `user_id` VARCHAR(128) NOT NULL,
+  `map_id` INT NOT NULL,
+  `sub_id` INT NOT NULL,
+  `hard_mode` TINYINT NOT NULL,
+  `star` INT NOT NULL,
+  `create_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` TIMESTAMP NULL,
+   PRIMARY KEY (`user_id`, `map_id`, `sub_id`, `hard_mode`));
