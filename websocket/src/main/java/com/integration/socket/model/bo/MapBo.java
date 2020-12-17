@@ -119,6 +119,10 @@ public class MapBo {
         return mapDetailDto;
     }
 
+    public int getComputerLifeCount() {
+        return getCount(getComputerLife());
+    }
+
     private void copyLifeCountProperties(MapDto mapDto) {
         mapDto.setPlayerLife(getCount(getPlayerLife()));
         mapDto.setComputerLife(getCount(getComputerLife()));

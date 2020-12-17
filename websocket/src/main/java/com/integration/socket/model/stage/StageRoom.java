@@ -12,6 +12,7 @@ import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
 import com.integration.dto.room.TeamType;
 import com.integration.socket.model.CollideType;
+import com.integration.socket.model.Constant;
 import com.integration.socket.model.ItemType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.ItemBo;
@@ -64,10 +65,7 @@ public class StageRoom extends BaseStage {
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
     private static final int DEFAULT_SHIELD_TIME = 20 * 60;
     private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
-    private static final int SCORE_COM_BOOM = 10;
     private static final int SCORE_PLAYER_BOOM = -30;
-    private static final int SCORE_WIN = 500;
-    private static final int SCORE_HARD_MODE = 100;
 
     private Map<String, ItemBo> itemMap = new ConcurrentHashMap<>();
 
@@ -1004,9 +1002,9 @@ public class StageRoom extends BaseStage {
         int seconds = (int)((System.currentTimeMillis() - this.missionStartTime) / 1000);
 
         //困难模式加权
-        int hardModeScore = hardMode ? SCORE_HARD_MODE : 0;
+        int hardModeScore = hardMode ? Constant.SCORE_HARD_MODE : 0;
 
-        int winScore = SCORE_WIN + hardModeScore - seconds;
+        int winScore = Constant.SCORE_WIN + hardModeScore - seconds;
         if (winScore > 0) {
             this.score += winScore;
         }
@@ -1075,7 +1073,7 @@ public class StageRoom extends BaseStage {
         if (tankBo.getTeamType() == TeamType.RED) {
             this.score += SCORE_PLAYER_BOOM;
         } else {
-            this.score += SCORE_COM_BOOM;
+            this.score += Constant.SCORE_COM_BOOM;
         }
     }
 

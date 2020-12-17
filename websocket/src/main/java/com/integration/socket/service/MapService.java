@@ -34,6 +34,9 @@ public class MapService {
     }
 
     @Autowired
+    private MapStarService mapStarService;
+
+    @Autowired
     private MapDao mapDao;
 
     private Random random = new Random();
@@ -78,7 +81,11 @@ public class MapService {
             mapBo.duplicateComputer();
         } else if (roomType == RoomType.PVE) {
             mapBo.removeMapUnit(MapUnitType.BLUE_KING);
+
+            //缓存基本分数，算星的时候需要
+            mapStarService.saveBaseScore(mapBo);
         }
+
         return mapBo;
     }
 
