@@ -973,18 +973,20 @@ export default class AiEngine extends Engine {
             return;
         }
 
-        const thisEngine = this;
         Common.postEncrypt("/shop/buyWithCoin", {
             userId: Resource.getUser().deviceId,
             buyType: "AGAIN_FOR_SINGLE"
-        }, function (data) {
+        }, data => {
             Resource.setUser(data);
             Common.addMessage("续关成功!", '#FF0');
 
             //重置初始生命
-            thisEngine.playerLifeCount = 0;
+            this.playerLifeCount = 0;
 
-            thisEngine.startGame();
+            //重置总分
+            this.totalScore = 0;
+
+            this.startGame();
         });
     }
 

@@ -905,6 +905,10 @@ public class StageRoom extends BaseStage {
         }
 
         sendMessageToRoom(String.format("%s 选择了续关,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
+
+        //重置总分
+        this.totalScore = 0;
+
         gameStatus.setType(GameStatusType.PAUSE);
         init();
         processNextMapEvent(5, "重新开始");
