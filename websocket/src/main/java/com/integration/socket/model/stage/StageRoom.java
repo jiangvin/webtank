@@ -21,6 +21,7 @@ import com.integration.socket.model.bo.MapMangerBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.bot.BaseBotBo;
+import com.integration.socket.model.dto.StarDto;
 import com.integration.socket.model.dto.StringCountDto;
 import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.event.BaseEvent;
@@ -31,6 +32,7 @@ import com.integration.socket.model.event.IronKingEvent;
 import com.integration.socket.model.event.LoadMapEvent;
 import com.integration.socket.model.event.MessageEvent;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
+import com.integration.socket.service.MapStarService;
 import com.integration.socket.service.MessageService;
 import com.integration.socket.service.UserService;
 import com.integration.util.CommonUtil;
@@ -107,21 +109,29 @@ public class StageRoom extends BaseStage {
      * 计分相关
      */
     private long missionStartTime;
-    private int score = 0;
+    private int currentScore = 0;
+    private int totalScore = 0;
     private UserService userService;
+    private MapStarService mapStarService;
 
     /**
      * 道具池
      */
     private List<ItemType> itemTypePool = new ArrayList<>();
 
-    public StageRoom(RoomDto roomDto, UserBo creator, MapMangerBo mapManger, MessageService messageService, UserService userService) {
+    public StageRoom(RoomDto roomDto,
+                     UserBo creator,
+                     MapMangerBo mapManger,
+                     MessageService messageService,
+                     UserService userService,
+                     MapStarService mapStarService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
         this.hardMode = roomDto.isHardMode();
         this.creator = creator;
         this.mapManger = mapManger;
         this.userService = userService;
+        this.mapStarService = mapStarService;
         init();
     }
 
@@ -177,6 +187,7 @@ public class StageRoom extends BaseStage {
         this.eventList.clear();
         this.syncTankList.clear();
         this.missionStartTime = System.currentTimeMillis();
+        this.currentScore = 0;
 
         initItemPool();
         this.gameStatus.init();
@@ -937,12 +948,15 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean processGameOverPve(TeamType winTeam) {
-        int saveLife = saveTankType();
-
         if (winTeam == TeamType.RED) {
             updateScoreAfterWin();
-            gameStatus.setScore(this.score);
-            gameStatus.setRank(userService.getRank(this.score));
+            this.totalScore += this.currentScore;
+            gameStatus.setScore(this.totalScore);
+            gameStatus.setStar(mapStarService.getStarCount(getMapId(), getSubId(), hardMode, this.currentScore));
+            gameStatus.setRank(userService.getRank(this.totalScore));
+            saveStar();
+
+            int saveLife = saveTankType();
             if (!mapManger.loadNextMapPve(saveLife)) {
                 gameStatus.setType(GameStatusType.WIN);
                 userService.saveRankForMultiplePlayers(this.creator, gameStatus);
@@ -952,19 +966,18 @@ public class StageRoom extends BaseStage {
                 gameStatus.setType(GameStatusType.END);
             }
         } else {
-            if (this.score < 0) {
-                this.score = 0;
+            if (this.currentScore < 0) {
+                this.currentScore = 0;
             }
-            gameStatus.setScore(this.score);
-            gameStatus.setRank(userService.getRank(this.score));
+            this.totalScore += this.currentScore;
+            gameStatus.setScore(this.totalScore);
+            gameStatus.setRank(userService.getRank(this.totalScore));
             gameStatus.setType(GameStatusType.LOSE);
             userService.saveRankForMultiplePlayers(this.creator, gameStatus);
             getAndSaveCoin();
         }
-
         sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
 
-        //修改关卡信息
         return gameStatus.getType() == GameStatusType.END;
     }
 
@@ -992,9 +1005,25 @@ public class StageRoom extends BaseStage {
         userRecord.update();
     }
 
+    private void saveStar() {
+        StarDto starDto = new StarDto();
+        starDto.setHardMode(hardMode);
+        starDto.setMapId(getMapId());
+        starDto.setSubId(getSubId());
+        starDto.setStar(gameStatus.getStar());
+        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
+            UserBo user = kv.getValue();
+            if (StringUtils.isEmpty(user.getUserId())) {
+                continue;
+            }
+            starDto.setUserId(user.getUserId());
+            userService.saveStar(starDto);
+        }
+    }
+
     private void getAndSaveCoin() {
         for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-            userService.saveCoinFromScore(kv.getValue().getUserRecord(), score, false);
+            userService.saveCoinFromScore(kv.getValue().getUserRecord(), totalScore, false);
         }
     }
 
@@ -1006,7 +1035,7 @@ public class StageRoom extends BaseStage {
 
         int winScore = Constant.SCORE_WIN + hardModeScore - seconds;
         if (winScore > 0) {
-            this.score += winScore;
+            this.currentScore += winScore;
         }
     }
 
@@ -1071,9 +1100,9 @@ public class StageRoom extends BaseStage {
         }
 
         if (tankBo.getTeamType() == TeamType.RED) {
-            this.score += SCORE_PLAYER_BOOM;
+            this.currentScore += SCORE_PLAYER_BOOM;
         } else {
-            this.score += Constant.SCORE_COM_BOOM;
+            this.currentScore += Constant.SCORE_COM_BOOM;
         }
     }
 

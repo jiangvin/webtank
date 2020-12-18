@@ -34,6 +34,9 @@ public class RoomService {
     private MapService mapService;
 
     @Autowired
+    private MapStarService mapStarService;
+
+    @Autowired
     private UserService userService;
 
     /**
@@ -100,7 +103,7 @@ public class RoomService {
         MapMangerBo mapMangerBo = new MapMangerBo(mapService, roomDto.getMapId(), roomDto.getSubId(), roomDto.getRoomType());
 
         log.info("room:{} will be created", roomDto);
-        StageRoom stageRoom = new StageRoom(roomDto, creator, mapMangerBo, messageService, userService);
+        StageRoom stageRoom = new StageRoom(roomDto, creator, mapMangerBo, messageService, userService, mapStarService);
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
         return stageRoom;

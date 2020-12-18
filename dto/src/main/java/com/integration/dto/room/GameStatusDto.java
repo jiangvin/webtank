@@ -15,6 +15,7 @@ public class GameStatusDto {
     private GameStatusType type;
     private Integer score;
     private Integer rank;
+    private Integer star;
 
     public GameStatusDto(GameStatusType type) {
         this.type = type;
