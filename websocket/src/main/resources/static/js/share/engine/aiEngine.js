@@ -297,30 +297,32 @@ export default class AiEngine extends Engine {
                 "&subId=" + this.room.roomInfo.subId +
                 "&hardMode=" + this.room.roomInfo.hardMode,
                 mapEndDto => {
-                if (this.room.roomInfo.subId >= this.maxSubId) {
+                    this.saveStar(mapEndDto.star);
+
+                    if (this.room.roomInfo.subId >= this.maxSubId) {
+                        this.room.gameStatus({
+                            type: "WIN",
+                            score: this.totalScore,
+                            star: mapEndDto.star,
+                            rank: mapEndDto.rank
+                        });
+                        this.saveRank();
+                        this.saveStage();
+                        return;
+                    }
+
                     this.room.gameStatus({
-                        type: "WIN",
+                        type: "END",
                         score: this.totalScore,
                         star: mapEndDto.star,
                         rank: mapEndDto.rank
                     });
-                    this.saveRank();
-                    this.saveStage();
-                    return;
-                }
-
-                this.room.gameStatus({
-                    type: "END",
-                    score: this.totalScore,
-                    star: mapEndDto.star,
-                    rank: mapEndDto.rank
+                    Common.addTimeEvent("next", () => {
+                        //进入下一关
+                        ++this.room.roomInfo.subId;
+                        this.startGame();
+                    }, 480);
                 });
-                Common.addTimeEvent("next", () => {
-                    //进入下一关
-                    ++this.room.roomInfo.subId;
-                    this.startGame();
-                }, 480);
-            });
         } else {
             this.totalScore += this.currentScore;
             Common.getRequest("/singlePlayer/getMapEndInfo?currentScore=" + this.currentScore +
@@ -334,8 +336,8 @@ export default class AiEngine extends Engine {
                         score: this.totalScore,
                         rank: mapEndDto.rank
                     });
-                this.saveRank();
-            });
+                    this.saveRank();
+                });
         }
     }
 
@@ -366,6 +368,20 @@ export default class AiEngine extends Engine {
         };
         Common.postEncrypt("/singlePlayer/saveStage?userId=" + user.deviceId, request, data => {
             Resource.setUser(data);
+        });
+    }
+
+    saveStar(star) {
+        const user = Resource.getUser();
+        if (!user.deviceId) {
+            return;
+        }
+
+        Common.postEncrypt("/singlePlayer/saveStar?userId=" + user.deviceId, {
+            mapId: this.room.roomInfo.mapId,
+            subId: this.room.roomInfo.subId,
+            hardMode: this.room.roomInfo.hardMode,
+            star: star
         });
     }
 
