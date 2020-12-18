@@ -7,6 +7,7 @@ import com.integration.socket.model.dto.StarDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.UserDao;
 import com.integration.socket.repository.jooq.tables.records.RankBoardRecord;
+import com.integration.socket.repository.jooq.tables.records.StarRecord;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,6 +63,16 @@ public class UserService {
         }
 
         return RankDto.convert(userDao.queryRankList(start, limit));
+    }
+
+    public List<StarDto> getStarInfo(String userId) {
+        List<StarRecord> records = userDao.queryStarInfo(userId);
+
+        List<StarDto> dtoList = new ArrayList<>();
+        for (StarRecord record : records) {
+            dtoList.add(StarDto.convert(record));
+        }
+        return dtoList;
     }
 
     public int getRank(int score) {

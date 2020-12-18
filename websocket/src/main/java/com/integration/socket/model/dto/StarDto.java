@@ -1,6 +1,7 @@
 package com.integration.socket.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.integration.socket.repository.jooq.tables.records.StarRecord;
 import lombok.Data;
 
 /**
@@ -18,4 +19,13 @@ public class StarDto {
     private boolean hardMode;
     private int star;
     private String token;
+
+    static public StarDto convert(StarRecord record) {
+        StarDto starDto = new StarDto();
+        starDto.setMapId(record.getMapId());
+        starDto.setSubId(record.getSubId());
+        starDto.setHardMode(record.getHardMode());
+        starDto.setStar(record.getStar());
+        return starDto;
+    }
 }

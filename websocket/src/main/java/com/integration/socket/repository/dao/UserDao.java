@@ -45,6 +45,10 @@ public class UserDao extends BaseDao {
         userRecord.insert();
     }
 
+    public List<StarRecord> queryStarInfo(String userId) {
+        return create.selectFrom(STAR).where(STAR.USER_ID.eq(userId)).fetch();
+    }
+
     public boolean saveStar(StarDto starDto) {
         StarRecord starRecord = create.selectFrom(STAR)
                                 .where(STAR.USER_ID.eq(starDto.getUserId()))
