@@ -17,4 +17,5 @@ public class StarDto {
     private int subId;
     private boolean hardMode;
     private int star;
+    private String token;
 }

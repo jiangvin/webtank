@@ -45,7 +45,7 @@ public class UserDao extends BaseDao {
         userRecord.insert();
     }
 
-    public void saveStar(StarDto starDto) {
+    public boolean saveStar(StarDto starDto) {
         StarRecord starRecord = create.selectFrom(STAR)
                                 .where(STAR.USER_ID.eq(starDto.getUserId()))
                                 .and(STAR.MAP_ID.eq(starDto.getMapId()))
@@ -55,14 +55,16 @@ public class UserDao extends BaseDao {
             starRecord = create.newRecord(STAR);
             BeanUtils.copyProperties(starDto, starRecord);
             starRecord.insert();
+            return true;
         } else {
             if (starRecord.getStar() >= starDto.getStar()) {
-                return;
+                return false;
             }
 
             BeanUtils.copyProperties(starDto, starRecord);
             starRecord.setUpdateTime(new Timestamp(System.currentTimeMillis()));
             starRecord.update();
+            return true;
         }
     }
 

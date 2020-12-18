@@ -1,7 +1,6 @@
 package com.integration.socket.service;
 
 import com.integration.dto.room.GameStatusDto;
-import com.integration.socket.model.Constant;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.StarDto;
@@ -87,17 +86,9 @@ public class UserService {
     }
 
     public void saveRankForSinglePlayer(RankDto rankDto) {
-        //幂等性检测
-        if (!tokenService.checkToken(rankDto.getToken())) {
-            return;
-        }
-
         if (StringUtils.isEmpty(rankDto.getUsername()) || rankDto.getScore() == null || rankDto.getScore() <= 0) {
             return;
         }
-
-        //返回金币奖励
-        saveCoinFromScore(userDao.queryUser(rankDto.getUserId()), rankDto.getScore(), true);
 
         RankBoardRecord rankBoardRecord = userDao.queryFirstRank(rankDto.getUserId(), rankDto.getUsername());
         if (rankBoardRecord != null && rankBoardRecord.getScore() > rankDto.getScore()) {
@@ -119,13 +110,26 @@ public class UserService {
         }
     }
 
-    public boolean saveStar(StarDto starDto) {
-        if (StringUtils.isEmpty(starDto.getUserId())) {
-            return false;
+    public UserDto saveStarForSinglePlayer(StarDto starDto) {
+        if (!tokenService.checkToken(starDto.getToken())) {
+            return null;
         }
 
-        userDao.saveStar(starDto);
-        return true;
+        return saveStarForMultiplePlayers(starDto);
+    }
+
+    public UserDto saveStarForMultiplePlayers(StarDto starDto) {
+        UserRecord userRecord = userDao.queryUser(starDto.getUserId());
+        if (userRecord == null) {
+            return null;
+        }
+
+        boolean isFirstTime = userDao.saveStar(starDto);
+
+        //第一次获得星星可以得满金币，否则只能获得1枚金币
+        userRecord.setCoin(userRecord.getCoin() + (isFirstTime ? starDto.getStar() : 1));
+        userRecord.update();
+        return UserDto.convert(userRecord);
     }
 
     public void saveRankForMultiplePlayers(UserBo creator, GameStatusDto gameStatusDto) {
@@ -154,21 +158,5 @@ public class UserService {
             userDao.updateBoardRank(gameStatusDto.getRank(), null);
             userDao.insertRank(rankDto);
         }
-    }
-
-    public void saveCoinFromScore(UserRecord record, int score, boolean isSingle) {
-        if (record == null) {
-            return;
-        }
-
-        int coin = score / Constant.SCORE_TO_COIN;
-
-        record.setCoin(record.getCoin() + coin);
-        if (isSingle) {
-            record.setSingleGameTimes(record.getSingleGameTimes() + 1);
-        } else {
-            record.setNetGameTimes(record.getNetGameTimes() + 1);
-        }
-        record.update();
     }
 }

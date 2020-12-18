@@ -89,14 +89,14 @@ public class SinglePlayerController {
     }
 
     @PostMapping("/saveStar")
-    public boolean saveStar(@RequestParam("userId") String userId,
+    public UserDto saveStar(@RequestParam("userId") String userId,
                             @RequestBody EncryptDto encryptDto) {
         StarDto starDto = ObjectUtil.readValue(encryptDto.decrypt(), StarDto.class);
         if (starDto == null) {
-            return false;
+            return null;
         }
         starDto.setUserId(userId);
-        return userService.saveStar(starDto);
+        return userService.saveStarForSinglePlayer(starDto);
     }
 
     @PostMapping("/saveStage")

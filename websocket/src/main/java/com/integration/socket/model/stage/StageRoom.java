@@ -961,7 +961,6 @@ public class StageRoom extends BaseStage {
                 gameStatus.setType(GameStatusType.WIN);
                 userService.saveRankForMultiplePlayers(this.creator, gameStatus);
                 saveStage();
-                getAndSaveCoin();
             } else {
                 gameStatus.setType(GameStatusType.END);
             }
@@ -974,7 +973,6 @@ public class StageRoom extends BaseStage {
             gameStatus.setRank(userService.getRank(this.totalScore));
             gameStatus.setType(GameStatusType.LOSE);
             userService.saveRankForMultiplePlayers(this.creator, gameStatus);
-            getAndSaveCoin();
         }
         sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
 
@@ -1017,13 +1015,7 @@ public class StageRoom extends BaseStage {
                 continue;
             }
             starDto.setUserId(user.getUserId());
-            userService.saveStar(starDto);
-        }
-    }
-
-    private void getAndSaveCoin() {
-        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-            userService.saveCoinFromScore(kv.getValue().getUserRecord(), totalScore, false);
+            userService.saveStarForMultiplePlayers(starDto);
         }
     }
 

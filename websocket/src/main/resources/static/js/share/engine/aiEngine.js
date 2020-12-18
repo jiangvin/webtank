@@ -290,15 +290,18 @@ export default class AiEngine extends Engine {
                 winScore = 0;
             }
             this.currentScore += winScore;
-            this.totalScore += this.currentScore;
-            Common.getRequest("/singlePlayer/getMapEndInfo?currentScore=" + this.currentScore +
-                "&totalScore=" + this.totalScore +
-                "&mapId=" + this.room.roomInfo.mapId +
-                "&subId=" + this.room.roomInfo.subId +
-                "&hardMode=" + this.room.roomInfo.hardMode,
-                mapEndDto => {
-                    this.saveStar(mapEndDto.star);
+        }
+        this.currentScore = this.currentScore > 0 ? this.currentScore : 0;
+        this.totalScore += this.currentScore;
 
+        Common.getRequest("/singlePlayer/getMapEndInfo?currentScore=" + this.currentScore +
+            "&totalScore=" + this.totalScore +
+            "&mapId=" + this.room.roomInfo.mapId +
+            "&subId=" + this.room.roomInfo.subId +
+            "&hardMode=" + this.room.roomInfo.hardMode,
+            mapEndDto => {
+                if (win) {
+                    this.saveStar(mapEndDto.star);
                     if (this.room.roomInfo.subId >= this.maxSubId) {
                         this.room.gameStatus({
                             type: "WIN",
@@ -308,37 +311,28 @@ export default class AiEngine extends Engine {
                         });
                         this.saveRank();
                         this.saveStage();
-                        return;
+                    } else {
+                        this.room.gameStatus({
+                            type: "END",
+                            score: this.totalScore,
+                            star: mapEndDto.star,
+                            rank: mapEndDto.rank
+                        });
+                        Common.addTimeEvent("next", () => {
+                            //进入下一关
+                            ++this.room.roomInfo.subId;
+                            this.startGame();
+                        }, 480);
                     }
-
-                    this.room.gameStatus({
-                        type: "END",
-                        score: this.totalScore,
-                        star: mapEndDto.star,
-                        rank: mapEndDto.rank
-                    });
-                    Common.addTimeEvent("next", () => {
-                        //进入下一关
-                        ++this.room.roomInfo.subId;
-                        this.startGame();
-                    }, 480);
-                });
-        } else {
-            this.totalScore += this.currentScore;
-            Common.getRequest("/singlePlayer/getMapEndInfo?currentScore=" + this.currentScore +
-                "&totalScore=" + this.totalScore +
-                "&mapId=" + this.room.roomInfo.mapId +
-                "&subId=" + this.room.roomInfo.subId +
-                "&hardMode=" + this.room.roomInfo.hardMode,
-                mapEndDto => {
+                } else {
                     this.room.gameStatus({
                         type: "LOSE",
                         score: this.totalScore,
                         rank: mapEndDto.rank
                     });
                     this.saveRank();
-                });
-        }
+                }
+            });
     }
 
     saveStage() {
@@ -376,27 +370,28 @@ export default class AiEngine extends Engine {
         if (!user.deviceId) {
             return;
         }
-
-        Common.postEncrypt("/singlePlayer/saveStar?userId=" + user.deviceId, {
-            mapId: this.room.roomInfo.mapId,
-            subId: this.room.roomInfo.subId,
-            hardMode: this.room.roomInfo.hardMode,
-            star: star
+        Common.getRequest("/user/getToken", token => {
+            Common.postEncrypt("/singlePlayer/saveStar?userId=" + user.deviceId, {
+                mapId: this.room.roomInfo.mapId,
+                subId: this.room.roomInfo.subId,
+                hardMode: this.room.roomInfo.hardMode,
+                star: star,
+                token: token
+            }, data => {
+                Resource.setUser(data);
+            });
         });
     }
 
     saveRank() {
-        Common.getRequest("/user/getToken", token => {
-            let parameters = "?username=" + Resource.getUser().userId;
-            if (Resource.getUser().deviceId) {
-                parameters += "&userId=" + Resource.getUser().deviceId;
-            }
-            Common.postEncrypt("/singlePlayer/saveRank" + parameters,
-                {
-                    score: this.totalScore,
-                    token: token
-                });
-        });
+        let parameters = "?username=" + Resource.getUser().userId;
+        if (Resource.getUser().deviceId) {
+            parameters += "&userId=" + Resource.getUser().deviceId;
+        }
+        Common.postEncrypt("/singlePlayer/saveRank" + parameters,
+            {
+                score: this.totalScore
+            });
     }
 
     removeBullet(bullet) {
