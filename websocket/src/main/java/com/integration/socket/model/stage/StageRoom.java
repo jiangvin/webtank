@@ -67,7 +67,7 @@ public class StageRoom extends BaseStage {
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
     private static final int DEFAULT_SHIELD_TIME = 20 * 60;
     private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
-    private static final int SCORE_PLAYER_BOOM = -30;
+    private static final int SCORE_PLAYER_BOOM = -150;
 
     private Map<String, ItemBo> itemMap = new ConcurrentHashMap<>();
 
