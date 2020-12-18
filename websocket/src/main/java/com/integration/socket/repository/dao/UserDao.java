@@ -1,8 +1,10 @@
 package com.integration.socket.repository.dao;
 
 import com.integration.socket.model.dto.RankDto;
+import com.integration.socket.model.dto.StarDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.jooq.tables.records.RankBoardRecord;
+import com.integration.socket.repository.jooq.tables.records.StarRecord;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -41,6 +43,27 @@ public class UserDao extends BaseDao {
         userRecord.setCreateTime(new Timestamp(System.currentTimeMillis()));
         userRecord.setLastLoginTime(userRecord.getCreateTime());
         userRecord.insert();
+    }
+
+    public void saveStar(StarDto starDto) {
+        StarRecord starRecord = create.selectFrom(STAR)
+                                .where(STAR.USER_ID.eq(starDto.getUserId()))
+                                .and(STAR.MAP_ID.eq(starDto.getMapId()))
+                                .and(STAR.SUB_ID.eq(starDto.getSubId()))
+                                .and(STAR.HARD_MODE.eq(starDto.isHardMode())).fetchOne();
+        if (starRecord == null) {
+            starRecord = create.newRecord(STAR);
+            BeanUtils.copyProperties(starDto, starRecord);
+            starRecord.insert();
+        } else {
+            if (starRecord.getStar() >= starDto.getStar()) {
+                return;
+            }
+
+            BeanUtils.copyProperties(starDto, starRecord);
+            starRecord.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+            starRecord.update();
+        }
     }
 
     public List<RankBoardRecord> queryRankList(int start, int limit) {

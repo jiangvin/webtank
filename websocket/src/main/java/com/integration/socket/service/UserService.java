@@ -4,6 +4,7 @@ import com.integration.dto.room.GameStatusDto;
 import com.integration.socket.model.Constant;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.dto.RankDto;
+import com.integration.socket.model.dto.StarDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.UserDao;
 import com.integration.socket.repository.jooq.tables.records.RankBoardRecord;
@@ -116,6 +117,15 @@ public class UserService {
             userDao.updateBoardRank(rank, null);
             userDao.insertRank(rankDto);
         }
+    }
+
+    public boolean saveStar(StarDto starDto) {
+        if (StringUtils.isEmpty(starDto.getUserId())) {
+            return false;
+        }
+
+        userDao.saveStar(starDto);
+        return true;
     }
 
     public void saveRankForMultiplePlayers(UserBo creator, GameStatusDto gameStatusDto) {

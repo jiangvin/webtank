@@ -5,6 +5,7 @@ import com.integration.socket.model.dto.EncryptDto;
 import com.integration.socket.model.dto.MapDetailDto;
 import com.integration.socket.model.dto.MapEndDto;
 import com.integration.socket.model.dto.RankDto;
+import com.integration.socket.model.dto.StarDto;
 import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.dao.MapDao;
@@ -85,6 +86,17 @@ public class SinglePlayerController {
 
         userService.saveRankForSinglePlayer(rankDto);
         return true;
+    }
+
+    @PostMapping("/saveStar")
+    public boolean saveStar(@RequestParam("userId") String userId,
+                            @RequestBody EncryptDto encryptDto) {
+        StarDto starDto = ObjectUtil.readValue(encryptDto.decrypt(), StarDto.class);
+        if (starDto == null) {
+            return false;
+        }
+        starDto.setUserId(userId);
+        return userService.saveStar(starDto);
     }
 
     @PostMapping("/saveStage")
