@@ -46,10 +46,30 @@ public class LogFilter implements Filter {
             log.info("\nuri={} {}ip={}",
                      httpServletRequest.getRequestURI(),
                      queryStr.toString(),
-                     httpServletRequest.getRemoteAddr());
+                     getClientIp(httpServletRequest));
 
         }
         chain.doFilter(request, response);
+    }
+
+    /***
+     * 获取客户端IP地址;这里通过了nginx获取;X-Real-IP
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Real-IP");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Forwarded-For");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
     }
 
     private boolean needLog(String uri) {
@@ -59,13 +79,16 @@ public class LogFilter implements Filter {
         if (uri.startsWith("/css/")) {
             return false;
         }
-        if (uri.startsWith("/js/")) {
-            return false;
-        }
         if (uri.startsWith("/font/")) {
             return false;
         }
         if (uri.startsWith("/audio/")) {
+            return false;
+        }
+        if (uri.endsWith(".js")) {
+            return false;
+        }
+        if (uri.endsWith("/ping")) {
             return false;
         }
         return true;
