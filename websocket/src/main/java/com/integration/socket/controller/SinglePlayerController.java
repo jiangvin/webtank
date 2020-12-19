@@ -1,6 +1,7 @@
 package com.integration.socket.controller;
 
 import com.integration.dto.room.RoomType;
+import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.dto.EncryptDto;
 import com.integration.socket.model.dto.MapDetailDto;
 import com.integration.socket.model.dto.MapEndDto;
@@ -8,7 +9,6 @@ import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.StarDto;
 import com.integration.socket.model.dto.TankTypeDto;
 import com.integration.socket.model.dto.UserDto;
-import com.integration.socket.repository.dao.MapDao;
 import com.integration.socket.service.MapService;
 import com.integration.socket.service.MapStarService;
 import com.integration.socket.service.UserService;
@@ -38,9 +38,6 @@ public class SinglePlayerController {
     private MapService mapService;
 
     @Autowired
-    private MapDao mapDao;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
@@ -48,17 +45,17 @@ public class SinglePlayerController {
 
     @GetMapping("/getMapFromId")
     public MapDetailDto getMapFromId(@RequestParam(value = "id") int id, @RequestParam(value = "subId") int subId) {
-        return mapService.loadMap(id, subId, RoomType.PVE).toDetailDto();
+        MapBo mapBo = mapService.loadMap(id, subId, RoomType.PVE);
+        if (mapBo == null) {
+            return null;
+        } else {
+            return mapBo.toDetailDto();
+        }
     }
 
     @GetMapping("getTankTypes")
     public Map<String, TankTypeDto> getTankTypes() {
         return TankTypeDto.getTypeMap();
-    }
-
-    @GetMapping("getMaxSubId")
-    public int getMaxSubId(@RequestParam(value = "id") int id) {
-        return mapDao.queryMaxSubId(id);
     }
 
     @GetMapping("/getMapEndInfo")

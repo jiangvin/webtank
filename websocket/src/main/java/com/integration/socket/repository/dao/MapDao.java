@@ -1,7 +1,6 @@
 package com.integration.socket.repository.dao;
 
 import com.integration.socket.repository.jooq.tables.records.MapRecord;
-import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -35,9 +34,5 @@ public class MapDao extends BaseDao {
         .set(MAP.WIDTH, width)
         .set(MAP.HEIGHT, height)
         .set(MAP.SECRET, secret).execute();
-    }
-
-    public int queryMaxSubId(int id) {
-        return create.select(DSL.max(MAP.SUB_ID)).from(MAP).where(MAP.ID.eq(id)).fetchOneInto(Integer.class);
     }
 }

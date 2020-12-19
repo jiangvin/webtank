@@ -33,11 +33,6 @@ export default class AiEngine extends Engine {
             thisEngine.itemTypes[thisEngine.itemTypes.length] = "clock";
         }
 
-        thisEngine.maxSubId = 1;
-        Common.getRequest("/singlePlayer/getMaxSubId?id=" + thisEngine.room.roomInfo.mapId, function (data) {
-            thisEngine.maxSubId = data;
-        });
-
         /**
          * @type {{ammoMaxCount,ammoReloadTime,ammoSpeed,ammoMaxLifeTime,downId,upId}}
          */
@@ -127,20 +122,21 @@ export default class AiEngine extends Engine {
         });
     };
 
+    loadMap(mapId, subId, callback) {
+        Common.getRequest("/singlePlayer/getMapFromId?id=" + mapId + "&subId=" + subId, callback);
+    }
+
     loadMapDetail(callback) {
-        const thisEngine = this;
-        Common.getRequest("/singlePlayer/getMapFromId?id=" + this.room.roomInfo.mapId +
-            "&subId=" + this.room.roomInfo.subId, function (data) {
-            thisEngine.mapInfo = data;
+        this.loadMap(this.room.roomInfo.mapId, this.room.roomInfo.subId, data => {
+            this.mapInfo = data;
 
             //如果playerLife有值，则以playerLife为准，否则以地图数据为准
-            if (thisEngine.playerLifeCount) {
-                thisEngine.mapInfo.playerLife = thisEngine.playerLifeCount;
+            if (this.playerLifeCount) {
+                this.mapInfo.playerLife = this.playerLifeCount;
             } else {
-                thisEngine.playerLifeCount = thisEngine.mapInfo.playerLife;
+                this.playerLifeCount = this.mapInfo.playerLife;
             }
-            thisEngine.computerLifeCount = thisEngine.mapInfo.computerLife;
-
+            this.computerLifeCount = this.mapInfo.computerLife;
             callback();
         });
     }
@@ -302,34 +298,44 @@ export default class AiEngine extends Engine {
             mapEndDto => {
                 if (win) {
                     this.saveStar(mapEndDto.star);
-                    if (this.room.roomInfo.subId >= this.maxSubId) {
-                        this.room.gameStatus({
-                            type: "WIN",
-                            score: this.totalScore,
-                            star: mapEndDto.star,
-                            rank: mapEndDto.rank
-                        });
-                        this.saveRank();
-                        this.saveStage();
+
+                    //加载下一关卡数据
+                    let newMapId = this.room.roomInfo.mapId;
+                    let newSubId = this.room.roomInfo.subId;
+                    if (newSubId < 5) {
+                        ++newSubId;
                     } else {
+                        ++newMapId;
+                        newSubId = 1;
+                        this.saveStage();
+                    }
+                    this.loadMap(newMapId, newSubId, data => {
                         this.room.gameStatus({
-                            type: "END",
+                            type: data ? "END" : "WIN",
                             score: this.totalScore,
                             star: mapEndDto.star,
                             rank: mapEndDto.rank
                         });
-                        Common.addTimeEvent("next", () => {
+
+                        if (data) {
                             //进入下一关
-                            ++this.room.roomInfo.subId;
-                            this.startGame();
-                        }, 480);
-                    }
+                            Common.addTimeEvent("next", () => {
+                                this.room.roomInfo.mapId = newMapId;
+                                this.room.roomInfo.subId = newSubId;
+                                this.startGame();
+                            }, 480);
+                        } else {
+                            //保存排名，退出游戏
+                            this.saveRank();
+                        }
+                    });
                 } else {
                     this.room.gameStatus({
                         type: "LOSE",
                         score: this.totalScore,
                         rank: mapEndDto.rank
                     });
+                    //保存排名，退出游戏
                     this.saveRank();
                 }
             });

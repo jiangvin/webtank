@@ -90,7 +90,11 @@ public class MapService {
     }
 
     public MapBo loadMap(int mapId, int subId, RoomType roomType) {
-        return loadMap(mapDao.queryFromId(mapId, subId), roomType);
+        MapRecord mapRecord = mapDao.queryFromId(mapId, subId);
+        if (mapRecord == null) {
+            return null;
+        }
+        return loadMap(mapRecord, roomType);
     }
 
     public MapBo loadRandomMap(List<String> loadedMapNames, RoomType roomType) {
