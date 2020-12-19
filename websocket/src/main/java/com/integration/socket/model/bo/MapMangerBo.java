@@ -40,13 +40,15 @@ public class MapMangerBo {
         this.subId = mapBo.getSubId();
     }
 
-    public boolean loadNextMapPve(int saveLife) {
-        MapBo mapBo = mapService.loadNextMap(mapId, ++subId, roomType);
+    public boolean loadNextMapPve(int saveLife, int newMapId, int newSubId) {
+        MapBo mapBo = mapService.loadNextMap(newMapId, newSubId, roomType);
         if (mapBo == null) {
             return false;
         }
 
         //继承之前的属性
+        mapId = newMapId;
+        subId = newSubId;
         this.mapBo.addPlayerLife(saveLife);
         mapBo.setPlayerLife(this.mapBo.getPlayerLife());
 

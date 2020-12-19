@@ -960,11 +960,19 @@ public class StageRoom extends BaseStage {
             gameStatus.setRank(userService.getRank(this.totalScore));
             saveStar();
 
+            int newMapId = getMapId();
+            int newSubId = getSubId();
+            if (newSubId < 5) {
+                ++newSubId;
+            } else {
+                ++newMapId;
+                newSubId = 1;
+                saveStage();
+            }
             int saveLife = saveTankType();
-            if (!mapManger.loadNextMapPve(saveLife)) {
+            if (!mapManger.loadNextMapPve(saveLife, newMapId, newSubId)) {
                 gameStatus.setType(GameStatusType.WIN);
                 userService.saveRankForMultiplePlayers(this.creator, gameStatus);
-                saveStage();
             } else {
                 gameStatus.setType(GameStatusType.END);
             }
@@ -993,11 +1001,11 @@ public class StageRoom extends BaseStage {
         }
 
         if (hardMode) {
-            if (userRecord.getHardStage() < getMapId() + 1) {
+            if (userRecord.getHardStage() == getMapId()) {
                 userRecord.setHardStage(getMapId() + 1);
             }
         } else {
-            if (userRecord.getStage() < getMapId() + 1) {
+            if (userRecord.getStage() == getMapId()) {
                 userRecord.setStage(getMapId() + 1);
                 if (userRecord.getHardStage() == 0) {
                     userRecord.setHardStage(1);

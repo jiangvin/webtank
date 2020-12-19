@@ -145,8 +145,8 @@ export default class Success {
     }
 
     rotate(ctx, center, angle) {
-        ctx.translate(center.x, center.y);
+        ctx.translate(center.x + Resource.getOffset().x, center.y + Resource.getOffset().y);
         ctx.rotate(angle);
-        ctx.translate(-center.x, -center.y);
+        ctx.translate(-center.x - Resource.getOffset().x, -center.y - Resource.getOffset().y);
     }
 }
