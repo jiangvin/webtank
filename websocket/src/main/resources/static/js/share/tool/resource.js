@@ -94,6 +94,9 @@ export default class Resource {
         this.loadImage("mission_map", "mission/map");
         this.loadImage("mission_map_disable", "mission/map_disable");
         this.loadImage("mission_lock", "mission/lock");
+        this.loadImage("mission", "mission/mission");
+        this.loadImage("mission_rect", "mission/mission_rect");
+        this.loadImage("mission_disable", "mission/mission_disable");
     }
 
     loadNetResource() {

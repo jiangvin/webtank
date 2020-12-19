@@ -12,6 +12,8 @@ export default class Mission extends Stage {
     constructor() {
         super();
 
+        this.starMap = new Map();
+
         this.createFullScreenItem("mission_background");
 
         //难度选择
@@ -55,6 +57,14 @@ export default class Mission extends Stage {
 
         const text = ["第一关", "第二关", "第三关", "第四关"];
 
+        this.missionPos = [
+            {x: 784, y: 408},
+            {x: 784 + 365, y: 408},
+            {x: 784 + 365 * 2, y: 408},
+            {x: 950, y: 642},
+            {x: 950 + 380, y: 642}
+        ];
+
         this.createItem({
             draw: function (ctx) {
                 ctx.font = 'bold 32px HanSans';
@@ -85,16 +95,32 @@ export default class Mission extends Stage {
                         map.w,
                         map.h);
 
-                    if (thisMission.hasLock(i)) {
-                        ctx.displayCenter("mission_lock",
-                            334, 334 + i * (rectSelected.h * 1.1), 44);
-                    }
-
                     //文字
                     ctx.fillText(text[i],
                         200 + Resource.getOffset().x,
                         340 + Resource.getOffset().y + i * (rectSelected.h * 1.1));
+
+                    //图标
+                    if (thisMission.hasLock(i)) {
+                        ctx.displayCenter("mission_lock",
+                            334, 334 + i * (rectSelected.h * 1.1), 44);
+                    } else {
+                        ctx.displayCenter("star",
+                            324, 334 + i * (rectSelected.h * 1.1), 35);
+
+                        let star = thisMission.starMap.get(thisMission.generateSumKey(
+                            i + 1,
+                            thisMission.roomInfo.hardMode));
+                        if (!star) {
+                            star = 0;
+                        }
+                        ctx.fillText(star,
+                            362 + Resource.getOffset().x,
+                            340 + Resource.getOffset().y + i * (rectSelected.h * 1.1));
+                    }
                 }
+
+                thisMission.drawMissionInfo(ctx);
             }
         });
 
@@ -116,6 +142,43 @@ export default class Mission extends Stage {
         }
     }
 
+    drawMissionInfo(ctx) {
+        if (this.roomInfo.mapId < 1) {
+            return;
+        }
+
+        ctx.font = 'bold 45px HanSans';
+        ctx.textAlign = 'center';
+
+        for (let i = 0; i < 5; ++i) {
+            const pos = this.missionPos[i];
+            const text = this.roomInfo.mapId + "-" + (i + 1);
+            const starCount = this.getStarCount(i + 1);
+
+            ctx.displayCenter(starCount === -1 ? "mission_disable" : "mission", pos.x, pos.y, 180);
+            ctx.displayCenter("mission_rect", pos.x, pos.y, 180);
+
+            ctx.fillText(text,
+                pos.x + Resource.getOffset().x,
+                pos.y + 150 + Resource.getOffset().y);
+
+            if (starCount === -1) {
+                ctx.displayCenter("mission_lock", pos.x, pos.y, 44);
+            } else if (starCount > 0) {
+                let x = pos.x;
+                if (starCount === 2) {
+                    x -= 20;
+                } else if (starCount === 3) {
+                    x -= 40;
+                }
+
+                for (let i = 0; i < starCount; ++i) {
+                    ctx.displayCenter("star", x + i * 40, pos.y, 35);
+                }
+            }
+        }
+    }
+
     getMapImage(mapIndex) {
         if (!this.hasLock(mapIndex)) {
             return "mission_map";
@@ -127,6 +190,17 @@ export default class Mission extends Stage {
     hasLock(mapIndex) {
         const userMapIndex = this.roomInfo.hardMode ? Resource.getUser().hardStage : Resource.getUser().stage;
         return userMapIndex <= mapIndex;
+    }
+
+    getStarCount(subId) {
+        const key = this.generateKey(this.roomInfo.mapId, subId, this.roomInfo.hardMode);
+        if (this.starMap.has(key)) {
+            return this.starMap.get(key);
+        } else if (subId === 1) {
+            return 0;
+        } else {
+            return -1;
+        }
     }
 
     initControlEvent() {
@@ -211,5 +285,39 @@ export default class Mission extends Stage {
 
     init(roomInfo) {
         this.roomInfo = roomInfo;
+        this.loadStarInfo();
+    }
+
+    loadStarInfo() {
+        if (!Resource.getUser().deviceId) {
+            return;
+        }
+
+        Common.getRequest("/user/getStarInfo?userId=" + Resource.getUser().deviceId,
+            data => {
+                if (!data || data.length === 0) {
+                    return;
+                }
+
+                this.starMap.clear();
+                data.forEach(info => {
+                    this.starMap.set(this.generateKey(info.mapId, info.subId, info.hardMode), info.star);
+
+                    const sumKey = this.generateSumKey(info.mapId, info.hardMode);
+                    if (this.starMap.has(sumKey)) {
+                        this.starMap.set(sumKey, this.starMap.get(sumKey) + info.star);
+                    } else {
+                        this.starMap.set(sumKey, info.star);
+                    }
+                });
+            });
+    }
+
+    generateKey(mapId, subId, hardMode) {
+        return mapId + "-" + subId + "-" + hardMode;
+    }
+
+    generateSumKey(mapId, hardMode) {
+        return mapId + "-" + hardMode;
     }
 }
