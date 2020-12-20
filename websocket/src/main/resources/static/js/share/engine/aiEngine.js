@@ -12,69 +12,61 @@ export default class AiEngine extends Engine {
     constructor(room) {
         super(room);
 
-        const thisEngine = this;
+        this.totalScore = 0;
+        this.currentScore = 0;
 
-        thisEngine.totalScore = 0;
-        thisEngine.currentScore = 0;
-        thisEngine.stageStartTime = 0;
-
-        thisEngine.playerLifeCount = 0;
-        thisEngine.computerLifeCount = 0;
+        this.playerLifeCount = 0;
+        this.computerLifeCount = 0;
 
         //整理随机道具池
-        thisEngine.itemTypes = ["star", "shield", "life", "king", "bullet"];
+        this.itemTypes = ["star", "shield", "life", "king", "bullet"];
         if (Resource.getUser().hasRedStar()) {
-            thisEngine.itemTypes[thisEngine.itemTypes.length] = "red_star";
+            this.itemTypes[this.itemTypes.length] = "red_star";
         }
         if (Resource.getUser().hasGhost()) {
-            thisEngine.itemTypes[thisEngine.itemTypes.length] = "ghost";
+            this.itemTypes[this.itemTypes.length] = "ghost";
         }
         if (Resource.getUser().hasClock()) {
-            thisEngine.itemTypes[thisEngine.itemTypes.length] = "clock";
+            this.itemTypes[this.itemTypes.length] = "clock";
         }
-
-        /**
-         * @type {{ammoMaxCount,ammoReloadTime,ammoSpeed,ammoMaxLifeTime,downId,upId}}
-         */
-        thisEngine.tankTypes = {};
 
         /**
          * @type {{playerStartPos,computerStartPos,computerStartCount,computerTypeCountList,maxGridX,maxGridY}}
          */
-        thisEngine.mapInfo = {};
+        this.mapInfo = {};
+        this.tanks = new Map();
+        this.bullets = new Map();
+        this.items = new Map();
 
-        thisEngine.tanks = new Map();
-        thisEngine.bullets = new Map();
-        thisEngine.items = new Map();
-
-        Common.getRequest("/singlePlayer/getTankTypes", function (data) {
-            thisEngine.tankTypes = data;
-            thisEngine.initStage();
+        /**
+         * @type {{ammoMaxCount,ammoReloadTime,ammoSpeed,ammoMaxLifeTime,downId,upId}}
+         */
+        this.tankTypes = {};
+        Common.getRequest("/singlePlayer/getTankTypes", data => {
+            this.tankTypes = data;
+            this.startGame();
         })
     }
 
     initStage() {
-        const thisEngine = this;
-        thisEngine.loadMapDetail(function () {
-            Resource.getRoot().processSocketMessage({
-                messageType: "MAP",
-                message: thisEngine.mapInfo
-            });
+        this.stageStartTime = Date.now();
+        Resource.getRoot().processSocketMessage({
+            messageType: "MAP",
+            message: this.mapInfo
+        });
 
-            //create tanks
-            thisEngine.createPlayerTank();
-            for (let i = 0; i < thisEngine.mapInfo.computerStartCount; ++i) {
-                thisEngine.createComputerTank();
-            }
+        //create tanks
+        this.createPlayerTank();
+        for (let i = 0; i < this.mapInfo.computerStartCount; ++i) {
+            this.createComputerTank();
+        }
 
-            //create item
-            thisEngine.createGameItem();
+        //create item
+        this.createGameItem();
 
-            Resource.getRoot().processSocketMessage({
-                messageType: "SERVER_READY"
-            });
-            thisEngine.stageStartTime = Date.now();
-        })
+        Resource.getRoot().processSocketMessage({
+            messageType: "SERVER_READY"
+        });
     }
 
     createGameItem() {
@@ -124,21 +116,6 @@ export default class AiEngine extends Engine {
 
     loadMap(mapId, subId, callback) {
         Common.getRequest("/singlePlayer/getMapFromId?id=" + mapId + "&subId=" + subId, callback);
-    }
-
-    loadMapDetail(callback) {
-        this.loadMap(this.room.roomInfo.mapId, this.room.roomInfo.subId, data => {
-            this.mapInfo = data;
-
-            //如果playerLife有值，则以playerLife为准，否则以地图数据为准
-            if (this.playerLifeCount) {
-                this.mapInfo.playerLife = this.playerLifeCount;
-            } else {
-                this.playerLifeCount = this.mapInfo.playerLife;
-            }
-            this.computerLifeCount = this.mapInfo.computerLife;
-            callback();
-        });
     }
 
     update() {
@@ -322,7 +299,7 @@ export default class AiEngine extends Engine {
                             Common.addTimeEvent("next", () => {
                                 this.room.roomInfo.mapId = newMapId;
                                 this.room.roomInfo.subId = newSubId;
-                                this.startGame();
+                                this.startGame(data);
                             }, 480);
                         } else {
                             //保存排名，退出游戏
@@ -988,7 +965,6 @@ export default class AiEngine extends Engine {
 
             //重置初始生命
             this.playerLifeCount = 0;
-
             //重置总分
             this.totalScore = 0;
 
@@ -996,7 +972,7 @@ export default class AiEngine extends Engine {
         });
     }
 
-    startGame() {
+    startGame(data) {
         //保存坦克状态,用于下一关使用
         this.playerTankStatus = this.tanks.get(Resource.getUser().userId);
 
@@ -1008,8 +984,25 @@ export default class AiEngine extends Engine {
         this.items.clear();
         this.room.clear();
 
-        //进入下一关
-        this.initStage();
+        const setData = data => {
+            this.mapInfo = data;
+            //如果playerLife有值，则以playerLife为准，否则以地图数据为准
+            if (this.playerLifeCount) {
+                this.mapInfo.playerLife = this.playerLifeCount;
+            } else {
+                this.playerLifeCount = this.mapInfo.playerLife;
+            }
+            this.computerLifeCount = this.mapInfo.computerLife;
+        };
+        if (data) {
+            setData(data);
+            this.initStage();
+        } else {
+            this.loadMap(this.room.roomInfo.mapId, this.room.roomInfo.subId, data => {
+                setData(data);
+                this.initStage();
+            });
+        }
     }
 }
 AiEngine.keepGoingRate = 120;
