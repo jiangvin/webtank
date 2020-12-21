@@ -63,10 +63,11 @@ public class SinglePlayerController {
                              @RequestParam(value = "totalScore") int totalScore,
                              @RequestParam(value = "mapId") int mapId,
                              @RequestParam(value = "subId") int subId,
+                             @RequestParam(value = "deadCount") int deadCount,
                              @RequestParam(value = "hardMode") boolean hardMode) {
         return new MapEndDto(
                    userService.getRank(totalScore),
-                   mapStarService.getStarCount(mapId, subId, hardMode, currentScore));
+                   mapStarService.getStarCount(deadCount));
     }
 
     @PostMapping("/saveRank")

@@ -7,8 +7,4 @@ package com.integration.socket.model;
  */
 public class Constant {
     static public final String DEFAULT_TANK_TYPE = "tank01";
-
-    static public final int SCORE_WIN = 500;
-    static public final int SCORE_HARD_MODE = 100;
-    static public final int SCORE_COM_BOOM = 10;
 }

@@ -12,12 +12,12 @@ import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
 import com.integration.dto.room.TeamType;
 import com.integration.socket.model.CollideType;
-import com.integration.socket.model.Constant;
 import com.integration.socket.model.ItemType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.ItemBo;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.MapMangerBo;
+import com.integration.socket.model.bo.ScoreBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.bot.BaseBotBo;
@@ -67,7 +67,6 @@ public class StageRoom extends BaseStage {
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
     private static final int DEFAULT_SHIELD_TIME = 20 * 60;
     private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
-    private static final int SCORE_PLAYER_BOOM = -150;
 
     private Map<String, ItemBo> itemMap = new ConcurrentHashMap<>();
 
@@ -108,9 +107,7 @@ public class StageRoom extends BaseStage {
     /**
      * 计分相关
      */
-    private long missionStartTime;
-    private int currentScore = 0;
-    private int totalScore = 0;
+    private ScoreBo scoreBo = new ScoreBo();
     private UserService userService;
     private MapStarService mapStarService;
 
@@ -186,10 +183,9 @@ public class StageRoom extends BaseStage {
         this.removeBulletIds.clear();
         this.eventList.clear();
         this.syncTankList.clear();
-        this.missionStartTime = System.currentTimeMillis();
-        this.currentScore = 0;
 
         initItemPool();
+        this.scoreBo.init();
         this.gameStatus.init();
 
         this.eventList.add(new CreateItemEvent());
@@ -907,7 +903,7 @@ public class StageRoom extends BaseStage {
         sendMessageToRoom(String.format("%s 选择了续关,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
 
         //重置总分
-        this.totalScore = 0;
+        this.scoreBo.setTotalScore(0);
 
         gameStatus.setType(GameStatusType.PAUSE);
         init();
@@ -953,11 +949,11 @@ public class StageRoom extends BaseStage {
 
     private boolean processGameOverPve(TeamType winTeam) {
         if (winTeam == TeamType.RED) {
-            updateScoreAfterWin();
-            this.totalScore += this.currentScore;
-            gameStatus.setScore(this.totalScore);
-            gameStatus.setStar(mapStarService.getStarCount(getMapId(), getSubId(), hardMode, this.currentScore));
-            gameStatus.setRank(userService.getRank(this.totalScore));
+            this.scoreBo.addWinScore(this.hardMode);
+            this.scoreBo.addTotalScore();
+            gameStatus.setScore(this.scoreBo.getTotalScore());
+            gameStatus.setStar(mapStarService.getStarCount(this.scoreBo.getDeadCount()));
+            gameStatus.setRank(userService.getRank(this.scoreBo.getTotalScore()));
             saveStar();
 
             int newMapId = getMapId();
@@ -977,12 +973,9 @@ public class StageRoom extends BaseStage {
                 gameStatus.setType(GameStatusType.END);
             }
         } else {
-            if (this.currentScore < 0) {
-                this.currentScore = 0;
-            }
-            this.totalScore += this.currentScore;
-            gameStatus.setScore(this.totalScore);
-            gameStatus.setRank(userService.getRank(this.totalScore));
+            this.scoreBo.addTotalScore();
+            gameStatus.setScore(this.scoreBo.getTotalScore());
+            gameStatus.setRank(userService.getRank(this.scoreBo.getTotalScore()));
             gameStatus.setType(GameStatusType.LOSE);
             userService.saveRankForMultiplePlayers(this.creator, gameStatus);
         }
@@ -1028,18 +1021,6 @@ public class StageRoom extends BaseStage {
             }
             starDto.setUserId(user.getUserId());
             userService.saveStarForMultiplePlayers(starDto);
-        }
-    }
-
-    private void updateScoreAfterWin() {
-        int seconds = (int)((System.currentTimeMillis() - this.missionStartTime) / 1000);
-
-        //困难模式加权
-        int hardModeScore = hardMode ? Constant.SCORE_HARD_MODE : 0;
-
-        int winScore = Constant.SCORE_WIN + hardModeScore - seconds;
-        if (winScore > 0) {
-            this.currentScore += winScore;
         }
     }
 
@@ -1104,9 +1085,9 @@ public class StageRoom extends BaseStage {
         }
 
         if (tankBo.getTeamType() == TeamType.RED) {
-            this.currentScore += SCORE_PLAYER_BOOM;
+            this.scoreBo.addScoreForPlayerBoom();
         } else {
-            this.currentScore += Constant.SCORE_COM_BOOM;
+            this.scoreBo.addScoreForComBoom();
         }
     }
 

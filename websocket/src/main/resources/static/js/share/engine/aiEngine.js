@@ -7,13 +7,13 @@ import Engine from "./engine.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
+import ScoreInfo from "../item/game/scoreinfo.js";
 
 export default class AiEngine extends Engine {
     constructor(room) {
         super(room);
 
-        this.totalScore = 0;
-        this.currentScore = 0;
+        this.scoreInfo = new ScoreInfo();
 
         this.playerLifeCount = 0;
         this.computerLifeCount = 0;
@@ -49,7 +49,6 @@ export default class AiEngine extends Engine {
     }
 
     initStage() {
-        this.stageStartTime = Date.now();
         Resource.getRoot().processSocketMessage({
             messageType: "MAP",
             message: this.mapInfo
@@ -252,23 +251,15 @@ export default class AiEngine extends Engine {
     }
 
     processGameOver(win) {
-        //计算胜利分数
         if (win) {
-            const gameSeconds = (new Date() - this.stageStartTime) / 1000;
-            //困难模式加权
-            const hardMode = this.room.roomInfo.hardMode ? AiEngine.scoreHardMode : 0;
-
-            let winScore = Math.floor(AiEngine.scoreWin + hardMode - gameSeconds);
-            if (winScore < 0) {
-                winScore = 0;
-            }
-            this.currentScore += winScore;
+            this.scoreInfo.addWinScore(this.room.roomInfo.hardMode);
         }
-        this.currentScore = this.currentScore > 0 ? this.currentScore : 0;
-        this.totalScore += this.currentScore;
+        this.scoreInfo.addTotalScore();
 
-        Common.getRequest("/singlePlayer/getMapEndInfo?currentScore=" + this.currentScore +
-            "&totalScore=" + this.totalScore +
+        Common.getRequest("/singlePlayer/getMapEndInfo" +
+            "?currentScore=" + this.scoreInfo.currentScore +
+            "&totalScore=" + this.scoreInfo.totalScore +
+            "&deadCount=" + this.scoreInfo.deadCount +
             "&mapId=" + this.room.roomInfo.mapId +
             "&subId=" + this.room.roomInfo.subId +
             "&hardMode=" + this.room.roomInfo.hardMode,
@@ -289,7 +280,7 @@ export default class AiEngine extends Engine {
                     this.loadMap(newMapId, newSubId, data => {
                         this.room.gameStatus({
                             type: data ? "END" : "WIN",
-                            score: this.totalScore,
+                            score: this.scoreInfo.totalScore,
                             star: mapEndDto.star,
                             rank: mapEndDto.rank
                         });
@@ -309,7 +300,7 @@ export default class AiEngine extends Engine {
                 } else {
                     this.room.gameStatus({
                         type: "LOSE",
-                        score: this.totalScore,
+                        score: this.scoreInfo.totalScore,
                         rank: mapEndDto.rank
                     });
                     //保存排名，退出游戏
@@ -373,7 +364,7 @@ export default class AiEngine extends Engine {
         }
         Common.postEncrypt("/singlePlayer/saveRank" + parameters,
             {
-                score: this.totalScore
+                score: this.scoreInfo.totalScore
             });
     }
 
@@ -401,7 +392,7 @@ export default class AiEngine extends Engine {
         });
 
         if (tank.item.teamId === 1) {
-            this.currentScore += AiEngine.scorePlayerBoom;
+            this.scoreInfo.addScoreForPlayerBoom();
             --this.playerLifeCount;
             if (this.playerLifeCount === 0) {
                 this.processGameOver(false);
@@ -411,7 +402,7 @@ export default class AiEngine extends Engine {
             return;
         }
 
-        this.currentScore += AiEngine.scoreComBoom;
+        this.scoreInfo.addScoreForComBoom();
         --this.computerLifeCount;
         if (this.computerLifeCount === 0) {
             this.processGameOver(true);
@@ -966,7 +957,7 @@ export default class AiEngine extends Engine {
             //重置初始生命
             this.playerLifeCount = 0;
             //重置总分
-            this.totalScore = 0;
+            this.scoreInfo.totalScore = 0;
 
             this.startGame();
         });
@@ -977,12 +968,12 @@ export default class AiEngine extends Engine {
         this.playerTankStatus = this.tanks.get(Resource.getUser().userId);
 
         //清空场景
-        this.currentScore = 0;
         this.events = [];
         this.tanks.clear();
         this.bullets.clear();
         this.items.clear();
         this.room.clear();
+        this.scoreInfo.init();
 
         const setData = data => {
             this.mapInfo = data;
@@ -1008,11 +999,3 @@ export default class AiEngine extends Engine {
 AiEngine.keepGoingRate = 120;
 AiEngine.keepTryRate = 30;
 AiEngine.maxItemLimit = 3;
-
-/**
- * 需要和服务器同步
- */
-AiEngine.scoreComBoom = 10;
-AiEngine.scorePlayerBoom = -150;
-AiEngine.scoreWin = 500;
-AiEngine.scoreHardMode = 100;
