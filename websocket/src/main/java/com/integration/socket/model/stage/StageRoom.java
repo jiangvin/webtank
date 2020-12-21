@@ -341,29 +341,35 @@ public class StageRoom extends BaseStage {
         }
 
         if (event instanceof CreateItemEvent) {
+            createGameItem();
             CreateItemEvent createItemEvent = (CreateItemEvent) event;
-            if (itemMap.size() < MAX_ITEM_LIMIT) {
-                ItemType itemType = itemTypePool.get(random.nextInt(itemTypePool.size()));
-                for (int time = 0; time < TRY_TIMES_OF_CREATE_ITEM; ++time) {
-                    Point grid = new Point();
-                    grid.x = random.nextInt(getMapBo().getMaxGridX());
-                    grid.y = random.nextInt(getMapBo().getMaxGridY());
-                    String key = CommonUtil.generateKey(grid.x, grid.y);
-                    if (getMapBo().getUnitMap().containsKey(key)) {
-                        continue;
-                    }
-                    if (itemMap.containsKey(key)) {
-                        continue;
-                    }
-                    Point pos = CommonUtil.getPointFromKey(key);
-                    ItemBo itemBo = new ItemBo(key, pos, CommonUtil.getId(), itemType);
-                    itemMap.put(key, itemBo);
-                    sendMessageToRoom(Collections.singletonList(itemBo.toDto()), MessageType.ITEM);
-                    break;
-                }
-            }
             createItemEvent.resetTimeout();
             this.eventList.add(createItemEvent);
+        }
+    }
+
+    private void createGameItem() {
+        if (itemMap.size() >= MAX_ITEM_LIMIT) {
+            return;
+        }
+
+        ItemType itemType = itemTypePool.get(random.nextInt(itemTypePool.size()));
+        for (int time = 0; time < TRY_TIMES_OF_CREATE_ITEM; ++time) {
+            Point grid = new Point();
+            grid.x = random.nextInt(getMapBo().getMaxGridX());
+            grid.y = random.nextInt(getMapBo().getMaxGridY());
+            String key = CommonUtil.generateKey(grid.x, grid.y);
+            if (getMapBo().getUnitMap().containsKey(key)) {
+                continue;
+            }
+            if (itemMap.containsKey(key)) {
+                continue;
+            }
+            Point pos = CommonUtil.getPointFromKey(key);
+            ItemBo itemBo = new ItemBo(key, pos, CommonUtil.getId(), itemType);
+            itemMap.put(key, itemBo);
+            sendMessageToRoom(Collections.singletonList(itemBo.toDto()), MessageType.ITEM);
+            break;
         }
     }
 
@@ -501,7 +507,7 @@ public class StageRoom extends BaseStage {
             return false;
         }
 
-        for (Map.Entry<String, TankBo> kv : getTankMap().entrySet()) {
+        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
             TankBo target = kv.getValue();
             if (target.getTankId().equals(tank.getTankId())) {
                 continue;

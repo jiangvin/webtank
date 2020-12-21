@@ -59,18 +59,18 @@ export default class NetList extends Stage {
     }
 
     loadRoomList() {
-        const start = this.startRoomIndex;
+        //remove all buttons
+        for (let i = 0; i < 5; ++i) {
+            this.removeItemFromId("button_" + i);
+        }
 
+        const start = this.startRoomIndex;
         Common.getRequest("/multiplePlayers/getRooms?limit=6&start=" + start,
             /**
              *
              * @param data {{roomList,userCount,creator}}
              */
             data => {
-                //remove all buttons
-                for (let i = 0; i < 5; ++i) {
-                    this.removeItemFromId("button_" + i);
-                }
                 const roomList = data.roomList;
                 const interval = 114;
 
