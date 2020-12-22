@@ -23,7 +23,6 @@ export default class Index {
 
         this.root = new Root();
         Resource.setRoot(this.root);
-        this.root.addStage(new Loading());
 
         const debug = Adapter.getQueryString("debug");
         if (debug) {
@@ -31,26 +30,28 @@ export default class Index {
             this.initTouchDebug();
         }
 
-        const thisIndex = this;
         if (Adapter.isApp()) {
             Control.setControlMode(true);
-            Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
+            Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
                 if (data) {
                     //旧用户
                     Resource.setUser(data);
 
-                    thisIndex.root.addGameStage();
-                    thisIndex.start();
+                    this.root.addStage(new Loading());
+                    this.root.addGameStage();
+                    this.start();
                 } else {
                     //新用户
-                    thisIndex.root.addStage(new AppHome());
-                    thisIndex.root.addGameStage();
-                    thisIndex.start();
+                    this.root.addStage(new Loading());
+                    this.root.addStage(new AppHome());
+                    this.root.addGameStage();
+                    this.start();
                 }
             })
         } else {
             //web
             this.root.addStage(new Home());
+            this.root.addStage(new Loading());
             this.root.addGameStage();
             this.start();
         }
