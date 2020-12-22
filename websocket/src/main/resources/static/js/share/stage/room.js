@@ -495,8 +495,8 @@ export default class Room extends Stage {
     processSocketMessage(messageDto) {
         switch (messageDto.messageType) {
             case "TANKS":
-                //除了坦克之间的碰撞以外其他情况不更新自己，否则会和客户端的自动避让起冲突
-                const updateSelf = messageDto.note === "COLLIDE_TANK";
+                //只有特定情况下更新自己，否则会和客户端的自动避让起冲突
+                const updateSelf = (messageDto.note === "COLLIDE_TANK" || messageDto.note === "UPDATE_POS_FAILED");
                 this.createOrUpdateTanks(messageDto.message, updateSelf);
                 break;
             case "REMOVE_TANK":

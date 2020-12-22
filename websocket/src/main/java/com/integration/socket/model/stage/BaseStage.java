@@ -17,6 +17,7 @@ import com.integration.util.object.ObjectUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public abstract class BaseStage {
+
+    private static int UPDATE_DISTANCE_LIMIT = 20;
 
     private MessageService messageService;
 
@@ -131,7 +134,34 @@ public abstract class BaseStage {
             return;
         }
 
-        sendTankToRoom(updateBo);
+        String note = null;
+        if (!updateTankPos(updateBo, request)) {
+            note = "UPDATE_POS_FAILED";
+        }
+
+        sendTankToRoom(updateBo, note);
+    }
+
+    /**
+     * 距离检测，防止闪烁
+     *
+     * @param tankBo
+     * @param tankDto
+     * @return
+     */
+    private boolean updateTankPos(TankBo tankBo, ItemDto tankDto) {
+        if (tankDto.getX() == null || tankDto.getY() == null) {
+            return false;
+        }
+
+        double distance = Point.distance(tankBo.getX(), tankBo.getY(), tankDto.getX(), tankDto.getY());
+        if (distance > UPDATE_DISTANCE_LIMIT) {
+            return false;
+        }
+
+        tankBo.setX(tankDto.getX());
+        tankBo.setY(tankDto.getY());
+        return true;
     }
 
     /**
@@ -159,18 +189,7 @@ public abstract class BaseStage {
         if (actionType != ActionType.UNKNOWN) {
             tankBo.setActionType(actionType);
         }
-        updateTankControlExtension(tankBo, tankDto);
         return tankBo;
-    }
-
-    /**
-     * 继承扩展函数
-     *
-     * @param tankBo
-     * @param tankDto
-     */
-    void updateTankControlExtension(TankBo tankBo, ItemDto tankDto) {
-
     }
 
     /**

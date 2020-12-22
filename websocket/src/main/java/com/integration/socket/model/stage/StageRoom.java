@@ -1372,16 +1372,6 @@ public class StageRoom extends BaseStage {
         tankBo.setY(point.getY());
     }
 
-    @Override
-    void updateTankControlExtension(TankBo tankBo, ItemDto tankDto) {
-        //TODO - 距离检测，防止作弊
-
-        if (tankDto.getX() != null && tankDto.getY() != null) {
-            tankBo.setX(tankDto.getX());
-            tankBo.setY(tankDto.getY());
-        }
-    }
-
     private boolean isBot(TeamType teamType) {
         if (getRoomType() == RoomType.EVE) {
             return true;
