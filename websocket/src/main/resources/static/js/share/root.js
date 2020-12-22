@@ -222,7 +222,7 @@ export default class Root {
 
         //帧率信息
         ctx.textAlign = 'left';
-        let text = '帧率:' + this.frontFrame.frames;
+        let text = '帧率:' + this.frontFrame.framesPerSecond;
         if (this.netDelay) {
             text += ' / 延迟:' + this.netDelay + 'ms';
         }

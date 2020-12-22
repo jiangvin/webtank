@@ -252,6 +252,7 @@ public abstract class BaseStage {
 
     /**
      * 删除tank的扩展函数
+     * @param tankBo 要删除的目标
      */
     abstract void removeTankExtension(TankBo tankBo);
 }
