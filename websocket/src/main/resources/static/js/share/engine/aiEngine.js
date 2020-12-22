@@ -63,9 +63,7 @@ export default class AiEngine extends Engine {
         //create item
         this.createGameItem();
 
-        Resource.getRoot().processSocketMessage({
-            messageType: "SERVER_READY"
-        });
+        this.room.gameStatus({type: "NORMAL"});
     }
 
     createGameItem() {

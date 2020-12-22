@@ -242,10 +242,6 @@ public abstract class BaseStage {
         messageService.sendMessage(new MessageDto(object, messageType, username, getRoomId()));
     }
 
-    void sendReady(String username) {
-        messageService.sendReady(username, getRoomId());
-    }
-
     void removeTankFromUserId(String userId) {
         List<String> removeTankIds = new ArrayList<>();
         for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {

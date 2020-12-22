@@ -313,7 +313,7 @@ public class StageRoom extends BaseStage {
         if (event instanceof LoadMapEvent) {
             sendMessageToRoom(getMapBo().toDto(), MessageType.MAP);
             gameStatus.setType(GameStatusType.NORMAL);
-            sendMessageToRoom(null, MessageType.SERVER_READY);
+            sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
             //1 ~ 5 秒陆续出现坦克
             for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
                 createTankForUser(kv.getValue(), random.nextInt(60 * 4) + 60);
@@ -1203,11 +1203,6 @@ public class StageRoom extends BaseStage {
     }
 
     public void addUser(UserBo userBo) {
-        //TODO - 暂停状态不允许加入,需要后期优化
-        if (gameStatus.isPause()) {
-            return;
-        }
-
         userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
         sendStatusAndMessage(userBo, false);
@@ -1220,9 +1215,9 @@ public class StageRoom extends BaseStage {
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
         sendMessageToUser(getItemPool(), MessageType.ITEM, userBo.getUsername());
+        sendMessageToUser(gameStatus, MessageType.GAME_STATUS, userBo.getUsername());
 
         createTankForUser(userBo, 60 * 3);
-        sendReady(userBo.getUsername());
     }
 
     /**

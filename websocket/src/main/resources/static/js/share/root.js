@@ -254,9 +254,6 @@ export default class Root {
             case "ERROR_MESSAGE":
                 Common.addMessage(messageDto.message, "#F00");
                 break;
-            case "SERVER_READY":
-                this.serverReady();
-                break;
             case "USERS":
                 this.users = messageDto.message;
                 break;
@@ -271,13 +268,5 @@ export default class Root {
         if (this.engine) {
             this.engine.processControlEvent(control);
         }
-    }
-
-    serverReady() {
-        Status.setAck(true);
-        if (Status.getValue() !== Status.statusPause()) {
-            return;
-        }
-        Status.setStatus(Status.statusNormal());
     }
 }

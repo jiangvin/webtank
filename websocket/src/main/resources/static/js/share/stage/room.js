@@ -107,6 +107,10 @@ export default class Room extends Stage {
     }
 
     hideMask() {
+        if (this.mask === false) {
+            return;
+        }
+
         let frames = (this.minMaskTime - (new Date().getTime() - this.maskStartTime)) / 1000 * 60;
         if (frames < 0) {
             frames = 0;
@@ -114,9 +118,8 @@ export default class Room extends Stage {
         if (frames > 180) {
             frames = 180;
         }
-        const thisRoom = this;
-        Common.addTimeEvent("hide_mask", function () {
-            thisRoom.mask = false;
+        Common.addTimeEvent("hide_mask", () => {
+            this.mask = false;
         }, frames);
     }
 
@@ -526,9 +529,6 @@ export default class Room extends Stage {
             case "CLEAR_MAP":
                 this.clear();
                 break;
-            case "SERVER_READY":
-                this.hideMask();
-                break;
             case "GAME_STATUS":
                 this.gameStatus(messageDto.message);
                 break;
@@ -562,6 +562,9 @@ export default class Room extends Stage {
     }
 
     gameStatus(status) {
+        Status.setAck(true);
+        this.hideMask();
+
         if (status.type === "NORMAL") {
             Status.setStatus(Status.statusNormal());
             return;

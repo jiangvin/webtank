@@ -1,11 +1,9 @@
 package com.integration.socket.service;
 
 import com.integration.dto.message.MessageDto;
-import com.integration.dto.message.MessageType;
 import com.integration.socket.model.bo.SocketUserBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.util.CommonUtil;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,9 +57,5 @@ public class MessageService {
         } catch (Exception e) {
             log.error("catch send user:{} message error:", userBo.getUsername(), e);
         }
-    }
-
-    public void sendReady(@NonNull String username, String roomId) {
-        sendMessage(new MessageDto(null, MessageType.SERVER_READY, username, roomId));
     }
 }

@@ -46,7 +46,7 @@ export default class NetEngine extends Engine {
                 }
 
                 //注册消息事件
-                Common.addMessageEvent("SERVER_READY", function () {
+                Common.addMessageEvent("GAME_STATUS", function () {
                     thisEngine.addConnectCheckEvent();
                 })
             })
