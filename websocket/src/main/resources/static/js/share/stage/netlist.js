@@ -18,6 +18,9 @@ export default class NetList extends Stage {
         this.initStageItems();
 
         this.startRoomIndex = 0;
+
+        this.nextLoadInterval = 200;
+        this.isLoading = false;
     }
 
     initStageItems() {
@@ -55,15 +58,37 @@ export default class NetList extends Stage {
     }
 
     init() {
+        this.clear();
         this.loadRoomList();
     }
 
-    loadRoomList() {
+    update() {
+        super.update();
+        this.updateAutoLoading();
+    }
+
+    updateAutoLoading() {
+        if (this.isLoading) {
+            return;
+        }
+
+        if (this.nextLoadInterval > 0) {
+            --this.nextLoadInterval;
+        } else {
+            this.nextLoadInterval = 200;
+            this.loadRoomList();
+        }
+    }
+
+    clear() {
         //remove all buttons
         for (let i = 0; i < 5; ++i) {
             this.removeItemFromId("button_" + i);
         }
+    }
 
+    loadRoomList() {
+        this.isLoading = true;
         const start = this.startRoomIndex;
         Common.getRequest("/multiplePlayers/getRooms?limit=6&start=" + start,
             /**
@@ -71,6 +96,9 @@ export default class NetList extends Stage {
              * @param data {{roomList,userCount,creator}}
              */
             data => {
+                this.isLoading = false;
+                this.clear();
+
                 const roomList = data.roomList;
                 const interval = 114;
 
