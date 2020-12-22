@@ -102,17 +102,15 @@ export default class Root {
 
     update() {
         this.updateTimeEvents();
-
-        if (!Status.isGaming()) {
-            return;
-        }
-
         this.updateEngine();
         this.currentStage().update();
     }
 
     updateEngine() {
         if (!this.engine) {
+            return;
+        }
+        if (!Status.isGaming()) {
             return;
         }
         this.engine.update();

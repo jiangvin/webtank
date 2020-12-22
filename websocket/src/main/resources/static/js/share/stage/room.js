@@ -135,6 +135,10 @@ export default class Room extends Stage {
     }
 
     update() {
+        if (!Status.isGaming()) {
+            return;
+        }
+
         this.updateView();
         super.update();
     }
