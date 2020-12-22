@@ -220,9 +220,6 @@ export default class Root {
         ctx.textBaseline = 'bottom';
         ctx.fillStyle = '#ffffff';
 
-        // TODO QQ群信息
-        // ctx.fillText('© Created by Vin (QQ群: 87882492)', Resource.width() - 12, Resource.height() - 5);
-
         //帧率信息
         ctx.textAlign = 'left';
         let text = '帧率:' + this.frontFrame.frames;
