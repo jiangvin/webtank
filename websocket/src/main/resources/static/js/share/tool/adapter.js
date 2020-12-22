@@ -17,6 +17,7 @@ export default class Adapter {
          */
         this.platform = 0;
 
+        //TODO 输入框相关，还未启用
         this.inputDisplay = false;
         this.inputEnable = false;
     }

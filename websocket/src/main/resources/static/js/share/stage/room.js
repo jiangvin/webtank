@@ -65,9 +65,6 @@ export default class Room extends Stage {
         Resource.getRoot().addEngine(roomInfo.isNet);
         this.clear();
         Status.setStatus(Status.statusPause());
-
-        //TODO 输入框相关，后期优化
-        //Adapter.instance.inputEnable = true;
     }
 
     createManager() {
