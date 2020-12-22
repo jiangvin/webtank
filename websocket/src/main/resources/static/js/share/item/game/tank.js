@@ -211,9 +211,6 @@ export default class Tank extends MapItem {
     }
 
     showFace(faceId) {
-        if (this.faceTimeout > 0) {
-            return;
-        }
         this.faceId = faceId;
         this.faceTimeout = 5 * 60;
     }
