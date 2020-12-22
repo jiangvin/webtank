@@ -12,6 +12,11 @@ public enum MessageType {
      */
     USER_MESSAGE,
 
+    /**
+     * 表情
+     */
+    FACE,
+
 
     /**
      * 单向发送

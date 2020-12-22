@@ -22,6 +22,10 @@ export default class Tank extends MapItem {
         //是否有幽灵道具
         this.hasGhost = false;
 
+        //表情相关
+        this.faceTimeout = 0;
+        this.faceId = null;
+
         for (let key in options) {
             this[key] = options[key];
         }
@@ -29,6 +33,10 @@ export default class Tank extends MapItem {
 
     update() {
         super.update();
+
+        if (this.faceTimeout > 0) {
+            --this.faceTimeout;
+        }
 
         if (this.action === 0) {
             return;
@@ -153,4 +161,60 @@ export default class Tank extends MapItem {
             }
         });
     };
+
+    getEffectForFace() {
+        if (this.faceTimeout <= 0) {
+            return null;
+        }
+
+        const faceId = this.faceId;
+        return new Item({
+            x: this.screenPoint.x - 20 * Resource.getRoomScale(),
+            y: this.screenPoint.y - 15 * Resource.getRoomScale(),
+            z: Height.tankFace(),
+            draw: function (ctx) {
+                const image = Resource.getImage("tank_face_rect");
+                const displayWidth = 72 * Resource.getRoomScale();
+                const displayHeight = 72 * Resource.getRoomScale();
+                ctx.drawImage(image,
+                    0, 0,
+                    image.width, image.height,
+                    this.x - displayWidth / 2, this.y - displayHeight / 2,
+                    displayWidth, displayHeight);
+
+                const face = Resource.getImage(faceId);
+                const faceSize = 20 * Resource.getRoomScale();
+                ctx.drawImage(face,
+                    0, 0,
+                    face.width, face.height,
+                    this.x - faceSize / 2, this.y - faceSize * 1.3,
+                    faceSize, faceSize);
+            }
+        });
+    }
+
+    drawEffect(container) {
+        const shield = this.getEffectForShield();
+        if (shield) {
+            container[container.length] = shield;
+        }
+
+        const id = this.getEffectForId();
+        if (id) {
+            container[container.length] = id;
+        }
+
+        const face = this.getEffectForFace();
+        if (face) {
+            container[container.length] = face;
+        }
+    }
+
+    showFace(faceId) {
+        if (this.faceTimeout > 0) {
+            return;
+        }
+        this.faceId = faceId;
+        this.faceTimeout = 5 * 60;
+    }
 }

@@ -92,6 +92,13 @@ export default class MapItem extends Item {
             this.screenPoint.y <= -half ||
             this.screenPoint.x >= Resource.width() + half ||
             this.screenPoint.y >= Resource.height() + half);
+    }
+
+    /**
+     * 绘制特效
+     * @param container
+     */
+    drawEffect(container) {
 
     }
 }

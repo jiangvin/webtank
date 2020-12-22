@@ -154,6 +154,19 @@ export default class Resource {
         this.loadImage("button_home", "room/button_home");
         this.loadImage("button_again", "room/button_again");
 
+        //load face
+        this.loadImage("face_rect", "room/face/rect");
+        this.loadImage("tank_face_rect", "room/face/tank_face_rect");
+        for (let i = 1; i <= 6; ++i) {
+            let id;
+            if (i < 10) {
+                id = "0" + i;
+            } else {
+                id = "" + i;
+            }
+            this.loadImage("face" + id, "room/face/" + id);
+        }
+
         //load all tank images
         for (let i = 1; i <= 12; ++i) {
             let id;

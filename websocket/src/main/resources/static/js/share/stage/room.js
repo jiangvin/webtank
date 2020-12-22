@@ -11,12 +11,13 @@ import Status from "../tool/status.js";
 import Control from "../tool/control.js";
 import Sound from "../tool/sound.js";
 import Tank from "../item/game/tank.js";
-import Confirm from "../item/confirm.js";
 import MapItem from "../item/game/mapitem.js";
 import Bullet from "../item/game/bullet.js";
 import Height from "../item/game/height.js";
 import Success from "../item/game/success.js";
 import Failed from "../item/game/failed.js";
+import Manager from "../item/game/room/manager.js";
+import NetManager from "../item/game/room/netmanager.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -58,44 +59,23 @@ export default class Room extends Stage {
         });
     }
 
-    initControlEvent() {
-        const thisRoom = this;
-        //返回按钮
-        thisRoom.createControl({
-            leftTop: {
-                x: -130,
-                y: 30
-            },
-            size: {
-                w: 100,
-                h: 100
-            },
-            needOffset: false,
-            callBack: function () {
-                //返回主菜单(暂停状态不能返回)
-                if (!Status.isGaming()) {
-                    return;
-                }
-
-                new Confirm(
-                    thisRoom,
-                    "返回主菜单",
-                    ["返回主菜单将不会获得任何积分和金币，确定要返回吗？"],
-                    function () {
-                        Resource.getRoot().gotoStage("menu");
-                    });
-            }
-        })
-    }
-
     init(roomInfo) {
         this.roomInfo = roomInfo;
+        this.createManager();
         Resource.getRoot().addEngine(roomInfo.isNet);
         this.clear();
         Status.setStatus(Status.statusPause());
 
         //TODO 输入框相关，后期优化
         //Adapter.instance.inputEnable = true;
+    }
+
+    createManager() {
+        if (this.roomInfo.isNet) {
+            this.roomManager = new NetManager(this);
+        } else {
+            this.roomManager = new Manager(this);
+        }
     }
 
     showTeam() {
@@ -107,8 +87,9 @@ export default class Room extends Stage {
         this.reloadBackground();
         this.items.clear();
         this.controlUnits.clear();
-        this.initControlEvent();
         this.view.center = null;
+
+        this.roomManager.createControlEvent();
     }
 
     reloadBackground() {
@@ -224,7 +205,7 @@ export default class Room extends Stage {
                     return;
                 }
                 gameItems[gameItems.length] = item;
-                this.drawEffect(item, gameItems);
+                item.drawEffect(gameItems);
             } else {
                 commonItems[commonItems.length] = item;
             }
@@ -247,22 +228,6 @@ export default class Room extends Stage {
             item.draw(ctx);
         });
         this.drawHotZone(ctx);
-    }
-
-    drawEffect(target, container) {
-        if (target.constructor.name !== "Tank") {
-            return;
-        }
-
-        const shield = target.getEffectForShield();
-        if (shield) {
-            container[container.length] = shield;
-        }
-
-        const id = target.getEffectForId();
-        if (id) {
-            container[container.length] = id;
-        }
     }
 
     drawControl(ctx) {
@@ -316,60 +281,7 @@ export default class Room extends Stage {
     }
 
     drawRoomInfo(ctx) {
-        const rect = Resource.getImage("room_rect");
-        const interval = 320;
-
-        const icons = [
-            Resource.getImage("room_stage"),
-            Resource.getImage("player_life"),
-            Resource.getImage("enemy_life"),
-            Resource.getImage("room_gold"),
-            Resource.getImage("room")
-        ];
-
-        const infos = [
-            this.roomInfo.mapId + "-" + this.roomInfo.subId,
-            "x" + this.roomInfo.playerLife,
-            "x" + this.roomInfo.computerLife,
-            Resource.getUser().coin,
-            this.roomInfo.roomId
-        ];
-
-        ctx.font = '36px gameFont';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#FFF';
-
-        for (let i = 0; i < 5; ++i) {
-            ctx.drawImage(
-                rect,
-                0, 0,
-                rect.width, rect.height,
-                100 + i * interval, 50,
-                rect.width * 1.7, rect.height * 1.5
-            );
-
-            const icon = icons[i];
-            ctx.drawImage(
-                icon,
-                0, 0,
-                icon.width, icon.height,
-                100 + i * interval, 30,
-                100, 100
-            );
-
-            ctx.fillText(infos[i], 272 + i * interval, 82);
-        }
-
-        //返回按钮
-        const back = Resource.getImage("back");
-        ctx.drawImage(
-            back,
-            0, 0,
-            back.width, back.height,
-            Resource.width() - 130, 30,
-            100, 100
-        );
+        this.roomManager.drawRoomInfo(ctx);
     }
 
     drawMask(ctx) {
@@ -593,6 +505,9 @@ export default class Room extends Stage {
             case "REMOVE_TANK":
                 this.boomTank(messageDto.message);
                 break;
+            case "FACE":
+                this.showFace(messageDto.message);
+                break;
             case "BULLET":
                 this.createOrUpdateBullets(messageDto.message);
                 break;
@@ -623,6 +538,14 @@ export default class Room extends Stage {
             default:
                 break;
         }
+    }
+
+    showFace(faceDto) {
+        if (!this.items.has(faceDto.tankId)) {
+            return;
+        }
+
+        this.items.get(faceDto.tankId).showFace(faceDto.faceId);
     }
 
     removeGameItem(id) {

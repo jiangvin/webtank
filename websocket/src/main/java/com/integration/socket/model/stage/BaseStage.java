@@ -11,6 +11,7 @@ import com.integration.dto.room.TeamType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.dto.FaceDto;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
 import lombok.Getter;
@@ -71,9 +72,19 @@ public abstract class BaseStage {
             case USER_MESSAGE:
                 sendMessageToRoom(String.format("%s: %s", sendFrom, messageDto.getMessage()), messageDto.getMessageType());
                 break;
+            case FACE:
+                sendFace((String) messageDto.getMessage(), sendFrom);
+                break;
             default:
                 break;
         }
+    }
+
+    private void sendFace(String faceId, String username) {
+        if (!tankMap.containsKey(username)) {
+            return;
+        }
+        sendMessageToRoom(new FaceDto(username, faceId), MessageType.FACE);
     }
 
     public void processTankFire(String tankId, String sendFrom) {

@@ -126,6 +126,14 @@ export default class Stage {
         this.removeItem(item);
     }
 
+    removeControlFromId(controlId) {
+        const control = this.controlUnits.get(controlId);
+        if (!control) {
+            return;
+        }
+        this.removeControl(control);
+    }
+
     /**
      * 切换场景时运行
      */

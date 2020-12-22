@@ -40,4 +40,8 @@ export default class Height {
     static grass() {
         return 8;
     }
+
+    static tankFace() {
+        return 9;
+    }
 }
