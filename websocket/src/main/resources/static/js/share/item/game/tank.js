@@ -163,6 +163,10 @@ export default class Tank extends MapItem {
     };
 
     getEffectForStopMark() {
+        if (this.typeId === -1) {
+            return null;
+        }
+
         if (Status.getValue() !== Status.statusPauseRed() && Status.getValue() !== Status.statusPauseBlue()) {
             return null;
         }
