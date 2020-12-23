@@ -7,9 +7,10 @@ import Resource from "../tool/resource.js";
  */
 
 export default class TeamSelector {
-    constructor(stage, callback) {
+    constructor(stage, callback, close) {
         this.stage = stage;
         this.callback = callback;
+        this.close = close;
         this.init();
     }
 
@@ -136,5 +137,8 @@ export default class TeamSelector {
         this.stage.removeItem(this.joinRed);
         this.stage.removeItem(this.joinBlue);
         this.stage.controlUnits = this.cacheUnits;
+        if (this.close) {
+            this.close();
+        }
     }
 }

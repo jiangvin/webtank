@@ -136,10 +136,16 @@ export default class NetList extends Stage {
                                     Common.gotoStage("room", roomInfo);
                                 } else {
                                     //对抗模式
-                                    new TeamSelector(this, (teamType) => {
-                                        roomInfo.joinTeamType = teamType;
-                                        Common.gotoStage("room", roomInfo);
-                                    })
+                                    this.isLoading = true;
+                                    new TeamSelector(
+                                        this,
+                                        (teamType) => {
+                                            roomInfo.joinTeamType = teamType;
+                                            Common.gotoStage("room", roomInfo);
+                                        },
+                                        () => {
+                                            this.isLoading = false;
+                                        });
                                 }
                             }
                         )
