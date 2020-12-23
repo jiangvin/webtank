@@ -128,6 +128,8 @@ export default class Resource {
 
         this.loadImage("bullet", "room/bullet", "png", 4);
 
+        this.loadImage("stop", "room/stop");
+
         //item
         this.loadImage("item_bullet", "room/item/item_bullet");
         this.loadImage("item_clock", "room/item/item_clock");

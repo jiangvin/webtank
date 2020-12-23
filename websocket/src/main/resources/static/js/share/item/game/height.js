@@ -33,15 +33,19 @@ export default class Height {
         return 6;
     }
 
-    static bomb() {
+    static stopMark() {
         return 7;
     }
 
-    static grass() {
+    static bomb() {
         return 8;
     }
 
-    static tankFace() {
+    static grass() {
         return 9;
+    }
+
+    static tankFace() {
+        return 10;
     }
 }

@@ -162,6 +162,35 @@ export default class Tank extends MapItem {
         });
     };
 
+    getEffectForStopMark() {
+        if (Status.getValue() !== Status.statusPauseRed() && Status.getValue() !== Status.statusPauseBlue()) {
+            return null;
+        }
+        if (Status.getValue() === Status.statusPauseRed() && this.teamId !== 1) {
+            return null;
+        }
+        if (Status.getValue() === Status.statusPauseBlue() && this.teamId !== 2) {
+            return null;
+        }
+
+        return new Item({
+            x: this.screenPoint.x,
+            y: this.screenPoint.y,
+            z: Height.stopMark(),
+            draw: function (ctx) {
+                const image = Resource.getImage("stop");
+                const displayWidth = 25 * Resource.getRoomScale();
+                const displayHeight = 25 * Resource.getRoomScale();
+                ctx.drawImage(image,
+                    0, 0,
+                    image.width, image.height,
+                    this.x - displayWidth / 2,
+                    this.y - displayHeight / 2,
+                    displayWidth, displayHeight);
+            }
+        });
+    }
+
     getEffectForFace() {
         if (this.faceTimeout <= 0) {
             return null;
@@ -207,6 +236,11 @@ export default class Tank extends MapItem {
         const face = this.getEffectForFace();
         if (face) {
             container[container.length] = face;
+        }
+
+        const stopMark = this.getEffectForStopMark();
+        if (stopMark) {
+            container[container.length] = stopMark;
         }
     }
 
