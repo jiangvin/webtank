@@ -17,6 +17,7 @@ import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.ItemBo;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.MapMangerBo;
+import com.integration.socket.model.bo.PointBo;
 import com.integration.socket.model.bo.ScoreBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
@@ -476,8 +477,8 @@ public class StageRoom extends BaseStage {
         }
 
         //获取前方的两个角的坐标（顺时针获取）
-        List<Point> corners = generateCorners(tank, orientation);
-        for (Point corner : corners) {
+        List<PointBo> corners = generateCorners(tank, orientation);
+        for (PointBo corner : corners) {
             CollideType result = canPass(corner, tank.isHasGhost());
             if (result != CollideType.COLLIDE_NONE) {
                 return result;
@@ -486,8 +487,8 @@ public class StageRoom extends BaseStage {
         return CollideType.COLLIDE_NONE;
     }
 
-    private CollideType canPass(Point point, boolean hasGhost) {
-        if (point.x < 0 || point.y < 0 || point.x >= getMapBo().getWidth() || point.y >= getMapBo().getHeight()) {
+    private CollideType canPass(PointBo point, boolean hasGhost) {
+        if (point.getX() < 0 || point.getY() < 0 || point.getX() >= getMapBo().getWidth() || point.getY() >= getMapBo().getHeight()) {
             return CollideType.COLLIDE_BOUNDARY;
         }
 
@@ -548,8 +549,8 @@ public class StageRoom extends BaseStage {
         return false;
     }
 
-    private boolean collideWithMap(Point point) {
-        String key = CommonUtil.generateGridKey(point.x, point.y);
+    private boolean collideWithMap(PointBo point) {
+        String key = CommonUtil.generateGridKey(point.getX(), point.getY());
         if (!getMapBo().getUnitMap().containsKey(key)) {
             return false;
         }
@@ -557,48 +558,48 @@ public class StageRoom extends BaseStage {
         return getMapBo().getUnitMap().get(key) != MapUnitType.GRASS;
     }
 
-    private List<Point> generateCorners(TankBo tank, OrientationType orientation) {
-        int x = (int) tank.getX();
-        int y = (int) tank.getY();
+    private List<PointBo> generateCorners(TankBo tank, OrientationType orientation) {
+        double x = tank.getX();
+        double y = tank.getY();
         int size = CommonUtil.UNIT_SIZE;
         int halfLite = size / 2 - 1;
 
         //获取前方的两个角的坐标（顺时针获取）
-        Point corner1 = new Point();
-        Point corner2 = new Point();
+        PointBo corner1 = new PointBo();
+        PointBo corner2 = new PointBo();
         switch (orientation) {
             case UP:
                 y -= tank.getType().getSpeed();
-                corner1.x = x - halfLite;
-                corner1.y = y - halfLite;
-                corner2.x = x + halfLite;
-                corner2.y = y - halfLite;
+                corner1.setX(x - halfLite);
+                corner1.setY(y - halfLite);
+                corner2.setX(x + halfLite);
+                corner2.setY(y - halfLite);
                 break;
             case DOWN:
                 y += tank.getType().getSpeed();
-                corner1.x = x + halfLite;
-                corner1.y = y + halfLite;
-                corner2.x = x - halfLite;
-                corner2.y = y + halfLite;
+                corner1.setX(x + halfLite);
+                corner1.setY(y + halfLite);
+                corner2.setX(x - halfLite);
+                corner2.setY(y + halfLite);
                 break;
             case LEFT:
                 x -= tank.getType().getSpeed();
-                corner1.x = x - halfLite;
-                corner1.y = y + halfLite;
-                corner2.x = x - halfLite;
-                corner2.y = y - halfLite;
+                corner1.setX(x - halfLite);
+                corner1.setY(y + halfLite);
+                corner2.setX(x - halfLite);
+                corner2.setY(y - halfLite);
                 break;
             case RIGHT:
                 x += tank.getType().getSpeed();
-                corner1.x = x + halfLite;
-                corner1.y = y - halfLite;
-                corner2.x = x + halfLite;
-                corner2.y = y + halfLite;
+                corner1.setX(x + halfLite);
+                corner1.setY(y - halfLite);
+                corner2.setX(x + halfLite);
+                corner2.setY(y + halfLite);
                 break;
             default:
                 break;
         }
-        List<Point> corners = new ArrayList<>();
+        List<PointBo> corners = new ArrayList<>();
         corners.add(corner1);
         corners.add(corner2);
         return corners;
@@ -609,9 +610,9 @@ public class StageRoom extends BaseStage {
             return false;
         }
 
-        List<Point> corners = generateCorners(tankBo, tankBo.getOrientationType());
-        for (Point corner : corners) {
-            String key = CommonUtil.generateGridKey(corner.x, corner.y);
+        List<PointBo> corners = generateCorners(tankBo, tankBo.getOrientationType());
+        for (PointBo corner : corners) {
+            String key = CommonUtil.generateGridKey(corner.getX(), corner.getY());
             if (!itemMap.containsKey(key)) {
                 continue;
             }
