@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public abstract class BaseStage {
 
-    private static int UPDATE_DISTANCE_LIMIT = 20;
+    private static int UPDATE_DISTANCE_LIMIT = 30;
 
     private MessageService messageService;
 
