@@ -203,26 +203,24 @@ class EventManager {
 
                 //陆续出现坦克
                 for (Map.Entry<String, UserBo> kv : room.userMap.entrySet()) {
-                    String tankId = kv.getValue().getUsername();
-                    timeout = createTankEvent(kv.getValue(), tankId, timeout);
+                    timeout = createTankEvent(kv.getValue(), timeout);
                 }
                 for (Map.Entry<String, BaseBotBo> kv : room.botMap.entrySet()) {
-                    String tankId = kv.getValue().getBotUser().getUsername();
-                    timeout = createTankEvent(kv.getValue().getBotUser(), tankId, timeout);
+                    timeout = createTankEvent(kv.getValue().getBotUser(), timeout);
                 }
             }
         });
     }
 
     void createTankEvent(UserBo user) {
-        createTankEvent(user, user.getUsername(), 3 * 60);
+        createTankEvent(user, 3 * 60);
     }
 
     void createTankEvent(UserBo user, String tankId) {
-        createTankEvent(user, tankId, 3 * 60);
+        this.eventList.add(newCreateTankEvent(user, tankId, 3 * 60));
     }
 
-    private int createTankEvent(UserBo user, String tankId, int timeout) {
+    private int createTankEvent(UserBo user, int timeout) {
         if (room.isBot(user.getTeamType())) {
             int count = room.getMapBo().getComputerStartCount();
             for (int i = 0; i < count; ++i) {
@@ -230,7 +228,7 @@ class EventManager {
                 timeout += 60;
             }
         } else {
-            this.eventList.add(newCreateTankEvent(user, tankId, timeout));
+            this.eventList.add(newCreateTankEvent(user, user.getUsername(), timeout));
             timeout += 60;
         }
         return timeout;
