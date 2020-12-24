@@ -1,4 +1,4 @@
-package com.integration.socket.model.event;
+package com.integration.socket.model.stage.event;
 
 /**
  * @author 蒋文龙(Vin)

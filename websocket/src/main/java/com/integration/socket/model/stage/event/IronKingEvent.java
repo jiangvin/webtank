@@ -1,4 +1,4 @@
-package com.integration.socket.model.event;
+package com.integration.socket.model.stage.event;
 
 import lombok.Getter;
 
