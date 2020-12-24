@@ -41,7 +41,6 @@ import com.integration.util.model.CustomException;
 import com.integration.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.StringUtils;
 
 import java.awt.Point;
@@ -64,6 +63,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StageRoom extends BaseStage {
 
+    private static final int MAX_SUB_ID = 5;
     private static final int MAX_ITEM_LIMIT = 3;
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
     private static final int DEFAULT_SHIELD_TIME = 20 * 60;
@@ -221,16 +221,6 @@ public class StageRoom extends BaseStage {
     }
 
     @Override
-    public List<String> getUserList() {
-        List<String> users = new ArrayList<>();
-        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-            users.add(kv.getKey());
-        }
-        return users;
-    }
-
-    @Override
-    @Async
     public void update() {
         processEvent();
 
@@ -965,7 +955,7 @@ public class StageRoom extends BaseStage {
 
             int newMapId = getMapId();
             int newSubId = getSubId();
-            if (newSubId < 5) {
+            if (newSubId < MAX_SUB_ID) {
                 ++newSubId;
             } else {
                 ++newMapId;

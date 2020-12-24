@@ -60,7 +60,6 @@ public abstract class BaseStage {
 
     /**
      * 处理消息入口
-     *
      * @param messageDto
      * @param sendFrom
      */
@@ -144,7 +143,6 @@ public abstract class BaseStage {
 
     /**
      * 距离检测，防止闪烁
-     *
      * @param tankBo
      * @param tankDto
      * @return
@@ -166,7 +164,6 @@ public abstract class BaseStage {
 
     /**
      * 更新控制，房间内的更新只更新网格
-     *
      * @param tankDto
      * @return
      */
@@ -200,21 +197,24 @@ public abstract class BaseStage {
 
     /**
      * 用户离开时触发
-     *
      * @param username 离开的用户名
      */
     public abstract void removeUser(String username);
 
     /**
      * 获取用户列表
-     *
      * @return 用户列表
      */
-    abstract List<String> getUserList();
+    List<String> getUserList() {
+        List<String> users = new ArrayList<>();
+        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
+            users.add(kv.getKey());
+        }
+        return users;
+    }
 
     /**
      * 获取房间号
-     *
      * @return 房间号
      */
     public abstract String getRoomId();
@@ -226,16 +226,17 @@ public abstract class BaseStage {
         messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId()));
     }
 
-    private void sendMessageToRoom(Object object, MessageType messageType, String note) {
-        messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId(), note));
-    }
-
     void sendTankToRoom(TankBo tankBo) {
         sendTankToRoom(tankBo, null);
     }
 
     void sendTankToRoom(TankBo tankBo, String note) {
-        sendMessageToRoom(Collections.singletonList(tankBo.toDto()), MessageType.TANKS, note);
+        messageService.sendMessage(new MessageDto(
+                                       Collections.singletonList(tankBo.toDto()),
+                                       MessageType.TANKS,
+                                       getUserList(),
+                                       getRoomId(),
+                                       note));
     }
 
     void sendMessageToUser(Object object, MessageType messageType, String username) {
