@@ -22,10 +22,19 @@ export default class Mission extends Stage {
             draw: function (ctx) {
                 ctx.displayCenterRate(
                     thisMission.roomInfo.hardMode ? "mission_hard" : "mission_easy",
-                    .5, .54,
-                    .92, .84);
+                    .5, .5,
+                    1, 1);
             }
         });
+
+        this.missionPos = [
+            {x: 784, y: 458},
+            {x: 784 + 365, y: 458},
+            {x: 784 + 365 * 2, y: 458},
+            {x: 950, y: 692},
+            {x: 950 + 380, y: 692}
+        ];
+        this.missionSize = 180;
 
         this.createMapSelected();
 
@@ -56,14 +65,6 @@ export default class Mission extends Stage {
         map.y = rect.y + (rect.h - map.h) / 2;
 
         const text = ["第一关", "第二关", "第三关", "第四关"];
-
-        this.missionPos = [
-            {x: 784, y: 408},
-            {x: 784 + 365, y: 408},
-            {x: 784 + 365 * 2, y: 408},
-            {x: 950, y: 642},
-            {x: 950 + 380, y: 642}
-        ];
 
         this.createItem({
             draw: function (ctx) {
@@ -155,8 +156,8 @@ export default class Mission extends Stage {
             const text = this.roomInfo.mapId + "-" + (i + 1);
             const starCount = this.getStarCount(i + 1);
 
-            ctx.displayCenter(starCount === -1 ? "mission_disable" : "mission", pos.x, pos.y, 180);
-            ctx.displayCenter("mission_rect", pos.x, pos.y, 180);
+            ctx.displayCenter(starCount === -1 ? "mission_disable" : "mission", pos.x, pos.y, this.missionSize);
+            ctx.displayCenter("mission_rect", pos.x, pos.y, this.missionSize);
 
             ctx.fillText(text,
                 pos.x + Resource.getOffset().x,
@@ -196,7 +197,7 @@ export default class Mission extends Stage {
         const key = this.generateKey(this.roomInfo.mapId, subId, this.roomInfo.hardMode);
         if (this.starMap.has(key)) {
             return this.starMap.get(key);
-        } else if (subId === 1) {
+        } else if (subId <= 1 || this.getStarCount(subId - 1) > 0) {
             return 0;
         } else {
             return -1;
@@ -204,28 +205,30 @@ export default class Mission extends Stage {
     }
 
     initControlEvent() {
-        const thisMission = this;
-
         //start game
-        this.createControl({
-            leftTop: {
-                x: 1486,
-                y: 904
-            },
-            size: {
-                w: 240,
-                h: 70
-            },
-            callBack: function () {
-                //困难模式未解锁的情况
-                if (thisMission.roomInfo.mapId < 1) {
-                    Common.addMessage("请先解锁普通模式!", "#F00");
-                    return;
+        for (let i = 0; i < 5; ++i) {
+            this.createControl({
+                leftTop: {
+                    x: this.missionPos[i].x - this.missionSize / 2,
+                    y: this.missionPos[i].y - this.missionSize / 2
+                },
+                size: {
+                    w: this.missionSize,
+                    h: this.missionSize
+                },
+                callBack: () => {
+                    if (this.roomInfo.mapId < 1) {
+                        return;
+                    }
+                    if (this.getStarCount(i + 1) === -1) {
+                        Common.addMessage("请先解锁前面的关卡!", "#F00");
+                        return;
+                    }
+                    this.roomInfo.subId = (i + 1);
+                    Common.nextStage(this.roomInfo);
                 }
-
-                Common.nextStage(thisMission.roomInfo);
-            }
-        });
+            })
+        }
 
         //back
         this.createControl({
@@ -252,9 +255,9 @@ export default class Mission extends Stage {
                 w: 192,
                 h: 50
             },
-            callBack: function () {
-                thisMission.roomInfo.hardMode = false;
-                thisMission.roomInfo.mapId = 1;
+            callBack: () => {
+                this.roomInfo.hardMode = false;
+                this.roomInfo.mapId = 1;
             }
         });
 
@@ -268,12 +271,12 @@ export default class Mission extends Stage {
                 w: 192,
                 h: 50
             },
-            callBack: function () {
-                thisMission.roomInfo.hardMode = true;
-                if (thisMission.hasLock(0)) {
-                    thisMission.roomInfo.mapId = 0;
+            callBack: () => {
+                this.roomInfo.hardMode = true;
+                if (this.hasLock(0)) {
+                    this.roomInfo.mapId = 0;
                 } else {
-                    thisMission.roomInfo.mapId = 1;
+                    this.roomInfo.mapId = 1;
                 }
             }
         });
