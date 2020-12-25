@@ -32,7 +32,7 @@ public class ShopService {
     private static final int GHOST_PRICE = 8;
     private static final int TANK02_PRICE = 20;
     private static final int TANK03_PRICE = 40;
-    private static final int AGAIN_PRICE = 30;
+    private static final int AGAIN_PRICE = 0;
 
     public UserDto buyWithCoin(BuyDto buyDto) {
         UserRecord userRecord = userDao.queryUser(buyDto.getUserId());

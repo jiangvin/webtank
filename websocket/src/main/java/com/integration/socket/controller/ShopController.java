@@ -32,7 +32,7 @@ public class ShopController {
             throw new CustomException("参数出错!");
         }
         if (StringUtils.isEmpty(buyDto.getUserId())) {
-            throw new CustomException("网页用户不支持购买!");
+            throw new CustomException("网页用户不支持该操作!");
         }
 
         return shopService.buyWithCoin(buyDto);

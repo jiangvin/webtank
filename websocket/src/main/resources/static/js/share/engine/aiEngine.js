@@ -950,7 +950,7 @@ export default class AiEngine extends Engine {
             buyType: "AGAIN_FOR_SINGLE"
         }, data => {
             Resource.setUser(data);
-            Common.addMessage("续关成功!", '#FF0');
+            Common.addMessage("操作成功!", '#FF0');
 
             //重置初始生命
             this.playerLifeCount = 0;

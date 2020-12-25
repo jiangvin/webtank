@@ -699,7 +699,7 @@ public class StageRoom extends BaseStage {
             throw new CustomException("地图读取异常, 操作失败");
         }
 
-        sendMessageToRoom(String.format("%s 选择了续关,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
+        sendMessageToRoom(String.format("%s 选择了重玩,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
 
         //重置总分
         this.scoreBo.setTotalScore(0);
