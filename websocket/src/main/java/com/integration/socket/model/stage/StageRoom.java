@@ -796,41 +796,7 @@ public class StageRoom extends BaseStage {
     }
 
     private String generateUsernameWithTeam(UserBo userBo) {
-        return String.format("%s[%s]", userBo.getUsername(), getTeam(userBo.getTeamType()));
-    }
-
-    private String getTeam(TeamType teamType) {
-        String teamStr = "观看";
-        switch (getRoomType()) {
-            case EVE:
-            case PVP:
-                switch (teamType) {
-                    case RED:
-                        teamStr = "红队";
-                        break;
-                    case BLUE:
-                        teamStr = "蓝队";
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case PVE:
-                switch (teamType) {
-                    case RED:
-                        teamStr = "玩家";
-                        break;
-                    case BLUE:
-                        teamStr = "AI";
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-        return teamStr;
+        return String.format("%s[%s]", userBo.getUsername(), roomTypeManager.getTeamStr(userBo.getTeamType()));
     }
 
     public void addBot(BaseBotBo bot) {

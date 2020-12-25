@@ -193,4 +193,38 @@ class RoomTypeManager {
         }
         return room.tankStatusSaveMap.size();
     }
+
+    String getTeamStr(TeamType teamType) {
+        String teamStr = "观看";
+        switch (room.getRoomType()) {
+            case EVE:
+            case PVP:
+                switch (teamType) {
+                    case RED:
+                        teamStr = "红队";
+                        break;
+                    case BLUE:
+                        teamStr = "蓝队";
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case PVE:
+                switch (teamType) {
+                    case RED:
+                        teamStr = "玩家";
+                        break;
+                    case BLUE:
+                        teamStr = "AI";
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+        return teamStr;
+    }
 }
