@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public class MapDao extends BaseDao {
     public List<String> queryMapNameList() {
-        return create.select(MAP.NAME).from(MAP).orderBy(MAP.ID).fetchInto(String.class);
+        return create.select(MAP.NAME).from(MAP).orderBy(MAP.ID, MAP.SUB_ID).fetchInto(String.class);
     }
 
     public MapRecord queryFromId(int id, int subId) {
