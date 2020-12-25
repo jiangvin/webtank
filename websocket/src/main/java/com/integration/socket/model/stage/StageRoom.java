@@ -36,7 +36,6 @@ import org.springframework.util.StringUtils;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +88,8 @@ public class StageRoom extends BaseStage {
 
     private EventManager eventManager;
 
+    private RoomTypeManager roomTypeManager;
+
     /**
      * 计分相关
      */
@@ -115,40 +116,8 @@ public class StageRoom extends BaseStage {
         this.userService = userService;
         this.mapStarService = mapStarService;
         this.eventManager = new EventManager(this);
+        this.roomTypeManager = new RoomTypeManager(this);
         init();
-    }
-
-    private void initItemPool() {
-        itemTypePool.clear();
-        itemTypePool.addAll(Arrays.asList(ItemType.values()));
-        boolean hasRedStar = false;
-        boolean hasGhost = false;
-        boolean hasClock = false;
-        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-            UserBo user = kv.getValue();
-            if (!hasRedStar && user.hasRedStar()) {
-                hasRedStar = true;
-            }
-            if (!hasGhost && user.hasGhost()) {
-                hasGhost = true;
-            }
-            if (!hasClock && user.hasClock()) {
-                hasClock = true;
-            }
-            if (hasRedStar && hasGhost && hasClock) {
-                break;
-            }
-        }
-
-        if (!hasRedStar) {
-            itemTypePool.remove(ItemType.RED_STAR);
-        }
-        if (!hasGhost) {
-            itemTypePool.remove(ItemType.GHOST);
-        }
-        if (!hasClock) {
-            itemTypePool.remove(ItemType.CLOCK);
-        }
     }
 
     public RoomDto toDto() {
@@ -169,7 +138,7 @@ public class StageRoom extends BaseStage {
         this.removeBulletIds.clear();
         this.syncTankList.clear();
 
-        initItemPool();
+        this.roomTypeManager.initItemPool();
         this.scoreBo.init();
         this.gameStatus.init();
         this.eventManager.init();
@@ -992,7 +961,7 @@ public class StageRoom extends BaseStage {
         sendStatusAndMessage(userBo, false);
 
         addPlayerLifeForNewComer(userBo.getTeamType());
-        initItemPool();
+        roomTypeManager.initItemPool();
 
         //发送场景信息
         sendMessageToUser(getMapBo().toDto(), MessageType.MAP, userBo.getUsername());
