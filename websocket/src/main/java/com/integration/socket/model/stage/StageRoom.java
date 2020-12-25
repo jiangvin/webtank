@@ -6,7 +6,6 @@ import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
 import com.integration.dto.map.OrientationType;
 import com.integration.dto.message.MessageType;
-import com.integration.dto.room.GameStatusDto;
 import com.integration.dto.room.GameStatusType;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
@@ -22,9 +21,7 @@ import com.integration.socket.model.bo.ScoreBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.model.bot.BaseBotBo;
-import com.integration.socket.model.dto.StarDto;
 import com.integration.socket.model.dto.StringCountDto;
-import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import com.integration.socket.service.MapStarService;
 import com.integration.socket.service.MessageService;
 import com.integration.socket.service.UserService;
@@ -32,7 +29,6 @@ import com.integration.util.CommonUtil;
 import com.integration.util.model.CustomException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -51,7 +47,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StageRoom extends BaseStage {
 
-    private static final int MAX_SUB_ID = 5;
     private static final int DEFAULT_SHIELD_TIME = 20 * 60;
 
     Map<String, ItemBo> itemMap = new ConcurrentHashMap<>();
@@ -80,11 +75,11 @@ public class StageRoom extends BaseStage {
     @Getter
     private String roomId;
 
-    private boolean hardMode;
+    boolean hardMode;
 
-    private UserBo creator;
+    UserBo creator;
 
-    private MapMangerBo mapManger;
+    MapMangerBo mapManger;
 
     private EventManager eventManager;
 
@@ -93,9 +88,9 @@ public class StageRoom extends BaseStage {
     /**
      * 计分相关
      */
-    private ScoreBo scoreBo = new ScoreBo();
-    private UserService userService;
-    private MapStarService mapStarService;
+    ScoreBo scoreBo = new ScoreBo();
+    UserService userService;
+    MapStarService mapStarService;
 
     /**
      * 道具池
@@ -144,23 +139,11 @@ public class StageRoom extends BaseStage {
         this.eventManager.init();
     }
 
-    private int saveTankType() {
-        this.tankStatusSaveMap.clear();
-        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            TankBo tankBo = kv.getValue();
-            if (tankBo.isBot()) {
-                continue;
-            }
-            this.tankStatusSaveMap.put(tankBo.getUserId(), tankBo);
-        }
-        return this.tankStatusSaveMap.size();
-    }
-
-    private int getMapId() {
+    int getMapId() {
         return mapManger.getMapId();
     }
 
-    private int getSubId() {
+    int getSubId() {
         return mapManger.getSubId();
     }
 
@@ -679,12 +662,9 @@ public class StageRoom extends BaseStage {
     }
 
     private void processGameOver(TeamType winTeam) {
-        if (getRoomType() == RoomType.PVE && !processGameOverPve(winTeam)) {
-            return;
-        } else if (getRoomType() != RoomType.PVE && !processGameOverPvp(winTeam)) {
+        if (!roomTypeManager.processGameOver(winTeam)) {
             return;
         }
-
         init();
         processNextMapEvent(10, "进入下一关");
     }
@@ -694,7 +674,6 @@ public class StageRoom extends BaseStage {
             String content = String.format("%d秒后%s...", i, tips);
             eventManager.createMessageEvent(content, MessageType.SYSTEM_MESSAGE, (loadSeconds - i) * 60);
         }
-
         int frames = loadSeconds * 60;
 
         //更改关卡信息
@@ -705,100 +684,6 @@ public class StageRoom extends BaseStage {
 
         //加载地图
         eventManager.createLoadMapEvent(frames);
-    }
-
-    private boolean processGameOverPve(TeamType winTeam) {
-        if (winTeam == TeamType.RED) {
-            this.scoreBo.addWinScore(this.hardMode);
-            this.scoreBo.addTotalScore();
-            gameStatus.setScore(this.scoreBo.getTotalScore());
-            gameStatus.setStar(mapStarService.getStarCount(this.scoreBo.getDeadCount()));
-            gameStatus.setRank(userService.getRank(this.scoreBo.getTotalScore()));
-            saveStar();
-
-            int newMapId = getMapId();
-            int newSubId = getSubId();
-            if (newSubId < MAX_SUB_ID) {
-                ++newSubId;
-            } else {
-                ++newMapId;
-                newSubId = 1;
-                saveStage();
-            }
-            int saveLife = saveTankType();
-            if (!mapManger.loadNextMapPve(saveLife, newMapId, newSubId)) {
-                gameStatus.setType(GameStatusType.WIN);
-                userService.saveRankForMultiplePlayers(this.creator, gameStatus);
-            } else {
-                gameStatus.setType(GameStatusType.END);
-            }
-        } else {
-            this.scoreBo.addTotalScore();
-            gameStatus.setScore(this.scoreBo.getTotalScore());
-            gameStatus.setRank(userService.getRank(this.scoreBo.getTotalScore()));
-            gameStatus.setType(GameStatusType.LOSE);
-            userService.saveRankForMultiplePlayers(this.creator, gameStatus);
-        }
-        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
-
-        return gameStatus.getType() == GameStatusType.END;
-    }
-
-    /**
-     * 保持通关记录
-     */
-    private void saveStage() {
-        UserRecord userRecord = creator.getUserRecord();
-        if (userRecord == null) {
-            return;
-        }
-
-        if (hardMode) {
-            if (userRecord.getHardStage() == getMapId()) {
-                userRecord.setHardStage(getMapId() + 1);
-            }
-        } else {
-            if (userRecord.getStage() == getMapId()) {
-                userRecord.setStage(getMapId() + 1);
-                if (userRecord.getHardStage() == 0) {
-                    userRecord.setHardStage(1);
-                }
-            }
-        }
-        userRecord.update();
-    }
-
-    private void saveStar() {
-        StarDto starDto = new StarDto();
-        starDto.setHardMode(hardMode);
-        starDto.setMapId(getMapId());
-        starDto.setSubId(getSubId());
-        starDto.setStar(gameStatus.getStar());
-        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-            UserBo user = kv.getValue();
-            if (StringUtils.isEmpty(user.getUserId())) {
-                continue;
-            }
-            starDto.setUserId(user.getUserId());
-            userService.saveStarForMultiplePlayers(starDto);
-        }
-    }
-
-    private boolean processGameOverPvp(TeamType winTeam) {
-        userMap.forEach((key, value) -> {
-            if (value.getTeamType() == winTeam) {
-                sendMessageToUser(new GameStatusDto(GameStatusType.END), MessageType.GAME_STATUS, value.getUsername());
-            } else {
-                sendMessageToUser(new GameStatusDto(GameStatusType.LOSE_PVP), MessageType.GAME_STATUS, value.getUsername());
-            }
-        });
-
-        if (!mapManger.loadRandomMapPvp()) {
-            gameStatus.setType(GameStatusType.WIN);
-        } else {
-            gameStatus.setType(GameStatusType.END);
-        }
-        return gameStatus.getType() == GameStatusType.END;
     }
 
     private void changeMap(String key, MapUnitType type) {
