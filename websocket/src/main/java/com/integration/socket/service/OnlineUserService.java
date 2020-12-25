@@ -25,7 +25,7 @@ public class OnlineUserService {
     /**
      * 缓存新用户，当用户返回ready消息时才放入game中
      */
-    private ConcurrentHashMap <String, UserBo> newUserCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, UserBo> newUserCache = new ConcurrentHashMap<>();
 
     @Autowired
     private UserDao userDao;

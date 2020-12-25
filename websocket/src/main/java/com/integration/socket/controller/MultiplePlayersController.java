@@ -31,16 +31,21 @@ public class MultiplePlayersController {
     @Autowired
     private RoomService roomService;
 
-    @GetMapping("/getUserId")
-    public String getUserId(@RequestParam(value = "userId") String userId) {
-        if (!onlineUserService.exists(userId)) {
-            return userId;
+    /**
+     * 获得用户的连接名
+     * @param name
+     * @return
+     */
+    @GetMapping("/getConnectName")
+    public String getNetName(@RequestParam(value = "name") String name) {
+        if (!onlineUserService.exists(name)) {
+            return name;
         }
 
         for (int i = NAME_START; i <= NAME_LIMIT; ++i) {
-            String newId = String.format("%s(%d)", userId, i);
-            if (!onlineUserService.exists(newId)) {
-                return newId;
+            String newName = String.format("%s(%d)", name, i);
+            if (!onlineUserService.exists(newName)) {
+                return newName;
             }
         }
 

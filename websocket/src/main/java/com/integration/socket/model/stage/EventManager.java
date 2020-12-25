@@ -31,6 +31,48 @@ import java.util.Random;
  * @date 2020/12/24
  */
 class EventManager {
+
+    private abstract static class BaseEvent {
+        private int timeout;
+        private int refreshTimeout;
+        private int refreshIncrease;
+        private boolean isLoop = false;
+
+        BaseEvent(int timeout) {
+            this.timeout = timeout;
+        }
+
+        BaseEvent(int timeout, int increase) {
+            this.isLoop = true;
+            this.refreshTimeout = timeout;
+            this.refreshIncrease = increase;
+            this.timeout = timeout;
+        }
+
+        boolean update() {
+            if (timeout > 0) {
+                --timeout;
+                return false;
+            }
+
+            process();
+            if (isLoop) {
+                refresh();
+            }
+            return !isLoop;
+        }
+
+        private void refresh() {
+            refreshTimeout += refreshIncrease;
+            timeout = refreshTimeout;
+        }
+
+        /**
+         * 具体事件的运行的逻辑
+         */
+        abstract void process();
+    }
+
     private static final int MAX_ITEM_LIMIT = 3;
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
     private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
