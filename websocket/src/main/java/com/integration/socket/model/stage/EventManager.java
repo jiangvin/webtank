@@ -34,6 +34,7 @@ class EventManager {
     private static final int MAX_ITEM_LIMIT = 3;
     private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
     private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
+    private static final int DEFAULT_CREATE_TIMEOUT_FOR_TANK = 3 * 60;
 
     private StageRoom room;
     private List<BaseEvent> eventList = new ArrayList<>();
@@ -199,7 +200,7 @@ class EventManager {
                 room.gameStatus.setType(GameStatusType.NORMAL);
                 room.sendMessageToRoom(room.gameStatus, MessageType.GAME_STATUS);
 
-                int timeout = 3 * 60;
+                int timeout = DEFAULT_CREATE_TIMEOUT_FOR_TANK;
 
                 //陆续出现坦克
                 for (Map.Entry<String, UserBo> kv : room.userMap.entrySet()) {
@@ -213,11 +214,11 @@ class EventManager {
     }
 
     void createTankEvent(UserBo user) {
-        createTankEvent(user, 3 * 60);
+        createTankEvent(user, DEFAULT_CREATE_TIMEOUT_FOR_TANK);
     }
 
     void createTankEvent(UserBo user, String tankId) {
-        this.eventList.add(newCreateTankEvent(user, tankId, 3 * 60));
+        this.eventList.add(newCreateTankEvent(user, tankId, DEFAULT_CREATE_TIMEOUT_FOR_TANK));
     }
 
     private int createTankEvent(UserBo user, int timeout) {
