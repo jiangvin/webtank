@@ -1,7 +1,6 @@
 package com.integration.socket.service;
 
 import com.integration.dto.message.MessageDto;
-import com.integration.socket.model.bo.SocketUserBo;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -49,13 +48,6 @@ public class MessageService {
             return;
         }
 
-        try {
-            if (userBo instanceof SocketUserBo) {
-                SocketUserBo socketUserBo = (SocketUserBo) userBo;
-                socketUserBo.sendMessage(messageDto);
-            }
-        } catch (Exception e) {
-            log.error("catch send user:{} message error:", userBo.getUsername(), e);
-        }
+        userBo.sendMessage(messageDto);
     }
 }

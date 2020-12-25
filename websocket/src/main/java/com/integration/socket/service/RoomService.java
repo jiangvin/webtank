@@ -89,10 +89,6 @@ public class RoomService {
             throw new CustomException("房间名重复:" + roomDto.getRoomId());
         }
 
-        if (!StringUtils.isEmpty(creator.getRoomId())) {
-            throw new CustomException("用户正在其他房间中");
-        }
-
         if (roomDto.getRoomType() == null) {
             throw new CustomException("房间类型不能为空");
         }

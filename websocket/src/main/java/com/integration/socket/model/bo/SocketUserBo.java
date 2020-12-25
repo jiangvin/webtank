@@ -2,6 +2,7 @@ package com.integration.socket.model.bo;
 
 import com.integration.dto.message.MessageDto;
 import com.integration.util.object.ObjectUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.websocket.Session;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.net.URLDecoder;
  * @date 2020/5/29
  */
 
+@Slf4j
 public class SocketUserBo extends UserBo {
 
     private static final String USER_NAME_PREFIX = "name=";
@@ -27,14 +29,24 @@ public class SocketUserBo extends UserBo {
         this.setUserId(userId);
     }
 
-    public void sendMessage(MessageDto messageDto) throws IOException {
-        synchronized (session) {
-            session.getBasicRemote().sendText(ObjectUtil.writeValue(messageDto));
+    @Override
+    public void sendMessage(MessageDto messageDto) {
+        try {
+            synchronized (session) {
+                session.getBasicRemote().sendText(ObjectUtil.writeValue(messageDto));
+            }
+        } catch (IOException e) {
+            log.error("catch send user:{} message error:", getUsername(), e);
         }
     }
 
-    public void disconnect() throws IOException {
-        session.close();
+    @Override
+    public void disconnect() {
+        try {
+            session.close();
+        } catch (IOException e) {
+            log.error("catch send user:{} close error:", getUsername(), e);
+        }
     }
 
     private static String getQueryParam(String name, String[] queryInfos) throws UnsupportedEncodingException {
