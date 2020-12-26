@@ -6,6 +6,7 @@
 
 import Resource from "./resource.js";
 import Common from "./common.js";
+import Status from "./status.js";
 
 export default class Control {
 
@@ -204,13 +205,6 @@ export default class Control {
             return;
         }
 
-        //talk
-        // distance = Common.distance(x, y, controlMode.talkCenterX, controlMode.talkCenterY);
-        // if (distance < controlMode.talkRadius) {
-        //     Adapter.inputMessageEvent(false);
-        //     return;
-        // }
-
         //way
         //如果已经在触控方向盘则不做额外触控操作
         if (controlMode.touchX && controlMode.touchY) {
@@ -301,10 +295,6 @@ export default class Control {
         thisControl.controlMode.rightCenterX = rightCenterX;
         thisControl.controlMode.rightCenterY = rightCenterY;
         thisControl.controlMode.rightRadius = rightRadius;
-
-        // thisControl.controlMode.talkRadius = 37;
-        // thisControl.controlMode.talkCenterX = Resource.width() - 61;
-        // thisControl.controlMode.talkCenterY = 92;
     };
 
     static draw(ctx) {
@@ -333,6 +323,10 @@ export default class Control {
             control2.width, control2.height,
             x - centerRadius, y - centerRadius,
             centerRadius * 2, centerRadius * 2);
+
+        if (!Status.isGaming()) {
+            return;
+        }
 
         //右圆
         const fire = Resource.getOrCreateImage("fire");

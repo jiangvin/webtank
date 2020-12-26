@@ -1,6 +1,7 @@
 import Resource from "../../../tool/resource.js";
 import Status from "../../../tool/status.js";
 import Confirm from "../../confirm.js";
+import Sound from "../../../tool/sound.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -26,12 +27,14 @@ export default class Manager {
                 h: 100
             },
             needOffset: false,
+            hasSound: false,
             callBack: function () {
                 //返回主菜单(暂停状态不能返回)
                 if (!Status.isGaming()) {
                     return;
                 }
 
+                Sound.click();
                 new Confirm(
                     thisRoom,
                     "返回主菜单",
@@ -94,6 +97,10 @@ export default class Manager {
     }
 
     drawBackButton(ctx) {
+        if (!Status.isGaming()) {
+            return;
+        }
+
         const back = Resource.getImage("back");
         ctx.drawImage(
             back,
