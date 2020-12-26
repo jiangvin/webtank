@@ -214,7 +214,10 @@ export default class Root {
     }
 
     drawTips(ctx) {
-        //版权信息
+        if (!Resource.isDebug()) {
+            return;
+        }
+
         ctx.font = '28px Helvetica';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'bottom';
