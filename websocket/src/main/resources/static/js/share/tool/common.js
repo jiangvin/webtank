@@ -148,6 +148,33 @@ export default class Common {
     }
 }
 
+CanvasRenderingContext2D.prototype.fillRoundRect = function (x, y, w, h, radius) {
+    this.beginPath();
+
+    //右下角
+    this.arc(x + w - radius, y + h - radius, radius,
+        0, Math.PI / 2);
+    this.lineTo(x + radius, y + h);
+
+    //左下角
+    this.arc(x + radius, y + h - radius, radius,
+        Math.PI / 2, Math.PI);
+    this.lineTo(x, y + radius);
+
+    //左上角
+    this.arc(x + radius, y + radius, radius,
+        Math.PI, Math.PI * 3 / 2);
+    this.lineTo(x + w - radius, y);
+
+    //右上角
+    this.arc(x + w - radius, y + radius, radius,
+        - Math.PI / 2, 0);
+    this.lineTo(x + w, y + h - radius);
+    this.closePath();
+    this.fill();
+    this.restore();
+};
+
 CanvasRenderingContext2D.prototype.displayCenter = function (imageId, x, y, w, h) {
     this.displayBase(imageId, x, y, w, h, "center");
 };
