@@ -419,7 +419,7 @@ export default class Shop extends Stage {
         }
 
         new NewConfirm(this,
-            "是否确定花费金币" + item.price + "购买" + item.title + "?",
+            ["是否确定花费金币" + item.price + "购买" + item.title + "?"],
             () => {
                 Common.postEncrypt("/shop/buyWithCoin", {
                     userId: Resource.getUser().deviceId,

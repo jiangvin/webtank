@@ -1,7 +1,7 @@
 import Resource from "../../../tool/resource.js";
 import Status from "../../../tool/status.js";
-import Confirm from "../../confirm.js";
 import Sound from "../../../tool/sound.js";
+import NewConfirm from "../../newconfirm.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -35,10 +35,12 @@ export default class Manager {
                 }
 
                 Sound.click();
-                new Confirm(
+                new NewConfirm(
                     thisRoom,
-                    "返回主菜单",
-                    ["返回主菜单将不会获得任何积分和金币，确定要返回吗？"],
+                    [
+                        "返回主菜单将不会获得任何积分和金币",
+                        "确定要返回吗？"
+                    ],
                     function () {
                         Resource.getRoot().gotoStage("menu");
                     });

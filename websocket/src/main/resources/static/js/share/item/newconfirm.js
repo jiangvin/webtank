@@ -6,9 +6,9 @@
 import Resource from "../tool/resource.js";
 
 export default class NewConfirm {
-    constructor(stage, text, callback) {
+    constructor(stage, textList, callback) {
         this.stage = stage;
-        this.text = text;
+        this.textList = textList;
         this.callback = callback;
         this.init();
     }
@@ -17,6 +17,8 @@ export default class NewConfirm {
         //缓存，清空所有按钮事件
         this.cacheUnits = this.stage.controlUnits;
         this.stage.controlUnits = new Map();
+
+        this.textInterval = 55;
 
         this.stage.createItem({
             id: "confirm_rect",
@@ -39,9 +41,14 @@ export default class NewConfirm {
                 ctx.font = '40px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(this.text,
-                    952 + Resource.getOffset().x,
-                    485 + Resource.getOffset().y);
+
+                let y = 485;
+                this.textList.forEach(text => {
+                    ctx.fillText(text,
+                        952 + Resource.getOffset().x,
+                        y + Resource.getOffset().y);
+                    y += this.textInterval;
+                });
             }
         });
 
