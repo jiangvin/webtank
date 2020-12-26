@@ -143,8 +143,17 @@ export default class Index {
         const height = document.documentElement.clientHeight;
         const scale = Resource.calculateScale(width, height);
 
-        const newWidth = Math.round(width / scale);
-        const newHeight = Math.round(height / scale);
+        let newWidth = Math.round(width / scale);
+        let newHeight = Math.round(height / scale);
+
+        //减小精度误差
+        if (Math.abs(newWidth - Resource.displayW()) < 2) {
+            newWidth = Resource.displayW();
+        }
+        if (Math.abs(newHeight - Resource.displayH()) < 2) {
+            newHeight = Resource.displayH();
+        }
+        
         let style = "";
         //变形的中心点为左上角
         style += "-webkit-transform-origin: 0 0;";
