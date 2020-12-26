@@ -85,6 +85,7 @@ export default class NetList extends Stage {
         for (let i = 0; i < 5; ++i) {
             this.removeItemFromId("button_" + i);
         }
+        this.removeItemFromId("room_list");
     }
 
     loadRoomList() {
@@ -130,6 +131,8 @@ export default class NetList extends Stage {
                                 const roomInfo = new RoomInfo(true);
                                 roomInfo.roomId = room.roomId;
                                 roomInfo.roomType = room.roomType;
+                                roomInfo.mapId = room.mapId;
+                                roomInfo.subId = room.subId;
                                 roomInfo.joinRoom = true;
                                 if (room.roomType === "PVE") {
                                     //闯关模式
