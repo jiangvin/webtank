@@ -93,6 +93,10 @@ export default class Shop extends Stage {
                 title: "幽灵",
                 imageId: "item_ghost",
                 price: 10,
+                hasBuy: () => {
+                    return Resource.getUser().hasGhost();
+                },
+                buyType: "GHOST",
                 text: [
                     "游戏中会随机出现幽灵道具",
                     "效果：使你的坦克变成半透明",
@@ -104,6 +108,10 @@ export default class Shop extends Stage {
                 title: "定时器",
                 imageId: "item_clock",
                 price: 18,
+                hasBuy: () => {
+                    return Resource.getUser().hasClock();
+                },
+                buyType: "CLOCK",
                 text: [
                     "游戏中会随机出现定时器道具",
                     "效果：使敌方所有坦克15秒内",
@@ -115,6 +123,10 @@ export default class Shop extends Stage {
                 title: "红星",
                 imageId: "item_red_star",
                 price: 20,
+                hasBuy: () => {
+                    return Resource.getUser().hasRedStar();
+                },
+                buyType: "RED_STAR",
                 text: [
                     "游戏中会随机出现红星道具",
                     "效果：使你的坦克直接升至四",
@@ -127,6 +139,10 @@ export default class Shop extends Stage {
                 imageId: "tank02",
                 imageIndex: 3,
                 price: 35,
+                buyType: "TANK02",
+                hasBuy: () => {
+                    return Resource.getUser().getTankType() === "tank02";
+                },
                 text: [
                     "效果：使你的坦克初始状态为",
                     "二星坦克",
@@ -138,6 +154,10 @@ export default class Shop extends Stage {
                 imageId: "tank03",
                 imageIndex: 3,
                 price: 50,
+                buyType: "TANK03",
+                hasBuy: () => {
+                    return Resource.getUser().getTankType() === "tank03";
+                },
                 text: [
                     "效果：使你的坦克初始状态为",
                     "三星坦克",
@@ -234,7 +254,10 @@ export default class Shop extends Stage {
     initShopButtonControl() {
         this.shopItems.forEach(item => {
             item.control = this.createControl({
-                needOffset: false
+                needOffset: false,
+                callBack: () => {
+                    this.buy(item.buyType);
+                }
             })
         })
     }
@@ -254,7 +277,9 @@ export default class Shop extends Stage {
             control.rightBottom.x = control.leftTop.x + this.itemInfo.buttonWidth;
             control.rightBottom.y = control.leftTop.y + this.itemInfo.buttonHeight;
 
-            if (control.rightBottom.x > Resource.displayW() - 80 + Resource.getOffset().x) {
+            if (this.shopItems[i].hasBuy()) {
+                control.enable = false;
+            } else if (control.rightBottom.x > Resource.displayW() - 80 + Resource.getOffset().x) {
                 control.enable = false;
             } else control.enable = control.leftTop.x >= 80 + Resource.getOffset().x;
         }
@@ -338,32 +363,61 @@ export default class Shop extends Stage {
     }
 
     drawItemButton(ctx, x, y, i) {
-        const image = Resource.getImage("shop_button");
-        ctx.drawImage(
-            image,
-            0, 0,
-            image.width, image.height,
-            x + this.itemInfo.w / 2 - this.itemInfo.buttonWidth / 2,
-            y + 460 - this.itemInfo.buttonHeight / 2,
-            this.itemInfo.buttonWidth, this.itemInfo.buttonHeight);
+        const item = this.shopItems[i];
 
-        const gold = Resource.getImage("gold");
-        ctx.drawImage(
-            gold,
-            0, 0,
-            gold.width, gold.height,
-            x + this.itemInfo.w / 2 - 100,
-            y + 420,
-            70, 70
-        );
-
-        const price = this.shopItems[i].price;
         ctx.font = 'bold 50px Arial';
         ctx.strokeStyle = '#7b642f';
-        ctx.strokeText(price, x + this.itemInfo.w / 2 + 20, y + 460);
         ctx.fillStyle = '#f7f3df';
-        ctx.fillText(price, x + this.itemInfo.w / 2 + 20, y + 460);
 
+        if (item.hasBuy()) {
+            const image = Resource.getImage("shop_button_disable");
+            ctx.drawImage(
+                image,
+                0, 0,
+                image.width, image.height,
+                x + this.itemInfo.w / 2 - this.itemInfo.buttonWidth / 2,
+                y + 460 - this.itemInfo.buttonHeight / 2,
+                this.itemInfo.buttonWidth, this.itemInfo.buttonHeight);
+            const tips = "已购买";
+            ctx.strokeText(tips, x + this.itemInfo.w / 2, y + 460);
+            ctx.fillText(tips, x + this.itemInfo.w / 2, y + 460);
+
+        } else {
+            const image = Resource.getImage("shop_button");
+            ctx.drawImage(
+                image,
+                0, 0,
+                image.width, image.height,
+                x + this.itemInfo.w / 2 - this.itemInfo.buttonWidth / 2,
+                y + 460 - this.itemInfo.buttonHeight / 2,
+                this.itemInfo.buttonWidth, this.itemInfo.buttonHeight);
+
+            const gold = Resource.getImage("gold");
+            ctx.drawImage(
+                gold,
+                0, 0,
+                gold.width, gold.height,
+                x + this.itemInfo.w / 2 - 100,
+                y + 420,
+                70, 70
+            );
+
+            const price = item.price;
+            ctx.strokeText(price, x + this.itemInfo.w / 2 + 20, y + 460);
+            ctx.fillText(price, x + this.itemInfo.w / 2 + 20, y + 460);
+
+        }
+    }
+
+    buy(type) {
+        Common.postEncrypt("/shop/buyWithCoin", {
+            userId: Resource.getUser().deviceId,
+            buyType: type
+        }, data => {
+            Resource.setUser(data);
+            Common.addMessage("购买成功!", '#FF0');
+            this.updateShopButtonControlStatus();
+        });
     }
 
     getId() {

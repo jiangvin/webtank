@@ -199,6 +199,7 @@ export default class Resource {
     loadShopResource() {
         this.loadImage("shop_background", "shop/background");
         this.loadImage("shop_button", "shop/button");
+        this.loadImage("shop_button_disable", "shop/button_disable");
     }
 
     loadAnimationImage(imageId, widthPics, type) {
