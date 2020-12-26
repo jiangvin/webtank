@@ -9,6 +9,8 @@ import Resource from "../tool/resource.js";
 import ControlUnit from "../item/controlunit.js";
 import Common from "../tool/common.js";
 import Control from "../tool/control.js";
+import NewConfirm from "../item/newconfirm.js";
+import Tip from "../item/tip.js";
 
 export default class Shop extends Stage {
     constructor() {
@@ -256,7 +258,7 @@ export default class Shop extends Stage {
             item.control = this.createControl({
                 needOffset: false,
                 callBack: () => {
-                    this.buy(item.buyType);
+                    this.buy(item);
                 }
             })
         })
@@ -410,15 +412,24 @@ export default class Shop extends Stage {
         }
     }
 
-    buy(type) {
-        Common.postEncrypt("/shop/buyWithCoin", {
-            userId: Resource.getUser().deviceId,
-            buyType: type
-        }, data => {
-            Resource.setUser(data);
-            Common.addMessage("购买成功!", '#FF0');
-            this.updateShopButtonControlStatus();
-        });
+    buy(item) {
+        if (Resource.getUser().coin < item.price) {
+            new Tip(this, "金币不足!");
+            return;
+        }
+
+        new NewConfirm(this,
+            "是否确定花费金币" + item.price + "购买" + item.title + "?",
+            () => {
+                Common.postEncrypt("/shop/buyWithCoin", {
+                    userId: Resource.getUser().deviceId,
+                    buyType: item.buyType
+                }, data => {
+                    Resource.setUser(data);
+                    this.updateShopButtonControlStatus();
+                    new Tip(this, "购买成功!");
+                });
+            });
     }
 
     getId() {

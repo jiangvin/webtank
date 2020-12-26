@@ -63,6 +63,7 @@ export default class Resource {
 
         //menu
         this.loadAnimationImage("button", 1);
+        this.loadAnimationImage("confirm");
 
         //other
         this.loadAnimationImage("star");
