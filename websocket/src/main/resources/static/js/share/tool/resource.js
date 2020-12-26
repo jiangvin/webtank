@@ -39,6 +39,9 @@ export default class Resource {
         //net
         this.loadNetResource();
 
+        //shop
+        this.loadShopResource();
+
         //rank board
         this.loadAnimationImage("rank_board", 1, "jpg");
         this.loadAnimationImage("button_next");
@@ -64,6 +67,7 @@ export default class Resource {
 
         //other
         this.loadAnimationImage("star");
+        this.loadAnimationImage("gold");
     }
 
     loadMenuResource() {
@@ -122,7 +126,6 @@ export default class Resource {
         this.loadImage("player_life", "room/player_life");
         this.loadImage("enemy_life", "room/enemy_life");
         this.loadImage("room_stage", "room/stage");
-        this.loadImage("room_gold", "room/gold");
         this.loadImage("room", "room/room");
         this.loadImage("room_rect", "room/rect");
 
@@ -191,6 +194,11 @@ export default class Resource {
             this.loadImage("red_tank" + id, "room/tank/red/" + id, "png", 4);
             this.loadImage("blue_tank" + id, "room/tank/blue/" + id, "png", 4);
         }
+    }
+
+    loadShopResource() {
+        this.loadImage("shop_background", "shop/background");
+        this.loadImage("shop_button", "shop/button");
     }
 
     loadAnimationImage(imageId, widthPics, type) {

@@ -43,6 +43,10 @@ export default class Menu extends Stage {
             }
         });
 
+        this.initButton();
+    }
+
+    initButton() {
         //排行榜打开按钮
         const buttonOpenRankBoard = new ControlUnit(
             Resource.generateClientId(),
@@ -53,6 +57,17 @@ export default class Menu extends Stage {
             }
         );
         this.controlUnits.set(buttonOpenRankBoard.id, buttonOpenRankBoard);
+
+        //商店
+        const buttonOpenShop = new ControlUnit(
+            Resource.generateClientId(),
+            {x: 1567, y: 793},
+            {x: 1760, y: 1036},
+            function () {
+                Common.gotoStage("shop");
+            }
+        );
+        this.controlUnits.set(buttonOpenShop.id, buttonOpenShop);
     }
 
     createBullet() {

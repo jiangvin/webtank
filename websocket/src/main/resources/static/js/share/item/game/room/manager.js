@@ -53,7 +53,7 @@ export default class Manager {
             Resource.getImage("room_stage"),
             Resource.getImage("player_life"),
             Resource.getImage("enemy_life"),
-            Resource.getImage("room_gold"),
+            Resource.getImage("gold"),
             Resource.getImage("room")
         ];
         const infos = [

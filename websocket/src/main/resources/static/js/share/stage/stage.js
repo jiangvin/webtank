@@ -40,6 +40,9 @@ export default class Stage {
         ctx.lineWidth = 4;
         ctx.strokeStyle = '#F00';
         this.controlUnits.forEach(function (unit) {
+            if (!unit.enable) {
+                return;
+            }
             const leftTop = unit.getLeftTop();
             const rightBottom = unit.getRightBottom();
             ctx.strokeRect(
@@ -52,6 +55,9 @@ export default class Stage {
 
     processPointDownEvent(point) {
         for (let [, value] of this.controlUnits) {
+            if (!value.enable) {
+                continue;
+            }
             if (value.process(point)) {
                 break;
             }

@@ -13,12 +13,15 @@ export default class ControlUnit {
         this.leftTop = leftTop;
         this.rightBottom = rightBottom;
         this.callBack = callBack;
+        this.hasSound = true;
 
         /**
          * 是否根据16:9的画面做偏移
          * @type {boolean}
          */
         this.needOffset = true;
+
+        this.enable = true;
     }
 
     process(point) {
@@ -29,8 +32,10 @@ export default class ControlUnit {
             point.x <= rightBottom.x &&
             point.y >= leftTop.y &&
             point.y <= rightBottom.y) {
-            Sound.click();
-            this.callBack();
+            this.callBack(point);
+            if (this.hasSound) {
+                Sound.click();
+            }
             return true;
         } else {
             return false;

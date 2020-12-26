@@ -16,6 +16,7 @@ import Room from "./stage/room.js";
 import Mission from "./stage/mission.js";
 import NetList from "./stage/netlist.js";
 import NetCreate from "./stage/netcreate.js";
+import Shop from "./stage/shop.js";
 
 export default class Root {
     constructor() {
@@ -71,6 +72,7 @@ export default class Root {
         this.addStage(new Room());
         this.addStage(new NetList());
         this.addStage(new NetCreate());
+        this.addStage(new Shop());
     }
 
     addStage(stage) {
