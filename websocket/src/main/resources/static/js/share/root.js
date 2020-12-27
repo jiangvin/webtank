@@ -20,7 +20,7 @@ import Shop from "./stage/shop.js";
 
 export default class Root {
     constructor() {
-        this.frontFrame = new Frame();
+        this.frame = new Frame();
 
         this.stages = [];
         this.stageIndex = 0;
@@ -146,7 +146,7 @@ export default class Root {
     }
 
     draw(ctx) {
-        this.frontFrame.calculate();
+        this.frame.calculate();
         this.currentStage().draw(ctx);
         this.drawMessage(ctx);
         this.drawTips(ctx);
@@ -225,7 +225,7 @@ export default class Root {
 
         //帧率信息
         ctx.textAlign = 'left';
-        let text = '帧率:' + this.frontFrame.framesPerSecond;
+        let text = '帧率:' + this.frame.framesPerSecond;
         if (this.netDelay) {
             text += ' / 延迟:' + this.netDelay + 'ms';
         }
