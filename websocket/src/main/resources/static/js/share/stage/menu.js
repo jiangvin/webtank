@@ -76,6 +76,12 @@ export default class Menu extends Stage {
 
         this.createItem({
             draw: function (ctx) {
+                bulletMap.forEach(bullet => {
+                    const width = bulletWidth * bullet.scale;
+                    ctx.displayCenter("menu_bullet", bullet.x, bullet.y, width);
+                })
+            },
+            update: function () {
                 //create bullet
                 if (Math.floor(Math.random() * 50) === 0) {
                     const bullet = {
@@ -87,12 +93,11 @@ export default class Menu extends Stage {
                     bulletMap.set(bullet.id, bullet);
                 }
 
-                //draw
+                //move
                 bulletMap.forEach(bullet => {
                     bullet.x -= 20 * bullet.scale;
                     bullet.y -= 20 * bullet.scale;
                     const width = bulletWidth * bullet.scale;
-                    ctx.displayCenter("menu_bullet", bullet.x, bullet.y, width);
                     if (bullet.x <= -width) {
                         bulletMap.delete(bullet.id);
                     }
@@ -103,9 +108,28 @@ export default class Menu extends Stage {
 
     createDoor() {
         const speed = 0.5;
+        const doorSize = {
+            w: 360,
+            h: 400
+        };
 
         this.createItem({
             draw: function (ctx) {
+                const doorStatus = this.stage.doorStatus;
+                ctx.displayTopLeft(
+                    "menu_door_" + Math.floor(doorStatus.indexDoor1),
+                    488,
+                    584,
+                    doorSize.w,
+                    doorSize.h);
+                ctx.displayTopLeft(
+                    "menu_door_" + Math.floor(doorStatus.indexDoor2),
+                    1152,
+                    584,
+                    doorSize.w,
+                    doorSize.h);
+            },
+            update: function () {
                 const doorStatus = this.stage.doorStatus;
                 if (doorStatus.enterDoor1) {
                     if (doorStatus.indexDoor1 < 22) {
@@ -121,24 +145,6 @@ export default class Menu extends Stage {
                         Common.gotoStage("net_list");
                     }
                 }
-
-                const doorSize = {
-                    w: 360,
-                    h: 400
-                };
-
-                ctx.displayTopLeft(
-                    "menu_door_" + Math.floor(doorStatus.indexDoor1),
-                    488,
-                    584,
-                    doorSize.w,
-                    doorSize.h);
-                ctx.displayTopLeft(
-                    "menu_door_" + Math.floor(doorStatus.indexDoor2),
-                    1152,
-                    584,
-                    doorSize.w,
-                    doorSize.h);
             }
         });
 

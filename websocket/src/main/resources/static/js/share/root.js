@@ -103,9 +103,11 @@ export default class Root {
     }
 
     update() {
-        this.updateTimeEvents();
-        this.updateEngine();
-        this.currentStage().update();
+        this.frame.update(() => {
+            this.updateTimeEvents();
+            this.updateEngine();
+            this.currentStage().update();
+        });
     }
 
     updateEngine() {
