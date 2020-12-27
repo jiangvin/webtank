@@ -59,29 +59,7 @@ export default class Common {
     }
 
     static getRequest(url, callBack) {
-        try {
-            const xmlHttp = new XMLHttpRequest();
-            xmlHttp.onreadystatechange = function () {
-                if (xmlHttp.readyState !== 4) {
-                    return;
-                }
-                if (xmlHttp.status !== 200) {
-                    Common.addMessage(xmlHttp.responseText, "#ff0000");
-                    return;
-                }
-
-                const result = JSON.parse(xmlHttp.responseText);
-                if (result.success) {
-                    callBack(result.data);
-                } else {
-                    Common.addMessage(result.message, "#ff0000");
-                }
-            };
-            xmlHttp.open("GET", Common.generateHttpHost() + encodeURI(url), true); // true for asynchronous
-            xmlHttp.send(null);
-        } catch (e) {
-            Common.addMessage(e, "#ff0000");
-        }
+        Resource.instance.adapter.getRequest(url, callBack);
     }
 
     static postEncrypt(url, body, callback) {
@@ -89,32 +67,7 @@ export default class Common {
     }
 
     static postRequest(url, body, callback) {
-        try {
-            const xmlHttp = new XMLHttpRequest();
-            xmlHttp.onreadystatechange = function () {
-                if (xmlHttp.readyState !== 4) {
-                    return;
-                }
-                if (xmlHttp.status !== 200) {
-                    Common.addMessage(xmlHttp.responseText, "#ff0000");
-                    return;
-                }
-
-                const result = JSON.parse(xmlHttp.responseText);
-                if (result.success) {
-                    if (callback) {
-                        callback(result.data);
-                    }
-                } else {
-                    Common.addMessage(result.message, "#ff0000");
-                }
-            };
-            xmlHttp.open("POST", Common.generateHttpHost() + encodeURI(url), true); // true for asynchronous
-            xmlHttp.setRequestHeader('content-type', 'application/json');
-            xmlHttp.send(JSON.stringify(body));
-        } catch (e) {
-            Common.addMessage(e, "#ff0000");
-        }
+        Resource.instance.adapter.postRequest(url, body, callback);
     };
 
     static generateHttpHost() {
@@ -168,7 +121,7 @@ CanvasRenderingContext2D.prototype.fillRoundRect = function (x, y, w, h, radius)
 
     //右上角
     this.arc(x + w - radius, y + radius, radius,
-        - Math.PI / 2, 0);
+        -Math.PI / 2, 0);
     this.lineTo(x + w, y + h - radius);
     this.closePath();
     this.fill();

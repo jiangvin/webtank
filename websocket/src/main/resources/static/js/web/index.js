@@ -5,13 +5,13 @@
  */
 
 import Resource from "../share/tool/resource.js";
-import Home from "../web/home.js"
 import Control from "../share/tool/control.js";
 import Root from "../share/root.js";
-import Adapter from "../share/tool/adapter.js";
-import Common from "../share/tool/common.js";
-import AppHome from "../app/apphome.js";
+import AdapterManager from "../share/tool/adapter/adapterManager.js";
 import Loading from "./loading.js";
+import AppHome from "../app/apphome.js";
+import Home from "./home.js";
+import Common from "../share/tool/common.js";
 
 export default class Index {
     constructor() {
@@ -24,36 +24,56 @@ export default class Index {
         this.root = new Root();
         Resource.setRoot(this.root);
 
-        const debug = Adapter.getQueryString("debug");
+        const debug = AdapterManager.getQueryString("debug");
         if (debug) {
             Resource.setDebug(debug);
             this.initTouchDebug();
         }
 
-        if (Adapter.isApp()) {
-            Control.setControlMode(true);
-            Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
-                if (data) {
-                    //旧用户
-                    Resource.setUser(data);
+        this.initGame();
+    }
 
-                    this.root.addStage(new Loading());
-                    this.root.addGameStage();
+    initGame() {
+        AdapterManager.checkPlatform();
+        switch (AdapterManager.getPlatform()) {
+            case "android":
+                Control.setControlMode(true);
+                Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
+                    if (data) {
+                        //旧用户
+                        Resource.setUser(data);
+                        Resource.getRoot().addStage(new Loading());
+                        Resource.getRoot().addGameStage();
+                    } else {
+                        //新用户
+                        Resource.getRoot().addStage(new Loading());
+                        Resource.getRoot().addStage(new AppHome());
+                        Resource.getRoot().addGameStage();
+                    }
                     this.start();
-                } else {
-                    //新用户
-                    this.root.addStage(new Loading());
-                    this.root.addStage(new AppHome());
-                    this.root.addGameStage();
+                });
+                break;
+            case "ios":
+                Control.setControlMode(true);
+                Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
+                    if (data) {
+                        //旧用户
+                        Resource.setUser(data);
+                        Resource.getRoot().addGameStage();
+                    } else {
+                        //新用户
+                        Resource.getRoot().addStage(new AppHome());
+                        Resource.getRoot().addGameStage();
+                    }
                     this.start();
-                }
-            })
-        } else {
-            //web
-            this.root.addStage(new Home());
-            this.root.addStage(new Loading());
-            this.root.addGameStage();
-            this.start();
+                });
+                break;
+            default:
+                Resource.getRoot().addStage(new Home());
+                Resource.getRoot().addStage(new Loading());
+                Resource.getRoot().addGameStage();
+                this.start();
+                break;
         }
     }
 
@@ -153,7 +173,7 @@ export default class Index {
         if (Math.abs(newHeight - Resource.displayH()) < 2) {
             newHeight = Resource.displayH();
         }
-        
+
         let style = "";
         //变形的中心点为左上角
         style += "-webkit-transform-origin: 0 0;";

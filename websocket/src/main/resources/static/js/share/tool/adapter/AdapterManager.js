@@ -1,18 +1,19 @@
 /**
  * @author 蒋文龙(Vin)
- * @description 支援微信和网页的差异化开发
+ * @description 支援各平台的差异化开发
  * @date 2020/5/28
  */
-import Connect from "./connect.js";
-import Resource from "./resource.js";
-import WxInput from "../../wx/wxinput.js";
+import Connect from "../connect.js";
+import Resource from "../resource.js";
+import WxInput from "../../../wx/wxinput.js";
+import Adapter from "./Adapter.js";
+import AdapterIos from "./AdapterIos.js";
 
-export default class Adapter {
+export default class AdapterManager {
 
     constructor() {
-
         /**
-         * 0: web, 1: wx, 2:app
+         * 0: web, 1: wx, 2:android, 3:ios
          * @type {number}
          */
         this.platform = 0;
@@ -22,17 +23,41 @@ export default class Adapter {
         this.inputEnable = false;
     }
 
-    static isApp() {
-        const deviceId = Adapter.getQueryString("deviceId");
-        const deviceName = Adapter.getQueryString("deviceName");
+    static checkPlatform() {
+        const deviceId = AdapterManager.getQueryString("deviceId");
+        const deviceName = AdapterManager.getQueryString("deviceName");
+        const platform = AdapterManager.getQueryString("platform");
+
+        //web
         if (deviceId === null || deviceName === null) {
-            return false;
+            AdapterManager.initAdapter();
+            return;
         }
 
         Resource.getUser().deviceId = deviceId;
         Resource.getUser().deviceName = deviceName;
-        Adapter.setPlatform(2);
-        return true;
+        if (platform) {
+            //ios
+            AdapterManager.setPlatform(3);
+        } else {
+            //android
+            AdapterManager.setPlatform(2);
+        }
+
+        AdapterManager.initAdapter();
+    }
+
+    static initAdapter() {
+        Resource.instance.adapter = AdapterManager.generateInstance();
+    }
+
+    static generateInstance() {
+        switch (AdapterManager.getPlatform()) {
+            case "ios":
+                return new AdapterIos();
+            default:
+                return new Adapter();
+        }
     }
 
     static getQueryString(name) {
@@ -48,9 +73,22 @@ export default class Adapter {
         this.instance.platform = platform;
     }
 
+    static getPlatform() {
+        switch (AdapterManager.instance.platform) {
+            case 1:
+                return "wx";
+            case 2:
+                return "android";
+            case 3:
+                return "ios";
+            default:
+                return "web";
+        }
+    }
+
     static initInput() {
         if (this.instance.platform === 0 || this.instance.platform === 2) {
-            Adapter.initInputWeb();
+            AdapterManager.initInputWeb();
         }
     }
 
@@ -62,7 +100,7 @@ export default class Adapter {
         input.addClass("input-message");
         document.addEventListener("keydown", function (e) {
             if (e.key === "Enter") {
-                Adapter.inputMessageEvent(true);
+                AdapterManager.inputMessageEvent(true);
             }
         });
     }
@@ -73,9 +111,9 @@ export default class Adapter {
         }
 
         if (this.instance.platform === 1) {
-            Adapter.inputMessageWxEvent();
+            AdapterManager.inputMessageWxEvent();
         } else {
-            Adapter.inputMessageWebEvent(inputFocus);
+            AdapterManager.inputMessageWebEvent(inputFocus);
         }
     }
 
@@ -98,7 +136,7 @@ export default class Adapter {
 
     static inputMessageWebEvent(inputFocus) {
         const input = $('#input');
-        if (Adapter.instance.inputDisplay) {
+        if (AdapterManager.instance.inputDisplay) {
             //关闭输入框
             //关闭输入框前先处理文字信息
             const text = input.val();
@@ -106,11 +144,11 @@ export default class Adapter {
                 Connect.send("USER_MESSAGE", text);
                 input.val("");
             }
-            Adapter.instance.inputDisplay = false;
+            AdapterManager.instance.inputDisplay = false;
             document.getElementById('input').style.visibility = 'hidden';
         } else {
             //打开输入框
-            Adapter.instance.inputDisplay = true;
+            AdapterManager.instance.inputDisplay = true;
             document.getElementById('input').style.visibility = 'visible';
             if (inputFocus) {
                 input.focus();
@@ -122,10 +160,10 @@ export default class Adapter {
      * room name输入框
      */
     static createInputRoomName(x, y, parent) {
-        if (Adapter.instance.platform === 1) {
-            Adapter.createInputRoomNameWx(x, y, parent);
+        if (AdapterManager.instance.platform === 1) {
+            AdapterManager.createInputRoomNameWx(x, y, parent);
         } else {
-            Adapter.createInputRoomNameWeb(x, y);
+            AdapterManager.createInputRoomNameWeb(x, y);
         }
     }
 
@@ -152,10 +190,10 @@ export default class Adapter {
     }
 
     static getInputRoomName(parent) {
-        if (Adapter.instance.platform === 1) {
-            return Adapter.getInputRoomNameWx(parent);
+        if (AdapterManager.instance.platform === 1) {
+            return AdapterManager.getInputRoomNameWx(parent);
         } else {
-            return Adapter.getInputRoomNameWeb();
+            return AdapterManager.getInputRoomNameWeb();
         }
     }
 
@@ -171,4 +209,4 @@ export default class Adapter {
         return input.text;
     }
 }
-Adapter.instance = new Adapter();
+AdapterManager.instance = new AdapterManager();

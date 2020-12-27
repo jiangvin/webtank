@@ -1,7 +1,7 @@
 import '../share/libs/jsencrypt.min.js'
 import Resource from '../share/tool/resource'
 import Control from "../share/tool/control";
-import Adapter from "../share/tool/adapter";
+import AdapterManager from "../share/tool/adapter/adapterManager.js";
 import Root from "../share/root.js";
 import Sound from "../share/tool/sound.js";
 
@@ -49,7 +49,7 @@ export default class Main {
         canvas.width = width / scale;
         canvas.height = height / scale;
 
-        Adapter.setPlatform(1);
+        AdapterManager.setPlatform(1);
         Control.setControlMode(true);
 
         this.root = new Root();
