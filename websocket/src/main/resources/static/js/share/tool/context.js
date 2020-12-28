@@ -5,11 +5,20 @@ import Resource from "./resource.js";
  * @description
  * @date 2020/12/28
  */
-CanvasRenderingContext2D.prototype.isOffset = true;
-CanvasRenderingContext2D.prototype.isScale = true;
 
-CanvasRenderingContext2D.prototype.fillRoundRect = function (x, y, w, h, radius) {
+CanvasRenderingContext2D.prototype.displayFillRoundRect = function (x, y, w, h, radius) {
     this.beginPath();
+
+    if (Resource.getNeedOffset()) {
+        x += Resource.getOffset().x;
+        y += Resource.getOffset().y;
+    }
+
+    x *= Resource.getScale();
+    y *= Resource.getScale();
+    w *= Resource.getScale();
+    h *= Resource.getScale();
+    radius *= Resource.getScale();
 
     //右下角
     this.arc(x + w - radius, y + h - radius, radius,
@@ -103,16 +112,15 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
         h = w * img.height / img.width;
     }
 
-    if (this.isScale) {
-        x = x * Resource.getScale();
-        y = y * Resource.getScale();
-        w = w * Resource.getScale();
-        h = h * Resource.getScale();
-    }
-    if (this.isOffset) {
+    if (Resource.getNeedOffset()) {
         x = x + Resource.getOffset().x;
         y = y + Resource.getOffset().y;
     }
+
+    x = x * Resource.getScale();
+    y = y * Resource.getScale();
+    w = w * Resource.getScale();
+    h = h * Resource.getScale();
 
     switch (align) {
         case "center":
@@ -133,39 +141,27 @@ CanvasRenderingContext2D.prototype.displayText = function (text, x, y, size, fon
         font = "Arial";
     }
     if (offset === undefined) {
-        offset = this.isOffset;
+        offset = Resource.getNeedOffset();
     }
 
     if (x < 0) {
-        x = Resource.width() + x;
-        if (offset) {
-            x -= Resource.getOffset().x;
-        }
+        x = Resource.formatWidth(!offset) + x;
     } else {
-        if (this.isScale) {
-            x = Math.round(x * Resource.getScale());
-        }
         if (offset) {
             x += Resource.getOffset().x;
         }
     }
     if (y < 0) {
-        y = Resource.height() + y;
-        if (offset) {
-            y -= Resource.getOffset().y;
-        }
+        y = Resource.formatHeight(!offset) + y;
     } else {
-        if (this.isScale) {
-            y = Math.round(y * Resource.getScale());
-        }
         if (offset) {
             y += Resource.getOffset().y;
         }
     }
 
-    if (this.isScale) {
-        size = Math.round(size * Resource.getScale());
-    }
+    x = Math.round(x * Resource.getScale());
+    y = Math.round(y * Resource.getScale());
+    size = Math.round(size * Resource.getScale());
     this.font = bold ? "bold " : " " + size + "px " + font;
     this.fillText(text, x, y);
 };

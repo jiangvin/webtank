@@ -189,9 +189,9 @@ export default class Index {
         //变形的中心点为左上角
         style += "transform-origin: 0 0;";
         if (Resource.getOffset().x) {
-            style += "transform: translateX(" + Resource.getOffset().x + "px)"
+            style += "transform: translateX(" + (Resource.getOffset().x * scale) + "px)"
         } else {
-            style += "transform: translateY(" + Resource.getOffset().y + "px)"
+            style += "transform: translateY(" + (Resource.getOffset().y * scale) + "px)"
         }
         style += " scale(" + scale + ")";
         let main = document.getElementById("main");

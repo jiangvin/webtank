@@ -38,47 +38,36 @@ export default class Loading extends Stage {
                 const width = Resource.formatWidth() * .4;
                 const height = 50;
                 const pos = {
-                    x: Resource.formatWidth() * .5 - width / 2 + Resource.getOffset().x,
-                    y: Resource.formatHeight() * .63 + Resource.getOffset().y
-                };
-
-                const fillRoundRect = function (ctx, x, y, width, height) {
-                    const radio = height / 2;
-
-                    ctx.beginPath();
-                    ctx.arc(x + width, y, radio, -Math.PI / 2, Math.PI / 2);
-                    ctx.lineTo(x, y + radio);
-                    ctx.arc(x, y, radio, Math.PI / 2, Math.PI * 3 / 2);
-                    ctx.lineTo(x + width, y - radio);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.restore();
+                    x: Resource.formatWidth() * .5 - width / 2,
+                    y: Resource.formatHeight() * .6
                 };
 
                 //进度条背景
                 ctx.fillStyle = '#FFF';
-                fillRoundRect(ctx,
+                ctx.displayFillRoundRect(
                     pos.x,
                     pos.y,
                     width,
-                    height);
+                    height,
+                    height / 2);
 
                 //进度条
                 ctx.fillStyle = '#028EE7';
-                fillRoundRect(ctx,
+                ctx.displayFillRoundRect(
                     pos.x,
                     pos.y,
                     width * (thisLoading.percent / 100.0),
-                    height);
+                    height,
+                    height / 2);
 
                 //文字
-                ctx.font = '36px Microsoft YaHei UI';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
                 ctx.fillStyle = '#FFF';
-                ctx.fillText('资源已加载' + thisLoading.percent + '%',
+                ctx.displayText('资源已加载' + thisLoading.percent + '%',
                     pos.x + width / 2,
-                    pos.y + 44);
+                    pos.y + 65,
+                    36);
 
             }
         });

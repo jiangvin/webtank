@@ -29,7 +29,7 @@ export default class Tip {
             draw: ctx => {
                 ctx.globalAlpha = 0.6;
                 ctx.fillStyle = '#000';
-                ctx.fillRoundRect(
+                ctx.displayFillRoundRect(
                     Resource.width() / 2 - size.w / 2,
                     Resource.height() / 2 - size.h / 2,
                     size.w, size.h, 20);

@@ -325,7 +325,7 @@ export default class Shop extends Stage {
         }
 
         ctx.fillStyle = '#f9f0e1';
-        ctx.fillRoundRect(
+        ctx.displayFillRoundRect(
             leftTop.x, leftTop.y,
             this.itemInfo.w,
             this.itemInfo.h,

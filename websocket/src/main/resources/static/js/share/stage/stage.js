@@ -37,7 +37,7 @@ export default class Stage {
         if (!Resource.isDebug()) {
             return;
         }
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 2;
         ctx.strokeStyle = '#F00';
         this.controlUnits.forEach(function (unit) {
             if (!unit.enable) {

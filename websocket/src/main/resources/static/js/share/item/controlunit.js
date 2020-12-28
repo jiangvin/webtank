@@ -19,7 +19,7 @@ export default class ControlUnit {
          * 是否根据16:9的画面做偏移
          * @type {boolean}
          */
-        this.needOffset = true;
+        this.needOffset = Resource.getNeedOffset();
 
         this.enable = true;
     }

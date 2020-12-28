@@ -17,6 +17,7 @@ export default class Resource {
         this.host = "";
         this.debug = false;
         this.encrypt = new JSEncrypt();
+        this.needOffset = true;
         this.encrypt.setPublicKey('MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCGLK2SvOA8W84X/w9IDld7MiO+eEFCCiCeK0czeB+yS2dsQ7FAfReeZrNznJCzJvMwr2RWir/0+xngvyZOcPCM3P1SSYZHUQXzrEGSXTcaqKGvRHEnbWnpsGacccidomfsvHYHHoeCqkprk/rWWoRiAR7HI6riwHQNb0FE/MwukwIDAQAB');
         this.initImage();
     }
@@ -238,6 +239,10 @@ export default class Resource {
         Resource.instance.user.setDebug(debug);
     }
 
+    static getNeedOffset() {
+        return Resource.instance.needOffset;
+    }
+
     static generateClientId() {
         return "generateClientId=" + Resource.instance.itemId++;
     }
@@ -268,8 +273,8 @@ export default class Resource {
         Resource.instance.scale = scaleX > scaleY ? scaleY : scaleX;
 
         Resource.instance.offset = {
-            x: Math.floor((width - Resource.formatWidth() * Resource.getScale()) / 2),
-            y: Math.floor((height - Resource.formatHeight() * Resource.getScale()) / 2)
+            x: Math.floor((width / Resource.getScale() - Resource.formatWidth()) / 2),
+            y: Math.floor((height / Resource.getScale() - Resource.formatHeight()) / 2)
         };
         return Resource.instance.scale;
     }
@@ -282,12 +287,20 @@ export default class Resource {
         return Resource.instance.offset;
     }
 
-    static formatWidth() {
-        return 1920;
+    static formatWidth(full) {
+        if (full) {
+            return Resource.width() / Resource.getScale();
+        } else {
+            return 1920;
+        }
     }
 
-    static formatHeight() {
-        return 1080;
+    static formatHeight(full) {
+        if (full) {
+            return Resource.height() / Resource.getScale();
+        } else {
+            return 1080;
+        }
     }
 
     static width() {
