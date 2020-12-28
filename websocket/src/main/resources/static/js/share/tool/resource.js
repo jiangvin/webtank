@@ -262,23 +262,14 @@ export default class Resource {
         return Resource.instance.encrypt.encrypt(JSON.stringify(object));
     }
 
-    static calculateScale(d1, d2) {
-        let width;
-        let height;
-        if (d1 > d2) {
-            width = d1;
-            height = d2;
-        } else {
-            width = d2;
-            height = d1;
-        }
+    static calculateScale(width, height) {
         let scaleX = width / Resource.formatWidth();
         let scaleY = height / Resource.formatHeight();
         Resource.instance.scale = scaleX > scaleY ? scaleY : scaleX;
 
         Resource.instance.offset = {
-            x: Math.floor((width / Resource.getScale() - Resource.formatWidth()) / 2),
-            y: Math.floor((height / Resource.getScale() - Resource.formatHeight()) / 2)
+            x: Math.floor((width - Resource.formatWidth() * Resource.getScale()) / 2),
+            y: Math.floor((height - Resource.formatHeight() * Resource.getScale()) / 2)
         };
         return Resource.instance.scale;
     }

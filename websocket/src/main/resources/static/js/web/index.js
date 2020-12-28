@@ -12,6 +12,7 @@ import AppHome from "../app/apphome.js";
 import Home from "./home.js";
 import Common from "../share/tool/common.js";
 import AdapterManager from "../share/tool/adapter/AdapterManager.js";
+import "../share/tool/context.js"
 
 export default class Index {
     constructor() {
@@ -157,54 +158,46 @@ export default class Index {
     }
 
     windowChange() {
-        const width = document.documentElement.clientWidth;
-        const height = document.documentElement.clientHeight;
+        const d1 = document.documentElement.clientWidth;
+        const d2 = document.documentElement.clientHeight;
+        const width = d1 > d2 ? d1 : d2;
+        const height = width === d1 ? d2 : d1;
         const scale = Resource.calculateScale(width, height);
-
-        let newWidth = Math.round(width / scale);
-        let newHeight = Math.round(height / scale);
-
-        //减小精度误差
-        if (Math.abs(newWidth - Resource.formatWidth()) < 2) {
-            newWidth = Resource.formatWidth();
-        }
-        if (Math.abs(newHeight - Resource.formatHeight()) < 2) {
-            newHeight = Resource.formatHeight();
-        }
+        this.canvas.width = width;
+        this.canvas.height = height;
 
         let style = "";
         //变形的中心点为左上角
         style += "-webkit-transform-origin: 0 0;";
         style += "transform-origin: 0 0;";
-        if (width >= height) {
+        style += "width:" + width + "px;";
+        style += "height:" + height + "px;";
+        if (d1 >= d2) {
             // 横屏
-            style += "width:" + newWidth + "px;";
-            style += "height:" + newHeight + "px;";
-            style += "-webkit-transform: rotate(0) scale(" + scale + ");";
-            style += "transform: rotate(0) scale(" + scale + ");";
-            this.canvas.width = newWidth;
-            this.canvas.height = newHeight;
+            style += "-webkit-transform: rotate(0);";
+            style += "transform: rotate(0);";
         } else {
             // 竖屏
-            style += "width:" + newHeight + "px;";
-            style += "height:" + newWidth + "px;";
-            style += "-webkit-transform: rotate(90deg) scale(" + scale + ") translate(0px," + -newWidth + "px);";
-            style += "transform: rotate(90deg) scale(" + scale + ") translate(0px," + -newWidth + "px);";
-            this.canvas.width = newHeight;
-            this.canvas.height = newWidth;
+            style += "-webkit-transform: rotate(90deg) translate(0px," + -height + "px);";
+            style += "transform: rotate(90deg) translate(0px," + -height + "px);";
         }
         let wrapper = document.getElementById("wrapper");
         wrapper.style.cssText = style;
 
         //标准窗口的位移偏移
-        let main = document.getElementById("main");
+        style = "";
+        //变形的中心点为左上角
+        style += "transform-origin: 0 0;";
         if (Resource.getOffset().x) {
-            main.style.cssText = "transform: translateX(" + Resource.getOffset().x + "px);"
+            style += "transform: translateX(" + Resource.getOffset().x + "px)"
         } else {
-            main.style.cssText = "transform: translateY(" + Resource.getOffset().y + "px);"
+            style += "transform: translateY(" + Resource.getOffset().y + "px)"
         }
+        style += " scale(" + scale + ")";
+        let main = document.getElementById("main");
+        main.style.cssText = style;
 
-        Control.setPortrait(height > width);
+        Control.setPortrait(d2 > d1);
         //窗口变化时重新计算触控栏位置
         Control.generateTouchModeInfo();
     }

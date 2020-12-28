@@ -225,14 +225,12 @@ export default class Root {
             return;
         }
 
-        ctx.font = '28px Helvetica';
-        ctx.textAlign = 'right';
+        ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
         ctx.fillStyle = '#ffffff';
 
         //帧率信息
-        ctx.textAlign = 'left';
-        let text = "分辨率:" + document.documentElement.clientWidth + "x" + document.documentElement.clientHeight;
+        let text = "分辨率:" + Resource.width() + "x" + Resource.height();
         text += ' 帧率:' + this.frame.framesPerSecond;
         if (this.netDelay) {
             text += ' / 延迟:' + this.netDelay + 'ms';
@@ -240,7 +238,7 @@ export default class Root {
         if (this.users) {
             text += ' / 房间人数:' + this.users.length;
         }
-        ctx.fillText(text, 10, Resource.height() - 5);
+        ctx.displayText(text, 10, -5, 35, null, null, false);
     }
 
     processPointDownEvent(point) {
