@@ -165,11 +165,11 @@ export default class Index {
         let newHeight = Math.round(height / scale);
 
         //减小精度误差
-        if (Math.abs(newWidth - Resource.displayW()) < 2) {
-            newWidth = Resource.displayW();
+        if (Math.abs(newWidth - Resource.formatWidth()) < 2) {
+            newWidth = Resource.formatWidth();
         }
-        if (Math.abs(newHeight - Resource.displayH()) < 2) {
-            newHeight = Resource.displayH();
+        if (Math.abs(newHeight - Resource.formatHeight()) < 2) {
+            newHeight = Resource.formatHeight();
         }
 
         let style = "";

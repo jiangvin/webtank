@@ -29,14 +29,14 @@ export default class AppHome extends Stage {
         this.createItem({
             draw: function (ctx) {
                 ctx.displayCenter("button_enter",
-                    Resource.displayW() / 2,
-                    Resource.displayH() * .58 + 150,
+                    Resource.formatWidth() / 2,
+                    Resource.formatHeight() * .58 + 150,
                     700, 90);
             },
             controlUnit: new ControlUnit(
                 Resource.generateClientId(),
-                {x: Resource.displayW() / 2 - 350, y: Resource.displayH() * .58 + 105},
-                {x: Resource.displayW() / 2 + 350, y: Resource.displayH() * .58 + 195},
+                {x: Resource.formatWidth() / 2 - 350, y: Resource.formatHeight() * .58 + 105},
+                {x: Resource.formatWidth() / 2 + 350, y: Resource.formatHeight() * .58 + 195},
                 function () {
                     //检测是否输入名字
                     const input = $('#input');

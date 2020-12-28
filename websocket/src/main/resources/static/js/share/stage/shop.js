@@ -26,8 +26,8 @@ export default class Shop extends Stage {
                 ctx.fillRect(
                     Resource.getOffset().x,
                     Resource.getOffset().y,
-                    Resource.displayW(),
-                    Resource.displayH());
+                    Resource.formatWidth(),
+                    Resource.formatHeight());
 
                 this.drawCoinCount(ctx);
                 this.drawShopItems(ctx);
@@ -222,7 +222,7 @@ export default class Shop extends Stage {
                 return;
             }
 
-            let minDistance = Resource.displayW();
+            let minDistance = Resource.formatWidth();
             let movePoint;
             for (let i = 0; i < e.touches.length; ++i) {
                 const point = Control.getTouchPoint(e.touches[i]);
@@ -281,7 +281,7 @@ export default class Shop extends Stage {
 
             if (this.shopItems[i].hasBuy()) {
                 control.enable = false;
-            } else if (control.rightBottom.x > Resource.displayW() - 80 + Resource.getOffset().x) {
+            } else if (control.rightBottom.x > Resource.formatWidth() - 80 + Resource.getOffset().x) {
                 control.enable = false;
             } else control.enable = control.leftTop.x >= 80 + Resource.getOffset().x;
         }

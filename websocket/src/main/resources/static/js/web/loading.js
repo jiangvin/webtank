@@ -35,11 +35,11 @@ export default class Loading extends Stage {
 
         this.createItem({
             draw: function (ctx) {
-                const width = Resource.displayW() * .4;
+                const width = Resource.formatWidth() * .4;
                 const height = 50;
                 const pos = {
-                    x: Resource.displayW() * .5 - width / 2 + Resource.getOffset().x,
-                    y: Resource.displayH() * .63 + Resource.getOffset().y
+                    x: Resource.formatWidth() * .5 - width / 2 + Resource.getOffset().x,
+                    y: Resource.formatHeight() * .63 + Resource.getOffset().y
                 };
 
                 const fillRoundRect = function (ctx, x, y, width, height) {

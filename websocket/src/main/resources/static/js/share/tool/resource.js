@@ -272,13 +272,13 @@ export default class Resource {
             width = d2;
             height = d1;
         }
-        let scaleX = width / Resource.displayW();
-        let scaleY = height / Resource.displayH();
+        let scaleX = width / Resource.formatWidth();
+        let scaleY = height / Resource.formatHeight();
         Resource.instance.scale = scaleX > scaleY ? scaleY : scaleX;
 
         Resource.instance.offset = {
-            x: Math.floor((width / Resource.getScale() - Resource.displayW()) / 2),
-            y: Math.floor((height / Resource.getScale() - Resource.displayH()) / 2)
+            x: Math.floor((width / Resource.getScale() - Resource.formatWidth()) / 2),
+            y: Math.floor((height / Resource.getScale() - Resource.formatHeight()) / 2)
         };
         return Resource.instance.scale;
     }
@@ -291,11 +291,11 @@ export default class Resource {
         return Resource.instance.offset;
     }
 
-    static displayW() {
+    static formatWidth() {
         return 1920;
     }
 
-    static displayH() {
+    static formatHeight() {
         return 1080;
     }
 

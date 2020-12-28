@@ -86,8 +86,8 @@ export default class Menu extends Stage {
                 if (Math.floor(Math.random() * 50) === 0) {
                     const bullet = {
                         id: Resource.generateClientId(),
-                        x: Math.floor(Math.random() * Resource.displayW()),
-                        y: Resource.displayH() / 2,
+                        x: Math.floor(Math.random() * Resource.formatWidth()),
+                        y: Resource.formatHeight() / 2,
                         scale: Math.random() + 0.1
                     };
                     bulletMap.set(bullet.id, bullet);

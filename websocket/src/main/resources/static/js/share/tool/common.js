@@ -148,7 +148,7 @@ CanvasRenderingContext2D.prototype.displayRate = function (imageId, rateX, rateY
 
     let w;
     if (rateW) {
-        w = Resource.displayW() * rateW;
+        w = Resource.formatWidth() * rateW;
     } else {
         //未加载完毕的情况
         if (!img.width) {
@@ -159,7 +159,7 @@ CanvasRenderingContext2D.prototype.displayRate = function (imageId, rateX, rateY
 
     let h;
     if (rateH) {
-        h = Resource.displayH() * rateH;
+        h = Resource.formatHeight() * rateH;
     } else {
         //未加载完毕的情况
         if (!img.width || !img.height) {
@@ -168,8 +168,8 @@ CanvasRenderingContext2D.prototype.displayRate = function (imageId, rateX, rateY
         h = w * img.height / img.width;
     }
 
-    const x = Resource.displayW() * rateX;
-    const y = Resource.displayH() * rateY;
+    const x = Resource.formatWidth() * rateX;
+    const y = Resource.formatHeight() * rateY;
 
     this.displayBase(imageId, x, y, w, h, align);
 };
