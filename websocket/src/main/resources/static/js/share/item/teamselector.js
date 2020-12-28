@@ -39,6 +39,13 @@ export default class TeamSelector {
         this.speed = 0.05;
         this.joinRed = this.stage.createItem({
             draw: ctx => {
+                ctx.drawImage(imgRed,
+                    imgRed.width * (1 - displayRate), 0,
+                    imgRed.width * displayRate, imgRed.height,
+                    Resource.getOffset().x, Resource.getOffset().y + 420,
+                    this.buttonSize.w * displayRate, this.buttonSize.h);
+            },
+            update: () => {
                 //动画相关
                 if (this.speed > 0) {
                     if (displayRate < 1) {
@@ -55,12 +62,6 @@ export default class TeamSelector {
                         this.removeItems();
                     }
                 }
-
-                ctx.drawImage(imgRed,
-                    imgRed.width * (1 - displayRate), 0,
-                    imgRed.width * displayRate, imgRed.height,
-                    Resource.getOffset().x, Resource.getOffset().y + 420,
-                    this.buttonSize.w * displayRate, this.buttonSize.h);
             }
         });
 

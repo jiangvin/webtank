@@ -27,12 +27,6 @@ export default class Tip {
         this.stage.createItem({
             id: "tip",
             draw: ctx => {
-                if (size.timeout > 0) {
-                    --size.timeout;
-                } else {
-                    this.close();
-                }
-
                 ctx.globalAlpha = 0.6;
                 ctx.fillStyle = '#000';
                 ctx.fillRoundRect(
@@ -49,6 +43,13 @@ export default class Tip {
                 ctx.fillText(this.text,
                     Resource.width() / 2,
                     Resource.height() / 2);
+            },
+            update: () => {
+                if (size.timeout > 0) {
+                    --size.timeout;
+                } else {
+                    this.close();
+                }
             }
         })
     }

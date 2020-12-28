@@ -104,6 +104,7 @@ export default class Root {
 
     update() {
         this.frame.update(() => {
+            this.updateMessage();
             this.updateTimeEvents();
             this.updateEngine();
             this.currentStage().update();
@@ -198,17 +199,21 @@ export default class Root {
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
         this.messages.forEach(function (message) {
+            ctx.globalAlpha = (message.lifetime / 300);
+            ctx.fillStyle = message.color;
+            ctx.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context,
+                160 + Resource.getOffset().x, height);
+            height += 35;
+        });
+        ctx.globalAlpha = 1;
+    }
+
+    updateMessage() {
+        this.messages.forEach(function (message) {
             if (message.lifetime > 0) {
                 message.lifetime -= 1;
             }
-            ctx.globalAlpha = (message.lifetime / 300);
-            ctx.fillStyle = message.color;
-            ctx.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context, 160, height);
-            height += 35;
         });
-
-        ctx.globalAlpha = 1;
-
         //消息全部过期，清除
         if (this.messages.length !== 0 && this.messages[0].lifetime <= 0) {
             this.messages = [];
@@ -227,7 +232,8 @@ export default class Root {
 
         //帧率信息
         ctx.textAlign = 'left';
-        let text = '帧率:' + this.frame.framesPerSecond;
+        let text = "分辨率:" + document.documentElement.clientWidth + "x" + document.documentElement.clientHeight;
+        text += ' 帧率:' + this.frame.framesPerSecond;
         if (this.netDelay) {
             text += ' / 延迟:' + this.netDelay + 'ms';
         }
