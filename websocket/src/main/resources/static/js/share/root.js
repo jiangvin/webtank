@@ -195,14 +195,13 @@ export default class Root {
 
     drawMessage(ctx) {
         let height = 160;
-        ctx.font = '30px Helvetica';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
         this.messages.forEach(function (message) {
             ctx.globalAlpha = (message.lifetime / 300);
             ctx.fillStyle = message.color;
-            ctx.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context,
-                160 + Resource.getOffset().x, height);
+            ctx.displayText("[" + message.date.format("hh:mm:ss") + "] " + message.context,
+                160, height, 30);
             height += 35;
         });
         ctx.globalAlpha = 1;
@@ -238,7 +237,7 @@ export default class Root {
         if (this.users) {
             text += ' / 房间人数:' + this.users.length;
         }
-        ctx.displayText(text, 10, -5, 35, null, null, false);
+        ctx.displayText(text, 10, -5, 35, null, false);
     }
 
     processPointDownEvent(point) {

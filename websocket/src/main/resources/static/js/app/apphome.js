@@ -46,14 +46,15 @@ export default class AppHome extends Stage {
                         return;
                     }
 
-                    $('#main').empty();
                     Resource.setUserId(name);
                     Common.postRequest("/user/saveUser", {
                         userId: Resource.getUser().deviceId,
                         username: Resource.getUser().userId,
                         userDevice: Resource.getUser().deviceName
+                    }, () => {
+                        $('#main').empty();
+                        Common.nextStage();
                     });
-                    Common.nextStage();
                 }
             )
         });
@@ -61,17 +62,18 @@ export default class AppHome extends Stage {
         //文字
         this.createItem({
             draw: function (context) {
-                context.font = '36px Helvetica';
                 context.textAlign = 'left';
                 context.textBaseline = 'middle';
                 context.fillStyle = '#FFF';
-                context.fillText('☑ 进入游戏即代表同意',
-                    Resource.width() / 2 - 320,
-                    Resource.height() * .58 + 230);
+                context.displayText('☑ 进入游戏即代表同意',
+                    Resource.formatWidth() / 2 - 320,
+                    Resource.formatHeight() * .58 + 230,
+                    36);
                 context.fillStyle = '#F00';
-                context.fillText('《游戏隐私协议》',
-                    Resource.width() / 2 + 40,
-                    Resource.height() * .58 + 230);
+                context.displayText('《游戏隐私协议》',
+                    Resource.formatWidth() / 2 + 40,
+                    Resource.formatHeight() * .58 + 230,
+                    36);
             }
         });
     }

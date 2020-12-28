@@ -46,10 +46,10 @@ export default class Stage {
             const leftTop = unit.getLeftTop();
             const rightBottom = unit.getRightBottom();
             ctx.strokeRect(
-                leftTop.x,
-                leftTop.y,
-                rightBottom.x - leftTop.x,
-                rightBottom.y - leftTop.y);
+                leftTop.x * Resource.getScale(),
+                leftTop.y * Resource.getScale(),
+                (rightBottom.x - leftTop.x) * Resource.getScale(),
+                (rightBottom.y - leftTop.y) * Resource.getScale());
         })
     }
 

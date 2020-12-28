@@ -136,7 +136,7 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
         w, h);
 };
 
-CanvasRenderingContext2D.prototype.displayText = function (text, x, y, size, font, bold, offset) {
+CanvasRenderingContext2D.prototype.displayText = function (text, x, y, size, bold, offset, font) {
     if (!font) {
         font = "Arial";
     }
