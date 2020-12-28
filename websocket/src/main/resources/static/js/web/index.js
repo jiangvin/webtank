@@ -7,19 +7,16 @@
 import Resource from "../share/tool/resource.js";
 import Control from "../share/tool/control.js";
 import Root from "../share/root.js";
-import AdapterManager from "../share/tool/adapter/adapterManager.js";
 import Loading from "./loading.js";
 import AppHome from "../app/apphome.js";
 import Home from "./home.js";
 import Common from "../share/tool/common.js";
+import AdapterManager from "../share/tool/adapter/AdapterManager.js";
 
 export default class Index {
     constructor() {
         this.initEvent();
-
         this.generateCanvas();
-        Resource.setCanvas(this.canvas);
-        this.ctx = this.canvas.getContext('2d');
 
         this.root = new Root();
         Resource.setRoot(this.root);
@@ -151,10 +148,11 @@ export default class Index {
 
     generateCanvas() {
         this.canvas = document.getElementById("canvas");
+        this.ctx = this.canvas.getContext('2d');
+        Resource.setCanvas(this.canvas);
         this.windowChange();
-        const thisIndex = this;
-        window.addEventListener("resize", function () {
-            thisIndex.windowChange();
+        window.addEventListener("resize", () => {
+            this.windowChange();
         });
     }
 

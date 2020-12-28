@@ -28,9 +28,9 @@ export default class AdapterManager {
         const deviceName = AdapterManager.getQueryString("deviceName");
         const platform = AdapterManager.getQueryString("platform");
 
-        //web
         if (deviceId === null || deviceName === null) {
-            AdapterManager.initAdapter();
+            //web
+            AdapterManager.setPlatform(0);
             return;
         }
 
@@ -43,8 +43,6 @@ export default class AdapterManager {
             //android
             AdapterManager.setPlatform(2);
         }
-
-        AdapterManager.initAdapter();
     }
 
     static initAdapter() {
@@ -71,6 +69,7 @@ export default class AdapterManager {
 
     static setPlatform(platform) {
         this.instance.platform = platform;
+        AdapterManager.initAdapter();
     }
 
     static getPlatform() {
