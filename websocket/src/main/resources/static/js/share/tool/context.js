@@ -5,6 +5,7 @@ import Resource from "./resource.js";
  * @description
  * @date 2020/12/28
  */
+CanvasRenderingContext2D.prototype.fontSize = 30;
 
 CanvasRenderingContext2D.prototype.displayFillRoundRect = function (x, y, w, h, radius) {
     this.beginPath();
@@ -137,6 +138,9 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
 };
 
 CanvasRenderingContext2D.prototype.displayText = function (text, x, y, size, bold, offset, font) {
+    if (!size) {
+        size = this.fontSize;
+    }
     if (!font) {
         font = "Arial";
     }

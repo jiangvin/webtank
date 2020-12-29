@@ -131,12 +131,12 @@ export default class Rank extends Stage {
                 thisRank.createItem({
                     id: "rank_board_info",
                     draw: function (ctx) {
-                        const x = 288 + Resource.getOffset().x;
-                        const y = 334 + Resource.getOffset().y;
+                        const x = 288;
+                        const y = 334;
 
                         const interval = 114;
 
-                        ctx.font = '40px Helvetica';
+                        ctx.fontSize = 40;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillStyle = '#040141';
@@ -150,11 +150,11 @@ export default class Rank extends Stage {
 
                             const data = dataList[i];
                             //name
-                            ctx.fillText(data.username, x + 422, y + i * interval);
+                            ctx.displayText(data.username, x + 422, y + i * interval);
                             //score
-                            ctx.fillText(data.score, x + 864, y + i * interval);
+                            ctx.displayText(data.score, x + 864, y + i * interval);
                             //mode
-                            ctx.fillText(data.gameType === 0 ? "单人模式" : "联机模式",
+                            ctx.displayText(data.gameType === 0 ? "单人模式" : "联机模式",
                                 x + 1286,
                                 y + i * interval);
                         }
@@ -181,18 +181,11 @@ export default class Rank extends Stage {
 
     drawRankNumber(ctx, number, x, y) {
         if (number <= 3) {
-            const img = Resource.getImage("rank_" + number);
             const w = 80;
             const h = 74;
-            ctx.drawImage(
-                img,
-                0, 0,
-                img.width, img.height,
-                x - w / 2, y - h / 2,
-                w, h
-            );
+            ctx.displayCenter("rank_" + number, x, y, w, h);
         } else {
-            ctx.fillText(number + "", x, y);
+            ctx.displayText(number + "", x, y);
         }
     }
 }
