@@ -159,10 +159,10 @@ export default class NetList extends Stage {
                 this.createItem({
                     id: "room_list",
                     draw: function (ctx) {
-                        const x = Resource.getOffset().x;
-                        const y = 380 + Resource.getOffset().y;
+                        const x = 0;
+                        const y = 380;
 
-                        ctx.font = '40px Helvetica';
+                        ctx.fontSize = 40;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillStyle = '#040141';
@@ -173,12 +173,12 @@ export default class NetList extends Stage {
                             }
                             const room = roomList[i];
 
-                            ctx.fillText(room.roomId, x + 280, y + i * interval);
-                            ctx.fillText(room.roomType === "PVE" ? "闯关模式" : "对抗模式",
+                            ctx.displayText(room.roomId, x + 280, y + i * interval);
+                            ctx.displayText(room.roomType === "PVE" ? "闯关模式" : "对抗模式",
                                 x + 525, y + i * interval);
-                            ctx.fillText("游戏中", x + 790, y + i * interval);
-                            ctx.fillText(room.userCount, x + 1026, y + i * interval);
-                            ctx.fillText(room.creator, x + 1323, y + i * interval);
+                            ctx.displayText("游戏中", x + 790, y + i * interval);
+                            ctx.displayText(room.userCount, x + 1026, y + i * interval);
+                            ctx.displayText(room.creator, x + 1323, y + i * interval);
                         }
                     }
                 });

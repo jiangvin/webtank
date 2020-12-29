@@ -42,8 +42,10 @@ export default class TeamSelector {
                 ctx.drawImage(imgRed,
                     imgRed.width * (1 - displayRate), 0,
                     imgRed.width * displayRate, imgRed.height,
-                    Resource.getOffset().x, Resource.getOffset().y + 420,
-                    this.buttonSize.w * displayRate, this.buttonSize.h);
+                    Resource.getOffset().x * Resource.getScale(),
+                    (Resource.getOffset().y + 420) * Resource.getScale(),
+                    this.buttonSize.w * displayRate * Resource.getScale(),
+                    this.buttonSize.h * Resource.getScale());
             },
             update: () => {
                 //动画相关
@@ -70,9 +72,10 @@ export default class TeamSelector {
                 ctx.drawImage(imgBlue,
                     0, 0,
                     imgBlue.width * displayRate, imgBlue.height,
-                    Resource.getOffset().x + 1920 - this.buttonSize.w * displayRate,
-                    Resource.getOffset().y + 420,
-                    this.buttonSize.w * displayRate, this.buttonSize.h);
+                    (Resource.getOffset().x + 1920 - this.buttonSize.w * displayRate) * Resource.getScale(),
+                    (Resource.getOffset().y + 420) * Resource.getScale(),
+                    this.buttonSize.w * displayRate * Resource.getScale(),
+                    this.buttonSize.h * Resource.getScale());
             }
         })
     }
