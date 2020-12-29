@@ -38,15 +38,12 @@ export default class NewConfirm {
 
                 //文字
                 ctx.fillStyle = '#000';
-                ctx.font = '40px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
                 let y = 485;
                 this.textList.forEach(text => {
-                    ctx.fillText(text,
-                        952 + Resource.getOffset().x,
-                        y + Resource.getOffset().y);
+                    ctx.displayText(text, 952, y, 40);
                     y += this.textInterval;
                 });
             }

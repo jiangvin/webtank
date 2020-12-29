@@ -19,16 +19,9 @@ export default class Shop extends Stage {
         this.initShopItems();
         this.initControl();
 
-        //背景色图层
         this.createItem({
             draw: ctx => {
-                ctx.fillStyle = '#f6e7d0';
-                ctx.fillRect(
-                    Resource.getOffset().x,
-                    Resource.getOffset().y,
-                    Resource.formatWidth(),
-                    Resource.formatHeight());
-
+                this.drawBackground(ctx);
                 this.drawCoinCount(ctx);
                 this.drawShopItems(ctx);
                 this.drawBlackMask(ctx);
@@ -56,17 +49,23 @@ export default class Shop extends Stage {
         document.removeEventListener('touchend', this.endEvent);
     }
 
+    drawBackground(ctx) {
+        ctx.fillStyle = '#f6e7d0';
+        ctx.fillRect(
+            0, 0,
+            Resource.width(),
+            Resource.height());
+    }
+
     drawCoinCount(ctx) {
         //绘制金币数
         const coinCount = "x" + Resource.getUser().coin;
         ctx.displayCenter("gold", 905, 225, 90);
-        ctx.font = 'bold 50px Arial';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.strokeStyle = '#000';
-        ctx.strokeText(coinCount, Resource.getOffset().x + 960, Resource.getOffset().y + 228);
         ctx.fillStyle = '#f7f3df';
-        ctx.fillText(coinCount, Resource.getOffset().x + 960, Resource.getOffset().y + 228);
+        ctx.displayStrokeText(coinCount, 960, 228, 50, true);
     }
 
     initShopItems() {
@@ -236,7 +235,6 @@ export default class Shop extends Stage {
     initShopButtonControl() {
         this.shopItems.forEach(item => {
             item.control = this.createControl({
-                needOffset: false,
                 callBack: () => {
                     this.buy(item);
                 }
@@ -248,22 +246,21 @@ export default class Shop extends Stage {
         for (let i = 0; i < this.shopItems.length; ++i) {
             const control = this.shopItems[i].control;
 
-            control.leftTop.x = this.itemInfo.offset +
-                Resource.getOffset().x + 155 +
+            control.leftTop.x = this.itemInfo.offset
+                + 155 +
                 this.itemInfo.w / 2 -
                 this.itemInfo.buttonWidth / 2 +
                 i * (this.itemInfo.w + this.itemInfo.interval);
-            control.leftTop.y = Resource.getOffset().y +
-                760 -
+            control.leftTop.y = 760 -
                 this.itemInfo.buttonHeight / 2;
             control.rightBottom.x = control.leftTop.x + this.itemInfo.buttonWidth;
             control.rightBottom.y = control.leftTop.y + this.itemInfo.buttonHeight;
 
             if (this.shopItems[i].hasBuy()) {
                 control.enable = false;
-            } else if (control.rightBottom.x > Resource.formatWidth() - 80 + Resource.getOffset().x) {
+            } else if (control.rightBottom.x > Resource.formatWidth() - 80) {
                 control.enable = false;
-            } else control.enable = control.leftTop.x >= 80 + Resource.getOffset().x;
+            } else control.enable = control.leftTop.x >= 80;
         }
     }
 
@@ -277,8 +274,8 @@ export default class Shop extends Stage {
     }
 
     drawShopItem(ctx, i) {
-        const x = this.itemInfo.offset + Resource.getOffset().x + 155 + i * (this.itemInfo.w + this.itemInfo.interval);
-        const y = Resource.getOffset().y + 300;
+        const x = this.itemInfo.offset + 155 + i * (this.itemInfo.w + this.itemInfo.interval);
+        const y = 300;
         if (!this.drawItemRect(ctx, x, y)) {
             return;
         }
@@ -297,7 +294,7 @@ export default class Shop extends Stage {
             y: y + this.itemInfo.h
         };
 
-        if (leftTop.x > Resource.width()) {
+        if (leftTop.x > Resource.formatWidth()) {
             return false;
         }
         if (rightButton.x < 0) {
@@ -316,33 +313,29 @@ export default class Shop extends Stage {
     drawItemText(ctx, x, y, i) {
         const item = this.shopItems[i];
         ctx.fillStyle = '#000';
-        ctx.font = '48px Arial';
         x = x + this.itemInfo.w / 2;
-        ctx.fillText(item.title, x, y + 60);
+        ctx.displayText(item.title, x, y + 60, 48);
 
         if (!item.text || item.text.length === 0) {
             return;
         }
-        ctx.font = '26px Arial';
         y = y + 290;
         item.text.forEach((text => {
-            ctx.fillText(text, x, y);
+            ctx.displayText(text, x, y, 26);
             y += 30;
         }));
     }
 
     drawItemImage(ctx, x, y, i) {
         const item = this.shopItems[i];
-        const image = Resource.getImage(item.imageId);
         const index = item.imageIndex ? item.imageIndex : 0;
-        ctx.drawImage(
-            image,
-            index * image.width / image.widthPics, 0,
-            image.width / image.widthPics,
-            image.height / image.heightPics,
-            x + this.itemInfo.w / 2 - this.itemInfo.imageSize / 2,
-            y + 180 - this.itemInfo.imageSize / 2,
-            this.itemInfo.imageSize, this.itemInfo.imageSize);
+        ctx.displayCenter(
+            item.imageId,
+            x + this.itemInfo.w / 2,
+            y + 180,
+            this.itemInfo.imageSize,
+            this.itemInfo.imageSize,
+            index);
     }
 
     drawItemButton(ctx, x, y, i) {
@@ -353,42 +346,26 @@ export default class Shop extends Stage {
         ctx.fillStyle = '#f7f3df';
 
         if (item.hasBuy()) {
-            const image = Resource.getImage("shop_button_disable");
-            ctx.drawImage(
-                image,
-                0, 0,
-                image.width, image.height,
-                x + this.itemInfo.w / 2 - this.itemInfo.buttonWidth / 2,
-                y + 460 - this.itemInfo.buttonHeight / 2,
-                this.itemInfo.buttonWidth, this.itemInfo.buttonHeight);
+            ctx.displayCenter(
+                "shop_button_disable",
+                x + this.itemInfo.w / 2,
+                y + 460,
+                this.itemInfo.buttonWidth);
             const tips = "已购买";
-            ctx.strokeText(tips, x + this.itemInfo.w / 2, y + 460);
-            ctx.fillText(tips, x + this.itemInfo.w / 2, y + 460);
-
+            ctx.displayStrokeText(tips, x + this.itemInfo.w / 2, y + 460, 50, true);
         } else {
-            const image = Resource.getImage("shop_button");
-            ctx.drawImage(
-                image,
-                0, 0,
-                image.width, image.height,
-                x + this.itemInfo.w / 2 - this.itemInfo.buttonWidth / 2,
-                y + 460 - this.itemInfo.buttonHeight / 2,
-                this.itemInfo.buttonWidth, this.itemInfo.buttonHeight);
-
-            const gold = Resource.getImage("gold");
-            ctx.drawImage(
-                gold,
-                0, 0,
-                gold.width, gold.height,
+            ctx.displayCenter(
+                "shop_button",
+                x + this.itemInfo.w / 2,
+                y + 460,
+                this.itemInfo.buttonWidth);
+            ctx.displayTopLeft(
+                "gold",
                 x + this.itemInfo.w / 2 - 100,
                 y + 420,
-                70, 70
-            );
-
+                70);
             const price = item.price;
-            ctx.strokeText(price, x + this.itemInfo.w / 2 + 20, y + 460);
-            ctx.fillText(price, x + this.itemInfo.w / 2 + 20, y + 460);
-
+            ctx.displayStrokeText(price, x + this.itemInfo.w / 2 + 20, y + 460, 50, true);
         }
     }
 

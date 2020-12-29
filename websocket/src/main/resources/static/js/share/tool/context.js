@@ -45,8 +45,8 @@ CanvasRenderingContext2D.prototype.displayFillRoundRect = function (x, y, w, h, 
     this.restore();
 };
 
-CanvasRenderingContext2D.prototype.displayCenter = function (imageId, x, y, w, h) {
-    this.displayBase(imageId, x, y, w, h, "center");
+CanvasRenderingContext2D.prototype.displayCenter = function (imageId, x, y, w, h, indexX) {
+    this.displayBase(imageId, x, y, w, h, "center", indexX);
 };
 
 CanvasRenderingContext2D.prototype.displayTopLeft = function (imageId, x, y, w, h) {
@@ -91,7 +91,7 @@ CanvasRenderingContext2D.prototype.displayRate = function (imageId, rateX, rateY
     this.displayBase(imageId, x, y, w, h, align);
 };
 
-CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, align) {
+CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, align, indexX) {
     const img = Resource.getImage(imageId);
     if (!img) {
         return;
@@ -130,14 +130,29 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
             break;
     }
 
+    if (indexX === undefined) {
+        indexX = 0;
+    }
+
     this.drawImage(img,
-        0, 0,
-        img.width, img.height,
+        indexX * img.width / img.widthPics, 0,
+        img.width / img.widthPics, img.height,
         x, y,
         w, h);
 };
 
+CanvasRenderingContext2D.prototype.displayStrokeText = function (text, x, y, size, bold, offset, font) {
+    const status = this.generateTextStatus(x, y, size, bold, offset, font);
+    this.strokeText(text, status.x, status.y);
+    this.fillText(text, status.x, status.y);
+};
+
 CanvasRenderingContext2D.prototype.displayText = function (text, x, y, size, bold, offset, font) {
+    const status = this.generateTextStatus(x, y, size, bold, offset, font);
+    this.fillText(text, status.x, status.y);
+};
+
+CanvasRenderingContext2D.prototype.generateTextStatus = function (x, y, size, bold, offset, font) {
     if (!size) {
         size = this.fontSize;
     }
@@ -148,24 +163,21 @@ CanvasRenderingContext2D.prototype.displayText = function (text, x, y, size, bol
         offset = Resource.getNeedOffset();
     }
 
+    if (offset) {
+        x += Resource.getOffset().x;
+        y += Resource.getOffset().y;
+    }
     if (x < 0) {
         x = Resource.formatWidth(!offset) + x;
-    } else {
-        if (offset) {
-            x += Resource.getOffset().x;
-        }
     }
     if (y < 0) {
         y = Resource.formatHeight(!offset) + y;
-    } else {
-        if (offset) {
-            y += Resource.getOffset().y;
-        }
     }
 
     x = Math.round(x * Resource.getScale());
     y = Math.round(y * Resource.getScale());
     size = Math.round(size * Resource.getScale());
-    this.font = bold ? "bold " : " " + size + "px " + font;
-    this.fillText(text, x, y);
+    this.font = ((bold === true) ? "bold " : " ") + size + "px " + font;
+
+    return {x: x, y: y};
 };

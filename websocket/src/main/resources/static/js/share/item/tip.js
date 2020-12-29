@@ -30,19 +30,19 @@ export default class Tip {
                 ctx.globalAlpha = 0.6;
                 ctx.fillStyle = '#000';
                 ctx.displayFillRoundRect(
-                    Resource.width() / 2 - size.w / 2,
-                    Resource.height() / 2 - size.h / 2,
+                    Resource.formatWidth() / 2 - size.w / 2,
+                    Resource.formatHeight() / 2 - size.h / 2,
                     size.w, size.h, 20);
                 ctx.globalAlpha = 1;
 
                 //文字
                 ctx.fillStyle = '#FFF';
-                ctx.font = '48px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(this.text,
-                    Resource.width() / 2,
-                    Resource.height() / 2);
+                ctx.displayText(this.text,
+                    Resource.formatWidth() / 2,
+                    Resource.formatHeight() / 2,
+                    48);
             },
             update: () => {
                 if (size.timeout > 0) {
