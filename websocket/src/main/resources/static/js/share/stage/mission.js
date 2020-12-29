@@ -17,11 +17,10 @@ export default class Mission extends Stage {
         this.createFullScreenItem("mission_background");
 
         //难度选择
-        const thisMission = this;
         this.createItem({
-            draw: function (ctx) {
+            draw: ctx => {
                 ctx.displayCenterRate(
-                    thisMission.roomInfo.hardMode ? "mission_hard" : "mission_easy",
+                    this.roomInfo.hardMode ? "mission_hard" : "mission_easy",
                     .5, .5,
                     1, 1);
             }
@@ -68,7 +67,6 @@ export default class Mission extends Stage {
 
         this.createItem({
             draw: function (ctx) {
-                ctx.font = 'bold 32px HanSans';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#FFF';
@@ -97,9 +95,7 @@ export default class Mission extends Stage {
                         map.h);
 
                     //文字
-                    ctx.fillText(text[i],
-                        200 + Resource.getOffset().x,
-                        340 + Resource.getOffset().y + i * (rectSelected.h * 1.1));
+                    ctx.displayText(text[i], 200, 340 + i * (rectSelected.h * 1.1), 32, true);
 
                     //图标
                     if (thisMission.hasLock(i)) {
@@ -115,9 +111,7 @@ export default class Mission extends Stage {
                         if (!star) {
                             star = 0;
                         }
-                        ctx.fillText(star,
-                            362 + Resource.getOffset().x,
-                            340 + Resource.getOffset().y + i * (rectSelected.h * 1.1));
+                        ctx.displayText(star, 362, 340 + i * (rectSelected.h * 1.1), 32, true);
                     }
                 }
 
