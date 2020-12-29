@@ -39,26 +39,6 @@ export default class Shop extends Stage {
         this.createFullScreenItem("shop_background");
     }
 
-    /**
-     * 绘制黑色遮罩，防止超宽屏的滑动穿帮
-     * @param ctx
-     */
-    drawBlackMask(ctx) {
-        if (Resource.getOffset().x < 2) {
-            return;
-        }
-
-        ctx.fillStyle = '#000';
-        ctx.fillRect(
-            0, 0,
-            Resource.getOffset().x,
-            Resource.height());
-        ctx.fillRect(
-            Resource.width() - Resource.getOffset().x, 0,
-            Resource.getOffset().x,
-            Resource.height());
-    }
-
     init() {
         this.itemInfo.offset = 0;
         this.itemInfo.touchPoint = null;

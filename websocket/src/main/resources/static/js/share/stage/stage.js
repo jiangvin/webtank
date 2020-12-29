@@ -154,4 +154,47 @@ export default class Stage {
     getId() {
         return "stage";
     }
+
+    /**
+     * 绘制黑色遮罩，防止超宽屏的元素绘制到屏幕外
+     * @param ctx
+     */
+    drawBlackMask(ctx) {
+        this.drawBlackMaskX(ctx);
+        this.drawBlackMaskY(ctx);
+    }
+
+    drawBlackMaskX(ctx) {
+        const width = Resource.getOffset().x * Resource.getScale();
+        if (width < 2) {
+            return;
+        }
+
+        ctx.fillStyle = '#000';
+        ctx.fillRect(
+            0, 0,
+            width,
+            Resource.height());
+        ctx.fillRect(
+            Resource.width() - width, 0,
+            width,
+            Resource.height());
+    }
+
+    drawBlackMaskY(ctx) {
+        const height = Resource.getOffset().y * Resource.getScale();
+        if (height < 2) {
+            return;
+        }
+
+        ctx.fillStyle = '#000';
+        ctx.fillRect(
+            0, 0,
+            Resource.width(),
+            height);
+        ctx.fillRect(
+            0, Resource.height() - height,
+            Resource.width(),
+            height);
+    }
 }

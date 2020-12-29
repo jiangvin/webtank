@@ -24,22 +24,21 @@ export default class Menu extends Stage {
         //信息
         this.createItem({
             draw: function (ctx) {
-                ctx.font = 'bold 26px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#FFF';
                 const pos = {
-                    x: 344 + Resource.getOffset().x,
-                    y: 72 + Resource.getOffset().y
+                    x: 344,
+                    y: 72
                 };
                 //姓名
-                ctx.fillText(Resource.getUser().userId, pos.x, pos.y);
+                ctx.displayText(Resource.getUser().userId, pos.x, pos.y, 26, true);
                 //金币
-                ctx.fillText(Resource.getUser().coin, pos.x + 400, pos.y);
+                ctx.displayText(Resource.getUser().coin, pos.x + 400, pos.y, 26, true);
                 //排名
-                ctx.fillText(Resource.getUser().rank, pos.x + 844, pos.y);
+                ctx.displayText(Resource.getUser().rank, pos.x + 844, pos.y, 26, true);
                 //积分
-                ctx.fillText(Resource.getUser().score, pos.x + 1266, pos.y);
+                ctx.displayText(Resource.getUser().score, pos.x + 1266, pos.y, 26, true);
             }
         });
 
@@ -75,11 +74,14 @@ export default class Menu extends Stage {
         const bulletWidth = 160;
 
         this.createItem({
-            draw: function (ctx) {
+            draw: ctx => {
                 bulletMap.forEach(bullet => {
                     const width = bulletWidth * bullet.scale;
                     ctx.displayCenter("menu_bullet", bullet.x, bullet.y, width);
-                })
+                });
+
+                //黑色遮罩，防止穿帮
+                this.drawBlackMask(ctx);
             },
             update: function () {
                 //create bullet
