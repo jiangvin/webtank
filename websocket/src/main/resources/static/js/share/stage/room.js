@@ -51,15 +51,10 @@ export default class Room extends Stage {
             x: 0,
             y: 0
         };
-
-        //加载字体
-        const myFont = new FontFace('gameFont', 'url(font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
-        myFont.load().then(font => {
-            document.fonts.add(font)
-        });
     }
 
     init(roomInfo) {
+        Resource.setNeedOffset(false);
         this.roomInfo = roomInfo;
         this.createManager();
         Resource.getRoot().addEngine(roomInfo.isNet);
@@ -297,25 +292,21 @@ export default class Room extends Stage {
         ctx.fillStyle = '#01A7EC';
         ctx.fillRect(0, 0, Resource.width(), Resource.height());
         ctx.fillStyle = '#22b2ee';
-        ctx.fillRect(0, Resource.height() * .32,
-            Resource.width(),
-            270);
+        ctx.fillRect(0, Resource.height() * .32, Resource.width(), 270 * Resource.getScale());
 
+        const w = Resource.formatWidth(true);
+        const h = Resource.formatHeight(true);
         //显示标题
-        ctx.font = '100px gameFont';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
-        ctx.fillText(this.generateMaskInfo(), Resource.width() / 2, Resource.height() * .4);
+        ctx.displayGameText(this.generateMaskInfo(), w / 2, h * .4, 100);
 
         //显示难度
-        const img = Resource.getImage(this.roomInfo.hardMode ? "room_hard" : "room_easy");
-        ctx.drawImage(img,
-            0, 0,
-            img.width, img.height,
-            Resource.width() * .85, 0,
-            img.width * 2, img.height * 2);
-
+        ctx.displayTopLeft(
+            this.roomInfo.hardMode ? "room_hard" : "room_easy",
+            w * .8, 0,
+            150);
         //绘制生命
         if (this.maskPlayerLife === null || this.maskEnemyLife === null) {
             if (this.roomInfo.playerLife === null || this.roomInfo.computerLife === null) {
@@ -328,30 +319,27 @@ export default class Room extends Stage {
             }
         }
 
-        ctx.font = '44px gameFont';
+        ctx.fontSize = 44;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
 
-        const playerLife = Resource.getImage("player_life");
-        ctx.drawImage(playerLife,
-            0, 0,
-            playerLife.width, playerLife.height,
-            Resource.width() / 2 - 200, Resource.height() * .32 + 170,
-            100, 100);
-        ctx.fillText("x" + this.maskPlayerLife,
-            Resource.width() / 2 - 90,
-            Resource.height() * .32 + 216);
+        ctx.displayTopLeft(
+            "player_life",
+            w / 2 - 200,
+            h * .32 + 170,
+            100);
+        ctx.displayGameText("x" + this.maskPlayerLife,
+            w / 2 - 90,
+            h * .32 + 216);
 
-        const enemyLife = Resource.getImage("enemy_life");
-        ctx.drawImage(enemyLife,
-            0, 0,
-            enemyLife.width, enemyLife.height,
-            Resource.width() / 2 + 20, Resource.height() * .32 + 170,
-            100, 100);
-        ctx.fillText("x" + this.maskEnemyLife,
-            Resource.width() / 2 + 130,
-            Resource.height() * .32 + 216);
+        ctx.displayTopLeft(
+            "enemy_life",
+            w / 2 + 20, h * .32 + 170,
+            100);
+        ctx.displayGameText("x" + this.maskEnemyLife,
+            w / 2 + 130,
+            h * .32 + 216);
     }
 
     /**

@@ -243,6 +243,10 @@ export default class Resource {
         return Resource.instance.needOffset;
     }
 
+    static setNeedOffset(needOffset) {
+        Resource.instance.needOffset = needOffset;
+    }
+
     static generateClientId() {
         return "generateClientId=" + Resource.instance.itemId++;
     }
@@ -351,7 +355,7 @@ export default class Resource {
     }
 
     static getRoomScale() {
-        return 2.3;
+        return 2.3 * Resource.getScale();
     }
 }
 Resource.instance = new Resource();

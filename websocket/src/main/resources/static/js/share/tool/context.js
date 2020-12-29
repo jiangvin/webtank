@@ -5,6 +5,13 @@ import Resource from "./resource.js";
  * @description
  * @date 2020/12/28
  */
+
+//加载字体
+const myFont = new FontFace('gameFont', 'url(font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
+myFont.load().then(font => {
+    document.fonts.add(font)
+});
+
 CanvasRenderingContext2D.prototype.fontSize = 30;
 
 CanvasRenderingContext2D.prototype.displayFillRoundRect = function (x, y, w, h, radius) {
@@ -145,6 +152,10 @@ CanvasRenderingContext2D.prototype.displayStrokeText = function (text, x, y, siz
     const status = this.generateTextStatus(x, y, size, bold, offset, font);
     this.strokeText(text, status.x, status.y);
     this.fillText(text, status.x, status.y);
+};
+
+CanvasRenderingContext2D.prototype.displayGameText = function (text, x, y, size, bold, offset) {
+    this.displayText(text, x, y, size, bold, offset, "gameFont");
 };
 
 CanvasRenderingContext2D.prototype.displayText = function (text, x, y, size, bold, offset, font) {

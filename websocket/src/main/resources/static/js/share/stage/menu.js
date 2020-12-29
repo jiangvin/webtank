@@ -182,6 +182,7 @@ export default class Menu extends Stage {
             indexDoor2: 0,
             enterDoor2: false
         };
+        Resource.setNeedOffset(true);
 
         //同步用户信息(获得的金币等)
         Common.syncUserData();
