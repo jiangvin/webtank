@@ -35,18 +35,27 @@ export default class AdapterIos extends Adapter {
         });
     }
 
-    requestCallback(resultStr, id) {
-        const result = JSON.parse(resultStr);
+    requestCallback(data, id) {
         if (!this.iosCallbackMap.has(id)) {
             return;
         }
 
-        const callback = this.iosCallbackMap.get(id);
-        this.iosCallbackMap.delete(id);
+        const result = JSON.parse(this.b64DecodeUnicode(data));
         if (result.success) {
-            callback(result.data);
+            const callback = this.iosCallbackMap.get(id);
+            this.iosCallbackMap.delete(id);
+            if (callback) {
+                callback(result.data);
+            }
         } else {
             Resource.getRoot().addMessage(result.message, "#ff0000");
         }
+    }
+
+    b64DecodeUnicode(str) {
+        // Going backwards: from byte stream, to percent-encoding, to original string.
+        return decodeURIComponent(atob(str).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
     }
 }
