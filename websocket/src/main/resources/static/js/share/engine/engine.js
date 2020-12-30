@@ -312,7 +312,7 @@ export default class Engine {
     };
 
     isBarrier(stage, point, ghost) {
-        if (point.x < 0 || point.y < 0 || point.x >= stage.mapSize.width || point.y >= stage.mapSize.height) {
+        if (point.x < 0 || point.y < 0 || point.x >= stage.size.width || point.y >= stage.size.height) {
             return true;
         }
 

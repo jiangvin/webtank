@@ -353,9 +353,5 @@ export default class Resource {
     static getBulletSize() {
         return 14;
     }
-
-    static getRoomScale() {
-        return 2.3 * Resource.getScale();
-    }
 }
 Resource.instance = new Resource();

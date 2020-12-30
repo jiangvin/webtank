@@ -133,7 +133,6 @@ export default class Room extends Stage {
         if (!Status.isGaming()) {
             return;
         }
-
         this.updateView();
         super.update();
     }
@@ -143,15 +142,18 @@ export default class Room extends Stage {
             return;
         }
 
+        const w = Resource.width() * this.scaleForWindowToServer();
+        const h = Resource.height() * this.scaleForWindowToServer();
+
         let updateX = false;
         let updateY = false;
-        if (this.size.width < Resource.width()) {
+        if (this.size.width < w) {
             updateX = true;
-            this.view.x = (this.size.width - Resource.width()) / 2;
+            this.view.x = (this.size.width - w) / 2;
         }
-        if (this.size.height < Resource.height()) {
+        if (this.size.height < h) {
             updateY = true;
-            this.view.y = (this.size.height - Resource.height()) / 2;
+            this.view.y = (this.size.height - h) / 2;
         }
 
         if ((updateX && updateY) || !this.view.center) {
@@ -159,36 +161,32 @@ export default class Room extends Stage {
         }
 
         const center = {
-            x: this.view.center.x * Resource.getRoomScale(),
-            y: this.view.center.y * Resource.getRoomScale()
+            x: this.view.center.x,
+            y: this.view.center.y
         };
-
         if (!updateX) {
-            this.view.x = center.x - Resource.width() / 2;
-            if (this.view.x < 0) {
-                this.view.x = 0;
-            }
-            if (this.view.x > this.size.width - Resource.width()) {
-                this.view.x = this.size.width - Resource.width()
-            }
+            this.view.x = this.valueInBoundary(center.x - w / 2, 0, this.size.width - w);
         }
-
         if (!updateY) {
-            this.view.y = center.y - Resource.height() / 2;
-            if (this.view.y < 0) {
-                this.view.y = 0;
-            }
-            if (this.view.y > this.size.height - Resource.height()) {
-                this.view.y = this.size.height - Resource.height()
-            }
+            this.view.y = this.valueInBoundary(center.y - h / 2, 0, this.size.height - h);
         }
     };
 
+    valueInBoundary(value, min, max) {
+        if (value < min) {
+            return min;
+        } else if (value > max) {
+            return max;
+        } else {
+            return value;
+        }
+    }
+
     draw(ctx) {
         this.drawBackground(ctx);
-        this.drawItems(ctx);
-        this.drawControl(ctx);
-        this.drawRoomInfo(ctx);
+        // this.drawItems(ctx);
+        // this.drawControl(ctx);
+        // this.drawRoomInfo(ctx);
         this.drawMask(ctx);
     }
 
@@ -234,7 +232,6 @@ export default class Room extends Stage {
     }
 
     drawBackground(ctx) {
-        //背景图
         const img = Resource.getImage("room_background");
         ctx.drawImage(
             img,
@@ -244,37 +241,54 @@ export default class Room extends Stage {
             Resource.width(), Resource.height()
         );
 
-        if (!this.size.width || !this.size.height || !this.backgroundImage) {
+        if (!this.size.width || !this.size.height) {
             return;
         }
 
-        if (!this.backgroundImage.repeatX || !this.backgroundImage.repeatY) {
-            this.calculateBackgroundRepeat();
-        }
+        //将所有数据都转换成后端的尺寸，最后再做比例缩放
+        const imageWidthForServer = this.backgroundImage.width * this.scaleForWindowToServer();
+        const imageHeightForServer = this.backgroundImage.height * this.scaleForWindowToServer();
+        const topLeft = this.convertToScreenPoint({x: 0, y: 0});
+        const getBottomRight = (topLeft) => {
+            return {
+                x: this.valueInBoundary(
+                    topLeft.x + imageWidthForServer,
+                    topLeft.x,
+                    this.size.width - this.view.x),
+                y: this.valueInBoundary(
+                    topLeft.y + imageHeightForServer,
+                    topLeft.y,
+                    this.size.height - this.view.y)
+            };
+        };
 
-        const mapStart = this.convertToScreenPoint({x: 0, y: 0});
-        for (let x = 0; x < this.backgroundImage.repeatX; ++x) {
-            for (let y = 0; y < this.backgroundImage.repeatY; ++y) {
-                const start = {};
-                const end = {};
-                start.x = x * this.backgroundImage.sizeX;
-                start.y = y * this.backgroundImage.sizeY;
+        //屏幕大小
+        const w = Resource.width() * this.scaleForWindowToServer();
+        const h = Resource.height() * this.scaleForWindowToServer();
 
-                end.x = start.x + this.backgroundImage.sizeX;
-                end.y = start.y + this.backgroundImage.sizeY;
+        //开始绘制
+        for (; topLeft.x < this.size.width; topLeft.x += imageWidthForServer) {
+            for (; topLeft.y < this.size.height; topLeft.y += imageHeightForServer) {
+                const bottomRight = getBottomRight(topLeft);
 
-                if (start.x + mapStart.x > Resource.width() ||
-                    start.y + mapStart.y > Resource.height() ||
-                    end.x + mapStart.x < 0 ||
-                    end.y + mapStart.y < 0) {
+                //超出边界
+                if (topLeft.x > w ||
+                    topLeft.y > h ||
+                    bottomRight.x < 0 ||
+                    bottomRight.y < 0) {
                     continue;
                 }
 
-                ctx.drawImage(this.backgroundImage,
+                const displayWidth = (bottomRight.x - topLeft.x) / imageWidthForServer * this.backgroundImage.width;
+                const displayHeight = (bottomRight.y - topLeft.y) / imageHeightForServer * this.backgroundImage.height;
+                ctx.drawImage(
+                    this.backgroundImage,
                     0, 0,
-                    this.backgroundImage.width, this.backgroundImage.height,
-                    start.x + mapStart.x, start.y + mapStart.y,
-                    this.backgroundImage.sizeX, this.backgroundImage.sizeY);
+                    displayWidth, displayHeight,
+                    topLeft.x / this.scaleForWindowToServer(),
+                    topLeft.y / this.scaleForWindowToServer(),
+                    displayWidth,
+                    displayHeight);
             }
         }
     }
@@ -358,16 +372,9 @@ export default class Room extends Stage {
             this.roomInfo.computerLife = data.computerLife;
         }
         if (data.width && data.height) {
-            this.mapSize = {
-                width: data.width,
-                height: data.height
-            };
-            this.size.width = data.width * Resource.getRoomScale();
-            this.size.height = data.height * Resource.getRoomScale();
-            this.calculateBackgroundRepeat();
+            this.size.width = data.width;
+            this.size.height = data.height;
         }
-
-        // load mapItem
         if (data.itemList) {
             data.itemList.forEach(itemData => {
                 this.createOrUpdateMapItem(itemData);
@@ -457,20 +464,6 @@ export default class Room extends Stage {
             item.isBarrier = true;
         }
     }
-
-    calculateBackgroundRepeat() {
-        this.backgroundImage.repeatX = Math.round(this.size.width / this.backgroundImage.width);
-        this.backgroundImage.repeatY = Math.round(this.size.height / this.backgroundImage.height);
-        if (this.backgroundImage.repeatX === 0) {
-            this.backgroundImage.repeatX = 1;
-        }
-        if (this.backgroundImage.repeatY === 0) {
-            this.backgroundImage.repeatY = 1;
-        }
-
-        this.backgroundImage.sizeX = this.size.width / this.backgroundImage.repeatX;
-        this.backgroundImage.sizeY = this.size.height / this.backgroundImage.repeatY;
-    };
 
     /**
      * 真实坐标转换屏幕坐标
@@ -828,5 +821,13 @@ export default class Room extends Stage {
 
     getId() {
         return "room";
+    }
+
+    /**
+     * 屏幕大小转换成后端832 * 468的比例
+     * @returns {number}
+     */
+    scaleForWindowToServer() {
+        return 1 / (Resource.getScale() * 2.3);
     }
 }
