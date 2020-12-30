@@ -26,7 +26,6 @@ export default class Manager {
                 w: 100,
                 h: 100
             },
-            needOffset: false,
             hasSound: false,
             callBack: function () {
                 //返回主菜单(暂停状态不能返回)
@@ -49,17 +48,16 @@ export default class Manager {
     }
 
     drawRoomInfo(ctx) {
-        const rect = Resource.getImage("room_rect");
         const interval = 320;
 
         const roomInfo = this.room.roomInfo;
 
         const icons = [
-            Resource.getImage("room_stage"),
-            Resource.getImage("player_life"),
-            Resource.getImage("enemy_life"),
-            Resource.getImage("gold"),
-            Resource.getImage("room")
+            "room_stage",
+            "player_life",
+            "enemy_life",
+            "gold",
+            "room"
         ];
         const infos = [
             roomInfo.mapId + "-" + roomInfo.subId,
@@ -69,30 +67,23 @@ export default class Manager {
             roomInfo.roomId
         ];
 
-        ctx.font = '36px gameFont';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
 
         for (let i = 0; i < 5; ++i) {
-            ctx.drawImage(
-                rect,
-                0, 0,
-                rect.width, rect.height,
+            ctx.displayTopLeft(
+                "room_rect",
                 100 + i * interval, 50,
-                rect.width * 1.7, rect.height * 1.5
-            );
+                277);
 
             const icon = icons[i];
-            ctx.drawImage(
+            ctx.displayTopLeft(
                 icon,
-                0, 0,
-                icon.width, icon.height,
                 100 + i * interval, 30,
-                100, 100
-            );
+                100, 100);
 
-            ctx.fillText(infos[i], 272 + i * interval, 82);
+            ctx.displayGameText(infos[i], 272 + i * interval, 82, 36);
         }
 
         this.drawBackButton(ctx);
@@ -102,13 +93,9 @@ export default class Manager {
         if (!Status.isGaming()) {
             return;
         }
-
-        const back = Resource.getImage("back");
-        ctx.drawImage(
-            back,
-            0, 0,
-            back.width, back.height,
-            Resource.width() - 130, 30,
+        ctx.displayTopLeft(
+            "back",
+            Resource.formatWidth(true) - 130, 30,
             100, 100
         );
     }

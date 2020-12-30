@@ -56,10 +56,10 @@ export default class ControlUnit {
             y: point.y
         };
         if (pos.x < 0) {
-            pos.x = Resource.width() + pos.x;
+            pos.x = Resource.formatWidth(!Resource.getNeedOffset()) + pos.x;
         }
         if (pos.y < 0) {
-            pos.y = Resource.height() + pos.y;
+            pos.y = Resource.formatHeight(!Resource.getNeedOffset()) + pos.y;
         }
 
         const offset = this.getOffset();

@@ -40,7 +40,7 @@ export default class Button extends Rect {
     }
 
     draw(ctx) {
-        this.drawImage(ctx);
+        super.draw(ctx);
         this.drawText(ctx);
     }
 
@@ -50,9 +50,5 @@ export default class Button extends Rect {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#fff';
         ctx.fillText(this.text, this.x, this.y);
-    }
-
-    drawImage(ctx) {
-        super.draw(ctx);
     }
 }

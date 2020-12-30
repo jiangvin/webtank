@@ -45,7 +45,20 @@ export default class MapItem extends Item {
     }
 
     draw(ctx, displayWidth, displayHeight) {
-        this.drawImage(ctx, displayWidth, displayHeight);
+        if (!displayWidth) {
+            displayWidth = this.image.width / this.image.widthPics * this.scale;
+        }
+        if (!displayHeight) {
+            displayHeight = this.image.height / this.image.heightPics * this.scale;
+        }
+
+        this.drawForServerToWindow(ctx,
+            this.image,
+            this.screenPoint.x,
+            this.screenPoint.y,
+            displayWidth,
+            displayHeight,
+            this.orientation);
     }
 
     updateAnimation() {
@@ -54,24 +67,21 @@ export default class MapItem extends Item {
         }
     }
 
-    drawImage(context, displayWidth, displayHeight) {
-        if (!displayWidth) {
-            displayWidth = this.image.width / this.image.widthPics * this.scale;
-        }
-        if (!displayHeight) {
-            displayHeight = this.image.height / this.image.heightPics * this.scale;
+    drawForServerToWindow(ctx, image, x, y, w, h, indexX) {
+        const displayScale = this.scaleForServerToWindow();
+        if (indexX === undefined) {
+            indexX = 0;
         }
 
-        displayWidth *= Resource.getRoomScale();
-        displayHeight *= Resource.getRoomScale();
-
-
-        context.drawImage(this.image,
-            this.orientation * this.image.width / this.image.widthPics, 0,
-            this.image.width / this.image.widthPics, this.image.height / this.image.heightPics,
-            this.screenPoint.x - displayWidth / 2, this.screenPoint.y - displayHeight / 2,
-            displayWidth, displayHeight);
-    };
+        ctx.drawImage(image,
+            indexX * image.width / image.widthPics, 0,
+            image.width / image.widthPics,
+            image.height / image.heightPics,
+            (x - w / 2) * displayScale,
+            (y - h / 2) * displayScale,
+            w * displayScale,
+            h * displayScale);
+    }
 
     getType() {
         return "game";
@@ -81,17 +91,20 @@ export default class MapItem extends Item {
      * 是否在画面中
      */
     isInScreen() {
-        const half = Resource.getUnitSize() * Resource.getRoomScale() / 2;
+        const half = Resource.getUnitSize() / 2;
 
         this.screenPoint = this.stage.convertToScreenPoint({
-            x: this.x * Resource.getRoomScale(),
-            y: this.y * Resource.getRoomScale()
+            x: this.x,
+            y: this.y
         });
+
+        const w = Resource.width() * this.scaleForWindowToServer();
+        const h = Resource.height() * this.scaleForWindowToServer();
 
         return !(this.screenPoint.x <= -half ||
             this.screenPoint.y <= -half ||
-            this.screenPoint.x >= Resource.width() + half ||
-            this.screenPoint.y >= Resource.height() + half);
+            this.screenPoint.x >= w + half ||
+            this.screenPoint.y >= h + half);
     }
 
     /**
@@ -100,5 +113,13 @@ export default class MapItem extends Item {
      */
     drawEffect(container) {
 
+    }
+
+    scaleForWindowToServer() {
+        return this.stage.scaleForWindowToServer();
+    }
+
+    scaleForServerToWindow() {
+        return this.stage.scaleForServerToWindow();
     }
 }

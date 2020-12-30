@@ -104,18 +104,19 @@ export default class Tank extends MapItem {
 
         //ID坐标
         const x = this.screenPoint.x;
-        const y = this.screenPoint.y - Resource.getUnitSize() * Resource.getRoomScale() * this.scale / 2;
-
+        const y = this.screenPoint.y - Resource.getUnitSize() * this.scale / 2;
+        const displayScale = this.scaleForServerToWindow();
+        const fontSize = Math.round(13 * displayScale);
         return new Item({
             x: x,
             y: y,
             z: Height.tankId(),
             draw: function (ctx) {
-                ctx.font = '26px Helvetica';
+                ctx.font = fontSize + 'px Helvetica';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 ctx.fillStyle = color;
-                ctx.fillText(id, x, y);
+                ctx.fillText(id, x * displayScale, y * displayScale);
             }
         });
     }
@@ -127,7 +128,7 @@ export default class Tank extends MapItem {
 
         const thisItem = this;
         if (!thisItem.play || thisItem.play.isFinish()) {
-            thisItem.play = new Play(1, 15,
+            thisItem.play = new Play(1, 10,
                 function () {
                     thisItem.play.shieldFrame = (thisItem.play.shieldFrame + 1) % 4;
                 }, function () {
@@ -141,22 +142,21 @@ export default class Tank extends MapItem {
         }
 
         const shieldFrame = thisItem.play.shieldFrame;
-
+        const image = Resource.getOrCreateImage("shield");
+        const displayWidth = image.width / image.widthPics * 0.9;
+        const displayHeight = image.height / image.heightPics * 0.9;
+        const item = this;
         return new Item({
             x: thisItem.screenPoint.x,
             y: thisItem.screenPoint.y,
             z: Height.shield(),
             draw: function (ctx) {
-                const image = Resource.getOrCreateImage("shield");
-                const displayWidth = image.width / image.widthPics * Resource.getRoomScale() * 0.9;
-                const displayHeight = image.height / image.heightPics * Resource.getRoomScale() * 0.9;
-
                 ctx.globalAlpha = 0.7;
-                ctx.drawImage(image,
-                    shieldFrame * image.width / image.widthPics, 0,
-                    image.width / image.widthPics, image.height / image.heightPics,
-                    this.x - displayWidth / 2, this.y - displayHeight / 2,
-                    displayWidth, displayHeight);
+                item.drawForServerToWindow(
+                    ctx, image,
+                    this.x, this.y,
+                    displayWidth, displayHeight,
+                    shieldFrame);
                 ctx.globalAlpha = 1.0;
             }
         });
@@ -177,20 +177,16 @@ export default class Tank extends MapItem {
             return null;
         }
 
+        const image = Resource.getImage("stop");
         return new Item({
             x: this.screenPoint.x,
             y: this.screenPoint.y,
             z: Height.stopMark(),
-            draw: function (ctx) {
-                const image = Resource.getImage("stop");
-                const displayWidth = 25 * Resource.getRoomScale();
-                const displayHeight = 25 * Resource.getRoomScale();
-                ctx.drawImage(image,
-                    0, 0,
-                    image.width, image.height,
-                    this.x - displayWidth / 2,
-                    this.y - displayHeight / 2,
-                    displayWidth, displayHeight);
+            draw: (ctx) => {
+                this.drawForServerToWindow(
+                    ctx, image,
+                    this.screenPoint.x, this.screenPoint.y,
+                    25, 25);
             }
         });
     }
@@ -200,28 +196,17 @@ export default class Tank extends MapItem {
             return null;
         }
 
+        const image = Resource.getImage("tank_face_rect");
         const faceId = this.faceId;
+        const face = Resource.getImage(faceId);
+        const item = this;
         return new Item({
-            x: this.screenPoint.x - 20 * Resource.getRoomScale(),
-            y: this.screenPoint.y - 15 * Resource.getRoomScale(),
+            x: this.screenPoint.x - 20,
+            y: this.screenPoint.y - 15,
             z: Height.tankFace(),
             draw: function (ctx) {
-                const image = Resource.getImage("tank_face_rect");
-                const displayWidth = 72 * Resource.getRoomScale();
-                const displayHeight = 72 * Resource.getRoomScale();
-                ctx.drawImage(image,
-                    0, 0,
-                    image.width, image.height,
-                    this.x - displayWidth / 2, this.y - displayHeight / 2,
-                    displayWidth, displayHeight);
-
-                const face = Resource.getImage(faceId);
-                const faceSize = 20 * Resource.getRoomScale();
-                ctx.drawImage(face,
-                    0, 0,
-                    face.width, face.height,
-                    this.x - faceSize / 2, this.y - faceSize * 1.3,
-                    faceSize, faceSize);
+                item.drawForServerToWindow(ctx, image, this.x, this.y, 72, 72);
+                item.drawForServerToWindow(ctx, face, this.x, this.y - 15, 20, 20);
             }
         });
     }

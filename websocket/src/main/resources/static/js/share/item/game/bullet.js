@@ -1,5 +1,4 @@
 import MapItem from "./mapitem.js";
-import Resource from "../../tool/resource.js";
 import Height from "./height.js";
 
 /**
@@ -26,9 +25,9 @@ export default class Bullet extends MapItem {
         }
     }
 
-    drawImage(context) {
-        const displayWidth = this.image.width / this.image.widthPics * this.scale * Resource.getRoomScale();
-        const displayHeight = this.image.height / this.image.heightPics * this.scale * Resource.getRoomScale();
+    draw(context) {
+        const displayWidth = this.image.width / this.image.widthPics * this.scale;
+        const displayHeight = this.image.height / this.image.heightPics * this.scale;
 
         //已经爆炸
         if (this.action === 0) {
@@ -38,7 +37,7 @@ export default class Bullet extends MapItem {
         //左右的时候子弹稍微上偏
         let offsetY = 0;
         if (this.orientation > 1) {
-            offsetY = -10;
+            offsetY = -4;
         }
         const center = {
             x: this.screenPoint.x,
@@ -46,13 +45,11 @@ export default class Bullet extends MapItem {
         };
 
         this.rotate(context, center);
-
-        context.drawImage(this.image,
-            this.bulletType * this.image.width / this.image.widthPics, 0,
-            this.image.width / this.image.widthPics, this.image.height / this.image.heightPics,
-            center.x - displayWidth / 2, center.y - displayHeight / 2,
-            displayWidth, displayHeight);
-
+        this.drawForServerToWindow(
+            context, this.image,
+            center.x, center.y,
+            displayWidth, displayHeight,
+            this.bulletType);
         this.rotate(context, center, true);
     };
 
@@ -62,8 +59,13 @@ export default class Bullet extends MapItem {
             return;
         }
 
+        const rotatePoint = {
+            x: center.x * this.scaleForServerToWindow(),
+            y: center.y * this.scaleForServerToWindow()
+        };
+
         //将绘图原点移到画布中点
-        ctx.translate(center.x, center.y);
+        ctx.translate(rotatePoint.x, rotatePoint.y);
 
         //默认旋转方向为顺时针
         let direction = 1;
@@ -86,7 +88,7 @@ export default class Bullet extends MapItem {
         }
 
         //还原原点
-        ctx.translate(-center.x, -center.y);
+        ctx.translate(-rotatePoint.x, -rotatePoint.y);
     }
 
     update() {

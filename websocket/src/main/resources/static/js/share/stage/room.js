@@ -184,9 +184,9 @@ export default class Room extends Stage {
 
     draw(ctx) {
         this.drawBackground(ctx);
-        // this.drawItems(ctx);
+        this.drawItems(ctx);
         this.drawControl(ctx);
-        // this.drawRoomInfo(ctx);
+        this.drawRoomInfo(ctx);
         this.drawMask(ctx);
     }
 
@@ -828,6 +828,10 @@ export default class Room extends Stage {
      * @returns {number}
      */
     scaleForWindowToServer() {
-        return 1 / (Resource.getScale() * 2.3);
+        return 1 / this.scaleForServerToWindow();
+    }
+
+    scaleForServerToWindow() {
+        return Resource.getScale() * 2.3;
     }
 }

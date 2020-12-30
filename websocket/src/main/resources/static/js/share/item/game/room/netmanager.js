@@ -5,7 +5,6 @@
  */
 
 import Manager from "./manager.js";
-import Resource from "../../../tool/resource.js";
 import Status from "../../../tool/status.js";
 import Connect from "../../../tool/connect.js";
 
@@ -29,15 +28,11 @@ export default class NetManager extends Manager {
     }
 
     drawFaceButton(ctx) {
-        const face = Resource.getImage("face01");
-        ctx.drawImage(
-            face,
-            0, 0,
-            face.width, face.height,
-            Resource.width() - 150, 540,
-            120, 120
-        );
-
+        ctx.displayTopLeft(
+            "face01",
+            -150,
+            540,
+            120);
         this.drawFaceRect(ctx);
     }
 
@@ -46,25 +41,19 @@ export default class NetManager extends Manager {
             return;
         }
 
-        const rect = Resource.getImage("face_rect");
-        ctx.drawImage(
-            rect,
-            0, 0,
-            rect.width, rect.height,
-            Resource.width() - 595, 175,
+        ctx.displayTopLeft(
+            "face_rect",
+            -595, 175,
             600, 500
         );
 
-        const startX = Resource.width() + this.faceInfo.x;
+        const startX = this.faceInfo.x;
         const startY = this.faceInfo.y;
         for (let i = 0; i < 6; ++i) {
-            const img = Resource.getImage("face0" + (i + 1));
             const x = startX + (i % 3) * this.faceInfo.interval;
             const y = startY + Math.floor(i / 3) * this.faceInfo.interval;
-            ctx.drawImage(
-                img,
-                0, 0,
-                img.width, img.height,
+            ctx.displayTopLeft(
+                "face0" + (i + 1),
                 x, y,
                 this.faceInfo.size, this.faceInfo.size
             );

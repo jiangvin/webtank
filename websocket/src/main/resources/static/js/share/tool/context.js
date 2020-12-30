@@ -120,8 +120,14 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
         h = w * img.height / img.width;
     }
 
-    if (Resource.getNeedOffset()) {
+    if (x < 0) {
+        x = Resource.formatWidth(!Resource.getNeedOffset()) + x;
+    } else if (Resource.getNeedOffset()) {
         x = x + Resource.getOffset().x;
+    }
+    if (y < 0) {
+        y = Resource.formatWidth(!Resource.getNeedOffset()) + y;
+    } else if (Resource.getNeedOffset()) {
         y = y + Resource.getOffset().y;
     }
 
