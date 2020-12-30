@@ -272,13 +272,15 @@ export default class Resource {
     }
 
     static calculateScale(width, height) {
-        let scaleX = width / Resource.formatWidth();
-        let scaleY = height / Resource.formatHeight();
+        const formatWidth = 1920;
+        const formatHeight = 1080;
+        let scaleX = width / formatWidth;
+        let scaleY = height / formatHeight;
         Resource.instance.scale = scaleX > scaleY ? scaleY : scaleX;
 
         Resource.instance.offset = {
-            x: Math.floor((width / Resource.getScale() - Resource.formatWidth()) / 2),
-            y: Math.floor((height / Resource.getScale() - Resource.formatHeight()) / 2)
+            x: Math.floor((width / Resource.getScale() - formatWidth) / 2),
+            y: Math.floor((height / Resource.getScale() - formatHeight) / 2)
         };
         return Resource.instance.scale;
     }
@@ -291,19 +293,25 @@ export default class Resource {
         return Resource.instance.offset;
     }
 
-    static formatWidth(full) {
-        if (full) {
-            return Resource.width() / Resource.getScale();
-        } else {
+    static formatWidth(offset) {
+        if (offset === undefined) {
+            offset = Resource.getNeedOffset();
+        }
+        if (offset) {
             return 1920;
+        } else {
+            return Resource.width() / Resource.getScale();
         }
     }
 
-    static formatHeight(full) {
-        if (full) {
-            return Resource.height() / Resource.getScale();
-        } else {
+    static formatHeight(offset) {
+        if (offset === undefined) {
+            offset = Resource.getNeedOffset();
+        }
+        if (offset) {
             return 1080;
+        } else {
+            return Resource.height() / Resource.getScale();
         }
     }
 

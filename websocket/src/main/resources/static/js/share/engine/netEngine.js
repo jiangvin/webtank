@@ -96,13 +96,13 @@ export default class NetEngine extends Engine {
                 thisEngine.room.createItem({
                     draw: function (ctx) {
                         ctx.displayCenter("button_home",
-                            Resource.formatWidth(true) / 2, 620,
+                            Resource.formatWidth() / 2, 620,
                             350, 120);
                     }
                 });
                 thisEngine.room.createControl({
                     leftTop: {
-                        x: Resource.formatWidth(true) / 2 - 175,
+                        x: Resource.formatWidth() / 2 - 175,
                         y: 620 - 60
                     },
                     size: {

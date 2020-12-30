@@ -95,7 +95,7 @@ export default class Manager {
         }
         ctx.displayTopLeft(
             "back",
-            Resource.formatWidth(true) - 130, 30,
+            Resource.formatWidth() - 130, 30,
             100, 100
         );
     }

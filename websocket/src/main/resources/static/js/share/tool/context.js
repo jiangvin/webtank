@@ -121,12 +121,12 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
     }
 
     if (x < 0) {
-        x = Resource.formatWidth(!Resource.getNeedOffset()) + x;
+        x = Resource.formatWidth() + x;
     } else if (Resource.getNeedOffset()) {
         x = x + Resource.getOffset().x;
     }
     if (y < 0) {
-        y = Resource.formatWidth(!Resource.getNeedOffset()) + y;
+        y = Resource.formatWidth() + y;
     } else if (Resource.getNeedOffset()) {
         y = y + Resource.getOffset().y;
     }
@@ -180,15 +180,15 @@ CanvasRenderingContext2D.prototype.generateTextStatus = function (x, y, size, bo
         offset = Resource.getNeedOffset();
     }
 
-    if (offset) {
-        x += Resource.getOffset().x;
-        y += Resource.getOffset().y;
-    }
     if (x < 0) {
-        x = Resource.formatWidth(!offset) + x;
+        x = Resource.formatWidth(offset) + x;
+    } else if (offset) {
+        x += Resource.getOffset().x;
     }
     if (y < 0) {
-        y = Resource.formatHeight(!offset) + y;
+        y = Resource.formatHeight(offset) + y;
+    } else if (offset) {
+        y += Resource.getOffset().y;
     }
 
     x = Math.round(x * Resource.getScale());

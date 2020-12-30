@@ -29,11 +29,15 @@ export default class NewConfirm {
                 ctx.fillRect(0, 0, Resource.width(), Resource.height());
                 ctx.globalAlpha = 1;
 
+                const center = {
+                    x: Resource.formatWidth() / 2,
+                    y: Resource.formatHeight() / 2
+                };
                 //框体
                 ctx.displayCenter(
                     "confirm",
-                    960,
-                    540,
+                    center.x,
+                    center.y,
                     900);
 
                 //文字
@@ -41,9 +45,9 @@ export default class NewConfirm {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                let y = 485;
+                let y = center.y - 55;
                 this.textList.forEach(text => {
-                    ctx.displayText(text, 952, y, 40);
+                    ctx.displayText(text, center.x - 8, y, 40);
                     y += this.textInterval;
                 });
             }

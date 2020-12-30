@@ -354,7 +354,7 @@ export default class Control {
         if (Control.instance.portrait) {
             //竖屏
             touchPoint.x = y;
-            touchPoint.y = Resource.formatHeight(true) * scale - x;
+            touchPoint.y = Resource.formatHeight(false) * scale - x;
         } else {
             //横屏
             touchPoint.x = x;

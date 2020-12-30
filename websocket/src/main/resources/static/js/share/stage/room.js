@@ -308,8 +308,8 @@ export default class Room extends Stage {
         ctx.fillStyle = '#22b2ee';
         ctx.fillRect(0, Resource.height() * .32, Resource.width(), 270 * Resource.getScale());
 
-        const w = Resource.formatWidth(true);
-        const h = Resource.formatHeight(true);
+        const w = Resource.formatWidth();
+        const h = Resource.formatHeight();
         //显示标题
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
