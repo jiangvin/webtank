@@ -30,12 +30,12 @@ export default class Common {
         Resource.getRoot().gotoStage(id, options);
     }
 
-    static addTimeEvent(eventType, callBack, timeout, ignoreLog) {
-        Resource.getRoot().addTimeEvent(eventType, callBack, timeout, ignoreLog);
+    static addTimeEvent(eventType, callback, timeout, ignoreLog) {
+        Resource.getRoot().addTimeEvent(eventType, callback, timeout, ignoreLog);
     }
 
-    static addMessageEvent(eventType, callBack) {
-        Resource.getRoot().addMessageEvent(eventType, callBack);
+    static addMessageEvent(eventType, callback) {
+        Resource.getRoot().addMessageEvent(eventType, callback);
     }
 
     static syncUserData() {
@@ -58,8 +58,8 @@ export default class Common {
         });
     }
 
-    static getRequest(url, callBack) {
-        Resource.instance.adapter.getRequest(url, callBack);
+    static getRequest(url, callback) {
+        Resource.instance.adapter.getRequest(url, callback);
     }
 
     static postEncrypt(url, body, callback) {

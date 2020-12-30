@@ -77,7 +77,7 @@ export default class NetManager extends Manager {
                 h: 120
             },
             needOffset: false,
-            callBack: () => {
+            callback: () => {
                 if (!Status.isGaming()) {
                     return;
                 }
@@ -105,7 +105,7 @@ export default class NetManager extends Manager {
                         h: this.faceInfo.size
                     },
                     needOffset: false,
-                    callBack: function () {
+                    callback: function () {
                         Connect.send("FACE", this.id);
                         manager.changeFaceEvent();
                     }

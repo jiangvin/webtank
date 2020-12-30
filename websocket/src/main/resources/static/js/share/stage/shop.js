@@ -165,14 +165,14 @@ export default class Shop extends Stage {
 
     initControl() {
         //返回按钮事件
-        const buttonCloseRankBoard = new ControlUnit(
-            Resource.generateClientId(),
-            {x: 1830, y: 32},
-            {x: 1910, y: 118},
-            () => {
+        const buttonCloseRankBoard = new ControlUnit({
+            leftTop: {x: 1830, y: 32},
+            rightBottom: {x: 1910, y: 118},
+            callback: () => {
                 this.removeEventListener();
                 Common.gotoStage("menu");
-            });
+            }
+        });
         this.controlUnits.set(buttonCloseRankBoard.id, buttonCloseRankBoard);
 
         //购买事件
@@ -189,7 +189,7 @@ export default class Shop extends Stage {
                 h: 571
             },
             hasSound: false,
-            callBack: (point) => {
+            callback: (point) => {
                 this.itemInfo.touchPoint = point;
                 this.itemInfo.offsetCache = this.itemInfo.offset;
             }
@@ -235,7 +235,7 @@ export default class Shop extends Stage {
     initShopButtonControl() {
         this.shopItems.forEach(item => {
             item.control = this.createControl({
-                callBack: () => {
+                callback: () => {
                     this.buy(item);
                 }
             })

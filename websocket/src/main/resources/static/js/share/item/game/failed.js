@@ -103,7 +103,7 @@ export default class Failed {
                 y: 910 - button.h / 2
             },
             size: button,
-            callBack: () => {
+            callback: () => {
                 Resource.getRoot().engine.again();
             }
         });
@@ -113,7 +113,7 @@ export default class Failed {
                 y: 910 - button.h / 2
             },
             size: button,
-            callBack: () => {
+            callback: () => {
                 Common.gotoStage("menu");
             }
         })

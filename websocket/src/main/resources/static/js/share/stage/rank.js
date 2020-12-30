@@ -21,13 +21,13 @@ export default class Rank extends Stage {
         this.createFullScreenItem("rank_board");
 
         //返回按钮事件
-        const buttonCloseRankBoard = new ControlUnit(
-            Resource.generateClientId(),
-            {x: 1830, y: 32},
-            {x: 1916, y: 118},
-            function () {
+        const buttonCloseRankBoard = new ControlUnit({
+            leftTop: {x: 1830, y: 32},
+            rightBottom: {x: 1916, y: 118},
+            callback: function () {
                 Common.lastStage();
-            });
+            }
+        });
         this.controlUnits.set(buttonCloseRankBoard.id, buttonCloseRankBoard);
 
         //按钮大小
@@ -52,17 +52,16 @@ export default class Rank extends Stage {
                 // 镜像处理还原坐标变换
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
             },
-            controlUnit: new ControlUnit(
-                Resource.generateClientId(),
-                {
+            controlUnit: new ControlUnit({
+                leftTop: {
                     x: 836 - buttonSize.w / 2,
                     y: 928 - buttonSize.h / 2
                 },
-                {
+                rightBottom: {
                     x: 836 + buttonSize.w / 2,
                     y: 928 + buttonSize.h / 2
                 },
-                function () {
+                callback: function () {
                     if (thisRank.rankStart <= 0) {
                         return;
                     }
@@ -70,7 +69,7 @@ export default class Rank extends Stage {
                     thisRank.rankStart -= 5;
                     thisRank.loadRank();
                 }
-            )
+            })
         });
 
         //下一页按钮
@@ -83,17 +82,16 @@ export default class Rank extends Stage {
                     buttonSize.w,
                     buttonSize.h);
             },
-            controlUnit: new ControlUnit(
-                Resource.generateClientId(),
-                {
+            controlUnit: new ControlUnit({
+                leftTop: {
                     x: 1084 - buttonSize.w / 2,
                     y: 928 - buttonSize.h / 2
                 },
-                {
+                rightBottom: {
                     x: 1084 + buttonSize.w / 2,
                     y: 928 + buttonSize.h / 2
                 },
-                function () {
+                callback: function () {
                     if (thisRank.isRankEnd) {
                         return;
                     }
@@ -101,7 +99,7 @@ export default class Rank extends Stage {
                     thisRank.rankStart += 5;
                     thisRank.loadRank();
                 }
-            )
+            })
         });
     }
 

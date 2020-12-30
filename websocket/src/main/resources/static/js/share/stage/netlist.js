@@ -36,7 +36,7 @@ export default class NetList extends Stage {
                 w: 86,
                 h: 96
             },
-            callBack: function () {
+            callback: function () {
                 Common.gotoStage("menu");
             }
         });
@@ -51,7 +51,7 @@ export default class NetList extends Stage {
                 w: 255,
                 h: 80
             },
-            callBack: function () {
+            callback: function () {
                 Common.nextStage();
             }
         });
@@ -116,17 +116,17 @@ export default class NetList extends Stage {
                                 380 + i * interval,
                                 170);
                         },
-                        controlUnit: new ControlUnit(
-                            "button_" + i,
-                            {
+                        controlUnit: new ControlUnit({
+                            id: "button_" + i,
+                            leftTop: {
                                 x: 1583,
                                 y: 348 + i * interval
                             },
-                            {
+                            rightBottom: {
                                 x: 1753,
                                 y: 412 + i * interval
                             },
-                            () => {
+                            callback: () => {
                                 const room = roomList[i];
                                 const roomInfo = new RoomInfo(true);
                                 roomInfo.roomId = room.roomId;
@@ -151,7 +151,7 @@ export default class NetList extends Stage {
                                         });
                                 }
                             }
-                        )
+                        })
                     })
                 }
 

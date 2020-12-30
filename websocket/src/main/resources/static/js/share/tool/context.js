@@ -52,8 +52,8 @@ CanvasRenderingContext2D.prototype.displayFillRoundRect = function (x, y, w, h, 
     this.restore();
 };
 
-CanvasRenderingContext2D.prototype.displayCenter = function (imageId, x, y, w, h, indexX) {
-    this.displayBase(imageId, x, y, w, h, "center", indexX);
+CanvasRenderingContext2D.prototype.displayCenter = function (imageId, x, y, w, h, indexX, offset) {
+    this.displayBase(imageId, x, y, w, h, "center", indexX, offset);
 };
 
 CanvasRenderingContext2D.prototype.displayTopLeft = function (imageId, x, y, w, h) {
@@ -98,7 +98,7 @@ CanvasRenderingContext2D.prototype.displayRate = function (imageId, rateX, rateY
     this.displayBase(imageId, x, y, w, h, align);
 };
 
-CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, align, indexX) {
+CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, align, indexX, offset) {
     const img = Resource.getImage(imageId);
     if (!img) {
         return;
@@ -120,14 +120,18 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
         h = w * img.height / img.width;
     }
 
+    if (offset === undefined) {
+        offset = Resource.getNeedOffset();
+    }
+
     if (x < 0) {
-        x = Resource.formatWidth() + x;
-    } else if (Resource.getNeedOffset()) {
+        x = Resource.formatWidth(offset) + x;
+    } else if (offset) {
         x = x + Resource.getOffset().x;
     }
     if (y < 0) {
-        y = Resource.formatWidth() + y;
-    } else if (Resource.getNeedOffset()) {
+        y = Resource.formatWidth(offset) + y;
+    } else if (offset) {
         y = y + Resource.getOffset().y;
     }
 

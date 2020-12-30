@@ -9,6 +9,7 @@ import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
 import Connect from "../tool/connect.js";
+import ControlUnit from "../item/controlunit.js";
 
 export default class NetEngine extends Engine {
     constructor(room) {
@@ -65,13 +66,13 @@ export default class NetEngine extends Engine {
      */
     addConnectCheckEvent() {
         const thisEngine = this;
-        const callBack = function () {
+        const callback = function () {
             if (Connect.status() === true) {
                 const start = new Date().getTime();
                 Common.getRequest("/multiplePlayers/ping", function () {
                     Resource.getRoot().netDelay = new Date().getTime() - start;
                 });
-                thisEngine.addTimeEvent(120, callBack);
+                thisEngine.addTimeEvent(120, callback);
             } else {
                 Status.setStatus(Status.statusPause());
                 //再关闭一次，排除一些情况
@@ -96,28 +97,29 @@ export default class NetEngine extends Engine {
                 thisEngine.room.createItem({
                     draw: function (ctx) {
                         ctx.displayCenter("button_home",
-                            Resource.formatWidth() / 2, 620,
-                            350, 120);
-                    }
-                });
-                thisEngine.room.createControl({
-                    leftTop: {
-                        x: Resource.formatWidth() / 2 - 175,
-                        y: 620 - 60
+                            960, 620,
+                            350, 120, 0, true);
                     },
-                    size: {
-                        w: 350,
-                        h: 120
-                    },
-                    callBack: () => {
-                        Resource.getRoot().gotoStage("menu");
-                    }
+                    controlUnit: new ControlUnit({
+                        center: {
+                            x: 960,
+                            y: 620
+                        },
+                        size: {
+                            w: 350,
+                            h: 120
+                        },
+                        callback: () => {
+                            Resource.getRoot().gotoStage("menu");
+                        },
+                        needOffset: true
+                    })
                 });
             }
         };
 
         console.log("connect status will be checked per 120 frames...");
-        thisEngine.addTimeEvent(120, callBack);
+        thisEngine.addTimeEvent(120, callback);
     }
 
     processControlEvent(control) {

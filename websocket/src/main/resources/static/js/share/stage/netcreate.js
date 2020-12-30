@@ -25,7 +25,7 @@ export default class NetCreate extends Stage {
                 w: 86,
                 h: 96
             },
-            callBack: function () {
+            callback: function () {
                 Common.lastStage();
             }
         });
@@ -40,7 +40,7 @@ export default class NetCreate extends Stage {
                 w: 540,
                 h: 635
             },
-            callBack: function () {
+            callback: function () {
                 Common.gotoStage("mission", new RoomInfo(true));
             }
         });
@@ -55,7 +55,7 @@ export default class NetCreate extends Stage {
                 w: 540,
                 h: 635
             },
-            callBack: () => {
+            callback: () => {
                 new TeamSelector(this, (teamType) => {
                     const roomInfo = new RoomInfo(true);
                     roomInfo.roomType = "PVP";

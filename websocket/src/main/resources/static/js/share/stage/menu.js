@@ -47,25 +47,23 @@ export default class Menu extends Stage {
 
     initButton() {
         //排行榜打开按钮
-        const buttonOpenRankBoard = new ControlUnit(
-            Resource.generateClientId(),
-            {x: 172, y: 744},
-            {x: 376, y: 1036},
-            function () {
+        const buttonOpenRankBoard = new ControlUnit({
+            leftTop: {x: 172, y: 744},
+            rightBottom: {x: 376, y: 1036},
+            callback: function () {
                 Common.nextStage();
             }
-        );
+        });
         this.controlUnits.set(buttonOpenRankBoard.id, buttonOpenRankBoard);
 
         //商店
-        const buttonOpenShop = new ControlUnit(
-            Resource.generateClientId(),
-            {x: 1567, y: 793},
-            {x: 1760, y: 1036},
-            function () {
+        const buttonOpenShop = new ControlUnit({
+            leftTop: {x: 1567, y: 793},
+            rightBottom: {x: 1760, y: 1036},
+            callback: function () {
                 Common.gotoStage("shop");
             }
-        );
+        });
         this.controlUnits.set(buttonOpenShop.id, buttonOpenShop);
     }
 
@@ -153,25 +151,23 @@ export default class Menu extends Stage {
         //事件处理
         const thisMenu = this;
         //单人模式
-        const singleMode = new ControlUnit(
-            Resource.generateClientId(),
-            {x: 556, y: 614},
-            {x: 748, y: 940},
-            function () {
+        const singleMode = new ControlUnit({
+            leftTop: {x: 556, y: 614},
+            rightBottom: {x: 748, y: 940},
+            callback: function () {
                 thisMenu.doorStatus.enterDoor1 = true;
             }
-        );
+        });
         this.controlUnits.set(singleMode.id, singleMode);
 
         //多人模式
-        const multipleMode = new ControlUnit(
-            Resource.generateClientId(),
-            {x: 1220, y: 614},
-            {x: 1412, y: 940},
-            function () {
+        const multipleMode = new ControlUnit({
+            leftTop: {x: 1220, y: 614},
+            rightBottom: {x: 1412, y: 940},
+            callback: function () {
                 thisMenu.doorStatus.enterDoor2 = true;
             }
-        );
+        });
         this.controlUnits.set(multipleMode.id, multipleMode);
     }
 

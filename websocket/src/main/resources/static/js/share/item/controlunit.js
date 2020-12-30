@@ -8,11 +8,11 @@ import Sound from "../tool/sound.js";
 import Resource from "../tool/resource.js";
 
 export default class ControlUnit {
-    constructor(id, leftTop, rightBottom, callBack) {
-        this.id = id;
-        this.leftTop = leftTop;
-        this.rightBottom = rightBottom;
-        this.callBack = callBack;
+    constructor(options) {
+        this.id = Resource.generateClientId();
+        this.leftTop = {x: 0, y: 0};
+        this.rightBottom = {x: 500, y: 500};
+        this.callback = null;
         this.hasSound = true;
 
         /**
@@ -22,6 +22,24 @@ export default class ControlUnit {
         this.needOffset = Resource.getNeedOffset();
 
         this.enable = true;
+
+        for (let key in options) {
+            this[key] = options[key];
+        }
+
+        //根据长宽重新计算右下角的位置
+        if (options.size) {
+            if (options.center) {
+                this.leftTop = {
+                    x: options.center.x - options.size.w / 2,
+                    y: options.center.y - options.size.h / 2
+                }
+            }
+            this.rightBottom = {
+                x: this.leftTop.x + options.size.w,
+                y: this.leftTop.y + options.size.h
+            }
+        }
     }
 
     process(point) {
@@ -32,7 +50,7 @@ export default class ControlUnit {
             point.x <= rightBottom.x &&
             point.y >= leftTop.y &&
             point.y <= rightBottom.y) {
-            this.callBack(point);
+            this.callback(point);
             if (this.hasSound) {
                 Sound.click();
             }

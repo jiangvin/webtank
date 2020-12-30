@@ -92,7 +92,7 @@ export default class TeamSelector {
                 y: 420
             },
             size: this.buttonSize,
-            callBack: () => {
+            callback: () => {
                 this.enter("RED");
             }
         });
@@ -103,7 +103,7 @@ export default class TeamSelector {
                 y: 420
             },
             size: this.buttonSize,
-            callBack: () => {
+            callback: () => {
                 this.enter("BLUE");
             }
         });
@@ -117,7 +117,7 @@ export default class TeamSelector {
                 x: 1870,
                 y: 1030
             },
-            callBack: () => {
+            callback: () => {
                 this.speed *= -1;
                 this.removeControls();
             }

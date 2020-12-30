@@ -27,7 +27,7 @@ export default class Manager {
                 h: 100
             },
             hasSound: false,
-            callBack: function () {
+            callback: function () {
                 //返回主菜单(暂停状态不能返回)
                 if (!Status.isGaming()) {
                     return;

@@ -83,24 +83,7 @@ export default class Stage {
     }
 
     createControl(options) {
-        const controlUnit = new ControlUnit(
-            Resource.generateClientId(),
-            {x: Resource.width() * .1, y: Resource.height() * .1},
-            {x: Resource.width() * .9, y: Resource.height() * .9},
-            function () {
-
-            });
-        for (let key in options) {
-            controlUnit[key] = options[key];
-        }
-
-        //根据长宽重新计算右下角的位置
-        if (options.size) {
-            controlUnit.rightBottom = {
-                x: controlUnit.leftTop.x + options.size.w,
-                y: controlUnit.leftTop.y + options.size.h
-            }
-        }
+        const controlUnit = new ControlUnit(options);
         this.controlUnits.set(controlUnit.id, controlUnit);
         return controlUnit;
     }

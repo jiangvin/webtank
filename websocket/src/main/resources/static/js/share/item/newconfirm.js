@@ -29,9 +29,11 @@ export default class NewConfirm {
                 ctx.fillRect(0, 0, Resource.width(), Resource.height());
                 ctx.globalAlpha = 1;
 
+                const offsetCache = Resource.getNeedOffset();
+                Resource.setNeedOffset(true);
                 const center = {
-                    x: Resource.formatWidth() / 2,
-                    y: Resource.formatHeight() / 2
+                    x: 960,
+                    y: 540
                 };
                 //框体
                 ctx.displayCenter(
@@ -50,6 +52,7 @@ export default class NewConfirm {
                     ctx.displayText(text, center.x - 8, y, 40);
                     y += this.textInterval;
                 });
+                Resource.setNeedOffset(offsetCache);
             }
         });
 
@@ -63,12 +66,13 @@ export default class NewConfirm {
                 w: 238,
                 h: 70
             },
-            callBack: () => {
+            callback: () => {
                 if (this.callback) {
                     this.callback();
                 }
                 this.close();
-            }
+            },
+            needOffset: true
         });
         this.stage.createControl({
             leftTop: {
@@ -79,9 +83,10 @@ export default class NewConfirm {
                 w: 238,
                 h: 70
             },
-            callBack: () => {
+            callback: () => {
                 this.close();
-            }
+            },
+            needOffset: true
         })
     }
 

@@ -33,11 +33,10 @@ export default class AppHome extends Stage {
                     Resource.formatHeight() * .58 + 150,
                     700, 90);
             },
-            controlUnit: new ControlUnit(
-                Resource.generateClientId(),
-                {x: Resource.formatWidth() / 2 - 350, y: Resource.formatHeight() * .58 + 105},
-                {x: Resource.formatWidth() / 2 + 350, y: Resource.formatHeight() * .58 + 195},
-                function () {
+            controlUnit: new ControlUnit({
+                leftTop: {x: Resource.formatWidth() / 2 - 350, y: Resource.formatHeight() * .58 + 105},
+                rightBottom: {x: Resource.formatWidth() / 2 + 350, y: Resource.formatHeight() * .58 + 195},
+                callback: function () {
                     //检测是否输入名字
                     const input = $('#input');
                     const name = input.val();
@@ -56,7 +55,7 @@ export default class AppHome extends Stage {
                         Common.nextStage();
                     });
                 }
-            )
+            })
         });
 
         //文字

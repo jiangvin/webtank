@@ -44,24 +44,24 @@ export default class Root {
         this.netDelay = 0;
     }
 
-    addTimeEvent(eventType, callBack, timeout, ignoreLog) {
+    addTimeEvent(eventType, callback, timeout, ignoreLog) {
         const event = {};
         event.eventType = eventType;
-        event.callback = callBack;
+        event.callback = callback;
         //默认100帧倒计时，不到1.5秒
         event.timeout = timeout ? timeout : 100;
         event.ignoreLog = ignoreLog;
         this.timeEvents.push(event);
     };
 
-    addMessageEvent(eventType, callBack) {
+    addMessageEvent(eventType, callback) {
         //消息已存在
         if (this.messageEvents.has(eventType)) {
             return;
         }
 
         const messageEvent = {};
-        messageEvent.callback = callBack;
+        messageEvent.callback = callback;
         this.messageEvents.set(eventType, messageEvent);
     }
 

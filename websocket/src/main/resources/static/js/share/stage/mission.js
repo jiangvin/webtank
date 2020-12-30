@@ -127,7 +127,7 @@ export default class Mission extends Stage {
                     y: 270 + i * (rectSelected.h * 1.1)
                 },
                 size: rect,
-                callBack: function () {
+                callback: function () {
                     if (thisMission.hasLock(i)) {
                         return;
                     }
@@ -210,7 +210,7 @@ export default class Mission extends Stage {
                     w: this.missionSize,
                     h: this.missionSize
                 },
-                callBack: () => {
+                callback: () => {
                     if (this.roomInfo.mapId < 1) {
                         return;
                     }
@@ -234,7 +234,7 @@ export default class Mission extends Stage {
                 w: 86,
                 h: 96
             },
-            callBack: function () {
+            callback: function () {
                 Common.preStage();
             }
         });
@@ -249,7 +249,7 @@ export default class Mission extends Stage {
                 w: 192,
                 h: 50
             },
-            callBack: () => {
+            callback: () => {
                 this.roomInfo.hardMode = false;
                 this.roomInfo.mapId = 1;
             }
@@ -265,7 +265,7 @@ export default class Mission extends Stage {
                 w: 192,
                 h: 50
             },
-            callBack: () => {
+            callback: () => {
                 this.roomInfo.hardMode = true;
                 if (this.hasLock(0)) {
                     this.roomInfo.mapId = 0;
