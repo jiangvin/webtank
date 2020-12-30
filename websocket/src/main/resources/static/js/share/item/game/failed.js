@@ -32,7 +32,6 @@ export default class Failed {
     }
 
     init() {
-
         const board = {
             w: 627,
             h: 398,
@@ -49,6 +48,7 @@ export default class Failed {
                 ctx.fillRect(0, 0, Resource.width(), Resource.height());
                 ctx.globalAlpha = 1;
 
+                Resource.setNeedOffset(true);
                 //board
                 if (!board.isEnd()) {
                     board.y += board.speed;
@@ -66,6 +66,7 @@ export default class Failed {
                     }
                     this.addButton();
                 }
+                Resource.setNeedOffset(false);
             }
         });
     }
@@ -83,10 +84,16 @@ export default class Failed {
 
         this.stage.createItem({
             draw: ctx => {
+                Resource.setNeedOffset(true);
                 ctx.displayCenter("button_again",
                     800,
                     910,
                     button.w, button.h);
+                ctx.displayCenter("button_home",
+                    1120,
+                    910,
+                    button.w, button.h);
+                Resource.setNeedOffset(false);
             }
         });
 
@@ -100,16 +107,6 @@ export default class Failed {
                 Resource.getRoot().engine.again();
             }
         });
-
-        this.stage.createItem({
-            draw: ctx => {
-                ctx.displayCenter("button_home",
-                    1120,
-                    910,
-                    button.w, button.h);
-            }
-        });
-
         this.stage.createControl({
             leftTop: {
                 x: 1120 - button.w / 2,

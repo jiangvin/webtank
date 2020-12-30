@@ -60,6 +60,7 @@ export default class Success {
                 ctx.fillRect(0, 0, Resource.width(), Resource.height());
                 ctx.globalAlpha = 1;
 
+                Resource.setNeedOffset(true);
                 //light
                 if (this.boardSize.scale === 1) {
                     this.lightSize.angle += this.lightSize.speed;
@@ -89,7 +90,7 @@ export default class Success {
                         y: this.center.y + 100
                     }, this.score, this.rank);
                 }
-
+                Resource.setNeedOffset(false);
             }
         });
     }
@@ -131,22 +132,25 @@ export default class Success {
     }
 
     static drawInfo(ctx, center, score, rank) {
-        ctx.font = '60px gameFont';
+        ctx.fontSize = 60;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
-        ctx.fillText("当前得分: " + score,
-            center.x + Resource.getOffset().x,
-            center.y + 270 + Resource.getOffset().y);
+        ctx.displayGameText("当前得分: " + score,
+            center.x, center.y + 270);
 
-        ctx.fillText("当前排名: " + rank,
-            center.x + Resource.getOffset().x,
-            center.y + 400 + Resource.getOffset().y);
+        ctx.displayGameText("当前排名: " + rank,
+            center.x,
+            center.y + 400);
     }
 
     rotate(ctx, center, angle) {
-        ctx.translate(center.x + Resource.getOffset().x, center.y + Resource.getOffset().y);
+        const rotateCenter = {
+            x: (center.x + Resource.getOffset().x) * Resource.getScale(),
+            y: (center.y + Resource.getOffset().y) * Resource.getScale()
+        };
+        ctx.translate(rotateCenter.x, rotateCenter.y);
         ctx.rotate(angle);
-        ctx.translate(-center.x - Resource.getOffset().x, -center.y - Resource.getOffset().y);
+        ctx.translate(-rotateCenter.x, -rotateCenter.y);
     }
 }

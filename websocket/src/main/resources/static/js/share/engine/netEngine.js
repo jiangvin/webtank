@@ -8,7 +8,6 @@ import Engine from "./engine.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
-import Button from "../item/button.js";
 import Connect from "../tool/connect.js";
 
 export default class NetEngine extends Engine {
@@ -85,7 +84,7 @@ export default class NetEngine extends Engine {
                         ctx.fillRect(0, 0, Resource.width(), Resource.height());
                         ctx.globalAlpha = 1;
 
-                        ctx.font = '100px gameFont';
+                        ctx.font = (100 * Resource.getScale()) + 'px gameFont';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillStyle = '#FFF';
@@ -94,10 +93,26 @@ export default class NetEngine extends Engine {
                 });
 
                 //显示返回按钮
-                const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
-                    Resource.getRoot().gotoStage("menu");
+                thisEngine.room.createItem({
+                    draw: function (ctx) {
+                        ctx.displayCenter("button_home",
+                            Resource.formatWidth(true) / 2, 620,
+                            350, 120);
+                    }
                 });
-                thisEngine.room.addItem(back);
+                thisEngine.room.createControl({
+                    leftTop: {
+                        x: Resource.formatWidth(true) / 2 - 175,
+                        y: 620 - 60
+                    },
+                    size: {
+                        w: 350,
+                        h: 120
+                    },
+                    callBack: () => {
+                        Resource.getRoot().gotoStage("menu");
+                    }
+                });
             }
         };
 
