@@ -114,7 +114,7 @@ export default class Control {
         const controlMode = Control.instance.controlMode;
         let stop = true;
         for (let i = 0; i < e.touches.length; ++i) {
-            const touchPoint = Control.getTouchPoint(e.touches[i]);
+            const touchPoint = Control.getTouchPointWithoutScale(e.touches[i]);
             const distance = Common.distance(touchPoint.x, touchPoint.y, controlMode.centerX, controlMode.centerY);
             //还有手指在方向盘上，不停止
             if (distance <= controlMode.maxRadius) {
@@ -142,7 +142,7 @@ export default class Control {
         let touchMovePoint;
         let distance;
         for (let i = 0; i < e.touches.length; ++i) {
-            const touchPoint = Control.getTouchPoint(e.touches[i]);
+            const touchPoint = Control.getTouchPointWithoutScale(e.touches[i]);
             distance = Common.distance(touchPoint.x, touchPoint.y, controlMode.centerX, controlMode.centerY);
             if (distance <= controlMode.maxRadius) {
                 touchMovePoint = touchPoint;
@@ -194,8 +194,8 @@ export default class Control {
     }
 
     static touchStartControl(touchPoint) {
-        let x = touchPoint.x;
-        let y = touchPoint.y;
+        let x = touchPoint.x * Resource.getScale();
+        let y = touchPoint.y * Resource.getScale();
         const controlMode = Control.instance.controlMode;
 
         //fire
@@ -205,7 +205,6 @@ export default class Control {
             return;
         }
 
-        //way
         //如果已经在触控方向盘则不做额外触控操作
         if (controlMode.touchX && controlMode.touchY) {
             return;
@@ -213,6 +212,13 @@ export default class Control {
 
         //在屏幕的左半边触控则直接返回
         if (x >= Common.width() * .3) {
+            return;
+        }
+
+        //过于靠边缘也直接返回
+        if (x < controlMode.radius ||
+            y < controlMode.radius ||
+            y > Resource.height() - controlMode.radius) {
             return;
         }
 
@@ -261,9 +267,9 @@ export default class Control {
             return;
         }
 
-        let centerX = Common.width() / 4 / 2;
-        let centerY = Common.height() / 2 / 2;
-        let radius = 160;
+        let centerX = Resource.width() / 4 / 2;
+        let centerY = Resource.height() / 2 / 2;
+        let radius = 160 * Resource.getScale();
         centerY *= 3;
 
         let rightCenterX = centerX * 7;
@@ -274,7 +280,7 @@ export default class Control {
             rightCenterX -= 20;
             centerX += 20;
         }
-        if (Common.height() - centerY - radius < 20) {
+        if (Resource.height() - centerY - radius < 20) {
             rightCenterY -= 20;
             centerY -= 20;
         }
@@ -290,7 +296,7 @@ export default class Control {
         thisControl.controlMode.centerY = centerY;
         thisControl.controlMode.radius = radius;
         thisControl.controlMode.minRadius = radius / 3;
-        thisControl.controlMode.maxRadius = radius * 2;
+        thisControl.controlMode.maxRadius = radius * 3;
 
         thisControl.controlMode.rightCenterX = rightCenterX;
         thisControl.controlMode.rightCenterY = rightCenterY;
@@ -348,7 +354,7 @@ export default class Control {
         if (Control.instance.portrait) {
             //竖屏
             touchPoint.x = y;
-            touchPoint.y = Common.height() * scale - x;
+            touchPoint.y = Resource.formatHeight(true) * scale - x;
         } else {
             //横屏
             touchPoint.x = x;
@@ -359,6 +365,13 @@ export default class Control {
         touchPoint.y /= scale;
 
         return touchPoint;
+    }
+
+    static getTouchPointWithoutScale(eventPoint) {
+        const point = this.getTouchPoint(eventPoint);
+        point.x *= Resource.getScale();
+        point.y *= Resource.getScale();
+        return point;
     }
 
     static setPortrait(isPorTrait) {

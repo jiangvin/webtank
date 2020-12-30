@@ -185,7 +185,7 @@ export default class Room extends Stage {
     draw(ctx) {
         this.drawBackground(ctx);
         // this.drawItems(ctx);
-        // this.drawControl(ctx);
+        this.drawControl(ctx);
         // this.drawRoomInfo(ctx);
         this.drawMask(ctx);
     }
