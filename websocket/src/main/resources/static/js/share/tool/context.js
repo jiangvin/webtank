@@ -124,19 +124,10 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
         offset = Resource.getNeedOffset();
     }
 
-    if (x < 0) {
-        x = Resource.formatWidth(offset) + x;
-    } else if (offset) {
-        x = x + Resource.getOffset().x;
-    }
-    if (y < 0) {
-        y = Resource.formatWidth(offset) + y;
-    } else if (offset) {
-        y = y + Resource.getOffset().y;
-    }
+    const p = this.posForFormatToScreen(x, y, offset);
+    x = p.x;
+    y = p.y;
 
-    x = x * Resource.getScale();
-    y = y * Resource.getScale();
     w = w * Resource.getScale();
     h = h * Resource.getScale();
 
@@ -180,25 +171,38 @@ CanvasRenderingContext2D.prototype.generateTextStatus = function (x, y, size, bo
     if (!font) {
         font = "Arial";
     }
-    if (offset === undefined) {
-        offset = Resource.getNeedOffset();
-    }
 
-    if (x < 0) {
-        x = Resource.formatWidth(offset) + x;
-    } else if (offset) {
-        x += Resource.getOffset().x;
-    }
-    if (y < 0) {
-        y = Resource.formatHeight(offset) + y;
-    } else if (offset) {
-        y += Resource.getOffset().y;
-    }
-
-    x = Math.round(x * Resource.getScale());
-    y = Math.round(y * Resource.getScale());
     size = Math.round(size * Resource.getScale());
     this.font = ((bold === true) ? "bold " : " ") + size + "px " + font;
 
-    return {x: x, y: y};
+    if (offset === undefined) {
+        offset = Resource.getNeedOffset();
+    }
+    return this.posForFormatToScreen(x, y, offset);
+};
+
+CanvasRenderingContext2D.prototype.posForFormatToScreen = function (x, y, offset) {
+    const p = {
+        x: x,
+        y: y
+    };
+
+    //offset下不支持负数显示
+
+    if (offset) {
+        p.x = x + Resource.getOffset().x;
+        p.y = y + Resource.getOffset().y;
+    } else {
+        if (p.x < 0) {
+            p.x = Resource.formatWidth(offset) + x;
+        }
+        if (p.y < 0) {
+            p.y = Resource.formatHeight(offset) + y;
+        }
+    }
+
+    p.x *= Resource.getScale();
+    p.y *= Resource.getScale();
+
+    return p;
 };
