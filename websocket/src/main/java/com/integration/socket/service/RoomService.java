@@ -8,7 +8,6 @@ import com.integration.socket.model.stage.StageRoom;
 import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -73,7 +72,6 @@ public class RoomService {
     }
 
     @Scheduled(fixedRate = 16)
-    @Async
     public void update() {
         for (StageRoom room : roomList) {
             room.update();
