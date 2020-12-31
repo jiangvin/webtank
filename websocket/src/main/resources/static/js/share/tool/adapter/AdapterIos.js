@@ -5,6 +5,7 @@
  */
 import Adapter from "./Adapter.js";
 import Resource from "../resource.js";
+import Sound from "../sound.js";
 
 export default class AdapterIos extends Adapter {
     constructor(mock) {
@@ -22,6 +23,31 @@ export default class AdapterIos extends Adapter {
         if (mock) {
             Resource.setHost("http://localhost/");
         }
+
+        this.initSound();
+    }
+
+    initSound() {
+        Sound.instance.sounds.forEach((sound) => {
+            sound.play = () => {
+                this.soundEvent(sound, "play");
+            };
+            sound.stop = () => {
+                this.soundEvent(sound, "stop");
+            };
+        });
+    }
+
+    soundEvent(sound, event) {
+        if (this.mock) {
+            console.log("mock sound event:" + sound.id + " event:" + event);
+            return;
+        }
+
+        window.webkit.messageHandlers.soundBridge.postMessage({
+            sound: sound,
+            event: event
+        });
     }
 
     getRequest(url, callback) {
