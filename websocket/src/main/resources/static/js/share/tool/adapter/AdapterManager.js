@@ -38,6 +38,8 @@ export default class AdapterManager {
         Resource.getUser().deviceName = deviceName;
         if (platform) {
             //ios
+            //是否模拟调试
+            AdapterManager.instance.mock = AdapterManager.getQueryString("mock");
             AdapterManager.setPlatform(3);
         } else {
             //android
@@ -52,7 +54,7 @@ export default class AdapterManager {
     static generateInstance() {
         switch (AdapterManager.getPlatform()) {
             case "ios":
-                return new AdapterIos();
+                return new AdapterIos(AdapterManager.instance.mock);
             default:
                 return new Adapter();
         }

@@ -7,16 +7,29 @@ import Adapter from "./Adapter.js";
 import Resource from "../resource.js";
 
 export default class AdapterIos extends Adapter {
-    constructor() {
+    constructor(mock) {
         super();
 
         /**
          * ios的网络访问靠APP代理完成
          */
         this.iosCallbackMap = new Map();
+
+        /**
+         * 模拟本地调试模式
+         */
+        this.mock = mock;
+        if (mock) {
+            Resource.setHost("http://localhost/");
+        }
     }
 
     getRequest(url, callback) {
+        if (this.mock) {
+            super.getRequest(url, callback);
+            return;
+        }
+
         const id = Resource.generateClientId();
         this.iosCallbackMap.set(id, callback);
         window.webkit.messageHandlers.getBridge.postMessage({
@@ -26,6 +39,11 @@ export default class AdapterIos extends Adapter {
     }
 
     postRequest(url, body, callback) {
+        if (this.mock) {
+            super.postRequest(url, body, callback);
+            return;
+        }
+
         const id = Resource.generateClientId();
         this.iosCallbackMap.set(id, callback);
         window.webkit.messageHandlers.postBridge.postMessage({
