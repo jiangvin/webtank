@@ -45,8 +45,9 @@ export default class AdapterIos extends Adapter {
         }
 
         window.webkit.messageHandlers.soundBridge.postMessage({
-            sound: sound,
-            event: event
+            src: sound.src,
+            event: event,
+            loop: !!sound.loop
         });
     }
 
@@ -83,11 +84,11 @@ export default class AdapterIos extends Adapter {
         if (!this.iosCallbackMap.has(id)) {
             return;
         }
+        const callback = this.iosCallbackMap.get(id);
+        this.iosCallbackMap.delete(id);
 
         const result = JSON.parse(this.b64DecodeUnicode(data));
         if (result.success) {
-            const callback = this.iosCallbackMap.get(id);
-            this.iosCallbackMap.delete(id);
             if (callback) {
                 callback(result.data);
             }
