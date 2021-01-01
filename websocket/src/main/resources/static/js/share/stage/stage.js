@@ -124,9 +124,16 @@ export default class Stage {
     }
 
     /**
-     * 切换场景时运行
+     * 打开场景时运行
      */
     init() {
+    }
+
+    /**
+     * 关闭场景时运行
+     */
+    destroy() {
+
     }
 
     /**

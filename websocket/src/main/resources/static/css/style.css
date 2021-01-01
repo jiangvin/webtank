@@ -52,6 +52,21 @@ input.input-name {
     transform: translateX(-338px);
 }
 
+input.input-room-name {
+    left: 8%;
+    top: 86.5%;
+    width: 14%;
+    height: 49px;
+    text-align: left;
+    background: none;
+    border: none;
+    color: white;
+}
+
+input.input-room-name::placeholder {
+    color: #ffffff7a;
+}
+
 button {
     min-width: 10%;
     text-align: center;

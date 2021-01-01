@@ -1,6 +1,5 @@
 import Stage from "./stage.js";
 import Common from "../tool/common.js";
-import Resource from "../tool/resource.js";
 import ControlUnit from "../item/controlunit.js";
 import RoomInfo from "../item/roominfo.js";
 import TeamSelector from "../item/teamselector.js";
@@ -21,6 +20,8 @@ export default class NetList extends Stage {
 
         this.nextLoadInterval = 200;
         this.isLoading = false;
+
+        this.mainWindow = $("#main");
     }
 
     initStageItems() {
@@ -58,8 +59,18 @@ export default class NetList extends Stage {
     }
 
     init() {
+        const input = $("<input/>");
+        input.attr("type", "text");
+        input.attr("placeholder", "输入房间号或ID");
+        input.addClass("input-room-name");
+        this.mainWindow.append(input);
+
         this.clear();
         this.loadRoomList();
+    }
+
+    destroy() {
+        this.mainWindow.empty();
     }
 
     update() {

@@ -159,17 +159,24 @@ export default class Root {
         return this.stages[this.stageIndex];
     }
 
+    prepareSwitchStage(options) {
+        if (this.preStageIndex !== -1) {
+            this.stages[this.preStageIndex].destroy();
+        }
+        this.currentStage().init(options);
+    }
+
     nextStage(options) {
         if (this.stageIndex < this.stages.length - 1) {
             this.preStageIndex = this.stageIndex++;
-            this.currentStage().init(options);
+            this.prepareSwitchStage(options);
         }
     }
 
     lastStage(options) {
         if (this.stageIndex > 0) {
             this.preStageIndex = this.stageIndex--;
-            this.currentStage().init(options);
+            this.prepareSwitchStage(options);
         }
     }
 
@@ -179,7 +186,7 @@ export default class Root {
         }
         this.stageIndex = this.preStageIndex;
         this.preStageIndex = -1;
-        this.currentStage().init(options);
+        this.prepareSwitchStage(options);
     }
 
     gotoStage(id, options) {
@@ -187,7 +194,7 @@ export default class Root {
             if (this.stages[i].getId() === id) {
                 this.preStageIndex = this.stageIndex;
                 this.stageIndex = i;
-                this.currentStage().init(options);
+                this.prepareSwitchStage(options);
                 return;
             }
         }
