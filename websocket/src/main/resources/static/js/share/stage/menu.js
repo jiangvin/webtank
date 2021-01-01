@@ -107,7 +107,7 @@ export default class Menu extends Stage {
     }
 
     createDoor() {
-        const speed = 0.5;
+        const speed = 0.2;
         const doorSize = {
             w: 360,
             h: 400
@@ -149,14 +149,18 @@ export default class Menu extends Stage {
         });
 
         //事件处理
-        const thisMenu = this;
         //单人模式
         const singleMode = new ControlUnit({
             leftTop: {x: 556, y: 614},
             rightBottom: {x: 748, y: 940},
-            callback: function () {
-                thisMenu.doorStatus.enterDoor1 = true;
-            }
+            callback: () => {
+                if (this.doorStatus.enterDoor1) {
+                    return;
+                }
+                Sound.openDoor();
+                this.doorStatus.enterDoor1 = true;
+            },
+            hasSound: false
         });
         this.controlUnits.set(singleMode.id, singleMode);
 
@@ -164,9 +168,14 @@ export default class Menu extends Stage {
         const multipleMode = new ControlUnit({
             leftTop: {x: 1220, y: 614},
             rightBottom: {x: 1412, y: 940},
-            callback: function () {
-                thisMenu.doorStatus.enterDoor2 = true;
-            }
+            callback: () => {
+                if (this.doorStatus.enterDoor2) {
+                    return;
+                }
+                Sound.openDoor();
+                this.doorStatus.enterDoor2 = true;
+            },
+            hasSound: false
         });
         this.controlUnits.set(multipleMode.id, multipleMode);
     }
@@ -184,7 +193,7 @@ export default class Menu extends Stage {
         Common.syncUserData();
 
         Connect.disconnect();
-        Sound.stopAll();
+        Sound.menuBgm();
         Resource.getRoot().engine = null;
         Resource.getRoot().users = null;
         Resource.getRoot().netDelay = 0;
