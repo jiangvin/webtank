@@ -142,7 +142,6 @@ export default class Mission extends Stage {
             return;
         }
 
-        ctx.font = 'bold 45px HanSans';
         ctx.textAlign = 'center';
 
         for (let i = 0; i < 5; ++i) {
@@ -153,9 +152,7 @@ export default class Mission extends Stage {
             ctx.displayCenter(starCount === -1 ? "mission_disable" : "mission", pos.x, pos.y, this.missionSize);
             ctx.displayCenter("mission_rect", pos.x, pos.y, this.missionSize);
 
-            ctx.fillText(text,
-                pos.x + Resource.getOffset().x,
-                pos.y + 150 + Resource.getOffset().y);
+            ctx.displayText(text, pos.x, pos.y + 150, 45, true);
 
             if (starCount === -1) {
                 ctx.displayCenter("mission_lock", pos.x, pos.y, 44);
