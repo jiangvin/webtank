@@ -271,18 +271,70 @@ export default class Resource {
         return Resource.instance.encrypt.encrypt(JSON.stringify(object));
     }
 
-    static calculateScale(width, height) {
+    static calculateWindowInfo(d1, d2) {
+        const info = {};
+
+        //计算横屏或竖屏
+        if (d1 > d2) {
+            info.isPortrait = false;
+            info.realW = d1;
+            info.realH = d2;
+        } else {
+            info.isPortrait = true;
+            info.realW = d2;
+            info.realH = d1;
+        }
+
+        //计算是否为标准的16:9的屏幕
+        const realScale = info.realW / info.realH;
+        const formatScale = 16 / 9;
+        info.formatWithWidth = realScale <= formatScale;
+
+        //屏幕最低为720P,否则画面太模糊了
+        const minWidth = 1280;
+        const minHeight = 720;
+        if (info.realW < minWidth && info.realH < minHeight) {
+            //需要强制成最低容忍画质
+            if (info.formatWithWidth) {
+                //屏幕太高
+                info.displayW = minWidth;
+                info.displayH = minWidth / realScale;
+            } else {
+                //屏幕太宽
+                info.displayW = minHeight * realScale;
+                info.displayH = minHeight;
+            }
+        } else {
+            //不需要变动
+            info.displayW = info.realW;
+            info.displayH = info.realH;
+        }
+
+        //计算绘制画面到真实画面的比例
+        info.scaleForDisplayToReal = info.realH / info.displayH;
+
+        //计算模板画面到绘制画面的比例
         const formatWidth = 1920;
         const formatHeight = 1080;
-        let scaleX = width / formatWidth;
-        let scaleY = height / formatHeight;
-        Resource.instance.scale = scaleX > scaleY ? scaleY : scaleX;
+        if (info.formatWithWidth) {
+            //屏幕太高
+            info.formatW = formatWidth;
+            info.formatH = formatWidth / realScale;
+        } else {
+            //屏幕太宽
+            info.formatW = formatHeight * realScale;
+            info.formatH = formatHeight;
+        }
+        info.scaleForFormatToDisplay = info.displayH / info.formatH;
+        info.scaleForFormatToReal = info.scaleForFormatToDisplay * info.scaleForDisplayToReal;
 
+        Resource.instance.windowInfo = info;
+        Resource.instance.scale = info.scaleForFormatToDisplay;
         Resource.instance.offset = {
-            x: Math.floor((width / Resource.getScale() - formatWidth) / 2),
-            y: Math.floor((height / Resource.getScale() - formatHeight) / 2)
+            x: (info.formatW - formatWidth) / 2,
+            y: (info.formatH - formatHeight) / 2
         };
-        return Resource.instance.scale;
+        return info;
     }
 
     static getScale() {

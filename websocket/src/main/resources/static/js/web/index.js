@@ -158,46 +158,42 @@ export default class Index {
     }
 
     windowChange() {
-        const d1 = document.documentElement.clientWidth;
-        const d2 = document.documentElement.clientHeight;
-        const width = d1 > d2 ? d1 : d2;
-        const height = width === d1 ? d2 : d1;
-        const scale = Resource.calculateScale(width, height);
-        this.canvas.width = width;
-        this.canvas.height = height;
+        const info = Resource.calculateWindowInfo(
+            document.documentElement.clientWidth,
+            document.documentElement.clientHeight
+        );
+        this.canvas.width = info.displayW;
+        this.canvas.height = info.displayH;
 
         let style = "";
         //变形的中心点为左上角
-        style += "-webkit-transform-origin: 0 0;";
         style += "transform-origin: 0 0;";
-        style += "width:" + width + "px;";
-        style += "height:" + height + "px;";
-        if (d1 >= d2) {
+        style += "width:" + info.displayW + "px;";
+        style += "height:" + info.displayH + "px;";
+        if (!info.isPortrait) {
             // 横屏
-            style += "-webkit-transform: rotate(0);";
-            style += "transform: rotate(0);";
+            style += "transform: rotate(0)";
         } else {
             // 竖屏
-            style += "-webkit-transform: rotate(90deg) translate(0px," + -height + "px);";
-            style += "transform: rotate(90deg) translate(0px," + -height + "px);";
+            style += "transform: rotate(90deg) translate(0px," + -info.realH + "px)";
         }
+        style += " scale(" + info.scaleForDisplayToReal + ")";
         let wrapper = document.getElementById("wrapper");
         wrapper.style.cssText = style;
 
         //标准窗口的位移偏移
         style = "";
-        //变形的中心点为左上角
         style += "transform-origin: 0 0;";
-        if (Resource.getOffset().x) {
-            style += "transform: translateX(" + (Resource.getOffset().x * scale) + "px)"
+        if (!info.formatWithWidth) {
+            style += "transform: translateX(" + (Resource.getOffset().x * info.scaleForFormatToDisplay) + "px)"
         } else {
-            style += "transform: translateY(" + (Resource.getOffset().y * scale) + "px)"
+            style += "transform: translateY(" + (Resource.getOffset().y * info.scaleForFormatToDisplay) + "px)"
         }
-        style += " scale(" + scale + ")";
+        style += " scale(" + info.scaleForFormatToDisplay + ")";
         let main = document.getElementById("main");
         main.style.cssText = style;
 
-        Control.setPortrait(d2 > d1);
+        Control.setPortrait(info.isPortrait);
         //窗口变化时重新计算触控栏位置
         Control.generateTouchModeInfo();
     }

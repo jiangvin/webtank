@@ -348,7 +348,7 @@ export default class Control {
         let y = eventPoint.clientY;
 
         //缩放处理
-        const scale = Resource.getScale();
+        const scale = Resource.instance.windowInfo.scaleForFormatToReal;
 
         const touchPoint = {};
         if (Control.instance.portrait) {
