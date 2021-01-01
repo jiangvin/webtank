@@ -22,6 +22,8 @@ export default class AdapterIos extends Adapter {
         this.mock = mock;
         if (mock) {
             Resource.setHost("http://localhost/");
+        } else {
+            Resource.setHost("https://xiwen100.com/tank/");
         }
 
         this.initSound();
