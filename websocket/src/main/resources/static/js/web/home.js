@@ -52,7 +52,7 @@ export default class Home extends Stage {
 
         const touchMode = $("<button/>");
         touchMode.addClass("connect");
-        touchMode.attr("id","touchMode");
+        touchMode.attr("id", "touchMode");
         touchMode.css("top", "60%");
         touchMode.text("触屏控制");
         mainWindow.append(touchMode);

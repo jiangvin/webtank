@@ -27,6 +27,18 @@ export default class AdapterIos extends Adapter {
         }
 
         this.initSound();
+        this.initInputEvent();
+    }
+
+    /**
+     * 解决苹果设备键盘回缩时画面不还原的问题
+     */
+    initInputEvent() {
+        $("#main").focusout(function (e) {
+            if (e && e.target && e.target.tagName && e.target.tagName.toLowerCase() === "input") {
+                window.scrollTo(0, 0);
+            }
+        });
     }
 
     initSound() {
