@@ -126,26 +126,29 @@ export default class Engine {
         }
 
         const speed = 10.0;
+        const w = Resource.width() * this.room.scaleForWindowToServer();
+        const h = Resource.height() * this.room.scaleForWindowToServer();
+
         switch (event) {
             case "Up":
-                if (this.room.size.height > Common.height()) {
+                if (this.room.size.height > h) {
                     this.room.view.y = this.room.view.y > speed ? this.room.view.y - speed : 0;
                 }
                 break;
             case "Down":
-                if (this.room.size.height > Common.height()) {
-                    const maxY = this.room.size.height - Common.height();
+                if (this.room.size.height > h) {
+                    const maxY = this.room.size.height - h;
                     this.room.view.y = this.room.view.y + speed < maxY ? this.room.view.y + speed : maxY;
                 }
                 break;
             case "Left":
-                if (this.room.size.width > Common.width()) {
+                if (this.room.size.width > w) {
                     this.room.view.x = this.room.view.x > speed ? this.room.view.x - speed : 0;
                 }
                 break;
             case "Right":
-                if (this.room.size.width > Common.width()) {
-                    const maxX = this.room.size.width - Common.width();
+                if (this.room.size.width > w) {
+                    const maxX = this.room.size.width - w;
                     this.room.view.x = this.room.view.x + speed < maxX ? this.room.view.x + speed : maxX;
                 }
                 break;

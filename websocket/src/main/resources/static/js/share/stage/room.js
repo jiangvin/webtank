@@ -248,7 +248,7 @@ export default class Room extends Stage {
         //将所有数据都转换成后端的尺寸，最后再做比例缩放
         const imageWidthForServer = this.backgroundImage.width * this.scaleForWindowToServer();
         const imageHeightForServer = this.backgroundImage.height * this.scaleForWindowToServer();
-        const topLeft = this.convertToScreenPoint({x: 0, y: 0});
+        const viewStart = this.convertToScreenPoint({x: 0, y: 0});
         const getBottomRight = (topLeft) => {
             return {
                 x: this.valueInBoundary(
@@ -267,8 +267,9 @@ export default class Room extends Stage {
         const h = Resource.height() * this.scaleForWindowToServer();
 
         //开始绘制
-        for (; topLeft.x < this.size.width; topLeft.x += imageWidthForServer) {
-            for (; topLeft.y < this.size.height; topLeft.y += imageHeightForServer) {
+        for (let x = viewStart.x; x < this.size.width; x += imageWidthForServer) {
+            for (let y = viewStart.y; y < this.size.height; y += imageHeightForServer) {
+                const topLeft = {x: x, y: y};
                 const bottomRight = getBottomRight(topLeft);
 
                 //超出边界

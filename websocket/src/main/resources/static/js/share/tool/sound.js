@@ -69,6 +69,7 @@ export default class Sound {
     }
 
     static stopAll() {
+        Sound.instance.currentLoopId = "";
         Sound.instance.sounds.forEach(function (sound) {
             if (!sound.loop) {
                 return;
