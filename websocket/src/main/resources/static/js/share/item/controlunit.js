@@ -50,6 +50,9 @@ export default class ControlUnit {
             point.x <= rightBottom.x &&
             point.y >= leftTop.y &&
             point.y <= rightBottom.y) {
+            if (!this.check()) {
+                return false;
+            }
             this.callback(point);
             if (this.hasSound) {
                 Sound.click();
@@ -58,6 +61,13 @@ export default class ControlUnit {
         } else {
             return false;
         }
+    }
+
+    /**
+     * 触发判断,需要具体实现
+     */
+    check() {
+        return true;
     }
 
     getLeftTop() {

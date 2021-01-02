@@ -22,6 +22,8 @@ export default class NetList extends Stage {
         this.isLoading = false;
 
         this.mainWindow = $("#main");
+        this.input = null;
+        this.search = null;
     }
 
     initStageItems() {
@@ -56,6 +58,23 @@ export default class NetList extends Stage {
                 Common.nextStage();
             }
         });
+
+        //search room
+        this.createControl({
+            leftTop: {
+                x: 426,
+                y: 938
+            },
+            size: {
+                w: 60,
+                h: 60
+            },
+            callback: () => {
+                this.startRoomIndex = 0;
+                this.search = this.input.val();
+                this.loadRoomList();
+            }
+        })
     }
 
     init() {
@@ -64,6 +83,8 @@ export default class NetList extends Stage {
         input.attr("placeholder", "输入房间号或ID");
         input.addClass("input-room-name");
         this.mainWindow.append(input);
+        this.input = input;
+        this.search = null;
 
         this.clear();
         this.loadRoomList();
@@ -102,7 +123,12 @@ export default class NetList extends Stage {
     loadRoomList() {
         this.isLoading = true;
         const start = this.startRoomIndex;
-        Common.getRequest("/multiplePlayers/getRooms?limit=6&start=" + start,
+
+        let url = "/multiplePlayers/getRooms?limit=6&start=" + start;
+        if (this.search) {
+            url += "&search=" + this.search;
+        }
+        Common.getRequest(url,
             /**
              *
              * @param data {{roomList,userCount,creator}}

@@ -77,6 +77,7 @@ public class StageRoom extends BaseStage {
 
     boolean hardMode;
 
+    @Getter
     UserBo creator;
 
     MapMangerBo mapManger;
