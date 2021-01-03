@@ -115,9 +115,6 @@ export default class Root {
         if (!this.engine) {
             return;
         }
-        if (!Status.isGaming()) {
-            return;
-        }
         this.engine.update();
     }
 
@@ -142,8 +139,7 @@ export default class Root {
                 }
                 event.callback();
                 //删除事件
-                this.timeEvents.splice(i, 1);
-                --i;
+                this.timeEvents.splice(i--, 1);
             }
         }
     }
