@@ -1,14 +1,13 @@
 package com.integration.socket.model.bo;
 
+import com.integration.dto.message.MessageDto;
 import com.integration.dto.room.TeamType;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
 import com.integration.util.time.TimeUtil;
 import lombok.Data;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author 蒋文龙(Vin)
@@ -16,19 +15,18 @@ import java.util.List;
  * @date 2020/4/28
  */
 @Data
+@Slf4j
 public class UserBo {
     /**
      * 全局唯一, 但会根据重名情况进行变化
      */
-    @NonNull private String username;
-    @NonNull private String socketSessionId;
+    @NonNull
+    private String username;
 
     /**
      * 网页用户没有userId
      */
     private String userId;
-
-    final private List<String> subscribeList = new ArrayList<>();
 
     /**
      * 用户当前所在的房间号
@@ -83,5 +81,17 @@ public class UserBo {
         }
 
         return userRecord.getClockExpired().after(TimeUtil.now());
+    }
+
+    /**
+     * 发送消息, 仅仅只是记录日志
+     * @param messageDto
+     */
+    public void sendMessage(MessageDto messageDto) {
+        log.info("user:{} mock send message:{}", username, messageDto.toString());
+    }
+
+    public void disconnect() {
+        log.info("user:{} mock disconnect", username);
     }
 }

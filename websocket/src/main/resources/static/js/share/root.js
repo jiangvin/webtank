@@ -10,13 +10,21 @@ import Status from "./tool/status.js"
 import Common from "./tool/common.js"
 import NetEngine from "./engine/netEngine.js";
 import AiEngine from "./engine/aiEngine.js";
+import Menu from "./stage/menu.js";
+import Rank from "./stage/rank.js";
+import Room from "./stage/room.js";
+import Mission from "./stage/mission.js";
+import NetList from "./stage/netlist.js";
+import NetCreate from "./stage/netcreate.js";
+import Shop from "./stage/shop.js";
 
 export default class Root {
     constructor() {
-        this.frontFrame = new Frame();
+        this.frame = new Frame();
 
         this.stages = [];
         this.stageIndex = 0;
+        this.preStageIndex = -1;
 
         this.messages = [];
 
@@ -36,25 +44,35 @@ export default class Root {
         this.netDelay = 0;
     }
 
-    addTimeEvent(eventType, callBack, timeout, ignoreLog) {
+    addTimeEvent(eventType, callback, timeout, ignoreLog) {
         const event = {};
         event.eventType = eventType;
-        event.callback = callBack;
+        event.callback = callback;
         //默认100帧倒计时，不到1.5秒
         event.timeout = timeout ? timeout : 100;
         event.ignoreLog = ignoreLog;
         this.timeEvents.push(event);
     };
 
-    addMessageEvent(eventType, callBack) {
+    addMessageEvent(eventType, callback) {
         //消息已存在
         if (this.messageEvents.has(eventType)) {
             return;
         }
 
         const messageEvent = {};
-        messageEvent.callback = callBack;
+        messageEvent.callback = callback;
         this.messageEvents.set(eventType, messageEvent);
+    }
+
+    addGameStage() {
+        this.addStage(new Menu());
+        this.addStage(new Rank());
+        this.addStage(new Mission());
+        this.addStage(new Room());
+        this.addStage(new NetList());
+        this.addStage(new NetCreate());
+        this.addStage(new Shop());
     }
 
     addStage(stage) {
@@ -85,14 +103,12 @@ export default class Root {
     }
 
     update() {
-        this.updateTimeEvents();
-
-        if (!Status.isGaming()) {
-            return;
-        }
-
-        this.updateEngine();
-        this.currentStage().update();
+        this.frame.update(() => {
+            this.updateMessage();
+            this.updateTimeEvents();
+            this.updateEngine();
+            this.currentStage().update();
+        });
     }
 
     updateEngine() {
@@ -123,14 +139,13 @@ export default class Root {
                 }
                 event.callback();
                 //删除事件
-                this.timeEvents.splice(i, 1);
-                --i;
+                this.timeEvents.splice(i--, 1);
             }
         }
     }
 
     draw(ctx) {
-        this.frontFrame.calculate();
+        this.frame.calculate();
         this.currentStage().draw(ctx);
         this.drawMessage(ctx);
         this.drawTips(ctx);
@@ -140,35 +155,67 @@ export default class Root {
         return this.stages[this.stageIndex];
     }
 
-    nextStage() {
+    prepareSwitchStage(options) {
+        if (this.preStageIndex !== -1) {
+            this.stages[this.preStageIndex].destroy();
+        }
+        this.currentStage().init(options);
+    }
+
+    nextStage(options) {
         if (this.stageIndex < this.stages.length - 1) {
-            ++this.stageIndex;
+            this.preStageIndex = this.stageIndex++;
+            this.prepareSwitchStage(options);
         }
     }
 
-    lastStage() {
+    lastStage(options) {
         if (this.stageIndex > 0) {
-            --this.stageIndex;
+            this.preStageIndex = this.stageIndex--;
+            this.prepareSwitchStage(options);
+        }
+    }
+
+    preStage(options) {
+        if (this.preStageIndex < 0 || this.preStageIndex === this.stageIndex) {
+            return;
+        }
+        this.stageIndex = this.preStageIndex;
+        this.preStageIndex = -1;
+        this.prepareSwitchStage(options);
+    }
+
+    gotoStage(id, options) {
+        for (let i = 0; i < this.stages.length; ++i) {
+            if (this.stages[i].getId() === id) {
+                this.preStageIndex = this.stageIndex;
+                this.stageIndex = i;
+                this.prepareSwitchStage(options);
+                return;
+            }
         }
     }
 
     drawMessage(ctx) {
-        let height = Resource.height() - 40;
-        ctx.font = '16px Helvetica';
+        let height = 160;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
+        this.messages.forEach(function (message) {
+            ctx.globalAlpha = (message.lifetime / 300);
+            ctx.fillStyle = message.color;
+            ctx.displayText("[" + message.date.format("hh:mm:ss") + "] " + message.context,
+                160, height, 30);
+            height += 35;
+        });
+        ctx.globalAlpha = 1;
+    }
+
+    updateMessage() {
         this.messages.forEach(function (message) {
             if (message.lifetime > 0) {
                 message.lifetime -= 1;
             }
-            ctx.globalAlpha = (message.lifetime / 300);
-            ctx.fillStyle = message.color;
-            ctx.fillText("[" + message.date.format("hh:mm:ss") + "] " + message.context, 25, height);
-            height -= 18;
         });
-
-        ctx.globalAlpha = 1;
-
         //消息全部过期，清除
         if (this.messages.length !== 0 && this.messages[0].lifetime <= 0) {
             this.messages = [];
@@ -176,23 +223,24 @@ export default class Root {
     }
 
     drawTips(ctx) {
-        //版权信息
-        ctx.font = '14px Helvetica';
-        ctx.textAlign = 'right';
+        if (!Resource.isDebug()) {
+            return;
+        }
+
+        ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
         ctx.fillStyle = '#ffffff';
-        ctx.fillText('© Created by Vin (QQ群: 87882492)', Resource.width() - 12, Resource.height() - 5);
 
         //帧率信息
-        ctx.textAlign = 'left';
-        let text = '帧率:' + this.frontFrame.frames;
+        let text = "分辨率:" + Resource.width() + "x" + Resource.height();
+        text += ' 帧率:' + this.frame.framesPerSecond;
         if (this.netDelay) {
             text += ' / 延迟:' + this.netDelay + 'ms';
         }
         if (this.users) {
             text += ' / 房间人数:' + this.users.length;
         }
-        ctx.fillText(text, 10, Resource.height() - 5);
+        ctx.displayText(text, 10, -5, 35, null, false);
     }
 
     processPointDownEvent(point) {
@@ -217,9 +265,6 @@ export default class Root {
             case "ERROR_MESSAGE":
                 Common.addMessage(messageDto.message, "#F00");
                 break;
-            case "SERVER_READY":
-                this.serverReady();
-                break;
             case "USERS":
                 this.users = messageDto.message;
                 break;
@@ -234,12 +279,5 @@ export default class Root {
         if (this.engine) {
             this.engine.processControlEvent(control);
         }
-    }
-
-    serverReady() {
-        if (Status.getValue() !== Status.statusPause()) {
-            return;
-        }
-        Status.setStatus(Status.statusNormal());
     }
 }

@@ -6,10 +6,36 @@ package com.integration.dto.room;
  * @date 2020/6/6
  */
 public enum GameStatusType {
+    /**
+     * 小关结束/胜利
+     */
+    END,
+    /**
+     * 暂停
+     */
     PAUSE,
+    /**
+     * 全部胜利
+     */
     WIN,
+    /**
+     * 失败
+     */
     LOSE,
+    /**
+     * PVP的失败(只显示失败，不显示按钮)
+     */
+    LOSE_PVP,
+    /**
+     * 红队暂停事件
+     */
     PAUSE_RED,
+    /**
+     * 蓝队暂停事件
+     */
     PAUSE_BLUE,
+    /**
+     * 正常
+     */
     NORMAL
 }

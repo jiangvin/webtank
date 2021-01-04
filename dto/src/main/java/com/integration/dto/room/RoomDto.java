@@ -17,7 +17,13 @@ public class RoomDto {
     private String roomId;
     private String creator;
     private int mapId;
+    private int subId;
     private RoomType roomType;
     private TeamType joinTeamType;
     private Integer userCount;
+
+    /**
+     * 困难模式下电脑可以吃道具
+     */
+    private boolean hardMode = false;
 }

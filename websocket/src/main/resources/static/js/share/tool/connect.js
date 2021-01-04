@@ -21,7 +21,7 @@ export default class Connect {
     }
 
     static disconnect() {
-        if (!Connect.status()) {
+        if (!Connect.instance.socketClient) {
             return;
         }
 
@@ -38,7 +38,9 @@ export default class Connect {
         Connect.instance.socketClient = new WebSocket(Connect.generateSocketHost() + '/ws' + queryString);
 
         Connect.instance.socketClient.onopen = function () {
-            Common.addMessage("与服务器连接中...", "#FF0");
+            if (Resource.isDebug()) {
+                Common.addMessage("与服务器连接中...", "#FF0");
+            }
             callback();
         };
 
@@ -51,7 +53,9 @@ export default class Connect {
         };
 
         Connect.instance.socketClient.onclose = function () {
-            Common.addMessage("退出多人模式", "#FF0");
+            if (Resource.isDebug()) {
+                Common.addMessage("退出多人模式", "#FF0");
+            }
         };
     }
 

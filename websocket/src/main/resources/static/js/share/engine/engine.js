@@ -15,33 +15,46 @@ export default class Engine {
 
         //连接超时调用
         this.addConnectTimeoutEvent(function () {
-            Common.lastStage();
-            Resource.getRoot().currentStage().initMenu();
+            Common.gotoStage("menu");
         });
     }
 
-    addTimeEvent(timeout, callback) {
+    /**
+     * 引擎类的事件
+     * @param timeout
+     * @param callback
+     * @param force 是否在游戏暂停时也更新
+     */
+    addTimeEvent(timeout, callback, force) {
         const event = {};
         event.callback = callback;
         event.timeout = timeout ? timeout : 100;
+        event.force = force;
         this.events.push(event);
     }
 
     update() {
         this.updateEvent();
+
+        if (!Status.isGaming()) {
+            return;
+        }
         this.updateCenter(this.room)
     }
 
     updateEvent() {
         for (let i = 0; i < this.events.length; ++i) {
             const event = this.events[i];
+            if (!Status.isGaming() && !event.force) {
+                continue;
+            }
+
             if (event.timeout > 0) {
                 --event.timeout;
             } else {
                 event.callback();
                 //删除事件
-                this.events.splice(i, 1);
-                --i;
+                this.events.splice(i--, 1);
             }
         }
     }
@@ -86,7 +99,7 @@ export default class Engine {
         }
 
         if (needSend) {
-            this.sendSyncMessage(room.send, center);
+            this.sendSyncMessage(center);
         }
     }
 
@@ -123,27 +136,30 @@ export default class Engine {
             return;
         }
 
-        const speed = 5.0;
+        const speed = 10.0;
+        const w = Resource.width() * this.room.scaleForWindowToServer();
+        const h = Resource.height() * this.room.scaleForWindowToServer();
+
         switch (event) {
             case "Up":
-                if (this.room.size.height > Common.height()) {
+                if (this.room.size.height > h) {
                     this.room.view.y = this.room.view.y > speed ? this.room.view.y - speed : 0;
                 }
                 break;
             case "Down":
-                if (this.room.size.height > Common.height()) {
-                    const maxY = this.room.size.height - Common.height();
+                if (this.room.size.height > h) {
+                    const maxY = this.room.size.height - h;
                     this.room.view.y = this.room.view.y + speed < maxY ? this.room.view.y + speed : maxY;
                 }
                 break;
             case "Left":
-                if (this.room.size.width > Common.width()) {
+                if (this.room.size.width > w) {
                     this.room.view.x = this.room.view.x > speed ? this.room.view.x - speed : 0;
                 }
                 break;
             case "Right":
-                if (this.room.size.width > Common.width()) {
-                    const maxX = this.room.size.width - Common.width();
+                if (this.room.size.width > w) {
+                    const maxX = this.room.size.width - w;
                     this.room.view.x = this.room.view.x + speed < maxX ? this.room.view.x + speed : maxX;
                 }
                 break;
@@ -172,15 +188,14 @@ export default class Engine {
         } else {
             center.orientation = newControl.orientation;
         }
-        this.sendSyncMessage(room.send, center);
+        this.sendSyncMessage(center);
     }
 
     /**
      * 在netEngine中重载
-     * @param send
      * @param center
      */
-    sendSyncMessage(send, center) {
+    sendSyncMessage(center) {
     };
 
     generateNewControl(stage, tank, orientation, action) {
@@ -311,7 +326,7 @@ export default class Engine {
     };
 
     isBarrier(stage, point, ghost) {
-        if (point.x < 0 || point.y < 0 || point.x > stage.size.width || point.y > stage.size.height) {
+        if (point.x < 0 || point.y < 0 || point.x >= stage.size.width || point.y >= stage.size.height) {
             return true;
         }
 
@@ -328,8 +343,9 @@ export default class Engine {
     };
 
     addConnectTimeoutEvent(callback) {
-        Common.addTimeEvent("connect_timeout", function () {
-            if (Status.getValue() !== Status.statusPause()) {
+        Status.setAck(false);
+        this.addTimeEvent(480, function () {
+            if (Status.getAck()) {
                 return;
             }
 
@@ -337,7 +353,7 @@ export default class Engine {
             if (callback !== undefined) {
                 callback();
             }
-        }, 300);
+        }, true);
     };
 
     /**

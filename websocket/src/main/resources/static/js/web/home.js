@@ -8,41 +8,64 @@ import Resource from "../share/tool/resource.js";
 import Stage from "../share/stage/stage.js"
 import Common from "../share/tool/common.js";
 import Control from "../share/tool/control.js";
-import Adapter from "../share/tool/adapter.js";
 
 export default class Home extends Stage {
     constructor() {
         super();
 
-        this.defaultNames = ["大酒神","一打七","开始行动","挂机无罪","求上单","RMB玩家","酱油位","对面间谍"];
-        $('#input').val(this.defaultNames[Math.floor(Math.random() * this.defaultNames.length)]);
-        $('#input-name-div').css("visibility", "visible");
-        //背景
-        const bgImage = Resource.getImage("background_loading","jpg");
+        //背景色
         this.createItem({
             draw: function (ctx) {
-                ctx.drawImage(bgImage,
-                    0, 0,
-                    bgImage.width, bgImage.height,
-                    0, 0,
-                    Resource.width(), Resource.height());
+                ctx.fillStyle = '#01A7EC';
+                ctx.fillRect(0, 0, Resource.width(), Resource.height());
             }
         });
 
-        //标题
+        //logo
         this.createItem({
-            draw: function (context) {
-                context.font = 'bold 55px Helvetica';
-                context.textAlign = 'center';
-                context.textBaseline = 'middle';
-                context.fillStyle = '#FFF';
-                context.fillText('欢迎光临', Resource.width() / 2, 40);
+            draw: function (ctx) {
+                ctx.displayCenterRate("logo",
+                    .5,
+                    .2,
+                    .55);
             }
         });
+    }
+
+    init() {
+        const mainWindow = $("#main");
+
+        const input = $("<input/>");
+        input.attr("type", "text");
+        input.attr("placeholder", "请输入名字");
+        input.addClass("input-name-web");
+        mainWindow.append(input);
+
+        this.defaultNames = ["大酒神", "一打七", "开始行动", "挂机无罪", "求上单", "RMB玩家", "酱油位", "对面间谍"];
+        input.val(this.defaultNames[Math.floor(Math.random() * this.defaultNames.length)]);
+
+        const keyboardMode = $("<button/>");
+        keyboardMode.addClass("connect");
+        keyboardMode.css("top", "47%");
+        keyboardMode.text("键盘控制");
+        mainWindow.append(keyboardMode);
+
+        const touchMode = $("<button/>");
+        touchMode.addClass("connect");
+        touchMode.attr("id", "touchMode");
+        touchMode.css("top", "60%");
+        touchMode.text("触屏控制");
+        mainWindow.append(touchMode);
+
+        const downloadApp = $("<button/>");
+        downloadApp.addClass("connect");
+        downloadApp.css("top", "73%");
+        downloadApp.text("下载APP");
+        mainWindow.append(downloadApp);
 
         //绑定事件
         const buttonEvent = function (e) {
-            const name = $('#input').val();
+            const name = input.val();
 
             //检测是否输入名字
             if (name === "") {
@@ -50,17 +73,16 @@ export default class Home extends Stage {
                 return;
             }
 
-            const isTouch = e.currentTarget.id === "button2";
+            const isTouch = e.currentTarget.id === "touchMode";
             Control.setControlMode(isTouch);
 
             Resource.setUserId(name);
-            $('#input-name-div').css("visibility", "hidden");
+            mainWindow.empty();
             Common.nextStage();
-            Adapter.initInput();
         };
-        $('#button1').bind('click', buttonEvent);
-        $('#button2').bind('click', buttonEvent);
-        $('#button3').bind('click', function () {
+        keyboardMode.bind('click', buttonEvent);
+        touchMode.bind('click', buttonEvent);
+        downloadApp.bind('click', function () {
             window.open("app/app-release.apk");
         });
     }

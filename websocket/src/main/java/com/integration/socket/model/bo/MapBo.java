@@ -33,6 +33,8 @@ public class MapBo {
 
     private int mapId;
 
+    private int subId;
+
     private String mapName;
 
     private List<StringCountDto> playerLife = new ArrayList<>();
@@ -45,15 +47,28 @@ public class MapBo {
 
     private List<String> computerStartPoints = new ArrayList<>();
 
-    public MapDto convertToDto() {
+    public MapDto toDto() {
         MapDto mapDto = new MapDto();
         copyProperties(mapDto);
         return mapDto;
     }
 
-    public MapDto toDto(List<String> keys) {
+    public MapDto toDtoWithKeys(List<String> keys) {
         MapDto mapDto = new MapDto();
         copyProperties(mapDto, keys);
+        return mapDto;
+    }
+
+    public MapDto convertMapIdToDto() {
+        MapDto mapDto = new MapDto();
+        mapDto.setMapId(this.mapId);
+        mapDto.setSubId(this.subId);
+        return mapDto;
+    }
+
+    public MapDto convertLifeCountToDto() {
+        MapDto mapDto = new MapDto();
+        copyLifeCountProperties(mapDto);
         return mapDto;
     }
 
@@ -64,6 +79,7 @@ public class MapBo {
     private void copyProperties(MapDto mapDto, List<String> keys) {
         copyLifeCountProperties(mapDto);
         mapDto.setMapId(getMapId());
+        mapDto.setSubId(getSubId());
         mapDto.setWidth(getWidth());
         mapDto.setHeight(getHeight());
         mapDto.setMapName(getMapName());
@@ -103,10 +119,8 @@ public class MapBo {
         return mapDetailDto;
     }
 
-    public MapDto convertLifeCountToDto() {
-        MapDto mapDto = new MapDto();
-        copyLifeCountProperties(mapDto);
-        return mapDto;
+    public int getComputerLifeCount() {
+        return getCount(getComputerLife());
     }
 
     private void copyLifeCountProperties(MapDto mapDto) {

@@ -8,20 +8,31 @@
 <body>
 <div>
     <div>
-        <label>地图</label>
-        <select id="mapSelector" >
-            <option value="-1">读取中</option>
-        </select>
+        <label>地图:
+            <select id="mapSelector">
+                <option value="-1">读取中</option>
+            </select>
+        </label>
         <button id="refresh" onclick="refreshMaps();">刷新</button>
         <button id="load" onclick="loadMap();">读取</button>
     </div>
     <div>
-        <label>地图名称:</label>
-        <input type="text" id="name" placeholder="名称不存在则新增"/>
+        <label>地图名称:
+            <input type="text" id="name" placeholder="名称不存在则新增"/>
+        </label>
     </div>
     <div>
-        <label>修改密码:</label>
-        <input type="password" id="pw" />
+        <label>修改密码:
+            <input type="password" id="pw"/>
+        </label>
+    </div>
+    <div>
+        <label>
+            关卡:
+            <input type="number" id="mapId" style="width: 50px">
+            -
+            <input type="number" id="subId" style="width: 50px">
+        </label>
     </div>
     <div>
         <div>地图内容:</div>
@@ -36,8 +47,9 @@
 
 <script type="text/javascript">
     refreshMaps();
+
     function refreshMaps() {
-        $.getJSON('/edit/getMaps', function(result) {
+        $.getJSON('/edit/getMaps', function (result) {
             if (result.success) {
                 setSelectorItems(result.data);
             }
@@ -47,7 +59,7 @@
     function setSelectorItems(maps) {
         const selector = $('#mapSelector')[0];
         const length = selector.options.length;
-        for (let i = length-1; i >= 0; --i) {
+        for (let i = length - 1; i >= 0; --i) {
             selector.options[i] = null;
         }
 
@@ -58,10 +70,10 @@
             selector.add(opt);
         }
     }
-    
+
     function loadMap() {
         const selectOpt = $('#mapSelector')[0].selectedOptions[0];
-        $.getJSON('/edit/getMapFromName/' + selectOpt.text, function(result) {
+        $.getJSON('/edit/getMapFromName/' + selectOpt.text, function (result) {
             if (result.success) {
                 setMapData(result.data);
             }
@@ -71,16 +83,20 @@
     function setMapData(data) {
         $('#name')[0].value = data.name;
         $('#content')[0].value = data.data;
+        $('#mapId')[0].value = data.id;
+        $('#subId')[0].value = data.subId;
     }
-    
+
     function save() {
         $.ajax({
             url: encodeURI('/edit/setMap'),
             type: 'post',
             data: {
-                name:$('#name')[0].value,
-                pw:$('#pw')[0].value,
-                data:$('#content')[0].value
+                name: $('#name')[0].value,
+                pw: $('#pw')[0].value,
+                data: $('#content')[0].value,
+                id: $('#mapId')[0].value,
+                subId: $('#subId')[0].value
             },
             dataType: 'json',
             success: function (result) {
@@ -89,7 +105,11 @@
                 } else {
                     alert("保存成功!");
                 }
+            },
+            error: function (result) {
+                alert(result.responseJSON.message);
             }
+
         });
     }
 

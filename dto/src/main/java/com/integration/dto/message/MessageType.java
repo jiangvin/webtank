@@ -12,6 +12,11 @@ public enum MessageType {
      */
     USER_MESSAGE,
 
+    /**
+     * 表情
+     */
+    FACE,
+
 
     /**
      * 单向发送
@@ -22,10 +27,6 @@ public enum MessageType {
      * 错误信息
      */
     ERROR_MESSAGE,
-    /**
-     * 数据传输完毕，通知前端可以解除暂停
-     */
-    SERVER_READY,
     /**
      * 所有用户id列表
      */

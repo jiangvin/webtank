@@ -1,151 +1,395 @@
-import Rect from "./rect.js";
-import Resource from "../tool/resource.js";
-import Button from "./button.js";
-import Item from "./item.js";
-import ShopButton from "./shopbutton.js";
-
 /**
  * @author 蒋文龙(Vin)
  * @description
- * @date 2020/6/20
+ * @date 2020/12/26
  */
 
-export default class Shop {
-    constructor(menu) {
-        this.menu = menu;
+import Stage from "./stage.js";
+import Resource from "../tool/resource.js";
+import ControlUnit from "../item/controlunit.js";
+import Common from "../tool/common.js";
+import Control from "../tool/control.js";
+import NewConfirm from "../item/newconfirm.js";
+import Tip from "../item/tip.js";
 
-        this.currentShopItems = [];
-        this.totalShopItems = [];
-        this.shopItemStart = 0;
+export default class Shop extends Stage {
+    constructor() {
+        super();
 
         this.initShopItems();
-    }
+        this.initControl();
 
-    initShop() {
-        const thisShop = this;
-        const items = [];
-
-        const background = new Rect(Resource.width() / 2, Resource.height() / 2, Resource.width() * .7, Resource.height() * .8);
-        items[items.length] = background;
-
-        // 金币
-        const coinImage = Resource.getImage("coin");
-        items[items.length] = new Item({
-            draw: function (ctx) {
-                ctx.drawImage(coinImage,
-                    0, 0,
-                    coinImage.width, coinImage.height,
-                    Resource.width() / 2 - 50, background.y - background.height / 2 + 10,
-                    coinImage.width * .75, coinImage.width * .75);
-
-                ctx.font = '24px Arial';
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#fff';
-                ctx.fillText(" x " + Resource.getUser().coin,
-                    Resource.width() / 2 - 5, background.y - background.height / 2 + 32);
+        this.createItem({
+            draw: ctx => {
+                this.drawBackground(ctx);
+                this.drawCoinCount(ctx);
+                this.drawShopItems(ctx);
+                this.drawBlackMask(ctx);
             }
         });
 
-        //按钮
-        items[items.length] = background;
-        items[items.length] = new Button("上一页",
-            background.x - 120,
-            background.y + background.height / 2 - 35,
-            function () {
-                if (thisShop.shopItemStart > 0) {
-                    thisShop.shopItemStart -= 6;
-                    thisShop.loadShopItems();
-                }
-            }, 110, 50, '24px Arial');
-        items[items.length] = new Button("下一页",
-            background.x,
-            background.y + background.height / 2 - 35,
-            function () {
-                if (thisShop.shopItemStart < 12) {
-                    thisShop.shopItemStart += 6;
-                    thisShop.loadShopItems();
-                }
-            }, 110, 50, '24px Arial');
-        items[items.length] = new Button("返回",
-            background.x + 120,
-            background.y + background.height / 2 - 35,
-            function () {
-                thisShop.menu.switchButtons(-7);
-            }, 110, 50, '24px Arial');
-
-        return items;
+        //背景图层
+        this.createFullScreenItem("shop_background");
     }
 
-    loadShopItems() {
-        this.removeCurrentItems();
-        for (let i = this.shopItemStart; i < this.shopItemStart + 6; ++i) {
-            if (!this.totalShopItems[i]) {
-                return;
-            }
-            this.currentShopItems[this.currentShopItems.length] = this.totalShopItems[i];
-            this.menu.addItem(this.totalShopItems[i]);
-        }
+    init() {
+        this.itemInfo.offset = 0;
+        this.itemInfo.touchPoint = null;
+        this.addEventListener();
+        this.updateShopButtonControlStatus();
     }
 
-    removeCurrentItems() {
-        const thisShop = this;
-        this.currentShopItems.forEach(function (item) {
-            thisShop.menu.removeItem(item);
-        });
-        this.currentShopItems = [];
+    addEventListener() {
+        document.addEventListener('touchmove', this.moveEvent);
+        document.addEventListener('touchend', this.endEvent);
     }
 
-    reload() {
-        this.initShopItems();
-        this.loadShopItems();
+    removeEventListener() {
+        document.removeEventListener('touchmove', this.moveEvent);
+        document.removeEventListener('touchend', this.endEvent);
+    }
+
+    drawBackground(ctx) {
+        ctx.fillStyle = '#f6e7d0';
+        ctx.fillRect(
+            0, 0,
+            Resource.width(),
+            Resource.height());
+    }
+
+    drawCoinCount(ctx) {
+        //绘制金币数
+        const coinCount = "x" + Resource.getUser().coin;
+        ctx.displayCenter("gold", 905, 225, 90);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.strokeStyle = '#000';
+        ctx.fillStyle = '#f7f3df';
+        ctx.displayStrokeText(coinCount, 960, 228, 50, true);
     }
 
     initShopItems() {
-        this.totalShopItems = [];
-        const items = this.totalShopItems;
+        this.shopItems = [
+            {
+                title: "幽灵",
+                imageId: "item_ghost",
+                price: 10,
+                hasBuy: () => {
+                    return Resource.getUser().hasGhost();
+                },
+                buyType: "GHOST",
+                text: [
+                    "游戏中会随机出现幽灵道具",
+                    "效果：使你的坦克变成半透明",
+                    "且移动时无视一切障碍物",
+                    "（限时一天）"
+                ]
+            },
+            {
+                title: "定时器",
+                imageId: "item_clock",
+                price: 18,
+                hasBuy: () => {
+                    return Resource.getUser().hasClock();
+                },
+                buyType: "CLOCK",
+                text: [
+                    "游戏中会随机出现定时器道具",
+                    "效果：使敌方所有坦克15秒内",
+                    "不能移动",
+                    "（限时一天）"
+                ]
+            },
+            {
+                title: "红星",
+                imageId: "item_red_star",
+                price: 20,
+                hasBuy: () => {
+                    return Resource.getUser().hasRedStar();
+                },
+                buyType: "RED_STAR",
+                text: [
+                    "游戏中会随机出现红星道具",
+                    "效果：使你的坦克直接升至四",
+                    "星坦克",
+                    "（限时一天）"
+                ]
+            },
+            {
+                title: "二星坦克",
+                imageId: "tank02",
+                imageIndex: 3,
+                price: 35,
+                buyType: "TANK02",
+                hasBuy: () => {
+                    return Resource.getUser().getTankType() === "tank02";
+                },
+                text: [
+                    "效果：使你的坦克初始状态为",
+                    "二星坦克",
+                    "（限时一天）"
+                ]
+            },
+            {
+                title: "三星坦克",
+                imageId: "tank03",
+                imageIndex: 3,
+                price: 50,
+                buyType: "TANK03",
+                hasBuy: () => {
+                    return Resource.getUser().getTankType() === "tank03";
+                },
+                text: [
+                    "效果：使你的坦克初始状态为",
+                    "三星坦克",
+                    "（限时一天）"
+                ]
+            }
+        ];
 
-        //第一页
-        items[items.length] = new ShopButton(this, 0, 0, "幽灵(限时)", Resource.getImage("item_ghost"), 0, 0, 8,
-            ["游戏中会随机出现幽灵道具（限时一天）",
-                "效果：使你的坦克变成半透明移动时无视一切障碍物"],
-            Resource.getUser().hasGhost(), "GHOST");
-        items[items.length] = new ShopButton(this, 1, 0, "定时器(限时)", Resource.getImage("item_clock"), 0, 0, 10,
-            ["游戏中会随机出现定时器道具（限时一天）",
-                "效果：使敌方所有坦克15秒内不能移动"],
-            Resource.getUser().hasClock(), "CLOCK");
-        items[items.length] = new ShopButton(this, 2, 0, "红星(限时)", Resource.getImage("item_red_star"), 0, 0, 12,
-            ["游戏中会随机出现红星道具（限时一天）",
-                "效果：使你的坦克直接升至四星坦克"],
-            Resource.getUser().hasRedStar(), "RED_STAR");
-        items[items.length] = new ShopButton(this, 0, 1, "二星坦克(限时)", Resource.getImage("tank02"), 3, 0, 20,
-            ["效果：使你的坦克初始状态为二星坦克（限时一天）"],
-            Resource.getUser().getTankType() === "tank02", "TANK02");
-        items[items.length] = new ShopButton(this, 1, 1, "三星坦克(限时)", Resource.getImage("tank03"), 3, 0, 40,
-            ["效果：使你的坦克初始状态为三星坦克（限时一天）"],
-            Resource.getUser().getTankType() === "tank03", "TANK03");
-        items[items.length] = new ShopButton(this, 2, 1, "X 50(首充)", Resource.getImage("coin"), 0, 1, 2,
-            ["获得50个金币（仅限一次）"]);
+        this.itemInfo = {
+            w: 450,
+            h: 540,
+            interval: 40,
+            imageSize: 180,
+            buttonWidth: 250,
+            buttonHeight: 250 / 17 * 6,
+            moveWidth: 1644,
+            offset: 0,
+            offsetCache: 0,
+            touchPoint: null
+        };
+        this.itemInfo.minOffset = -this.shopItems.length * (this.itemInfo.w + this.itemInfo.interval)
+            + this.itemInfo.moveWidth;
+    }
 
-        //第二页
-        items[items.length] = new ShopButton(this, 0, 0, "X 60", Resource.getImage("coin"), 0, 1, 6,
-            ["获得60个金币"]);
-        items[items.length] = new ShopButton(this, 1, 0, "X 250", Resource.getImage("coin"), 0, 1, 24,
-            ["获得250个金币"]);
-        items[items.length] = new ShopButton(this, 2, 0, "X 500", Resource.getImage("coin"), 0, 1, 42,
-            ["获得500个金币"]);
-        items[items.length] = new ShopButton(this, 0, 1, "幽灵(永久)", Resource.getImage("item_ghost"), 0, 1, 12,
-            ["游戏中会随机出现幽灵道具",
-                "效果：使你的坦克变成半透明移动时无视一切障碍物"]);
-        items[items.length] = new ShopButton(this, 1, 1, "定时器(永久)", Resource.getImage("item_clock"), 0, 1, 15,
-            ["游戏中会随机出现定时器道具",
-                "效果：使敌方所有坦克15秒内不能移动"]);
-        items[items.length] = new ShopButton(this, 2, 1, "红星(永久)", Resource.getImage("item_red_star"), 0, 1, 18,
-            ["游戏中会随机出现红星道具",
-                "效果：使你的坦克直接升至四星坦克"]);
+    initControl() {
+        //返回按钮事件
+        const buttonCloseRankBoard = new ControlUnit({
+            leftTop: {x: 1830, y: 32},
+            rightBottom: {x: 1910, y: 118},
+            callback: () => {
+                this.removeEventListener();
+                Common.gotoStage("menu");
+            }
+        });
+        this.controlUnits.set(buttonCloseRankBoard.id, buttonCloseRankBoard);
 
-        //第三页
-        items[items.length] = new ShopButton(this, 0, 0, "黄金坦克(限时)", Resource.getImage("tank09"), 3, 1, 30,
-            ["效果：使你的坦克初始状态为黄金坦克（限时三天）"]);
+        //购买事件
+        this.initShopButtonControl();
+
+        //滑动之前的按压事件
+        this.createControl({
+            leftTop: {
+                x: 138,
+                y: 285
+            },
+            size: {
+                w: this.itemInfo.moveWidth,
+                h: 571
+            },
+            hasSound: false,
+            callback: (point) => {
+                this.itemInfo.touchPoint = point;
+                this.itemInfo.offsetCache = this.itemInfo.offset;
+            }
+        });
+
+        //滑动辅助
+        this.moveEvent = e => {
+            if (!this.itemInfo.touchPoint) {
+                return;
+            }
+
+            let minDistance = Resource.formatWidth();
+            let movePoint;
+            for (let i = 0; i < e.touches.length; ++i) {
+                const point = Control.getTouchPoint(e.touches[i]);
+                const distance = Common.distance(
+                    point.x, point.y,
+                    this.itemInfo.touchPoint.x,
+                    this.itemInfo.touchPoint.y);
+                if (distance < minDistance) {
+                    movePoint = point;
+                    minDistance = distance;
+                    break;
+                }
+            }
+            if (!movePoint) {
+                return;
+            }
+
+            this.itemInfo.offset = (movePoint.x - this.itemInfo.touchPoint.x + this.itemInfo.offsetCache);
+            if (this.itemInfo.offset > 0) {
+                this.itemInfo.offset = 0;
+            } else if (this.itemInfo.offset < this.itemInfo.minOffset) {
+                this.itemInfo.offset = this.itemInfo.minOffset;
+            }
+            this.updateShopButtonControlStatus();
+        };
+        this.endEvent = () => {
+            this.itemInfo.touchPoint = null;
+        };
+    }
+
+    initShopButtonControl() {
+        this.shopItems.forEach(item => {
+            item.control = this.createControl({
+                callback: () => {
+                    this.buy(item);
+                }
+            })
+        })
+    }
+
+    updateShopButtonControlStatus() {
+        for (let i = 0; i < this.shopItems.length; ++i) {
+            const control = this.shopItems[i].control;
+
+            control.leftTop.x = this.itemInfo.offset
+                + 155 +
+                this.itemInfo.w / 2 -
+                this.itemInfo.buttonWidth / 2 +
+                i * (this.itemInfo.w + this.itemInfo.interval);
+            control.leftTop.y = 760 -
+                this.itemInfo.buttonHeight / 2;
+            control.rightBottom.x = control.leftTop.x + this.itemInfo.buttonWidth;
+            control.rightBottom.y = control.leftTop.y + this.itemInfo.buttonHeight;
+
+            if (this.shopItems[i].hasBuy()) {
+                control.enable = false;
+            } else if (control.rightBottom.x > Resource.formatWidth() - 80) {
+                control.enable = false;
+            } else control.enable = control.leftTop.x >= 80;
+        }
+    }
+
+    drawShopItems(ctx) {
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        for (let i = 0; i < this.shopItems.length; ++i) {
+            this.drawShopItem(ctx, i);
+        }
+    }
+
+    drawShopItem(ctx, i) {
+        const x = this.itemInfo.offset + 155 + i * (this.itemInfo.w + this.itemInfo.interval);
+        const y = 300;
+        if (!this.drawItemRect(ctx, x, y)) {
+            return;
+        }
+        this.drawItemImage(ctx, x, y, i);
+        this.drawItemText(ctx, x, y, i);
+        this.drawItemButton(ctx, x, y, i);
+    }
+
+    drawItemRect(ctx, x, y) {
+        const leftTop = {
+            x: x,
+            y: y
+        };
+        const rightButton = {
+            x: x + this.itemInfo.w,
+            y: y + this.itemInfo.h
+        };
+
+        if (leftTop.x > Resource.formatWidth()) {
+            return false;
+        }
+        if (rightButton.x < 0) {
+            return false;
+        }
+
+        ctx.fillStyle = '#f9f0e1';
+        ctx.displayFillRoundRect(
+            leftTop.x, leftTop.y,
+            this.itemInfo.w,
+            this.itemInfo.h,
+            20);
+        return true;
+    }
+
+    drawItemText(ctx, x, y, i) {
+        const item = this.shopItems[i];
+        ctx.fillStyle = '#000';
+        x = x + this.itemInfo.w / 2;
+        ctx.displayText(item.title, x, y + 60, 48);
+
+        if (!item.text || item.text.length === 0) {
+            return;
+        }
+        y = y + 290;
+        item.text.forEach((text => {
+            ctx.displayText(text, x, y, 26);
+            y += 30;
+        }));
+    }
+
+    drawItemImage(ctx, x, y, i) {
+        const item = this.shopItems[i];
+        const index = item.imageIndex ? item.imageIndex : 0;
+        ctx.displayCenter(
+            item.imageId,
+            x + this.itemInfo.w / 2,
+            y + 180,
+            this.itemInfo.imageSize,
+            this.itemInfo.imageSize,
+            index);
+    }
+
+    drawItemButton(ctx, x, y, i) {
+        const item = this.shopItems[i];
+
+        ctx.font = 'bold 50px Arial';
+        ctx.strokeStyle = '#7b642f';
+        ctx.fillStyle = '#f7f3df';
+
+        if (item.hasBuy()) {
+            ctx.displayCenter(
+                "shop_button_disable",
+                x + this.itemInfo.w / 2,
+                y + 460,
+                this.itemInfo.buttonWidth);
+            const tips = "已购买";
+            ctx.displayStrokeText(tips, x + this.itemInfo.w / 2, y + 460, 50, true);
+        } else {
+            ctx.displayCenter(
+                "shop_button",
+                x + this.itemInfo.w / 2,
+                y + 460,
+                this.itemInfo.buttonWidth);
+            ctx.displayTopLeft(
+                "gold",
+                x + this.itemInfo.w / 2 - 100,
+                y + 420,
+                70);
+            const price = item.price;
+            ctx.displayStrokeText(price, x + this.itemInfo.w / 2 + 20, y + 460, 50, true);
+        }
+    }
+
+    buy(item) {
+        if (Resource.getUser().coin < item.price) {
+            new Tip(this, "金币不足!");
+            return;
+        }
+
+        new NewConfirm(this,
+            ["是否确定花费金币" + item.price + "购买" + item.title + "?"],
+            () => {
+                Common.postEncrypt("/shop/buyWithCoin", {
+                    userId: Resource.getUser().deviceId,
+                    buyType: item.buyType
+                }, data => {
+                    Resource.setUser(data);
+                    this.updateShopButtonControlStatus();
+                    new Tip(this, "购买成功!");
+                });
+            });
+    }
+
+    getId() {
+        return "shop";
     }
 }

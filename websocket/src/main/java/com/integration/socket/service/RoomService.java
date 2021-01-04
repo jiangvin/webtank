@@ -34,6 +34,9 @@ public class RoomService {
     private MapService mapService;
 
     @Autowired
+    private MapStarService mapStarService;
+
+    @Autowired
     private UserService userService;
 
     /**
@@ -47,14 +50,16 @@ public class RoomService {
         roomList.remove(room);
     }
 
-    public boolean roomNameExists(String roomName) {
-        return roomMap.containsKey(roomName);
+    public boolean roomIdExists(String roomId) {
+        return roomMap.containsKey(roomId);
     }
 
     public RoomListDto getRoomListDto(int start, int limit, String search) {
         List<RoomDto> roomDtoList = new ArrayList<>();
         for (StageRoom room : roomList) {
-            if (!StringUtils.isEmpty(search) && !room.getRoomId().contains(search)) {
+            if (!StringUtils.isEmpty(search) &&
+                    !room.getRoomId().contains(search) &&
+                    !room.getCreator().getUsername().contains(search)) {
                 continue;
             }
             roomDtoList.add(room.toDto());
@@ -80,12 +85,8 @@ public class RoomService {
     }
 
     StageRoom create(RoomDto roomDto, UserBo creator) {
-        if (roomNameExists(roomDto.getRoomId())) {
+        if (roomIdExists(roomDto.getRoomId())) {
             throw new CustomException("房间名重复:" + roomDto.getRoomId());
-        }
-
-        if (!StringUtils.isEmpty(creator.getRoomId())) {
-            throw new CustomException("用户正在其他房间中");
         }
 
         if (roomDto.getRoomType() == null) {
@@ -97,10 +98,10 @@ public class RoomService {
         }
 
         //mapService会自动抛出异常，这里不用再做空判断
-        MapMangerBo mapMangerBo = new MapMangerBo(mapService, roomDto.getMapId(), roomDto.getRoomType());
+        MapMangerBo mapMangerBo = new MapMangerBo(mapService, roomDto.getMapId(), roomDto.getSubId(), roomDto.getRoomType());
 
         log.info("room:{} will be created", roomDto);
-        StageRoom stageRoom = new StageRoom(roomDto, creator, mapMangerBo, messageService, userService);
+        StageRoom stageRoom = new StageRoom(roomDto, creator, mapMangerBo, messageService, userService, mapStarService);
         roomMap.put(stageRoom.getRoomId(), stageRoom);
         roomList.add(stageRoom);
         return stageRoom;

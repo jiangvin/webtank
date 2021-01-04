@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Map extends TableImpl<MapRecord> {
 
-    private static final long serialVersionUID = 785106944;
+    private static final long serialVersionUID = -927644016;
 
     /**
      * The reference instance of <code>map</code>
@@ -60,6 +60,11 @@ public class Map extends TableImpl<MapRecord> {
      * The column <code>map.id</code>.
      */
     public final TableField<MapRecord, Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>map.sub_id</code>.
+     */
+    public final TableField<MapRecord, Integer> SUB_ID = createField("sub_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>map.name</code>.

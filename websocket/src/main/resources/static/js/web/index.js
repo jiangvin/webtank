@@ -5,51 +5,83 @@
  */
 
 import Resource from "../share/tool/resource.js";
-import Home from "../web/home.js"
-import Menu from "../share/stage/menu.js";
 import Control from "../share/tool/control.js";
-import Room from "../share/stage/room.js"
 import Root from "../share/root.js";
-import Adapter from "../share/tool/adapter.js";
-import Common from "../share/tool/common.js";
+import Loading from "./loading.js";
 import AppHome from "../app/apphome.js";
+import Home from "./home.js";
+import Common from "../share/tool/common.js";
+import AdapterManager from "../share/tool/adapter/AdapterManager.js";
+import "../share/tool/context.js"
 
 export default class Index {
     constructor() {
+        this.initEvent();
         this.generateCanvas();
-        Resource.setCanvas(this.canvas);
-        this.ctx = this.canvas.getContext('2d');
 
         this.root = new Root();
         Resource.setRoot(this.root);
-        const thisIndex = this;
-        if (Adapter.isApp()) {
-            Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
-                if (data) {
-                    //旧用户
-                    Resource.setUser(data);
 
-                    thisIndex.root.addStage(new Menu());
-                    thisIndex.root.addStage(new Room());
-                    thisIndex.initEvent();
-                    thisIndex.start();
-                } else {
-                    //新用户
-                    thisIndex.root.addStage(new AppHome());
-                    thisIndex.root.addStage(new Menu());
-                    thisIndex.root.addStage(new Room());
-                    thisIndex.initEvent();
-                    thisIndex.start();
-                }
-            })
-        } else {
-            //web
-            this.root.addStage(new Home());
-            this.root.addStage(new Menu());
-            this.root.addStage(new Room());
-            this.initEvent();
-            this.start();
+        const debug = AdapterManager.getQueryString("debug");
+        if (debug) {
+            Resource.setDebug(debug);
+            this.initTouchDebug();
         }
+
+        this.initGame();
+    }
+
+    initGame() {
+        AdapterManager.checkPlatform();
+        switch (AdapterManager.getPlatform()) {
+            case "android":
+                Control.setControlMode(true);
+                Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
+                    if (data) {
+                        //旧用户
+                        Resource.setUser(data);
+                        Resource.getRoot().addStage(new Loading());
+                        Resource.getRoot().addGameStage();
+                    } else {
+                        //新用户
+                        Resource.getRoot().addStage(new Loading());
+                        Resource.getRoot().addStage(new AppHome());
+                        Resource.getRoot().addGameStage();
+                    }
+                    this.start();
+                });
+                break;
+            case "ios":
+                Control.setControlMode(true);
+                Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
+                    if (data) {
+                        //旧用户
+                        Resource.setUser(data);
+                        Resource.getRoot().addGameStage();
+                    } else {
+                        //新用户
+                        Resource.getRoot().addStage(new AppHome());
+                        Resource.getRoot().addGameStage();
+                    }
+                    this.start();
+                });
+                break;
+            default:
+                Resource.getRoot().addStage(new Home());
+                Resource.getRoot().addStage(new Loading());
+                Resource.getRoot().addGameStage();
+                this.start();
+                break;
+        }
+    }
+
+    initTouchDebug() {
+        document.addEventListener('touchstart', function (e) {
+            for (let i = 0; i < e.touches.length; ++i) {
+                const touchPoint = Control.getTouchPoint(e.touches[i]);
+                console.log("point: " + touchPoint.x + "," + touchPoint.y);
+            }
+        });
     }
 
     initEvent() {
@@ -102,6 +134,7 @@ export default class Index {
     start() {
         const index = this;
         const root = this.root;
+        root.currentStage().init();
 
         //运算&绘制
         const draw = function () {
@@ -116,49 +149,53 @@ export default class Index {
 
     generateCanvas() {
         this.canvas = document.getElementById("canvas");
+        this.ctx = this.canvas.getContext('2d');
+        Resource.setCanvas(this.canvas);
         this.windowChange();
-        const thisIndex = this;
-        window.addEventListener("resize", function () {
-            thisIndex.windowChange();
+        window.addEventListener("resize", () => {
+            this.windowChange();
         });
     }
 
     windowChange() {
-        const width = document.documentElement.clientWidth;
-        const height = document.documentElement.clientHeight;
-        const scale = Resource.calculateScale(width, height);
+        const info = Resource.calculateWindowInfo(
+            document.documentElement.clientWidth,
+            document.documentElement.clientHeight
+        );
+        this.canvas.width = info.displayW;
+        this.canvas.height = info.displayH;
 
-        const newWidth = width / scale;
-        const newHeight = height / scale;
         let style = "";
         //变形的中心点为左上角
-        style += "-webkit-transform-origin: 0 0;";
         style += "transform-origin: 0 0;";
-        if (width >= height) {
+        style += "width:" + info.displayW + "px;";
+        style += "height:" + info.displayH + "px;";
+        if (!info.isPortrait) {
             // 横屏
-            style += "width:" + newWidth + "px;";
-            style += "height:" + newHeight + "px;";
-            style += "-webkit-transform: rotate(0) scale(" + scale + ");";
-            style += "transform: rotate(0) scale(" + scale + ");";
-            this.canvas.width = newWidth;
-            this.canvas.height = newHeight;
+            style += "transform: rotate(0)";
         } else {
             // 竖屏
-            style += "width:" + newHeight + "px;";
-            style += "height:" + newWidth + "px;";
-            style += "-webkit-transform: rotate(90deg) scale(" + scale + ") translate(0px," + -newWidth + "px);";
-            style += "transform: rotate(90deg) scale(" + scale + ") translate(0px," + -newWidth + "px);";
-            this.canvas.width = newHeight;
-            this.canvas.height = newWidth;
+            style += "transform: rotate(90deg) translate(0px," + -info.realH + "px)";
         }
+        style += " scale(" + info.scaleForDisplayToReal + ")";
         let wrapper = document.getElementById("wrapper");
         wrapper.style.cssText = style;
-        Control.setPortrait(height > width);
+
+        //标准窗口的位移偏移
+        style = "";
+        style += "transform-origin: 0 0;";
+        if (!info.formatWithWidth) {
+            style += "transform: translateX(" + (Resource.getOffset().x * info.scaleForFormatToDisplay) + "px)"
+        } else {
+            style += "transform: translateY(" + (Resource.getOffset().y * info.scaleForFormatToDisplay) + "px)"
+        }
+        style += " scale(" + info.scaleForFormatToDisplay + ")";
+        let main = document.getElementById("main");
+        main.style.cssText = style;
+
+        Control.setPortrait(info.isPortrait);
         //窗口变化时重新计算触控栏位置
         Control.generateTouchModeInfo();
     }
 }
-
-Resource.preloadResource(function () {
-    new Index();
-});
+new Index();

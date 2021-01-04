@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="renderer" content="webkit"/>
     <meta name="viewport" content="width=device-width,maximum-scale=1.0,viewport-fit=cover,user-scalable=no">
@@ -11,15 +12,13 @@
 
 <body bgcolor="#000000">
 <div id="wrapper">
-    <canvas id="canvas">页面显示异常,请联系作者(WX: Jiang_Vin)</canvas>
-    <div id="input-name-div" style="visibility:hidden">
-        <input id="input" type="text" placeholder="请输入名字" class="input-name"/>
-        <button id="button1" class="connect" style="top: 150px;">键盘控制</button>
-        <button id="button2" class="connect" style="top: 250px;">触屏控制</button>
-        <button id="button3" class="connect" style="top: 350px;">下载APP</button>
+    <canvas id="canvas"></canvas>
+    <div id="main" class="rect-16to9">
+
     </div>
 </div>
 <script src="js/web/libs/jquery.min.js"></script>
+<script src="js/web/libs/soundjs.min.js"></script>
 <script src="js/share/libs/jsencrypt.min.js"></script>
 <script type="module" src="js/web/index.js"></script>
 </body>

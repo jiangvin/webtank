@@ -1,6 +1,7 @@
 package com.integration.socket.controller;
 
 import com.integration.socket.model.dto.RankDto;
+import com.integration.socket.model.dto.StarDto;
 import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.service.OnlineUserService;
 import com.integration.socket.service.TokenService;
@@ -44,6 +45,11 @@ public class UserController {
     @GetMapping("/getUser")
     public UserDto getUser(@RequestParam(value = "userId") String userId) {
         return userService.queryUser(userId);
+    }
+
+    @GetMapping("/getStarInfo")
+    public List<StarDto> getStarInfo(@RequestParam("userId") String userId) {
+        return userService.getStarInfo(userId);
     }
 
     @PostMapping("/saveUser")

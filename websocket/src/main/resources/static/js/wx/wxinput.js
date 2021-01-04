@@ -3,8 +3,8 @@
  * @description
  * @date 2020/6/17
  */
-import Item from "../share/stage/item.js";
-import ControlUnit from "../share/stage/controlunit.js";
+import Item from "../share/item/item.js";
+import ControlUnit from "../share/item/controlunit.js";
 
 export default class WxInput extends Item {
     constructor(id, x, y, width, height, placeholder) {
@@ -41,6 +41,7 @@ export default class WxInput extends Item {
                 wx.showKeyboard(obj);
                 wx.onKeyboardConfirm(function (result) {
                     thisInput.text = result.value;
+                    wx.offKeyboardConfirm(this);
                 })
             });
     }
@@ -50,7 +51,7 @@ export default class WxInput extends Item {
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
         ctx.lineWidth = 2;
-        ctx.fillStyle = '#000';
+        ctx.strokeStyle = '#000';
         ctx.strokeRect(this.x, this.y, this.width, this.height);
 
         let text;

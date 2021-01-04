@@ -20,6 +20,10 @@ public class UserDto {
     private String username;
     private String userDevice;
     private int coin;
+    private int stage;
+    private int hardStage;
+    private Integer rank;
+    private Integer score;
     private String tankType;
     private Timestamp tankTypeExpired;
     private Timestamp redStarExpired;

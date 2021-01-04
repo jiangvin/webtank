@@ -4,8 +4,8 @@ import com.integration.dto.map.ActionType;
 import com.integration.dto.map.ItemDto;
 import com.integration.dto.map.MapDto;
 import com.integration.dto.map.MapUnitType;
+import com.integration.dto.map.OrientationType;
 import com.integration.dto.message.MessageType;
-import com.integration.dto.room.GameStatusDto;
 import com.integration.dto.room.GameStatusType;
 import com.integration.dto.room.RoomDto;
 import com.integration.dto.room.RoomType;
@@ -16,34 +16,26 @@ import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.ItemBo;
 import com.integration.socket.model.bo.MapBo;
 import com.integration.socket.model.bo.MapMangerBo;
+import com.integration.socket.model.bo.PointBo;
+import com.integration.socket.model.bo.ScoreBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.bot.BaseBotBo;
 import com.integration.socket.model.dto.StringCountDto;
-import com.integration.socket.model.dto.TankTypeDto;
-import com.integration.socket.model.event.BaseEvent;
-import com.integration.socket.model.event.ClockEvent;
-import com.integration.socket.model.event.CreateItemEvent;
-import com.integration.socket.model.event.CreateTankEvent;
-import com.integration.socket.model.event.IronKingEvent;
-import com.integration.socket.model.event.LoadMapEvent;
-import com.integration.socket.model.event.MessageEvent;
-import com.integration.socket.repository.jooq.tables.records.UserRecord;
+import com.integration.socket.service.MapStarService;
 import com.integration.socket.service.MessageService;
 import com.integration.socket.service.UserService;
 import com.integration.util.CommonUtil;
 import com.integration.util.model.CustomException;
-import com.integration.util.time.TimeUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -55,80 +47,73 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StageRoom extends BaseStage {
 
-    private static final int MAX_ITEM_LIMIT = 3;
-    private static final int TRY_TIMES_OF_CREATE_ITEM = 10;
     private static final int DEFAULT_SHIELD_TIME = 20 * 60;
-    private static final int DEFAULT_SHIELD_TIME_FOR_NEW_TANK = 3 * 60;
-    private static final int SCORE_COM_BOOM = 10;
-    private static final int SCORE_PLAYER_BOOM = -30;
-    private static final int SCORE_WIN = 500;
 
-    private ConcurrentHashMap<String, List<String>> gridTankMap = new ConcurrentHashMap<>();
-
-    private ConcurrentHashMap<String, List<String>> gridBulletMap = new ConcurrentHashMap<>();
-
-    private Map<String, ItemBo> itemMap = new ConcurrentHashMap<>();
-
-    private List<BaseEvent> eventList = new ArrayList<>();
+    Map<String, ItemBo> itemMap = new ConcurrentHashMap<>();
 
     /**
      * 要删除的子弹列表，每帧刷新
      */
-    private List<String> removeBulletIds = new ArrayList<>();
+    private Set<String> removeBulletIds = new HashSet<>();
 
     /**
      * 要更新的坦克列表，保证坦克每秒和客户端同步一次
      */
-    private List<TankBo> syncTankList = new ArrayList<>();
+    @Getter
+    private Set<TankBo> syncTankList = new HashSet<>();
+
+    /**
+     * BOT列表
+     */
+    Map<String, BaseBotBo> botMap = new ConcurrentHashMap<>();
 
     /**
      * 在通关后记录玩家属性
      */
-    private Map<String, TankTypeDto> tankTypeSaveMap = new ConcurrentHashMap<>();
+    Map<String, TankBo> tankStatusSaveMap = new ConcurrentHashMap<>();
 
     @Getter
     private String roomId;
 
-    private UserBo creator;
+    boolean hardMode;
 
-    private MapMangerBo mapManger;
+    @Getter
+    UserBo creator;
 
-    private Random random = new Random();
+    MapMangerBo mapManger;
+
+    private EventManager eventManager;
+
+    private RoomTypeManager roomTypeManager;
 
     /**
      * 计分相关
      */
-    private long missionStartTime;
-    private int score = 0;
-    private UserService userService;
+    ScoreBo scoreBo = new ScoreBo();
+    UserService userService;
+    MapStarService mapStarService;
 
     /**
      * 道具池
      */
-    private List<ItemType> itemTypePool = new ArrayList<>();
+    List<ItemType> itemTypePool = new ArrayList<>();
 
-    public StageRoom(RoomDto roomDto, UserBo creator, MapMangerBo mapManger, MessageService messageService, UserService userService) {
+    public StageRoom(RoomDto roomDto,
+                     UserBo creator,
+                     MapMangerBo mapManger,
+                     MessageService messageService,
+                     UserService userService,
+                     MapStarService mapStarService) {
         super(messageService);
         this.roomId = roomDto.getRoomId();
+        this.hardMode = roomDto.isHardMode();
         this.creator = creator;
         this.mapManger = mapManger;
         this.userService = userService;
-        initItemPool(creator);
-
+        this.mapStarService = mapStarService;
+        this.eventManager = new EventManager(this);
+        this.roomTypeManager = new RoomTypeManager(this);
         init();
-    }
-
-    private void initItemPool(UserBo creator) {
-        itemTypePool.addAll(Arrays.asList(ItemType.values()));
-        if (!creator.hasRedStar()) {
-            itemTypePool.remove(ItemType.RED_STAR);
-        }
-        if (!creator.hasGhost()) {
-            itemTypePool.remove(ItemType.GHOST);
-        }
-        if (!creator.hasClock()) {
-            itemTypePool.remove(ItemType.CLOCK);
-        }
     }
 
     public RoomDto toDto() {
@@ -136,6 +121,7 @@ public class StageRoom extends BaseStage {
         roomDto.setRoomId(getRoomId());
         roomDto.setCreator(this.creator.getUsername());
         roomDto.setMapId(getMapId());
+        roomDto.setSubId(getSubId());
         roomDto.setRoomType(getRoomType());
         roomDto.setUserCount(getUserCount());
         return roomDto;
@@ -145,74 +131,52 @@ public class StageRoom extends BaseStage {
         this.tankMap.clear();
         this.bulletMap.clear();
         this.itemMap.clear();
-        this.gridBulletMap.clear();
-        this.gridTankMap.clear();
         this.removeBulletIds.clear();
-        this.eventList.clear();
         this.syncTankList.clear();
-        this.missionStartTime = System.currentTimeMillis();
+
+        this.roomTypeManager.initItemPool();
+        this.scoreBo.init();
         this.gameStatus.init();
-
-        this.eventList.add(new CreateItemEvent());
+        this.eventManager.init();
     }
 
-    private int saveTankType() {
-        this.tankTypeSaveMap.clear();
-        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            TankBo tankBo = kv.getValue();
-            if (tankBo.isBot()) {
-                continue;
-            }
-            this.tankTypeSaveMap.put(tankBo.getUserId(), tankBo.getType());
-        }
-        return this.tankTypeSaveMap.size();
+    int getMapId() {
+        return mapManger.getMapId();
     }
 
-    private int getMapId() {
-        return mapManger.getMapBo().getMapId();
+    int getSubId() {
+        return mapManger.getSubId();
     }
 
-    private RoomType getRoomType() {
+    RoomType getRoomType() {
         return mapManger.getRoomType();
     }
 
-    private MapBo getMapBo() {
+    MapBo getMapBo() {
         return mapManger.getMapBo();
-    }
-
-    private void addRemoveBulletIds(String id) {
-        if (!this.removeBulletIds.contains(id)) {
-            removeBulletIds.add(id);
-        }
-    }
-
-    @Override
-    public List<String> getUserList() {
-        List<String> users = new ArrayList<>();
-        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-            users.add(kv.getKey());
-        }
-        return users;
     }
 
     @Override
     public void update() {
-        processEvent();
+        eventManager.update();
 
         if (gameStatus.isPause()) {
             return;
         }
 
-        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
-            TankBo tankBo = kv.getValue();
-            updateTank(tankBo);
+        for (Map.Entry<String, BaseBotBo> kv : botMap.entrySet()) {
+            kv.getValue().update();
         }
-        syncTanks();
 
         for (Map.Entry<String, BulletBo> kv : bulletMap.entrySet()) {
             updateBullet(kv.getValue());
         }
         removeBullets();
+
+        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
+            updateTank(kv.getValue());
+        }
+        syncTanks();
     }
 
     private void syncTanks() {
@@ -228,103 +192,6 @@ public class StageRoom extends BaseStage {
         syncTankList.clear();
     }
 
-    private void processEvent() {
-        if (eventList.isEmpty()) {
-            return;
-        }
-
-        for (int i = 0; i < eventList.size(); ++i) {
-            BaseEvent event = eventList.get(i);
-            if (event.getTimeout() == 0) {
-                processEvent(event);
-                eventList.remove(i);
-                --i;
-            } else {
-                event.setTimeout(event.getTimeout() - 1);
-            }
-        }
-    }
-
-    private void processEvent(BaseEvent event) {
-        //先检查是否执行
-        if (!StringUtils.isEmpty(event.getUsernameCheck()) && !this.userMap.containsKey(event.getUsernameCheck())) {
-            return;
-        }
-
-        if (event instanceof CreateTankEvent) {
-            CreateTankEvent createTankEvent = (CreateTankEvent) event;
-            addNewTank(createTankEvent.getUser(), createTankEvent.getTankId());
-            return;
-        }
-
-        if (event instanceof MessageEvent) {
-            MessageEvent messageEvent = (MessageEvent) event;
-            sendMessageToRoom(messageEvent.getContent(), messageEvent.getMessageType());
-            return;
-        }
-
-        if (event instanceof ClockEvent) {
-            if (gameStatus.getType() != GameStatusType.NORMAL) {
-                gameStatus.setType(GameStatusType.NORMAL);
-                sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
-            }
-            return;
-        }
-
-        if (event instanceof LoadMapEvent) {
-            sendMessageToRoom(getMapBo().convertToDto(), MessageType.MAP);
-            gameStatus.setType(GameStatusType.NORMAL);
-            sendMessageToRoom(null, MessageType.SERVER_READY);
-            //1 ~ 5 秒陆续出现坦克
-            for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-                createTankForUser(kv.getValue(), kv.getValue().getTeamType(), random.nextInt(60 * 4) + 60);
-            }
-            return;
-        }
-
-        if (event instanceof IronKingEvent) {
-            IronKingEvent ironKingEvent = (IronKingEvent) event;
-            List<String> keys = ironKingEvent.getKeys();
-            for (int i = 0; i < keys.size(); ++i) {
-                String key = keys.get(i);
-                if (!getMapBo().getUnitMap().containsKey(key)) {
-                    keys.remove(i);
-                    --i;
-                } else {
-                    getMapBo().getUnitMap().put(key, MapUnitType.BRICK);
-                }
-            }
-            sendMessageToRoom(getMapBo().toDto(keys), MessageType.MAP);
-            return;
-        }
-
-        if (event instanceof CreateItemEvent) {
-            CreateItemEvent createItemEvent = (CreateItemEvent) event;
-            if (itemMap.size() < MAX_ITEM_LIMIT) {
-                ItemType itemType = itemTypePool.get(random.nextInt(itemTypePool.size()));
-                for (int time = 0; time < TRY_TIMES_OF_CREATE_ITEM; ++time) {
-                    Point grid = new Point();
-                    grid.x = random.nextInt(getMapBo().getMaxGridX());
-                    grid.y = random.nextInt(getMapBo().getMaxGridY());
-                    String key = CommonUtil.generateKey(grid.x, grid.y);
-                    if (getMapBo().getUnitMap().containsKey(key)) {
-                        continue;
-                    }
-                    if (itemMap.containsKey(key)) {
-                        continue;
-                    }
-                    Point pos = CommonUtil.getPointFromKey(key);
-                    ItemBo itemBo = new ItemBo(key, pos, CommonUtil.getId(), itemType);
-                    itemMap.put(key, itemBo);
-                    sendMessageToRoom(Collections.singletonList(itemBo.toDto()), MessageType.ITEM);
-                    break;
-                }
-            }
-            createItemEvent.resetTimeout();
-            this.eventList.add(createItemEvent);
-        }
-    }
-
     private void removeBullets() {
         if (removeBulletIds.isEmpty()) {
             return;
@@ -335,8 +202,6 @@ public class StageRoom extends BaseStage {
             if (bullet == null) {
                 continue;
             }
-            removeToGridBulletMap(bullet, bullet.getStartGridKey());
-            removeToGridBulletMap(bullet, bullet.getEndGridKey());
             bulletMap.remove(bulletId);
             if (tankMap.containsKey(bullet.getTankId())) {
                 tankMap.get(bullet.getTankId()).addAmmoCount();
@@ -352,7 +217,7 @@ public class StageRoom extends BaseStage {
         }
 
         if (bullet.getLifeTime() == 0) {
-            addRemoveBulletIds(bullet.getId());
+            this.removeBulletIds.add(bullet.getId());
             return;
         }
 
@@ -362,19 +227,6 @@ public class StageRoom extends BaseStage {
 
         bullet.setLifeTime(bullet.getLifeTime() - 1);
         bullet.run();
-
-        String newStart = CommonUtil.generateGridKey(bullet.getX(), bullet.getY());
-        if (newStart.equals(bullet.getStartGridKey())) {
-            return;
-        }
-
-        removeToGridBulletMap(bullet, bullet.getStartGridKey());
-        bullet.setStartGridKey(newStart);
-
-        //newStartKey must equal endKey
-        String newEnd = CommonUtil.generateEndGridKey(bullet.getX(), bullet.getY(), bullet.getOrientationType());
-        bullet.setEndGridKey(newEnd);
-        insertToGridBulletMap(bullet, newEnd);
     }
 
     /**
@@ -410,17 +262,13 @@ public class StageRoom extends BaseStage {
         //移动计算
         if (tankBo.getActionType() == ActionType.RUN) {
             boolean canRun = true;
-            //障碍物检测
-            for (String key : tankBo.getGridKeyList()) {
-                CollideType type = collideWithAll(tankBo, key);
-                if (type != CollideType.COLLIDE_NONE) {
-                    tankBo.setActionType(ActionType.STOP);
-                    sendTankToRoom(tankBo, type.toString());
-                    //已经发送了一次，重置标识
-                    needUpdate = false;
-                    canRun = false;
-                    break;
-                }
+            CollideType type = canPass(tankBo);
+            if (type != CollideType.COLLIDE_NONE) {
+                tankBo.setActionType(ActionType.STOP);
+                sendTankToRoom(tankBo, type.toString());
+                //已经发送了一次，重置标识
+                needUpdate = false;
+                canRun = false;
             }
 
             if (canRun) {
@@ -428,7 +276,6 @@ public class StageRoom extends BaseStage {
                     needUpdate = true;
                 }
                 tankBo.run(tankBo.getType().getSpeed());
-                refreshTankGridMap(tankBo);
             }
         }
 
@@ -437,27 +284,165 @@ public class StageRoom extends BaseStage {
         }
     }
 
-    private boolean catchItem(TankBo tankBo) {
-        if (!canCatchItem(tankBo)) {
+    public CollideType canPass(TankBo tank) {
+        return canPass(tank, tank.getOrientationType());
+    }
+
+    public CollideType canPass(TankBo tank, OrientationType orientation) {
+        //先判断，增加效率，防止遍历2次
+        if (collideWithTanks(tank, orientation)) {
+            return CollideType.COLLIDE_TANK;
+        }
+
+        //获取前方的两个角的坐标（顺时针获取）
+        List<PointBo> corners = generateCorners(tank, orientation);
+        for (PointBo corner : corners) {
+            CollideType result = canPass(corner, tank.isHasGhost());
+            if (result != CollideType.COLLIDE_NONE) {
+                return result;
+            }
+        }
+        return CollideType.COLLIDE_NONE;
+    }
+
+    private CollideType canPass(PointBo point, boolean hasGhost) {
+        if (point.getX() < 0 || point.getY() < 0 || point.getX() >= getMapBo().getWidth() || point.getY() >= getMapBo().getHeight()) {
+            return CollideType.COLLIDE_BOUNDARY;
+        }
+
+        //幽灵状态无视一切障碍
+        if (hasGhost) {
+            return CollideType.COLLIDE_NONE;
+        }
+
+        if (collideWithMap(point)) {
+            return CollideType.COLLIDE_MAP;
+        }
+        return CollideType.COLLIDE_NONE;
+    }
+
+    private boolean collideWithTanks(TankBo tank, OrientationType orientation) {
+        if (tank.isHasGhost()) {
             return false;
         }
 
-        for (String key : tankBo.getGridKeyList()) {
-            if (!itemMap.containsKey(key)) {
+        for (Map.Entry<String, TankBo> kv : tankMap.entrySet()) {
+            TankBo target = kv.getValue();
+            if (target.getTankId().equals(tank.getTankId())) {
                 continue;
             }
 
-            ItemBo itemBo = itemMap.get(key);
-            double distance = Point.distance(tankBo.getX(), tankBo.getY(), itemBo.getPos().x, itemBo.getPos().y);
+            if (target.isHasGhost()) {
+                continue;
+            }
+
+            double distance = Point.distance(tank.getX(), tank.getY(), target.getX(), target.getY());
             if (distance <= CommonUtil.UNIT_SIZE) {
-                return catchItem(tankBo, itemBo);
+                switch (orientation) {
+                    case UP:
+                        if (tank.getY() > target.getY()) {
+                            return true;
+                        }
+                        break;
+                    case DOWN:
+                        if (tank.getY() < target.getY()) {
+                            return true;
+                        }
+                        break;
+                    case LEFT:
+                        if (tank.getX() > target.getX()) {
+                            return true;
+                        }
+                        break;
+                    case RIGHT:
+                        if (tank.getX() < target.getX()) {
+                            return true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         return false;
     }
 
+    private boolean collideWithMap(PointBo point) {
+        String key = CommonUtil.generateGridKey(point.getX(), point.getY());
+        if (!getMapBo().getUnitMap().containsKey(key)) {
+            return false;
+        }
+
+        return getMapBo().getUnitMap().get(key) != MapUnitType.GRASS;
+    }
+
+    private List<PointBo> generateCorners(TankBo tank, OrientationType orientation) {
+        double x = tank.getX();
+        double y = tank.getY();
+        int size = CommonUtil.UNIT_SIZE;
+        int halfLite = size / 2 - 1;
+
+        //获取前方的两个角的坐标（顺时针获取）
+        PointBo corner1 = new PointBo();
+        PointBo corner2 = new PointBo();
+        switch (orientation) {
+            case UP:
+                y -= tank.getType().getSpeed();
+                corner1.setX(x - halfLite);
+                corner1.setY(y - halfLite);
+                corner2.setX(x + halfLite);
+                corner2.setY(y - halfLite);
+                break;
+            case DOWN:
+                y += tank.getType().getSpeed();
+                corner1.setX(x + halfLite);
+                corner1.setY(y + halfLite);
+                corner2.setX(x - halfLite);
+                corner2.setY(y + halfLite);
+                break;
+            case LEFT:
+                x -= tank.getType().getSpeed();
+                corner1.setX(x - halfLite);
+                corner1.setY(y + halfLite);
+                corner2.setX(x - halfLite);
+                corner2.setY(y - halfLite);
+                break;
+            case RIGHT:
+                x += tank.getType().getSpeed();
+                corner1.setX(x + halfLite);
+                corner1.setY(y - halfLite);
+                corner2.setX(x + halfLite);
+                corner2.setY(y + halfLite);
+                break;
+            default:
+                break;
+        }
+        List<PointBo> corners = new ArrayList<>();
+        corners.add(corner1);
+        corners.add(corner2);
+        return corners;
+    }
+
+    private boolean catchItem(TankBo tankBo) {
+        if (!canCatchItem(tankBo)) {
+            return false;
+        }
+
+        List<PointBo> corners = generateCorners(tankBo, tankBo.getOrientationType());
+        for (PointBo corner : corners) {
+            String key = CommonUtil.generateGridKey(corner.getX(), corner.getY());
+            if (!itemMap.containsKey(key)) {
+                continue;
+            }
+
+            ItemBo itemBo = itemMap.get(key);
+            return catchItem(tankBo, itemBo);
+        }
+        return false;
+    }
+
     private boolean canCatchItem(TankBo tankBo) {
-        return getRoomType() != RoomType.PVE || tankBo.getTankId().equals(tankBo.getUserId());
+        return getRoomType() != RoomType.PVE || tankBo.getTankId().equals(tankBo.getUserId()) || hardMode;
     }
 
     private boolean catchItem(TankBo tankBo, ItemBo itemBo) {
@@ -482,17 +467,18 @@ public class StageRoom extends BaseStage {
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return true;
             case LIFE:
-                addLife(tankBo.getTeamType());
+                addLife(tankBo);
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return false;
             case KING:
-                kingShield(tankBo.getTeamType());
+                eventManager.createKingShieldEvent(tankBo.getTeamType());
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return false;
             case BULLET:
                 tankBo.setBulletCount(tankBo.getBulletCount() + 1);
+                tankBo.setMaxBulletCount(tankBo.getMaxBulletCount() + 1);
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return true;
@@ -505,7 +491,7 @@ public class StageRoom extends BaseStage {
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return true;
             case CLOCK:
-                clockEvent(tankBo.getTeamType());
+                eventManager.createClockEvent(tankBo.getTeamType());
                 itemMap.remove(itemBo.getPosKey());
                 sendMessageToRoom(itemBo.getId(), MessageType.REMOVE_ITEM);
                 return false;
@@ -514,76 +500,22 @@ public class StageRoom extends BaseStage {
         }
     }
 
-    private void clockEvent(TeamType teamType) {
-        if (teamType == TeamType.RED) {
-            gameStatus.setType(GameStatusType.PAUSE_BLUE);
-        } else {
-            gameStatus.setType(GameStatusType.PAUSE_RED);
-        }
-        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
-        eventList.add(new ClockEvent());
-    }
-
-    private void kingShield(TeamType teamType) {
-        MapUnitType kingType;
-        if (teamType == TeamType.RED) {
-            kingType = MapUnitType.RED_KING;
-        } else {
-            kingType = MapUnitType.BLUE_KING;
-        }
-
-        //寻找king
-        List<String> kingKeys = new ArrayList<>();
-        Map<String, MapUnitType> unitMap = getMapBo().getUnitMap();
-        for (Map.Entry<String, MapUnitType> kv : unitMap.entrySet()) {
-            if (kv.getValue() == kingType) {
-                kingKeys.add(kv.getKey());
-            }
-        }
-
-        //寻找要替换的key
-        List<String> changeKeys = new ArrayList<>();
-        for (String key : kingKeys) {
-            Point p = CommonUtil.getGridPointFromKey(key);
-            for (int x = p.x - 1; x <= p.x + 1; ++x) {
-                for (int y = p.y - 1; y <= p.y + 1; ++y) {
-                    if (x < 0 || x >= getMapBo().getMaxGridX()) {
-                        continue;
-                    }
-
-                    if (y < 0 || y >= getMapBo().getMaxGridY()) {
-                        continue;
-                    }
-
-                    String changeKey = CommonUtil.generateKey(x, y);
-                    MapUnitType changeType = unitMap.getOrDefault(changeKey, MapUnitType.BRICK);
-                    if (changeType == MapUnitType.BRICK || changeType == MapUnitType.BROKEN_BRICK) {
-                        unitMap.put(changeKey, MapUnitType.IRON);
-                        changeKeys.add(changeKey);
-                    }
-                }
-            }
-        }
-        if (changeKeys.isEmpty()) {
-            return;
-        }
-
-        sendMessageToRoom(getMapBo().toDto(changeKeys), MessageType.MAP);
-        this.eventList.add(new IronKingEvent(changeKeys));
-    }
-
-    private void addLife(TeamType teamType) {
-        List<StringCountDto> life = getLifeMap(teamType);
+    private void addLife(TankBo tankBo) {
+        List<StringCountDto> life = getLifeMap(tankBo.getTeamType());
 
         if (!life.isEmpty()) {
             life.get(0).addValue(1);
         } else {
-            life.add(new StringCountDto("tank01", 1));
+            life.add(new StringCountDto(tankBo.getType().getTypeId(), 1));
 
             //将观看模式的用户加入战场
             for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
                 UserBo userBo = kv.getValue();
-                if (userBo.getTeamType() != teamType) {
+                if (isBot(userBo.getTeamType())) {
+                    continue;
+                }
+
+                if (userBo.getTeamType() != tankBo.getTeamType()) {
                     continue;
                 }
 
@@ -591,7 +523,7 @@ public class StageRoom extends BaseStage {
                     continue;
                 }
 
-                this.eventList.add(new CreateTankEvent(userBo, 60 * 3));
+                eventManager.createTankEvent(userBo);
                 break;
             }
         }
@@ -599,48 +531,25 @@ public class StageRoom extends BaseStage {
         sendMessageToRoom(getMapBo().convertLifeCountToDto(), MessageType.MAP);
     }
 
-    private CollideType collideWithAll(TankBo tankBo, String key) {
-        Point grid = CommonUtil.getGridPointFromKey(key);
-        if (grid.x < 0 || grid.y < 0 || grid.x >= getMapBo().getMaxGridX() || grid.y >= getMapBo().getMaxGridY()) {
-            //超出范围，停止
-            return CollideType.COLLIDE_BOUNDARY;
-        }
-
-        //幽灵状态下无视一切障碍
-        if (tankBo.isHasGhost()) {
-            return CollideType.COLLIDE_NONE;
-        }
-
-        if (collideForTank(getMapBo().getUnitMap().get(key))) {
-            //有障碍物，停止
-            return CollideType.COLLIDE_MAP;
-        }
-
-        if (collideWithTanks(tankBo, key)) {
-            //有其他坦克，停止
-            return CollideType.COLLIDE_TANK;
-        }
-        return CollideType.COLLIDE_NONE;
-    }
-
     private boolean collideWithAll(BulletBo bullet) {
         if (bullet.getX() < 0 || bullet.getY() < 0 || bullet.getX() >= getMapBo().getWidth() || bullet.getY() >= getMapBo().getHeight()) {
             //超出范围
-            addRemoveBulletIds(bullet.getId());
+            this.removeBulletIds.add(bullet.getId());
             return true;
         }
 
         //和地图场景碰撞检测
-        if (collideForBullet(getMapBo().getUnitMap().get(bullet.getStartGridKey()))) {
-            addRemoveBulletIds(bullet.getId());
-            processMapWhenCatchAmmo(bullet.getStartGridKey(), bullet);
+        String key = CommonUtil.generateGridKey(bullet.getX(), bullet.getY());
+        if (collideForBullet(getMapBo().getUnitMap().get(key))) {
+            this.removeBulletIds.add(bullet.getId());
+            processMapWhenCatchAmmo(key, bullet);
             return true;
         }
 
         //和坦克碰撞检测
         TankBo tankBo = collideWithTanks(bullet);
         if (tankBo != null) {
-            addRemoveBulletIds(bullet.getId());
+            this.removeBulletIds.add(bullet.getId());
             if (!tankBo.hasShield()) {
                 if (tankBo.levelDown()) {
                     sendTankToRoom(tankBo);
@@ -665,26 +574,14 @@ public class StageRoom extends BaseStage {
     }
 
     private TankBo collideWithTanks(BulletBo bulletBo) {
-        TankBo tankBo = collideWithTanks(bulletBo, bulletBo.getStartGridKey());
-        if (tankBo != null) {
-            return tankBo;
-        }
-        return collideWithTanks(bulletBo, bulletBo.getEndGridKey());
-    }
-
-    private TankBo collideWithTanks(BulletBo bulletBo, String key) {
-        if (!gridTankMap.containsKey(key)) {
-            return null;
-        }
-
-        for (String tankId : gridTankMap.get(key)) {
-            TankBo tankBo = tankMap.get(tankId);
+        double minDistance = (CommonUtil.UNIT_SIZE + CommonUtil.AMMO_SIZE) / 2.0;
+        for (Map.Entry<String, TankBo> kv : this.tankMap.entrySet()) {
+            TankBo tankBo = kv.getValue();
             //队伍相同，不检测
             if (tankBo.getTeamType() == bulletBo.getTeamType()) {
                 continue;
             }
             double distance = Point.distance(tankBo.getX(), tankBo.getY(), bulletBo.getX(), bulletBo.getY());
-            double minDistance = CommonUtil.UNIT_SIZE / 2.0;
             if (distance <= minDistance) {
                 return tankBo;
             }
@@ -693,32 +590,16 @@ public class StageRoom extends BaseStage {
     }
 
     private boolean collideWithBullets(BulletBo ammo) {
-        if (collideWithBullets(ammo, ammo.getStartGridKey())) {
-            return true;
-        }
-
-        return collideWithBullets(ammo, ammo.getEndGridKey());
-    }
-
-    private boolean collideWithBullets(BulletBo ammo, String key) {
-        if (gridBulletMap.get(key) == null) {
-            return false;
-        }
-
-        for (String id : gridBulletMap.get(key)) {
-            if (id.equals(ammo.getId())) {
-                continue;
-            }
-
-            BulletBo target = bulletMap.get(id);
-            if (target == null || target.getTeamType() == ammo.getTeamType()) {
+        for (Map.Entry<String, BulletBo> kv : this.bulletMap.entrySet()) {
+            BulletBo target = kv.getValue();
+            if (target.getTeamType() == ammo.getTeamType()) {
                 continue;
             }
 
             double distance = Point.distance(ammo.getX(), ammo.getY(), target.getX(), target.getY());
             if (distance <= CommonUtil.AMMO_SIZE) {
-                addRemoveBulletIds(ammo.getId());
-                addRemoveBulletIds(target.getId());
+                this.removeBulletIds.add(ammo.getId());
+                this.removeBulletIds.add(target.getId());
                 return true;
             }
         }
@@ -771,109 +652,39 @@ public class StageRoom extends BaseStage {
             throw new CustomException("地图读取异常, 操作失败");
         }
 
-        sendMessageToRoom(String.format("%s 选择了续关,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
+        sendMessageToRoom(String.format("%s 选择了重玩,游戏将在5秒后重新开始...", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
+
+        //重置总分
+        this.scoreBo.setTotalScore(0);
+
         gameStatus.setType(GameStatusType.PAUSE);
-        gameStatus.setMessage(String.format("MISSION %02d", getMapId()));
         init();
         processNextMapEvent(5, "重新开始");
     }
 
     private void processGameOver(TeamType winTeam) {
-        gameStatus.setType(GameStatusType.PAUSE);
-        if (getRoomType() == RoomType.PVE && !processGameOverPve(winTeam)) {
-            return;
-        } else if (getRoomType() != RoomType.PVE && !processGameOverPvp(winTeam)) {
+        if (!roomTypeManager.processGameOver(winTeam)) {
             return;
         }
-
         init();
         processNextMapEvent(10, "进入下一关");
     }
 
     private void processNextMapEvent(int loadSeconds, String tips) {
-        int clearSeconds = loadSeconds - 2;
         for (int i = 1; i <= loadSeconds; ++i) {
             String content = String.format("%d秒后%s...", i, tips);
-            MessageEvent messageEvent = new MessageEvent(content, MessageType.SYSTEM_MESSAGE);
-            messageEvent.setTimeout((loadSeconds - i) * 60);
-            this.eventList.add(messageEvent);
+            eventManager.createMessageEvent(content, MessageType.SYSTEM_MESSAGE, (loadSeconds - i) * 60);
         }
-        //清空地图
-        MessageEvent cleanEvent = new MessageEvent(null, MessageType.CLEAR_MAP);
-        cleanEvent.setTimeout(clearSeconds * 60);
-        this.eventList.add(cleanEvent);
+        int frames = loadSeconds * 60;
 
-        //更改标题
-        MessageEvent changeTitle = new MessageEvent(new GameStatusDto(GameStatusType.PAUSE, gameStatus.getMessage()), MessageType.GAME_STATUS);
-        changeTitle.setTimeout(clearSeconds * 60);
-        this.eventList.add(changeTitle);
+        //更改关卡信息
+        eventManager.createMessageEvent(getMapBo().convertMapIdToDto(), MessageType.MAP, frames++);
+
+        //清空地图
+        eventManager.createMessageEvent(null, MessageType.CLEAR_MAP, frames++);
 
         //加载地图
-        LoadMapEvent loadEvent = new LoadMapEvent();
-        loadEvent.setTimeout(loadSeconds * 60);
-        this.eventList.add(loadEvent);
-    }
-
-    private boolean processGameOverPve(TeamType winTeam) {
-        int saveLife = saveTankType();
-
-        if (winTeam == TeamType.RED) {
-            updateScoreAfterWin();
-            gameStatus.setScore(this.score);
-            gameStatus.setRank(userService.getRank(this.score));
-            if (!mapManger.loadNextMapPve(saveLife)) {
-                gameStatus.setMessage("恭喜全部通关");
-                gameStatus.setType(GameStatusType.WIN);
-                userService.saveRankForMultiplePlayers(this.creator, gameStatus);
-                getAndSaveCoin();
-            } else {
-                gameStatus.setMessage("恭喜通关");
-            }
-        } else {
-            if (this.score < 0) {
-                this.score = 0;
-            }
-            gameStatus.setScore(this.score);
-            gameStatus.setRank(userService.getRank(this.score));
-            gameStatus.setMessage("游戏失败");
-            gameStatus.setType(GameStatusType.LOSE);
-            userService.saveRankForMultiplePlayers(this.creator, gameStatus);
-            getAndSaveCoin();
-        }
-
-        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
-
-        //修改标题，下次使用
-        gameStatus.setMessage(String.format("MISSION %02d", getMapId()));
-        return gameStatus.getType() == GameStatusType.PAUSE;
-    }
-
-    private void getAndSaveCoin() {
-        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-            userService.saveCoinFromScore(kv.getValue().getUserRecord(), score, false);
-        }
-    }
-
-    private void updateScoreAfterWin() {
-        int seconds = (int)((System.currentTimeMillis() - this.missionStartTime) / 1000);
-        int winScore = SCORE_WIN - seconds;
-        if (winScore > 0) {
-            this.score += winScore;
-        }
-    }
-
-    private boolean processGameOverPvp(TeamType winTeam) {
-        gameStatus.setMessage(getTeam(winTeam) + "胜利!");
-
-        if (!mapManger.loadRandomMapPvp()) {
-            gameStatus.setType(GameStatusType.WIN);
-        }
-
-        sendMessageToRoom(gameStatus, MessageType.GAME_STATUS);
-
-        //修改标题，下次使用
-        gameStatus.setMessage("RED vs BLUE");
-        return gameStatus.getType() == GameStatusType.PAUSE;
+        eventManager.createLoadMapEvent(frames);
     }
 
     private void changeMap(String key, MapUnitType type) {
@@ -881,64 +692,9 @@ public class StageRoom extends BaseStage {
         sendMessageToRoom(MapDto.convert(key, type), MessageType.MAP);
     }
 
-    private void removeMap(String key) {
+    void removeMap(String key) {
         getMapBo().getUnitMap().remove(key);
         sendMessageToRoom(key, MessageType.REMOVE_MAP);
-    }
-
-    private boolean collideWithTanks(TankBo tankBo, String key) {
-        if (gridTankMap.containsKey(key)) {
-            for (String tankId : gridTankMap.get(key)) {
-                //跳过自己
-                if (tankId.equals(tankBo.getTankId())) {
-                    continue;
-                }
-
-                TankBo target = tankMap.get(tankId);
-                if (collide(tankBo, target)) {
-                    //和其他坦克相撞
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean collide(TankBo tank1, TankBo tank2) {
-        double distance = Point.distance(tank1.getX(), tank1.getY(), tank2.getX(), tank2.getY());
-        boolean isCollide = distance <= CommonUtil.UNIT_SIZE;
-        switch (tank1.getOrientationType()) {
-            case UP:
-                if (isCollide && tank2.getY() < tank1.getY()) {
-                    return true;
-                }
-                break;
-            case DOWN:
-                if (isCollide && tank2.getY() > tank1.getY()) {
-                    return true;
-                }
-                break;
-            case LEFT:
-                if (isCollide && tank2.getX() < tank1.getX()) {
-                    return true;
-                }
-                break;
-            case RIGHT:
-                if (isCollide && tank2.getX() > tank1.getX()) {
-                    return true;
-                }
-                break;
-            default:
-                break;
-        }
-        return false;
-    }
-
-    private boolean collideForTank(MapUnitType mapUnitType) {
-        if (mapUnitType == null) {
-            return false;
-        }
-        return mapUnitType != MapUnitType.GRASS;
     }
 
     private boolean collideForBullet(MapUnitType mapUnitType) {
@@ -950,10 +706,6 @@ public class StageRoom extends BaseStage {
 
     @Override
     void removeTankExtension(TankBo tankBo) {
-        for (String key : tankBo.getGridKeyList()) {
-            removeToGridTankMap(tankBo, key);
-        }
-
         updateGameScore(tankBo);
 
         //check status
@@ -962,10 +714,14 @@ public class StageRoom extends BaseStage {
         }
 
         sendTankBombMessage(tankBo);
+
         //recreate
         UserBo userBo = this.userMap.get(tankBo.getUserId());
+        if (userBo == null && this.botMap.containsKey(tankBo.getUserId())) {
+            userBo = this.botMap.get(tankBo.getUserId()).getBotUser();
+        }
         if (userBo != null) {
-            this.eventList.add(new CreateTankEvent(userBo, tankBo.getTankId(), 60 * 3));
+            eventManager.createTankEvent(userBo, tankBo.getTankId());
         }
     }
 
@@ -975,9 +731,9 @@ public class StageRoom extends BaseStage {
         }
 
         if (tankBo.getTeamType() == TeamType.RED) {
-            this.score += SCORE_PLAYER_BOOM;
+            this.scoreBo.addScoreForPlayerBoom();
         } else {
-            this.score += SCORE_COM_BOOM;
+            this.scoreBo.addScoreForComBoom();
         }
     }
 
@@ -1041,151 +797,54 @@ public class StageRoom extends BaseStage {
     }
 
     private String generateUsernameWithTeam(UserBo userBo) {
-        return String.format("%s[%s]", userBo.getUsername(), getTeam(userBo.getTeamType()));
+        return String.format("%s[%s]", userBo.getUsername(), roomTypeManager.getTeamStr(userBo.getTeamType()));
     }
 
-    private String getTeam(TeamType teamType) {
-        String teamStr = "观看";
-        switch (getRoomType()) {
-            case EVE:
-            case PVP:
-                switch (teamType) {
-                    case RED:
-                        teamStr = "红队";
-                        break;
-                    case BLUE:
-                        teamStr = "蓝队";
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case PVE:
-                switch (teamType) {
-                    case RED:
-                        teamStr = "玩家";
-                        break;
-                    case BLUE:
-                        teamStr = "AI";
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-        return teamStr;
+    public void addBot(BaseBotBo bot) {
+        bot.setStage(this);
+        botMap.put(bot.getId(), bot);
+        addPlayerLifeForNewComer(bot.getTeamType());
+        eventManager.createTankEvent(bot.getBotUser());
     }
 
-    public void addUser(UserBo userBo, TeamType teamType) {
-        //TODO - 暂停状态不允许加入,需要后期优化
-        if (gameStatus.isPause()) {
-            return;
-        }
-
+    public void addUser(UserBo userBo) {
         userMap.put(userBo.getUsername(), userBo);
         userBo.setRoomId(this.roomId);
-        userBo.setTeamType(teamType);
         sendStatusAndMessage(userBo, false);
 
-        //每有一个玩家加入，玩家生命+1
-        if (getRoomType() == RoomType.PVE && teamType == TeamType.RED) {
-            getMapBo().addPlayerLife(1);
-        }
+        addPlayerLifeForNewComer(userBo.getTeamType());
+        roomTypeManager.initItemPool();
 
         //发送场景信息
-        sendMessageToUser(getMapBo().convertToDto(), MessageType.MAP, userBo.getUsername());
+        sendMessageToUser(getMapBo().toDto(), MessageType.MAP, userBo.getUsername());
         sendMessageToUser(getTankList(), MessageType.TANKS, userBo.getUsername());
         sendMessageToUser(getBulletList(), MessageType.BULLET, userBo.getUsername());
         sendMessageToUser(getItemPool(), MessageType.ITEM, userBo.getUsername());
+        sendMessageToUser(gameStatus, MessageType.GAME_STATUS, userBo.getUsername());
 
-        createTankForUser(userBo, teamType, 60 * 3);
-        sendReady(userBo.getUsername());
-    }
-
-    private void createTankForUser(UserBo userBo, TeamType teamType, int timeoutForPlayer) {
-        if (isBot(teamType)) {
-            int count = getMapBo().getComputerStartCount();
-            for (int i = 0; i < count; ++i) {
-                this.eventList.add(new CreateTankEvent(userBo, CommonUtil.getId(), 60 * random.nextInt(count)));
-            }
-            return;
-        }
-
-        this.eventList.add(new CreateTankEvent(userBo, timeoutForPlayer));
-    }
-
-    private void addNewTank(UserBo userBo, String tankId) {
-        if (userBo.getTeamType() == TeamType.VIEW) {
-            return;
-        }
-
-        List<StringCountDto> lifeMap = getLifeMap(userBo.getTeamType());
-        if (lifeMap.isEmpty()) {
-            if (!isBot(userBo.getTeamType())) {
-                sendMessageToRoom(String.format("没有剩余生命值, 玩家 %s 将变成观看模式", userBo.getUsername()), MessageType.SYSTEM_MESSAGE);
-            }
-            return;
-        }
-
-        TankBo tankBo = new TankBo();
-        tankBo.setTankId(tankId);
-        tankBo.setUserId(userBo.getUsername());
-        tankBo.setTeamType(userBo.getTeamType());
-
-        //设定类型
-        TankTypeDto initType = getTankType(lifeMap, userBo);
-        TankTypeDto saveType = this.tankTypeSaveMap.get(userBo.getUsername());
-        if (saveType != null) {
-            tankBo.setType(saveType);
-            this.tankTypeSaveMap.remove(userBo.getUsername());
-        } else {
-            tankBo.setType(initType);
-        }
-
-        if (!tankBo.isBot()) {
-            tankBo.setShieldTimeout(DEFAULT_SHIELD_TIME_FOR_NEW_TANK);
-        }
-        setStartPoint(tankBo);
-        tankBo.setBulletCount(tankBo.getType().getAmmoMaxCount());
-        tankMap.put(tankBo.getTankId(), tankBo);
-
-        sendTankToRoom(tankBo);
+        eventManager.createTankEvent(userBo);
     }
 
     /**
-     * 根据队伍获得类型，并且更新life
-     *
-     * @param lifeMap
-     * @return
+     * 防止新用户进来没有生命的情况
      */
-    private TankTypeDto getTankType(List<StringCountDto> lifeMap, UserBo userBo) {
-        StringCountDto pair = lifeMap.get(0);
-        int lastCount = pair.getValue() - 1;
-        if (lastCount == 0) {
-            lifeMap.remove(0);
-        } else {
-            pair.setValue(lastCount);
+    private void addPlayerLifeForNewComer(TeamType teamType) {
+        if (getRoomType() != RoomType.PVE) {
+            return;
         }
-        sendMessageToRoom(getMapBo().convertLifeCountToDto(), MessageType.MAP);
-        String tankType = pair.getKey();
-        if (isBot(userBo.getTeamType())) {
-            return TankTypeDto.getTankType(tankType);
+
+        if (teamType != TeamType.RED) {
+            return;
         }
-        if (userBo.getUserRecord() == null) {
-            return TankTypeDto.getTankType(tankType);
+
+        if (!getMapBo().getPlayerLife().isEmpty()) {
+            return;
         }
-        UserRecord userRecord = userBo.getUserRecord();
-        if (!StringUtils.isEmpty(userRecord.getTankType()) &&
-                userRecord.getTankTypeExpired() != null &&
-                userRecord.getTankTypeExpired().after(TimeUtil.now())) {
-            tankType = userRecord.getTankType();
-        }
-        return TankTypeDto.getTankType(tankType);
+
+        getMapBo().addPlayerLife(1);
     }
 
-    private List<StringCountDto> getLifeMap(TeamType teamType) {
+    List<StringCountDto> getLifeMap(TeamType teamType) {
         if (teamType == TeamType.RED) {
             return getMapBo().getPlayerLife();
         } else {
@@ -1217,96 +876,7 @@ public class StageRoom extends BaseStage {
         return itemDtoList;
     }
 
-    private void setStartPoint(TankBo tankBo) {
-        String posStr;
-        if (tankBo.getTeamType() == TeamType.RED) {
-            posStr = getMapBo().getPlayerStartPoints().get(random.nextInt(getMapBo().getPlayerStartPoints().size()));
-        } else {
-            posStr = getMapBo().getComputerStartPoints().get(random.nextInt(getMapBo().getComputerStartPoints().size()));
-        }
-        tankBo.getGridKeyList().add(posStr);
-        insertToGridTankMap(tankBo, posStr);
-        Point point = CommonUtil.getPointFromKey(posStr);
-        tankBo.setX(point.getX());
-        tankBo.setY(point.getY());
-    }
-
-    private void insertToGridTankMap(TankBo tankBo, String key) {
-        if (!gridTankMap.containsKey(key)) {
-            gridTankMap.put(key, new ArrayList<>());
-        }
-        if (!gridTankMap.get(key).contains(tankBo.getTankId())) {
-            gridTankMap.get(key).add(tankBo.getTankId());
-        }
-    }
-
-    private void removeToGridTankMap(TankBo tankBo, String key) {
-        if (!gridTankMap.containsKey(key)) {
-            return;
-        }
-        gridTankMap.get(key).remove(tankBo.getTankId());
-        if (gridTankMap.get(key).isEmpty()) {
-            gridTankMap.remove(key);
-        }
-    }
-
-    private void insertToGridBulletMap(BulletBo bullet, String key) {
-        if (!gridBulletMap.containsKey(key)) {
-            gridBulletMap.put(key, new ArrayList<>());
-        }
-        if (!gridBulletMap.get(key).contains(bullet.getId())) {
-            gridBulletMap.get(key).add(bullet.getId());
-        }
-    }
-
-    private void removeToGridBulletMap(BulletBo bullet, String key) {
-        if (!gridBulletMap.containsKey(key)) {
-            return;
-        }
-        gridBulletMap.get(key).remove(bullet.getId());
-        if (gridBulletMap.get(key).isEmpty()) {
-            gridBulletMap.remove(key);
-        }
-    }
-
-    @Override
-    void updateTankControlExtension(TankBo tankBo, ItemDto tankDto) {
-        //TODO - 距离检测，防止作弊
-
-        if (tankDto.getX() != null && tankDto.getY() != null) {
-            tankBo.setX(tankDto.getX());
-            tankBo.setY(tankDto.getY());
-        }
-        refreshTankGridMap(tankBo);
-    }
-
-    private void refreshTankGridMap(TankBo tankBo) {
-        List<String> newKeys = tankBo.generateGridKeyList();
-        for (String oldKey : tankBo.getGridKeyList()) {
-            if (!newKeys.contains(oldKey)) {
-                removeToGridTankMap(tankBo, oldKey);
-            }
-        }
-        for (String newKey : newKeys) {
-            if (!tankBo.getGridKeyList().contains(newKey)) {
-                insertToGridTankMap(tankBo, newKey);
-            }
-        }
-        tankBo.setGridKeyList(newKeys);
-    }
-
-    @Override
-    void processTankFireExtension(BulletBo bullet) {
-        String startKey = CommonUtil.generateGridKey(bullet.getX(), bullet.getY());
-        bullet.setStartGridKey(startKey);
-        insertToGridBulletMap(bullet, startKey);
-
-        String endKey = CommonUtil.generateEndGridKey(bullet.getX(), bullet.getY(), bullet.getOrientationType());
-        bullet.setEndGridKey(endKey);
-        insertToGridBulletMap(bullet, endKey);
-    }
-
-    private boolean isBot(TeamType teamType) {
+    boolean isBot(TeamType teamType) {
         if (getRoomType() == RoomType.EVE) {
             return true;
         }

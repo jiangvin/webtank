@@ -6,6 +6,7 @@ package com.integration.socket.repository.jooq;
 
 import com.integration.socket.repository.jooq.tables.Map;
 import com.integration.socket.repository.jooq.tables.RankBoard;
+import com.integration.socket.repository.jooq.tables.Star;
 import com.integration.socket.repository.jooq.tables.User;
 
 import javax.annotation.Generated;
@@ -33,6 +34,11 @@ public class Tables {
      * The table <code>rank_board</code>.
      */
     public static final RankBoard RANK_BOARD = com.integration.socket.repository.jooq.tables.RankBoard.RANK_BOARD;
+
+    /**
+     * The table <code>star</code>.
+     */
+    public static final Star STAR = com.integration.socket.repository.jooq.tables.Star.STAR;
 
     /**
      * The table <code>user</code>.

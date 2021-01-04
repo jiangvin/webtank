@@ -6,6 +6,7 @@
 
 import Resource from "./resource.js";
 import Common from "./common.js";
+import Status from "./status.js";
 
 export default class Control {
 
@@ -21,7 +22,7 @@ export default class Control {
         if (isTouch) {
             Control.generateTouchModeInfo();
             document.addEventListener('touchstart', function (e) {
-                for(let i = 0; i < e.touches.length; ++i) {
+                for (let i = 0; i < e.touches.length; ++i) {
                     const touchPoint = Control.getTouchPoint(e.touches[i]);
                     Control.touchStartControl(touchPoint);
                     Resource.getRoot().processPointDownEvent(touchPoint);
@@ -113,10 +114,10 @@ export default class Control {
         const controlMode = Control.instance.controlMode;
         let stop = true;
         for (let i = 0; i < e.touches.length; ++i) {
-            const touchPoint = Control.getTouchPoint(e.touches[i]);
+            const touchPoint = Control.getTouchPointWithoutScale(e.touches[i]);
             const distance = Common.distance(touchPoint.x, touchPoint.y, controlMode.centerX, controlMode.centerY);
             //还有手指在方向盘上，不停止
-            if (distance >= controlMode.minRadius && distance <= controlMode.maxRadius) {
+            if (distance <= controlMode.maxRadius) {
                 stop = false;
                 break;
             }
@@ -131,10 +132,17 @@ export default class Control {
 
     static touchMoveControl(e) {
         const controlMode = Control.instance.controlMode;
+
+        //如果没有操作方向键，则返回
+        if (controlMode.touchX == null || controlMode.touchY == null) {
+            return;
+        }
+
+        //找寻操作点
         let touchMovePoint;
         let distance;
         for (let i = 0; i < e.touches.length; ++i) {
-            const touchPoint = Control.getTouchPoint(e.touches[i]);
+            const touchPoint = Control.getTouchPointWithoutScale(e.touches[i]);
             distance = Common.distance(touchPoint.x, touchPoint.y, controlMode.centerX, controlMode.centerY);
             if (distance <= controlMode.maxRadius) {
                 touchMovePoint = touchPoint;
@@ -153,10 +161,6 @@ export default class Control {
             controlMode.touchX = x;
             controlMode.touchY = y;
         } else {
-            if (controlMode.touchX == null || controlMode.touchY == null) {
-                //从头到尾都超过外圆，不做任何操作
-                return;
-            }
             //开始计算圆外的点和圆心连线的交点
             //先将圆心移动到坐标原点
             x = x - controlMode.centerX;
@@ -190,28 +194,48 @@ export default class Control {
     }
 
     static touchStartControl(touchPoint) {
-        let x = touchPoint.x;
-        let y = touchPoint.y;
+        let x = touchPoint.x * Resource.getScale();
+        let y = touchPoint.y * Resource.getScale();
         const controlMode = Control.instance.controlMode;
 
+        //fire
         let distance = Common.distance(x, y, controlMode.rightCenterX, controlMode.rightCenterY);
         if (distance < controlMode.rightRadius) {
             Resource.getRoot().processControlEvent("FIRE");
             return;
         }
 
-        distance = Common.distance(x, y, controlMode.centerX, controlMode.centerY);
-        if (distance > controlMode.radius) {
-            //超过外圆
+        //如果已经在触控方向盘则不做额外触控操作
+        if (controlMode.touchX && controlMode.touchY) {
+            return;
+        }
+
+        //在屏幕的左半边触控则直接返回
+        if (x >= Common.width() * .3) {
+            return;
+        }
+
+        //过于靠边缘也直接返回
+        if (x < controlMode.radius ||
+            y < controlMode.radius ||
+            y > Resource.height() - controlMode.radius) {
             return;
         }
 
         controlMode.touchX = x;
         controlMode.touchY = y;
 
-        //排除细微控制带来的干扰
-        if (distance >= controlMode.minRadius) {
-            Resource.getRoot().processControlEvent(Control.getControlEventFromTouch(controlMode));
+        distance = Common.distance(x, y, controlMode.originCenterX, controlMode.originCenterY);
+        if (distance <= controlMode.radius) {
+            controlMode.centerX = controlMode.originCenterX;
+            controlMode.centerY = controlMode.originCenterY;
+            //排除细微控制带来的干扰
+            if (distance >= controlMode.minRadius) {
+                Resource.getRoot().processControlEvent(Control.getControlEventFromTouch(controlMode));
+            }
+        } else {
+            controlMode.centerX = x;
+            controlMode.centerY = y;
         }
     }
 
@@ -243,9 +267,9 @@ export default class Control {
             return;
         }
 
-        let centerX = Common.width() / 4 / 2;
-        let centerY = Common.height() / 2 / 2;
-        let radius = centerX > centerY ? centerY : centerX;
+        let centerX = Resource.width() / 4 / 2;
+        let centerY = Resource.height() / 2 / 2;
+        let radius = 160 * Resource.getScale();
         centerY *= 3;
 
         let rightCenterX = centerX * 7;
@@ -256,26 +280,27 @@ export default class Control {
             rightCenterX -= 20;
             centerX += 20;
         }
-        if (Common.height() - centerY - radius < 20) {
+        if (Resource.height() - centerY - radius < 20) {
             rightCenterY -= 20;
             centerY -= 20;
         }
 
         const thisControl = Control.instance;
         thisControl.controlMode = {};
+
+        //记录原始的位置
+        thisControl.controlMode.originCenterX = centerX;
+        thisControl.controlMode.originCenterY = centerY;
+
         thisControl.controlMode.centerX = centerX;
         thisControl.controlMode.centerY = centerY;
         thisControl.controlMode.radius = radius;
         thisControl.controlMode.minRadius = radius / 3;
-        thisControl.controlMode.maxRadius = radius * 2;
+        thisControl.controlMode.maxRadius = radius * 3;
 
         thisControl.controlMode.rightCenterX = rightCenterX;
         thisControl.controlMode.rightCenterY = rightCenterY;
         thisControl.controlMode.rightRadius = rightRadius;
-
-        thisControl.controlMode.hornCenterX = rightCenterX + rightRadius * 1.1;
-        thisControl.controlMode.hornCenterY = rightCenterY - rightRadius;
-        thisControl.controlMode.hornRadius = rightRadius * .4;
     };
 
     static draw(ctx) {
@@ -285,17 +310,19 @@ export default class Control {
 
         //外圆
         const controlMode = Control.instance.controlMode;
-        const control1 = Resource.getImage("control1");
+        let x = controlMode.touchX ? controlMode.centerX : controlMode.originCenterX;
+        let y = controlMode.touchY ? controlMode.centerY : controlMode.originCenterY;
+        const control1 = Resource.getOrCreateImage("control1");
         ctx.drawImage(control1,
             0, 0,
             control1.width, control1.height,
-            controlMode.centerX - controlMode.radius, controlMode.centerY - controlMode.radius,
+            x - controlMode.radius, y - controlMode.radius,
             controlMode.radius * 2, controlMode.radius * 2);
 
         //内圆
-        let x = controlMode.touchX ? controlMode.touchX : controlMode.centerX;
-        let y = controlMode.touchY ? controlMode.touchY : controlMode.centerY;
-        const control2 = Resource.getImage("control2");
+        x = controlMode.touchX ? controlMode.touchX : controlMode.originCenterX;
+        y = controlMode.touchY ? controlMode.touchY : controlMode.originCenterY;
+        const control2 = Resource.getOrCreateImage("control2");
         const centerRadius = controlMode.radius / 2;
         ctx.drawImage(control2,
             0, 0,
@@ -303,22 +330,17 @@ export default class Control {
             x - centerRadius, y - centerRadius,
             centerRadius * 2, centerRadius * 2);
 
+        if (!Status.isGaming()) {
+            return;
+        }
+
         //右圆
-        const fire = Resource.getImage("fire");
+        const fire = Resource.getOrCreateImage("fire");
         ctx.drawImage(fire,
             0, 0,
             fire.width, fire.height,
             controlMode.rightCenterX - controlMode.rightRadius, controlMode.rightCenterY - controlMode.rightRadius,
             controlMode.rightRadius * 2, controlMode.rightRadius * 2);
-
-        //返回
-        const back = Resource.getImage("back");
-        ctx.drawImage(
-            back,
-            0, 0,
-            back.width, back.height,
-            Resource.width() - back.width, 0,
-            back.width, back.height);
     }
 
     static getTouchPoint(eventPoint) {
@@ -326,13 +348,13 @@ export default class Control {
         let y = eventPoint.clientY;
 
         //缩放处理
-        const scale = Resource.getScale();
+        const scale = Resource.instance.windowInfo.scaleForFormatToReal;
 
         const touchPoint = {};
         if (Control.instance.portrait) {
             //竖屏
             touchPoint.x = y;
-            touchPoint.y = Common.height() * scale - x;
+            touchPoint.y = Resource.formatHeight(false) * scale - x;
         } else {
             //横屏
             touchPoint.x = x;
@@ -343,6 +365,13 @@ export default class Control {
         touchPoint.y /= scale;
 
         return touchPoint;
+    }
+
+    static getTouchPointWithoutScale(eventPoint) {
+        const point = this.getTouchPoint(eventPoint);
+        point.x *= Resource.getScale();
+        point.y *= Resource.getScale();
+        return point;
     }
 
     static setPortrait(isPorTrait) {

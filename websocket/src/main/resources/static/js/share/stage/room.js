@@ -6,15 +6,18 @@
 import Stage from "./stage.js";
 import Resource from "../tool/resource.js";
 import Common from "../tool/common.js";
-import Play from "./play.js";
+import Play from "../item/play.js";
 import Status from "../tool/status.js";
 import Control from "../tool/control.js";
-import Button from "./button.js";
 import Sound from "../tool/sound.js";
-import Rect from "./rect.js";
-import Item from "./item.js";
-import Tank from "./tank.js";
-import Confirm from "./confirm.js";
+import Tank from "../item/game/tank.js";
+import MapItem from "../item/game/mapitem.js";
+import Bullet from "../item/game/bullet.js";
+import Height from "../item/game/height.js";
+import Success from "../item/game/success.js";
+import Failed from "../item/game/failed.js";
+import Manager from "../item/game/room/manager.js";
+import NetManager from "../item/game/room/netmanager.js";
 
 export default class Room extends Stage {
     constructor() {
@@ -22,16 +25,13 @@ export default class Room extends Stage {
 
         /**
          *
-         * @type {{roomId,roomType,mapId}}
+         * @type {{roomId,roomType,mapId,subId}}
          */
         this.roomInfo = {};
         this.size = {};
         this.view = {x: 0, y: 0, center: null};
 
-        this.backgroundImage = Resource.getImage("background", "jpg");
-
         this.mask = true;
-        this.maskImage = Resource.getImage("background_loading", "jpg");
         this.maskStartTime = 0;
         this.minMaskTime = 3000;
 
@@ -54,26 +54,58 @@ export default class Room extends Stage {
     }
 
     init(roomInfo) {
+        Resource.setNeedOffset(false);
         this.roomInfo = roomInfo;
-        this.showTeam = roomInfo.showTeam;
+        this.createManager();
+        Resource.getRoot().addEngine(roomInfo.isNet);
         this.clear();
-        Status.setStatus(Status.statusPause(), this.generateMaskInfo());
-        Sound.bgm();
+        Status.setStatus(Status.statusPause());
+    }
+
+    createManager() {
+        if (this.roomInfo.isNet) {
+            this.roomManager = new NetManager(this);
+        } else {
+            this.roomManager = new Manager(this);
+        }
+    }
+
+    showTeam() {
+        return this.roomInfo.roomType === "PVP";
     }
 
     clear() {
         this.showMask();
+        this.reloadBackground();
         this.items.clear();
         this.controlUnits.clear();
         this.view.center = null;
+
+        this.roomManager.createControlEvent();
+    }
+
+    reloadBackground() {
+        const imageId = "room_background_" + (Math.round(Math.random()) + 1);
+        this.backgroundImage = Resource.getImage(imageId);
     }
 
     showMask() {
         this.maskStartTime = new Date().getTime();
         this.mask = true;
+        Sound.bgm();
+
+        //初始化玩家/敌方生命，为开头显示生命信息做准备
+        this.maskPlayerLife = null;
+        this.maskEnemyLife = null;
+        this.roomInfo.playerLife = null;
+        this.roomInfo.computerLife = null;
     }
 
     hideMask() {
+        if (this.mask === false) {
+            return;
+        }
+
         let frames = (this.minMaskTime - (new Date().getTime() - this.maskStartTime)) / 1000 * 60;
         if (frames < 0) {
             frames = 0;
@@ -81,28 +113,26 @@ export default class Room extends Stage {
         if (frames > 180) {
             frames = 180;
         }
-        const thisRoom = this;
-        Common.addTimeEvent("hide_mask", function () {
-            Status.setStatus(null, null);
-            thisRoom.mask = false;
+        Common.addTimeEvent("hide_mask", () => {
+            this.mask = false;
         }, frames);
     }
 
     generateMaskInfo() {
         if (this.roomInfo.roomType === "PVP") {
-            return "RED vs BLUE";
+            return "对抗模式";
         }
-
-        let displayNum;
-        if (this.roomInfo.mapId < 10) {
-            displayNum = "0" + this.roomInfo.mapId;
+        if (!this.roomInfo.isNet) {
+            return "单人模式 " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
         } else {
-            displayNum = "" + this.roomInfo.mapId;
+            return "合作模式 " + this.roomInfo.mapId + "-" + this.roomInfo.subId;
         }
-        return "MISSION " + displayNum;
     }
 
     update() {
+        if (!Status.isGaming()) {
+            return;
+        }
         this.updateView();
         super.update();
     }
@@ -112,117 +142,160 @@ export default class Room extends Stage {
             return;
         }
 
-        if (Status.getValue() === Status.statusPause()) {
-            return;
-        }
+        const w = Resource.width() * this.scaleForWindowToServer();
+        const h = Resource.height() * this.scaleForWindowToServer();
 
         let updateX = false;
         let updateY = false;
-        if (this.size.width < Resource.width()) {
+        if (this.size.width < w) {
             updateX = true;
-            this.view.x = (this.size.width - Resource.width()) / 2;
+            this.view.x = (this.size.width - w) / 2;
         }
-        if (this.size.height < Resource.height()) {
+        if (this.size.height < h) {
             updateY = true;
-            this.view.y = (this.size.height - Resource.height()) / 2;
+            this.view.y = (this.size.height - h) / 2;
         }
 
         if ((updateX && updateY) || !this.view.center) {
             return;
         }
 
+        const center = {
+            x: this.view.center.x,
+            y: this.view.center.y
+        };
         if (!updateX) {
-            this.view.x = this.view.center.x - Resource.width() / 2;
-            if (this.view.x < 0) {
-                this.view.x = 0;
-            }
-            if (this.view.x > this.size.width - Resource.width()) {
-                this.view.x = this.size.width - Resource.width()
-            }
+            this.view.x = this.valueInBoundary(center.x - w / 2, 0, this.size.width - w);
         }
-
         if (!updateY) {
-            this.view.y = this.view.center.y - Resource.height() / 2;
-            if (this.view.y < 0) {
-                this.view.y = 0;
-            }
-            if (this.view.y > this.size.height - Resource.height()) {
-                this.view.y = this.size.height - Resource.height()
-            }
+            this.view.y = this.valueInBoundary(center.y - h / 2, 0, this.size.height - h);
         }
     };
 
-    draw(ctx) {
-        //每秒排序一次
-        if (Resource.getRoot().frontFrame.totalFrames % 60 === 0) {
-            this.sortItems();
+    valueInBoundary(value, min, max) {
+        if (value < min) {
+            return min;
+        } else if (value > max) {
+            return max;
+        } else {
+            return value;
         }
+    }
 
+    draw(ctx) {
         this.drawBackground(ctx);
-        super.draw(ctx);
-        Control.draw(ctx);
-        this.drawMask(ctx);
-        this.drawStatus(ctx);
+        this.drawItems(ctx);
+        this.drawControl(ctx);
         this.drawRoomInfo(ctx);
+        this.drawMask(ctx);
+    }
+
+    drawItems(ctx) {
+        //获取并排序所有屏幕内的元素
+        //先绘制GameItem，再绘制CommonItem
+        const gameItems = [];
+        const commonItems = [];
+        this.items.forEach(item => {
+            if (item.getType() === "game") {
+                //滤掉屏幕外的元素
+                if (!item.isInScreen()) {
+                    return;
+                }
+                gameItems[gameItems.length] = item;
+                item.drawEffect(gameItems);
+            } else {
+                commonItems[commonItems.length] = item;
+            }
+        });
+        gameItems.sort((item1, item2) => {
+            if (item1.z !== item2.z) {
+                return item1.z - item2.z;
+            }
+            if (item1.y !== item2.y) {
+                return item1.y - item2.y;
+            }
+            return item1.x - item2.x;
+        });
+
+        //开始绘制
+        gameItems.forEach(item => {
+            item.draw(ctx);
+        });
+        commonItems.forEach(item => {
+            item.draw(ctx);
+        });
+        this.drawHotZone(ctx);
+    }
+
+    drawControl(ctx) {
+        Control.draw(ctx);
     }
 
     drawBackground(ctx) {
-        if (!this.size.width || !this.size.height || !this.backgroundImage) {
+        const img = Resource.getImage("room_background");
+        ctx.drawImage(
+            img,
+            0, 0,
+            img.width, img.height,
+            0, 0,
+            Resource.width(), Resource.height()
+        );
+
+        if (!this.size.width || !this.size.height) {
             return;
         }
 
-        if (!this.backgroundImage.repeatX || !this.backgroundImage.repeatY) {
-            this.calculateBackgroundRepeat();
-        }
+        //将所有数据都转换成后端的尺寸，最后再做比例缩放
+        const imageWidthForServer = this.backgroundImage.width * this.scaleForWindowToServer();
+        const imageHeightForServer = this.backgroundImage.height * this.scaleForWindowToServer();
+        const viewStart = this.convertToScreenPoint({x: 0, y: 0});
+        const getBottomRight = (topLeft) => {
+            return {
+                x: this.valueInBoundary(
+                    topLeft.x + imageWidthForServer,
+                    topLeft.x,
+                    this.size.width - this.view.x),
+                y: this.valueInBoundary(
+                    topLeft.y + imageHeightForServer,
+                    topLeft.y,
+                    this.size.height - this.view.y)
+            };
+        };
 
-        const mapStart = this.convertToScreenPoint({x: 0, y: 0});
-        for (let x = 0; x < this.backgroundImage.repeatX; ++x) {
-            for (let y = 0; y < this.backgroundImage.repeatY; ++y) {
-                const start = {};
-                const end = {};
-                start.x = x * this.backgroundImage.sizeX;
-                start.y = y * this.backgroundImage.sizeY;
+        //屏幕大小
+        const w = Resource.width() * this.scaleForWindowToServer();
+        const h = Resource.height() * this.scaleForWindowToServer();
 
-                end.x = start.x + this.backgroundImage.sizeX;
-                end.y = start.y + this.backgroundImage.sizeY;
+        //开始绘制
+        for (let x = viewStart.x; x < this.size.width; x += imageWidthForServer) {
+            for (let y = viewStart.y; y < this.size.height; y += imageHeightForServer) {
+                const topLeft = {x: x, y: y};
+                const bottomRight = getBottomRight(topLeft);
 
-                if (start.x + mapStart.x > Resource.width() ||
-                    start.y + mapStart.y  > Resource.height() ||
-                    end.x + mapStart.x < 0 ||
-                    end.y + mapStart.y < 0) {
+                //超出边界
+                if (topLeft.x > w ||
+                    topLeft.y > h ||
+                    bottomRight.x < 0 ||
+                    bottomRight.y < 0) {
                     continue;
                 }
 
-                ctx.drawImage(this.backgroundImage,
+                const displayWidth = (bottomRight.x - topLeft.x) / imageWidthForServer * this.backgroundImage.width;
+                const displayHeight = (bottomRight.y - topLeft.y) / imageHeightForServer * this.backgroundImage.height;
+                ctx.drawImage(
+                    this.backgroundImage,
                     0, 0,
-                    this.backgroundImage.width, this.backgroundImage.height,
-                    start.x + mapStart.x, start.y + mapStart.y,
-                    this.backgroundImage.sizeX, this.backgroundImage.sizeY);
+                    displayWidth, displayHeight,
+                    topLeft.x / this.scaleForWindowToServer(),
+                    topLeft.y / this.scaleForWindowToServer(),
+                    displayWidth,
+                    displayHeight);
             }
         }
     }
 
     drawRoomInfo(ctx) {
-        ctx.font = '14px Helvetica';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = '#ffffff';
-
-        //标题
-        if (this.roomInfo.roomId) {
-            const tipMessage = '房间号:' + this.roomInfo.roomId +
-                " 关卡:" + this.roomInfo.mapId + " [" + this.roomInfo.roomType + "]";
-            ctx.fillText(tipMessage, 10, 6);
-        }
-
-        //相关信息
-        if (this.roomInfo.roomType === 'PVE' && this.roomInfo.playerLife !== undefined) {
-            ctx.fillText("玩家剩余生命:" + this.roomInfo.playerLife, 10, 24);
-            ctx.fillText("电脑剩余生命:" + this.roomInfo.computerLife, 10, 40);
-        } else if (this.roomInfo.playerLife !== undefined) {
-            ctx.fillText("红队剩余生命:" + this.roomInfo.playerLife, 10, 24);
-            ctx.fillText("蓝队剩余生命:" + this.roomInfo.computerLife, 10, 40);
-        }
+        this.roomManager.drawRoomInfo(ctx);
     }
 
     drawMask(ctx) {
@@ -230,30 +303,68 @@ export default class Room extends Stage {
             return;
         }
 
-        ctx.drawImage(this.maskImage,
-            0, 0,
-            this.maskImage.width, this.maskImage.height,
-            0, 0,
-            Resource.width(), Resource.height());
-    }
+        //绘制背景
+        ctx.fillStyle = '#01A7EC';
+        ctx.fillRect(0, 0, Resource.width(), Resource.height());
+        ctx.fillStyle = '#22b2ee';
+        ctx.fillRect(0, Resource.height() * .32, Resource.width(), 270 * Resource.getScale());
 
-    drawStatus(ctx) {
-        if (Status.getMessage()) {
-            ctx.font = 'bold 55px Microsoft YaHei UI';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#FFF';
-            ctx.fillText(Status.getMessage(), Resource.width() / 2, Status.getHeight());
+        const w = Resource.formatWidth();
+        const h = Resource.formatHeight();
+        //显示标题
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#FFF';
+        ctx.displayGameText(this.generateMaskInfo(), w / 2, h * .4, 100);
+
+        //显示难度
+        ctx.displayTopLeft(
+            this.roomInfo.hardMode ? "room_hard" : "room_easy",
+            w * .8, 0,
+            150);
+        //绘制生命
+        if (this.maskPlayerLife === null || this.maskEnemyLife === null) {
+            if (this.roomInfo.playerLife === null || this.roomInfo.computerLife === null) {
+                //还未加载完毕，不显示生命
+                return;
+            } else {
+                //赋值，防止后面做变更
+                this.maskPlayerLife = this.roomInfo.playerLife;
+                this.maskEnemyLife = this.roomInfo.computerLife;
+            }
         }
+
+        ctx.fontSize = 44;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#FFF';
+
+        ctx.displayTopLeft(
+            "player_life",
+            w / 2 - 200,
+            h * .32 + 170,
+            100);
+        ctx.displayGameText("x" + this.maskPlayerLife,
+            w / 2 - 90,
+            h * .32 + 216);
+
+        ctx.displayTopLeft(
+            "enemy_life",
+            w / 2 + 20, h * .32 + 170,
+            100);
+        ctx.displayGameText("x" + this.maskEnemyLife,
+            w / 2 + 130,
+            h * .32 + 216);
     }
 
     /**
      *
-     * @param data {{mapId,playerLife,computerLife,width,height,itemList}}
+     * @param data {{mapId,subId,playerLife,computerLife,width,height,itemList}}
      */
     loadMap(data) {
-        if (data.mapId !== undefined) {
+        if (data.mapId !== undefined && data.subId !== undefined) {
             this.roomInfo.mapId = data.mapId;
+            this.roomInfo.subId = data.subId;
         }
         if (data.playerLife !== undefined) {
             this.roomInfo.playerLife = data.playerLife;
@@ -264,18 +375,19 @@ export default class Room extends Stage {
         if (data.width && data.height) {
             this.size.width = data.width;
             this.size.height = data.height;
-            this.calculateBackgroundRepeat();
         }
-
-        // load mapItem
-        const thisRoom = this;
         if (data.itemList) {
-            data.itemList.forEach(function (itemData) {
-                thisRoom.createOrUpdateMapItem(itemData);
+            data.itemList.forEach(itemData => {
+                this.createOrUpdateMapItem(itemData);
             })
         }
+    }
 
-        this.sortItems();
+    createMapItem(options) {
+        const item = new MapItem(options);
+        item.stage = this;
+        this.addItem(item);
+        return item;
     }
 
     createOrUpdateMapItem(data) {
@@ -283,7 +395,7 @@ export default class Room extends Stage {
         if (this.items.has(data.id)) {
             item = this.items.get(data.id);
         } else {
-            item = this.createItem({id: data.id})
+            item = this.createMapItem({id: data.id})
         }
 
         const typeId = parseInt(data.typeId);
@@ -297,13 +409,6 @@ export default class Room extends Stage {
         const position = Common.getPositionFromId(data.id);
         item.x = position.x;
         item.y = position.y;
-
-        //调整z值
-        if (typeId === 5) {
-            item.z = 4;
-        } else if (typeId === 4) {
-            item.z = -4;
-        }
 
         //播放动画
         switch (typeId) {
@@ -323,32 +428,34 @@ export default class Room extends Stage {
     setResourceImage(item, typeId) {
         switch (typeId) {
             case 0:
-                item.image = Resource.getImage("brick");
+                item.image = Resource.getOrCreateImage("brick");
                 item.orientation = 0;
                 break;
             case 1:
-                item.image = Resource.getImage("brick");
+                item.image = Resource.getOrCreateImage("brick");
                 item.orientation = 1;
                 break;
             case 2:
-                item.image = Resource.getImage("iron");
+                item.image = Resource.getOrCreateImage("iron");
                 item.orientation = 0;
                 break;
             case 3:
-                item.image = Resource.getImage("iron");
+                item.image = Resource.getOrCreateImage("iron");
                 item.orientation = 1;
                 break;
             case 4:
-                item.image = Resource.getImage("river");
+                item.image = Resource.getOrCreateImage("river");
+                item.z = Height.river();
                 break;
             case 5:
-                item.image = Resource.getImage("grass");
+                item.image = Resource.getOrCreateImage("grass");
+                item.z = Height.grass();
                 break;
             case 6:
-                item.image = Resource.getImage("red_king");
+                item.image = Resource.getOrCreateImage("red_king");
                 break;
             case 7:
-                item.image = Resource.getImage("blue_king");
+                item.image = Resource.getOrCreateImage("blue_king");
                 break;
         }
     };
@@ -358,41 +465,6 @@ export default class Room extends Stage {
             item.isBarrier = true;
         }
     }
-
-    sortItems() {
-        //支援ES5的兼容写法
-        const array = [];
-        this.items.forEach(function (item) {
-            array[array.length] = item;
-        });
-
-        array.sort(function (item1, item2) {
-            if (item1.z !== item2.z) {
-                return item1.z - item2.z;
-            }
-
-            if (item1.y !== item2.y) {
-                return item1.y - item2.y;
-            }
-
-            return item1.x - item2.x;
-        });
-
-        this.items = new Map();
-        const map = this.items;
-        array.forEach(function (item) {
-            map.set(item.id, item);
-        })
-    };
-
-
-    calculateBackgroundRepeat() {
-        this.backgroundImage.repeatX = Math.round(this.size.width / this.backgroundImage.width);
-        this.backgroundImage.repeatY = Math.round(this.size.height / this.backgroundImage.height);
-
-        this.backgroundImage.sizeX = this.size.width / this.backgroundImage.repeatX;
-        this.backgroundImage.sizeY = this.size.height / this.backgroundImage.repeatY;
-    };
 
     /**
      * 真实坐标转换屏幕坐标
@@ -412,12 +484,15 @@ export default class Room extends Stage {
     processSocketMessage(messageDto) {
         switch (messageDto.messageType) {
             case "TANKS":
-                //除了坦克之间的碰撞以外其他情况不更新自己，否则会和客户端的自动避让起冲突
-                const updateSelf = messageDto.note === "COLLIDE_TANK";
+                //只有特定情况下更新自己，否则会和客户端的自动避让起冲突
+                const updateSelf = (messageDto.note === "COLLIDE_TANK" || messageDto.note === "UPDATE_POS_FAILED");
                 this.createOrUpdateTanks(messageDto.message, updateSelf);
                 break;
             case "REMOVE_TANK":
                 this.boomTank(messageDto.message);
+                break;
+            case "FACE":
+                this.showFace(messageDto.message);
                 break;
             case "BULLET":
                 this.createOrUpdateBullets(messageDto.message);
@@ -427,7 +502,6 @@ export default class Room extends Stage {
                 break;
             case "MAP":
                 this.loadMap(messageDto.message);
-                this.sortItems();
                 break;
             case "REMOVE_MAP":
                 this.itemBomb({id: messageDto.message});
@@ -441,15 +515,20 @@ export default class Room extends Stage {
             case "CLEAR_MAP":
                 this.clear();
                 break;
-            case "SERVER_READY":
-                this.hideMask();
-                break;
             case "GAME_STATUS":
                 this.gameStatus(messageDto.message);
                 break;
             default:
                 break;
         }
+    }
+
+    showFace(faceDto) {
+        if (!this.items.has(faceDto.tankId)) {
+            return;
+        }
+
+        this.items.get(faceDto.tankId).showFace(faceDto.faceId);
     }
 
     removeGameItem(id) {
@@ -469,6 +548,9 @@ export default class Room extends Stage {
     }
 
     gameStatus(status) {
+        Status.setAck(true);
+        this.hideMask();
+
         if (status.type === "NORMAL") {
             Status.setStatus(Status.statusNormal());
             return;
@@ -482,86 +564,29 @@ export default class Room extends Stage {
             return;
         }
 
-        //其他结束状态
-        let titleHeight = Resource.height() * .4;
-        let buttonHeight = Resource.height() * 0.55;
-        if (status.score && status.rank) {
-            //计分板
-            const rect = new Rect(
-                Resource.width() / 2,
-                Resource.height() * .4,
-                Resource.width() * .6,
-                Resource.height() * .4);
-            this.addItem(rect);
-            const score = new Item({
-                z: 10,
-                draw: function (ctx) {
-                    ctx.font = 'bold 30px Microsoft YaHei UI';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = '#FFF';
-                    ctx.fillText("当前得分: " + status.score,
-                        Resource.width() / 2,
-                        Resource.height() * .3 + 60);
+        Status.setStatus(Status.statusPause());
 
-                    ctx.fillText("当前排名: " + status.rank,
-                        Resource.width() / 2,
-                        Resource.height() * .3 + 100);
-                }
-            });
-            this.addItem(score);
-            titleHeight = Resource.height() * .3;
-            buttonHeight = Resource.height() * 0.68;
+        if (status.type === "END") {
+            new Success(this, status.score, status.rank, status.star);
+            return;
         }
-        Status.setStatus(Status.statusPause(), status.message, titleHeight);
+
         if (status.type === "WIN") {
-            const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
-                //同步用户信息(获得的金币等)
-                Common.syncUserData();
-
-                Resource.getRoot().lastStage();
-                Resource.getRoot().currentStage().initMenu();
-            });
-            this.addItem(back);
-        } else if (status.type === "LOSE") {
-            const again = new Button("", Resource.width() * 0.5, buttonHeight, function () {
-                Resource.getRoot().engine.again();
-            });
-            again.drawText = function (ctx) {
-                ctx.font = '30px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'left';
-                ctx.fillStyle = '#fff';
-                ctx.fillText("重玩本关", this.x - 45, this.y);
-
-                const coin = Resource.getImage("coin");
-                ctx.drawImage(coin,
-                    0, 0,
-                    coin.width, coin.height,
-                    this.x + 27, this.y - 15,
-                    30, 30);
-
-                ctx.font = '20px Arial';
-                ctx.fillText("x 30", this.x + 82, this.y);
-            };
-            this.addItem(again);
-            buttonHeight += 75;
-            const back = new Button("返回主菜单", Resource.width() * 0.5, buttonHeight, function () {
-                //同步用户信息(获得的金币等)
-                Common.syncUserData();
-
-                Resource.getRoot().lastStage();
-                Resource.getRoot().currentStage().initMenu();
-            });
-            this.addItem(back);
+            new Success(this, status.score, status.rank, status.star);
+            //没有关卡了，回到主页
+            Common.addTimeEvent("back_to_menu", function () {
+                Common.gotoStage("menu");
+            }, 480);
+            return;
         }
 
-        if (status.message.indexOf("失败") >= 0) {
-            Sound.lose();
-        } else if (status.message.indexOf("恭喜") >= 0 || status.message.indexOf("胜利") >= 0) {
-            Sound.win();
-        } else if (status.message.indexOf("MISSION") >= 0) {
-            Sound.bgm();
+        if (status.type === "LOSE") {
+            new Failed(this, status.score, status.rank);
+            return;
+        }
+
+        if (status.type === "LOSE_PVP") {
+            new Failed(this, status.score, status.rank, true);
         }
     }
 
@@ -580,7 +605,6 @@ export default class Room extends Stage {
             } else {
                 const tankItem = thisStage.createTank({
                     id: tank.id,
-                    showId: true,
                     teamId: tank.teamId,
                     scale: 0.1
                 });
@@ -607,13 +631,25 @@ export default class Room extends Stage {
         tankItem.speed = tankData.speed;
         tankItem.hasShield = tankData.hasShield;
         tankItem.hasGhost = tankData.hasGhost;
-        tankItem.image = Resource.getImage(tankData.typeId);
+        tankItem.image = this.getTankImageFromTankData(tankData);
     };
+
+    getTankImageFromTankData(data) {
+        if (this.showTeam()) {
+            const team = data.teamId === 1 ? "red_" : "blue_";
+            return Resource.getImage(team + data.typeId);
+        } else {
+            return Resource.getImage(data.typeId);
+        }
+    }
 
     updateTankControl(tankData, force) {
         const tankItem = this.items.get(tankData.id);
         //优化前端闪烁显示
-        if (!force && tankItem.orientation === tankData.orientation && tankItem.action === tankData.action) {
+        if (!force &&
+            tankItem.orientation === tankData.orientation &&
+            tankItem.action === tankData.action &&
+            Common.distance(tankData.x, tankData.y, tankItem.x, tankItem.y) < 20) {
             return;
         }
         tankItem.orientation = tankData.orientation;
@@ -636,38 +672,22 @@ export default class Room extends Stage {
             }
         }
 
-        if (thisRoom.roomInfo.roomType === "PVE" && item.teamId === 2) {
-            item.showId = false;
-        } else if (thisRoom.roomInfo.roomType === "EVE") {
-            item.showId = false;
-        }
+        item.showId = thisRoom.isShowId(item.teamId);
         return item;
     };
 
-    generalUpdateEvent(item) {
-        if (item.play) {
-            item.play.update();
+    isShowId(teamId) {
+        if (!this.roomInfo.isNet) {
+            return false;
         }
 
-        if (item.action === 0) {
-            return;
+        if (this.roomInfo.roomType === "PVP") {
+            return true;
         }
 
-        switch (item.orientation) {
-            case 0:
-                item.y -= item.speed;
-                break;
-            case 1:
-                item.y += item.speed;
-                break;
-            case 2:
-                item.x -= item.speed;
-                break;
-            case 3:
-                item.x += item.speed;
-                break;
-        }
-    };
+        return teamId === 1;
+
+    }
 
     boomTank(data) {
         const tank = this.itemBomb(data);
@@ -703,8 +723,8 @@ export default class Room extends Stage {
         item.action = 0;
         item.orientation = 0;
         item.scale = bombScale;
-        item.z = 10;
-        item.image = Resource.getImage("bomb");
+        item.z = Height.bomb();
+        item.image = Resource.getOrCreateImage("bomb");
         const thisRoom = this;
         item.play = new Play(
             6,
@@ -714,10 +734,6 @@ export default class Room extends Stage {
             }, function () {
                 thisRoom.items.delete(item.id);
             });
-
-        //删除重加，确保在最上层绘制
-        this.items.delete(item.id);
-        this.items.set(item.id, item);
 
         //remove center
         if (item === this.view.center) {
@@ -740,20 +756,19 @@ export default class Room extends Stage {
     };
 
     createOrUpdateBullets(ammoList) {
-        let addNew = false;
         const thisStage = this;
         ammoList.forEach(function (ammo) {
             if (thisStage.items.has(ammo.id)) {
                 //已存在
                 thisStage.generalUpdateAttribute(ammo);
             } else {
-                addNew = true;
                 const bullet = thisStage.createBullet({
                     id: ammo.id,
                     x: ammo.x,
                     y: ammo.y,
                     orientation: ammo.orientation,
-                    speed: ammo.speed
+                    speed: ammo.speed,
+                    teamId: ammo.teamId
                 });
 
                 if (thisStage.view.center) {
@@ -765,19 +780,14 @@ export default class Room extends Stage {
                 }
             }
         });
-        if (addNew) {
-            thisStage.sortItems();
-        }
     }
 
     createBullet(options) {
-        const item = this.createItem(options);
+        const item = new Bullet(options);
+        item.stage = this;
+        this.addItem(item);
         item.action = 1;
-        item.image = Resource.getImage("bullet");
-        const thisStage = this;
-        item.update = function () {
-            thisStage.generalUpdateEvent(item);
-        };
+        item.image = Resource.getOrCreateImage("bullet");
         return item;
     };
 
@@ -788,39 +798,41 @@ export default class Room extends Stage {
                 return;
             }
             const imageId = "item_" + itemData.typeId.toLowerCase();
-            const gameItem = thisRoom.createItem({
+            const gameItem = thisRoom.createMapItem({
                 id: itemData.id,
                 x: itemData.x,
                 y: itemData.y,
+                z: Height.item(),
                 typeId: itemData.typeId.toLowerCase(),
-                image: Resource.getImage(imageId)
+                image: Resource.getImage(imageId),
+                scale: 0.28
             });
             gameItem.play = new Play(1, 15,
                 function () {
-                    gameItem.orientation = (gameItem.orientation + 1) % 2;
+                    if (gameItem.scale === 0.28) {
+                        gameItem.scale = 0.22;
+                    } else {
+                        gameItem.scale = 0.28;
+                    }
                 }, function () {
                     this.frames = 1;
                 });
         });
     };
 
-    processPointDownEvent(point) {
-        super.processPointDownEvent(point);
+    getId() {
+        return "room";
+    }
 
-        //返回主菜单(暂停状态不能返回)
-        if (point.x < Resource.width() - 140 ||
-            point.y > 40 ||
-            !Status.isGaming()) {
-            return;
-        }
+    /**
+     * 屏幕大小转换成后端832 * 468的比例
+     * @returns {number}
+     */
+    scaleForWindowToServer() {
+        return 1 / this.scaleForServerToWindow();
+    }
 
-        new Confirm(
-            this,
-            "返回主菜单",
-            ["返回主菜单将不会获得任何积分和金币，确定要返回吗？"],
-            function () {
-                Resource.getRoot().lastStage();
-                Resource.getRoot().currentStage().initMenu();
-            });
+    scaleForServerToWindow() {
+        return Resource.getScale() * 2.3;
     }
 }

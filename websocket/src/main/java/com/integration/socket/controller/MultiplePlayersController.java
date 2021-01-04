@@ -23,6 +23,7 @@ public class MultiplePlayersController {
 
     private static final int NAME_START = 2;
     private static final int NAME_LIMIT = 99;
+    private int roomId = 1;
 
     @Autowired
     private OnlineUserService onlineUserService;
@@ -30,32 +31,33 @@ public class MultiplePlayersController {
     @Autowired
     private RoomService roomService;
 
-    @GetMapping("/getUserId")
-    public String getUserId(@RequestParam(value = "userId") String userId) {
-        if (!onlineUserService.exists(userId)) {
-            return userId;
+    /**
+     * 获得用户的连接名
+     * @param name
+     * @return
+     */
+    @GetMapping("/getConnectName")
+    public String getNetName(@RequestParam(value = "name") String name) {
+        if (!onlineUserService.exists(name)) {
+            return name;
         }
 
         for (int i = NAME_START; i <= NAME_LIMIT; ++i) {
-            String newId = String.format("%s(%d)", userId, i);
-            if (!onlineUserService.exists(newId)) {
-                return newId;
+            String newName = String.format("%s(%d)", name, i);
+            if (!onlineUserService.exists(newName)) {
+                return newName;
             }
         }
 
         return CommonUtil.getId();
     }
 
-    @GetMapping("/getRoomName")
-    public String getRoomName(@RequestParam(value = "roomName") String roomName) {
-        if (!roomService.roomNameExists(roomName)) {
-            return roomName;
-        }
-
+    @GetMapping("/getRoomId")
+    public String getRoomId() {
         for (int i = NAME_START; i <= NAME_LIMIT; ++i) {
-            String newRoomName = String.format("%s(%d)", roomName, i);
-            if (!roomService.roomNameExists(newRoomName)) {
-                return newRoomName;
+            String newRoomId = String.format("%03d", this.roomId++);
+            if (!roomService.roomIdExists(newRoomId)) {
+                return newRoomId;
             }
         }
 

@@ -35,7 +35,6 @@ public class WebSocketEndpoint {
 
     /**
      * 连接成功
-     *
      * @param session
      */
     @OnOpen
@@ -46,9 +45,8 @@ public class WebSocketEndpoint {
         }
 
         if (onlineUserService.exists(userBo.getUsername())) {
-            MessageDto messageDto = new MessageDto("用户名重复", MessageType.ERROR_MESSAGE);
-            userBo.getSession().getBasicRemote().sendText(ObjectUtil.writeValue(messageDto));
-            userBo.getSession().close();
+            userBo.sendMessage(new MessageDto("用户名重复", MessageType.ERROR_MESSAGE));
+            userBo.disconnect();
             return;
         }
 
@@ -57,28 +55,26 @@ public class WebSocketEndpoint {
 
     /**
      * 连接关闭
-     *
      * @param session
      */
     @OnClose
     public void onClose(Session session) throws UnsupportedEncodingException {
-        String userId = SocketUserBo.getUsernameFromSession(session);
-        if (userId == null) {
+        String username = SocketUserBo.getUsernameFromSession(session);
+        if (username == null) {
             return;
         }
 
-        gameService.removeUser(userId);
+        gameService.removeUser(username);
     }
 
     /**
      * 接收到消息
-     *
      * @param text
      */
     @OnMessage
     public void onMsg(Session session, String text) throws IOException {
-        String userId = SocketUserBo.getUsernameFromSession(session);
-        if (userId == null) {
+        String username = SocketUserBo.getUsernameFromSession(session);
+        if (username == null) {
             return;
         }
 
@@ -88,9 +84,9 @@ public class WebSocketEndpoint {
         }
 
         try {
-            gameService.receiveMessage(messageDto, userId);
+            gameService.receiveMessage(messageDto, username);
         } catch (Exception e) {
-            log.error(String.format("userId:%s catch error:", userId), e);
+            log.error(String.format("username:%s catch error:", username), e);
             MessageDto errorDto = new MessageDto(e.getMessage(), MessageType.ERROR_MESSAGE);
             session.getBasicRemote().sendText(ObjectUtil.writeValue(errorDto));
         }

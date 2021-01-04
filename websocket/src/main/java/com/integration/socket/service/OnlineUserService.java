@@ -1,5 +1,7 @@
 package com.integration.socket.service;
 
+import com.integration.dto.message.MessageDto;
+import com.integration.dto.message.MessageType;
 import com.integration.socket.model.bo.UserBo;
 import com.integration.socket.repository.dao.UserDao;
 import lombok.extern.slf4j.Slf4j;
@@ -20,22 +22,24 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Slf4j
 public class OnlineUserService {
-    private ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
+    private Map<String, UserBo> userNameMap = new ConcurrentHashMap<>();
+
+    private Map<String, UserBo> userIdMap = new ConcurrentHashMap<>();
 
     /**
      * 缓存新用户，当用户返回ready消息时才放入game中
      */
-    private ConcurrentHashMap <String, UserBo> newUserCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, UserBo> newUserCache = new ConcurrentHashMap<>();
 
     @Autowired
     private UserDao userDao;
 
     public boolean exists(String key) {
-        return userMap.containsKey(key);
+        return userNameMap.containsKey(key);
     }
 
     void processNewUserReady(String username) {
-        if (userMap.containsKey(username)) {
+        if (userNameMap.containsKey(username)) {
             return;
         }
 
@@ -45,11 +49,17 @@ public class OnlineUserService {
         }
 
         if (userBo.hasUserId()) {
+            UserBo oldUser = getFormUserId(userBo.getUserId());
+            if (oldUser != null) {
+                oldUser.sendMessage(new MessageDto("您的账号在其他地方登录!", MessageType.SYSTEM_MESSAGE));
+                oldUser.disconnect();
+            }
             userBo.setUserRecord(userDao.queryUser(userBo.getUserId()));
+            userIdMap.put(userBo.getUserId(), userBo);
         }
 
-        userMap.put(userBo.getUsername(), userBo);
-        log.info("user:{} add into userMap(count:{})", userBo.getUsername(), userMap.size());
+        userNameMap.put(userBo.getUsername(), userBo);
+        log.info("user:{} add into userMap(count:{})", userBo.getUsername(), userNameMap.size());
     }
 
     public void addNewUserCache(UserBo userBo) {
@@ -61,43 +71,22 @@ public class OnlineUserService {
         log.info("user:{} add into the cache(count:{})", userBo.getUsername(), newUserCache.size());
     }
 
-    public void subscribeInUserCache(String username, String destination) {
-        if (!newUserCache.containsKey(username)) {
-            return;
-        }
-        UserBo userBo = newUserCache.get(username);
-        if (userBo.getSubscribeList().contains(destination)) {
-            return;
-        }
-
-        log.info("user:{} subscribe the path:{}", username, destination);
-        userBo.getSubscribeList().add(destination);
-    }
-
     UserBo remove(String key) {
         removeInCache(key);
         return removeInUserMap(key);
     }
 
     UserBo get(String key) {
-        return userMap.get(key);
+        return userNameMap.get(key);
     }
 
     UserBo getFormUserId(String userId) {
-        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
-            if (kv.getValue().getUserId() == null) {
-                continue;
-            }
-            if (userId.equals(kv.getValue().getUserId())) {
-                return kv.getValue();
-            }
-        }
-        return null;
+        return userIdMap.get(userId);
     }
 
     public List<String> getUserList() {
         List<String> users = new ArrayList<>();
-        userMap.forEach((key, value) -> users.add(key));
+        userNameMap.forEach((key, value) -> users.add(key));
         return users;
     }
 
@@ -113,13 +102,16 @@ public class OnlineUserService {
     }
 
     private UserBo removeInUserMap(String key) {
-        if (!userMap.containsKey(key)) {
+        if (!userNameMap.containsKey(key)) {
             return null;
         }
 
-        UserBo userBo = userMap.get(key);
-        userMap.remove(key);
-        log.info("user:{} remove in userMap(count:{})", key, userMap.size());
+        UserBo userBo = userNameMap.get(key);
+        userNameMap.remove(key);
+        if (userBo.hasUserId()) {
+            userIdMap.remove(userBo.getUserId());
+        }
+        log.info("user:{} remove in userMap(count:{})", key, userNameMap.size());
         return userBo;
     }
 }

@@ -22,7 +22,6 @@ public class RankDto {
     private String userId;
     private Integer gameType;
     private Integer score;
-    private String token;
 
     private static RankDto convert(RankBoardRecord rankRecord) {
         RankDto rankDto = new RankDto();

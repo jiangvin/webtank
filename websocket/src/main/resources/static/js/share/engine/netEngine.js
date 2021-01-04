@@ -8,8 +8,8 @@ import Engine from "./engine.js";
 import Common from "../tool/common.js";
 import Resource from "../tool/resource.js";
 import Status from "../tool/status.js";
-import Button from "../stage/button.js";
 import Connect from "../tool/connect.js";
+import ConnectStatus from "../tool/ConnectStatus.js";
 
 export default class NetEngine extends Engine {
     constructor(room) {
@@ -29,17 +29,10 @@ export default class NetEngine extends Engine {
                 //create room
                 if (!room.roomInfo.joinRoom) {
                     Common.addTimeEvent("CREATE_ROOM", function () {
-                        Common.getRequest("/multiplePlayers/getRoomName?roomName=" + Resource.getUser().userId + "的房间",
-                            function (roomName) {
-                                //set room id
-                                thisEngine.room.roomInfo.roomId = roomName;
-
-                                Connect.send("CREATE_ROOM", {
-                                    "roomId": thisEngine.room.roomInfo.roomId,
-                                    "mapId": thisEngine.room.roomInfo.mapId,
-                                    "roomType": thisEngine.room.roomInfo.roomType,
-                                    "joinTeamType": thisEngine.room.roomInfo.joinTeamType
-                                })
+                        Common.getRequest("/multiplePlayers/getRoomId",
+                            function (roomId) {
+                                thisEngine.room.roomInfo.roomId = roomId;
+                                Connect.send("CREATE_ROOM", thisEngine.room.roomInfo);
                             });
                     }, 40);
                 } else {
@@ -53,61 +46,19 @@ export default class NetEngine extends Engine {
                 }
 
                 //注册消息事件
-                Common.addMessageEvent("SERVER_READY", function () {
-                    if (Status.getValue() !== Status.statusPause()) {
-                        return;
-                    }
-                    thisEngine.addConnectCheckEvent();
-                    Status.setStatus(Status.statusNormal());
+                Common.addMessageEvent("GAME_STATUS", function () {
+                    new ConnectStatus(thisEngine);
                 })
             })
         })
     }
 
     setUserId(callback) {
-        Common.getRequest("/multiplePlayers/getUserId?userId=" + Resource.getUser().originalUserId, function (userId) {
-            Resource.setUserId(userId);
-            callback();
-        })
-    }
-
-    /**
-     * 每两秒确认一次连接是否失效
-     */
-    addConnectCheckEvent() {
-        const thisEngine = this;
-        const callBack = function () {
-            if (Connect.status() === true) {
-                const start = new Date().getTime();
-                Common.getRequest("/multiplePlayers/ping", function () {
-                    Resource.getRoot().netDelay = new Date().getTime() - start;
-                });
-                Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120, true);
-            } else {
-                Status.setStatus(Status.statusPause(), "与服务器断开！");
-
-                //显示蒙版
-                thisEngine.room.createItem({
-                    z: 8,
-                    draw: function (ctx) {
-                        ctx.globalAlpha = 0.5;
-                        ctx.fillStyle = '#000000';
-                        ctx.fillRect(0, 0, Resource.width(), Resource.height());
-                        ctx.globalAlpha = 1;
-                    }
-                });
-
-                //显示返回按钮
-                const back = new Button("返回主菜单", Resource.width() * 0.5, Resource.height() * 0.55, function () {
-                    Resource.getRoot().lastStage();
-                    Resource.getRoot().currentStage().initMenu();
-                });
-                thisEngine.room.addItem(back);
-            }
-        };
-
-        console.log("connect status will be checked per 120 frames...");
-        Resource.getRoot().addTimeEvent("CONNECT_CHECK", callBack, 120);
+        Common.getRequest("/multiplePlayers/getConnectName?name=" + Resource.getUser().originalUserId,
+            function (connectName) {
+                Resource.setUserId(connectName);
+                callback();
+            })
     }
 
     processControlEvent(control) {
@@ -121,23 +72,13 @@ export default class NetEngine extends Engine {
         }
     }
 
-    sendSyncMessage(send, center) {
-        if (center.x === send.x
-            && center.y === send.y
-            && center.orientation === send.orientation
-            && center.action === send.action) {
-            return;
-        }
-        send.x = center.x;
-        send.y = center.y;
-        send.orientation = center.orientation;
-        send.action = center.action;
+    sendSyncMessage(center) {
         Connect.send("UPDATE_TANK_CONTROL",
             {
-                orientation: send.orientation,
-                action: send.action,
-                x: send.x,
-                y: send.y
+                orientation: center.orientation,
+                action: center.action,
+                x: center.x,
+                y: center.y
             });
     };
 
@@ -150,6 +91,8 @@ export default class NetEngine extends Engine {
         Common.postEncrypt("/shop/buyWithCoin", {
             userId: Resource.getUser().deviceId,
             buyType: "AGAIN_FOR_NET"
+        }, function (data) {
+            Resource.setUser(data);
         });
     }
 }

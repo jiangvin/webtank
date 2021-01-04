@@ -48,11 +48,11 @@ public class MapService {
 
     private static final String MAP_CONTENT = "map_content";
 
-    public MapBo loadNextMap(int mapId, RoomType roomType) {
-        if (mapDao.queryFromId(mapId) == null) {
+    public MapBo loadNextMap(int mapId, int subId, RoomType roomType) {
+        if (mapDao.queryFromId(mapId, subId) == null) {
             return null;
         }
-        return loadMap(mapId, roomType);
+        return loadMap(mapId, subId, roomType);
     }
 
     private MapBo loadMap(MapRecord record, RoomType roomType) {
@@ -66,6 +66,7 @@ public class MapService {
 
         MapBo mapBo = readFile(content);
         mapBo.setMapId(record.getId());
+        mapBo.setSubId(record.getSubId());
         mapBo.setMapName(record.getName());
 
         //根据类型调整数据
@@ -78,11 +79,16 @@ public class MapService {
         } else if (roomType == RoomType.PVE) {
             mapBo.removeMapUnit(MapUnitType.BLUE_KING);
         }
+
         return mapBo;
     }
 
-    public MapBo loadMap(int mapId, RoomType roomType) {
-        return loadMap(mapDao.queryFromId(mapId), roomType);
+    public MapBo loadMap(int mapId, int subId, RoomType roomType) {
+        MapRecord mapRecord = mapDao.queryFromId(mapId, subId);
+        if (mapRecord == null) {
+            return null;
+        }
+        return loadMap(mapRecord, roomType);
     }
 
     public MapBo loadRandomMap(List<String> loadedMapNames, RoomType roomType) {
@@ -104,18 +110,24 @@ public class MapService {
         if (StringUtils.isEmpty(mapEditDto.getName())) {
             throw new CustomException("名字不能为空");
         }
+        if (mapEditDto.getId() == null ||
+                mapEditDto.getId() <= 0 ||
+                mapEditDto.getSubId() == null ||
+                mapEditDto.getSubId() <= 0) {
+            throw new CustomException("ID不能为空");
+        }
         MapBo mapBo = readFile(mapEditDto.getData());
 
-        MapRecord mapRecord = mapDao.queryFromName(mapEditDto.getName());
+        MapRecord mapRecord = mapDao.queryFromId(mapEditDto.getId(), mapEditDto.getSubId());
         if (mapRecord != null) {
             if (mapRecord.getSecret() != null && !mapRecord.getSecret().equals(mapEditDto.getPw())) {
-                throw new CustomException("密码校验出错,请重新输入密码或者修改地图名存为新地图");
+                throw new CustomException("密码校验出错,请重新输入密码或者修改ID存为新地图");
             }
+            mapRecord.setName(mapEditDto.getName());
             mapRecord.setData(mapEditDto.getData());
             mapRecord.setWidth(mapBo.getMaxGridX());
             mapRecord.setHeight(mapBo.getMaxGridY());
             mapRecord.update();
-            mapDao.resetId();
             return;
         }
 
@@ -123,8 +135,13 @@ public class MapService {
         if (!StringUtils.isEmpty(mapEditDto.getPw())) {
             secret = mapEditDto.getPw();
         }
-        mapDao.insertMap(mapEditDto.getName(), secret, mapBo.getMaxGridX(), mapBo.getMaxGridY(), mapEditDto.getData());
-        mapDao.resetId();
+        mapDao.insertMap(mapEditDto.getName(),
+                         mapEditDto.getId(),
+                         mapEditDto.getSubId(),
+                         secret,
+                         mapBo.getMaxGridX(),
+                         mapBo.getMaxGridY(),
+                         mapEditDto.getData());
     }
 
     private MapBo readFile(String content) {

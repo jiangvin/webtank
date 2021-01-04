@@ -14,20 +14,28 @@ export default class Common {
         Resource.getRoot().addMessage(context, color);
     }
 
-    static nextStage() {
-        Resource.getRoot().nextStage();
+    static nextStage(options) {
+        Resource.getRoot().nextStage(options);
     }
 
-    static lastStage() {
-        Resource.getRoot().lastStage();
+    static lastStage(options) {
+        Resource.getRoot().lastStage(options);
     }
 
-    static addTimeEvent(eventType, callBack, timeout, ignoreLog) {
-        Resource.getRoot().addTimeEvent(eventType, callBack, timeout, ignoreLog);
+    static preStage(options) {
+        Resource.getRoot().preStage(options);
     }
 
-    static addMessageEvent(eventType, callBack) {
-        Resource.getRoot().addMessageEvent(eventType, callBack);
+    static gotoStage(id, options) {
+        Resource.getRoot().gotoStage(id, options);
+    }
+
+    static addTimeEvent(eventType, callback, timeout, ignoreLog) {
+        Resource.getRoot().addTimeEvent(eventType, callback, timeout, ignoreLog);
+    }
+
+    static addMessageEvent(eventType, callback) {
+        Resource.getRoot().addMessageEvent(eventType, callback);
     }
 
     static syncUserData() {
@@ -36,39 +44,22 @@ export default class Common {
         }
 
         const oldCoins = Resource.getUser().coin;
+        const oldStage = Resource.getUser().stage;
         Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
             Resource.setUser(data);
             const newCoins = Resource.getUser().coin;
-            if (newCoins !== oldCoins) {
-                Common.addMessage("当前金币数量: " + newCoins);
+            if (newCoins > oldCoins) {
+                Common.addMessage("获得金币数量: " + (newCoins - oldCoins));
+            }
+            const newStage = Resource.getUser().stage;
+            if (newStage > oldStage) {
+                Common.addMessage("解锁新的任务关卡!");
             }
         });
     }
 
-    static getRequest(url, callBack) {
-        try {
-            const xmlHttp = new XMLHttpRequest();
-            xmlHttp.onreadystatechange = function () {
-                if (xmlHttp.readyState !== 4) {
-                    return;
-                }
-                if (xmlHttp.status !== 200) {
-                    Common.addMessage(xmlHttp.responseText, "#ff0000");
-                    return;
-                }
-
-                const result = JSON.parse(xmlHttp.responseText);
-                if (result.success) {
-                    callBack(result.data);
-                } else {
-                    Common.addMessage(result.message, "#ff0000");
-                }
-            };
-            xmlHttp.open("GET", Common.generateHttpHost() + encodeURI(url), true); // true for asynchronous
-            xmlHttp.send(null);
-        } catch (e) {
-            Common.addMessage(e, "#ff0000");
-        }
+    static getRequest(url, callback) {
+        Resource.instance.adapter.getRequest(url, callback);
     }
 
     static postEncrypt(url, body, callback) {
@@ -76,32 +67,7 @@ export default class Common {
     }
 
     static postRequest(url, body, callback) {
-        try {
-            const xmlHttp = new XMLHttpRequest();
-            xmlHttp.onreadystatechange = function () {
-                if (xmlHttp.readyState !== 4) {
-                    return;
-                }
-                if (xmlHttp.status !== 200) {
-                    Common.addMessage(xmlHttp.responseText, "#ff0000");
-                    return;
-                }
-
-                const result = JSON.parse(xmlHttp.responseText);
-                if (result.success) {
-                    if (callback) {
-                        callback(result.data);
-                    }
-                } else {
-                    Common.addMessage(result.message, "#ff0000");
-                }
-            };
-            xmlHttp.open("POST", Common.generateHttpHost() + encodeURI(url), true); // true for asynchronous
-            xmlHttp.setRequestHeader('content-type', 'application/json');
-            xmlHttp.send(JSON.stringify(body));
-        } catch (e) {
-            Common.addMessage(e, "#ff0000");
-        }
+        Resource.instance.adapter.postRequest(url, body, callback);
     };
 
     static generateHttpHost() {

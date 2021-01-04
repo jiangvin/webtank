@@ -9,8 +9,6 @@ import com.integration.util.CommonUtil;
 import lombok.Data;
 
 import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author 蒋文龙(Vin)
@@ -22,7 +20,7 @@ import java.util.List;
 public class TankBo {
     private String tankId;
     private String userId;
-    private OrientationType orientationType = OrientationType.UP;
+    private OrientationType orientationType = OrientationType.getRandomOrientation();
     private ActionType actionType = ActionType.STOP;
     private TeamType teamType;
     private double x;
@@ -30,7 +28,7 @@ public class TankBo {
     private TankTypeDto type;
     private int reloadTime;
     private int bulletCount;
-    private List<String> gridKeyList = new ArrayList<>();
+    private int maxBulletCount;
     private int shieldTimeout = 0;
     private boolean hasGhost = false;
 
@@ -96,6 +94,7 @@ public class TankBo {
         }
         reloadTime += newType.getAmmoReloadTime() - type.getAmmoReloadTime();
         bulletCount += newType.getAmmoMaxCount() - type.getAmmoMaxCount();
+        maxBulletCount += newType.getAmmoMaxCount() - type.getAmmoMaxCount();
         type = newType;
         return true;
     }
@@ -122,9 +121,7 @@ public class TankBo {
                    bulletPos.y,
                    this.getType().getAmmoSpeed(),
                    this.getType().isBrokenIron(),
-                   this.orientationType,
-                   null,
-                   null);
+                   this.orientationType);
     }
 
     private Point getBulletPos() {
@@ -170,17 +167,5 @@ public class TankBo {
 
     public void addAmmoCount() {
         ++bulletCount;
-    }
-
-    public List<String> generateGridKeyList() {
-        List<String> keys = new ArrayList<>();
-        int size = CommonUtil.UNIT_SIZE;
-        //缩小一个像素点检测，减少误差
-        int half = size / 2 - 1;
-        CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y - half), keys);
-        CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half, y - half), keys);
-        CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x - half, y + half), keys);
-        CommonUtil.addWithoutRepeat(CommonUtil.generateGridKey(x + half, y + half), keys);
-        return keys;
     }
 }

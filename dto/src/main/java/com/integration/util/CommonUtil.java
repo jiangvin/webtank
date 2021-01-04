@@ -1,10 +1,7 @@
 package com.integration.util;
 
 
-import com.integration.dto.map.OrientationType;
-
 import java.awt.Point;
-import java.util.List;
 
 /**
  * @author 蒋文龙(Vin)
@@ -51,33 +48,5 @@ public class CommonUtil {
     public static String generateGridKey(double x, double y) {
         Point point = generateGridPoint(x, y);
         return generateKey(point.x, point.y);
-    }
-
-    public static String generateEndGridKey(double x, double y, OrientationType orientationType) {
-        Point point = generateGridPoint(x, y);
-        switch (orientationType) {
-            case UP:
-                --point.y;
-                break;
-            case DOWN:
-                ++point.y;
-                break;
-            case LEFT:
-                --point.x;
-                break;
-            case RIGHT:
-                ++point.x;
-                break;
-            default:
-                break;
-        }
-        return CommonUtil.generateKey(point.x, point.y);
-    }
-
-    public static void addWithoutRepeat(String str, List<String> list) {
-        if (list.contains(str)) {
-            return;
-        }
-        list.add(str);
     }
 }

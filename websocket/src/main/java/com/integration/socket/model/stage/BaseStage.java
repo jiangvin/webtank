@@ -11,10 +11,13 @@ import com.integration.dto.room.TeamType;
 import com.integration.socket.model.bo.BulletBo;
 import com.integration.socket.model.bo.TankBo;
 import com.integration.socket.model.bo.UserBo;
+import com.integration.socket.model.dto.FaceDto;
 import com.integration.socket.service.MessageService;
 import com.integration.util.object.ObjectUtil;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,10 +33,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public abstract class BaseStage {
 
+    private static int UPDATE_DISTANCE_LIMIT = 30;
+
     private MessageService messageService;
 
     ConcurrentHashMap<String, UserBo> userMap = new ConcurrentHashMap<>();
 
+    @Getter
     ConcurrentHashMap<String, TankBo> tankMap = new ConcurrentHashMap<>();
 
     ConcurrentHashMap<String, BulletBo> bulletMap = new ConcurrentHashMap<>();
@@ -41,6 +47,7 @@ public abstract class BaseStage {
     /**
      * 游戏状态相关
      */
+    @Getter
     GameStatusDto gameStatus = new GameStatusDto();
 
     BaseStage(MessageService messageService) {
@@ -67,12 +74,22 @@ public abstract class BaseStage {
             case USER_MESSAGE:
                 sendMessageToRoom(String.format("%s: %s", sendFrom, messageDto.getMessage()), messageDto.getMessageType());
                 break;
+            case FACE:
+                sendFace((String) messageDto.getMessage(), sendFrom);
+                break;
             default:
                 break;
         }
     }
 
-    private void processTankFire(String tankId, String sendFrom) {
+    private void sendFace(String faceId, String username) {
+        if (!tankMap.containsKey(username)) {
+            return;
+        }
+        sendMessageToRoom(new FaceDto(username, faceId), MessageType.FACE);
+    }
+
+    public void processTankFire(String tankId, String sendFrom) {
         if (tankId == null) {
             tankId = sendFrom;
         }
@@ -98,17 +115,8 @@ public abstract class BaseStage {
         if (ammo == null) {
             return;
         }
-        processTankFireExtension(ammo);
         bulletMap.put(ammo.getId(), ammo);
         sendMessageToRoom(Collections.singletonList(ammo.convertToDto()), MessageType.BULLET);
-    }
-
-    /**
-     * 拓展函数
-     * @param ammo
-     */
-    void processTankFireExtension(BulletBo ammo) {
-
     }
 
     private void processTankControl(MessageDto messageDto, String sendFrom) {
@@ -125,7 +133,33 @@ public abstract class BaseStage {
             return;
         }
 
-        sendTankToRoom(updateBo);
+        String note = null;
+        if (!updateTankPos(updateBo, request)) {
+            note = "UPDATE_POS_FAILED";
+        }
+
+        sendTankToRoom(updateBo, note);
+    }
+
+    /**
+     * 距离检测，防止闪烁
+     * @param tankBo
+     * @param tankDto
+     * @return
+     */
+    private boolean updateTankPos(TankBo tankBo, ItemDto tankDto) {
+        if (tankDto.getX() == null || tankDto.getY() == null) {
+            return false;
+        }
+
+        double distance = Point.distance(tankBo.getX(), tankBo.getY(), tankDto.getX(), tankDto.getY());
+        if (distance > UPDATE_DISTANCE_LIMIT) {
+            return false;
+        }
+
+        tankBo.setX(tankDto.getX());
+        tankBo.setY(tankDto.getY());
+        return true;
     }
 
     /**
@@ -152,17 +186,7 @@ public abstract class BaseStage {
         if (actionType != ActionType.UNKNOWN) {
             tankBo.setActionType(actionType);
         }
-        updateTankControlExtension(tankBo, tankDto);
         return tankBo;
-    }
-
-    /**
-     * 继承扩展函数
-     * @param tankBo
-     * @param tankDto
-     */
-    void updateTankControlExtension(TankBo tankBo, ItemDto tankDto) {
-
     }
 
     /**
@@ -181,7 +205,13 @@ public abstract class BaseStage {
      * 获取用户列表
      * @return 用户列表
      */
-    abstract List<String> getUserList();
+    List<String> getUserList() {
+        List<String> users = new ArrayList<>();
+        for (Map.Entry<String, UserBo> kv : userMap.entrySet()) {
+            users.add(kv.getKey());
+        }
+        return users;
+    }
 
     /**
      * 获取房间号
@@ -196,24 +226,21 @@ public abstract class BaseStage {
         messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId()));
     }
 
-    private void sendMessageToRoom(Object object, MessageType messageType, String note) {
-        messageService.sendMessage(new MessageDto(object, messageType, getUserList(), getRoomId(), note));
-    }
-
     void sendTankToRoom(TankBo tankBo) {
         sendTankToRoom(tankBo, null);
     }
 
     void sendTankToRoom(TankBo tankBo, String note) {
-        sendMessageToRoom(Collections.singletonList(tankBo.toDto()), MessageType.TANKS, note);
+        messageService.sendMessage(new MessageDto(
+                                       Collections.singletonList(tankBo.toDto()),
+                                       MessageType.TANKS,
+                                       getUserList(),
+                                       getRoomId(),
+                                       note));
     }
 
     void sendMessageToUser(Object object, MessageType messageType, String username) {
         messageService.sendMessage(new MessageDto(object, messageType, username, getRoomId()));
-    }
-
-    void sendReady(String username) {
-        messageService.sendReady(username, getRoomId());
     }
 
     void removeTankFromUserId(String userId) {
@@ -241,9 +268,7 @@ public abstract class BaseStage {
 
     /**
      * 删除tank的扩展函数
-     * @param tankBo
+     * @param tankBo 要删除的目标
      */
-    void removeTankExtension(TankBo tankBo) {
-
-    }
+    abstract void removeTankExtension(TankBo tankBo);
 }
