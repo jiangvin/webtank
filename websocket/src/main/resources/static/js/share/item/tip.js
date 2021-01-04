@@ -7,18 +7,19 @@ import Resource from "../tool/resource.js";
  */
 
 export default class Tip {
-    constructor(stage, text) {
-        this.stage = stage;
+    constructor(stage, text, timeout) {
+        this.stage = stage ? stage : Resource.getRoot().currentStage();
         this.text = text;
+        this.timeout = timeout ? timeout : 80;
         this.init();
     }
 
     init() {
         const size = {
-            w: 420,
-            h: 110,
-            timeout: 80
+            w: this.text.length * 60,
+            h: 110
         };
+        size.w = size.w < 420 ? 420 : size.w;
 
         //缓存，清空所有按钮事件
         this.cacheUnits = this.stage.controlUnits;
@@ -45,8 +46,8 @@ export default class Tip {
                     48);
             },
             update: () => {
-                if (size.timeout > 0) {
-                    --size.timeout;
+                if (this.timeout > 0) {
+                    --this.timeout;
                 } else {
                     this.close();
                 }
