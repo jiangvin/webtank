@@ -57,7 +57,9 @@ public class RoomService {
     public RoomListDto getRoomListDto(int start, int limit, String search) {
         List<RoomDto> roomDtoList = new ArrayList<>();
         for (StageRoom room : roomList) {
-            if (!StringUtils.isEmpty(search) && !room.getRoomId().contains(search)) {
+            if (!StringUtils.isEmpty(search) &&
+                    !room.getRoomId().contains(search) &&
+                    !room.getCreator().getUsername().contains(search)) {
                 continue;
             }
             roomDtoList.add(room.toDto());

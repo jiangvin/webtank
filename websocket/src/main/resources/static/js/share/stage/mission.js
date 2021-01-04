@@ -26,6 +26,7 @@ export default class Mission extends Stage {
             }
         });
 
+        //mission info
         this.missionPos = [
             {x: 784, y: 458},
             {x: 784 + 365, y: 458},
@@ -35,106 +36,89 @@ export default class Mission extends Stage {
         ];
         this.missionSize = 180;
 
+        //map info
+        this.mapMaxId = 4;
+        this.rectSelected = {
+            w: 384,
+            h: 128,
+            x: 82,
+            y: 270,
+        };
+        this.rect = {
+            w: this.rectSelected.w * .85,
+            h: this.rectSelected.h * .93
+        };
+        this.rect.x = this.rectSelected.x + (this.rectSelected.w - this.rect.w) * .91;
+        this.rect.y = this.rectSelected.y + (this.rectSelected.h - this.rect.h) / 2;
+
         this.createMapSelected();
 
         this.initControlEvent();
     }
 
     createMapSelected() {
-        const mapMaxId = 4;
-        const thisMission = this;
-        const rectSelected = {
-            w: 384,
-            h: 128,
-            x: 82,
-            y: 270,
-        };
-        const rect = {
-            w: rectSelected.w * .85,
-            h: rectSelected.h * .93
-        };
-        rect.x = rectSelected.x + (rectSelected.w - rect.w) * .91;
-        rect.y = rectSelected.y + (rectSelected.h - rect.h) / 2;
-
         const map = {
-            w: rect.w * .92,
-            h: rect.h * .92
+            w: this.rect.w * .92,
+            h: this.rect.h * .92
         };
-        map.x = rect.x + (rect.w - map.w) / 2;
-        map.y = rect.y + (rect.h - map.h) / 2;
+        map.x = this.rect.x + (this.rect.w - map.w) / 2;
+        map.y = this.rect.y + (this.rect.h - map.h) / 2;
 
         const text = ["第一关", "第二关", "第三关", "第四关"];
 
         this.createItem({
-            draw: function (ctx) {
+            draw: ctx => {
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#FFF';
 
-                for (let i = 0; i < mapMaxId; ++i) {
+                for (let i = 0; i < this.mapMaxId; ++i) {
                     //选择框
-                    if (i === thisMission.roomInfo.mapId - 1) {
+                    if (i === this.roomInfo.mapId - 1) {
                         ctx.displayTopLeft("mission_map_rect_selected",
-                            rectSelected.x,
-                            rectSelected.y + i * (rectSelected.h * 1.1),
-                            rectSelected.w,
-                            rectSelected.h)
+                            this.rectSelected.x,
+                            this.rectSelected.y + i * (this.rectSelected.h * 1.1),
+                            this.rectSelected.w,
+                            this.rectSelected.h)
                     } else {
                         ctx.displayTopLeft("mission_map_rect",
-                            rect.x,
-                            rect.y + i * (rectSelected.h * 1.1),
-                            rect.w,
-                            rect.h)
+                            this.rect.x,
+                            this.rect.y + i * (this.rectSelected.h * 1.1),
+                            this.rect.w,
+                            this.rect.h)
                     }
 
                     //底图
-                    ctx.displayTopLeft(thisMission.getMapImage(i),
+                    ctx.displayTopLeft(this.getMapImage(i),
                         map.x,
-                        map.y + i * (rectSelected.h * 1.1),
+                        map.y + i * (this.rectSelected.h * 1.1),
                         map.w,
                         map.h);
 
                     //文字
-                    ctx.displayText(text[i], 200, 340 + i * (rectSelected.h * 1.1), 32, true);
+                    ctx.displayText(text[i], 200, 340 + i * (this.rectSelected.h * 1.1), 32, true);
 
                     //图标
-                    if (thisMission.hasLock(i)) {
+                    if (this.hasLock(i)) {
                         ctx.displayCenter("mission_lock",
-                            334, 334 + i * (rectSelected.h * 1.1), 44);
+                            334, 334 + i * (this.rectSelected.h * 1.1), 44);
                     } else {
                         ctx.displayCenter("star",
-                            324, 334 + i * (rectSelected.h * 1.1), 35);
+                            324, 334 + i * (this.rectSelected.h * 1.1), 35);
 
-                        let star = thisMission.starMap.get(thisMission.generateSumKey(
+                        let star = this.starMap.get(this.generateSumKey(
                             i + 1,
-                            thisMission.roomInfo.hardMode));
+                            this.roomInfo.hardMode));
                         if (!star) {
                             star = 0;
                         }
-                        ctx.displayText(star, 362, 340 + i * (rectSelected.h * 1.1), 32, true);
+                        ctx.displayText(star, 362, 340 + i * (this.rectSelected.h * 1.1), 32, true);
                     }
                 }
 
-                thisMission.drawMissionInfo(ctx);
+                this.drawMissionInfo(ctx);
             }
         });
-
-        //控制单元
-        for (let i = 0; i < mapMaxId; ++i) {
-            this.createControl({
-                leftTop: {
-                    x: 82 + (rectSelected.w - rect.w),
-                    y: 270 + i * (rectSelected.h * 1.1)
-                },
-                size: rect,
-                callback: function () {
-                    if (thisMission.hasLock(i)) {
-                        return;
-                    }
-                    thisMission.roomInfo.mapId = i + 1;
-                }
-            })
-        }
     }
 
     drawMissionInfo(ctx) {
@@ -196,6 +180,23 @@ export default class Mission extends Stage {
     }
 
     initControlEvent() {
+        //select map
+        for (let i = 0; i < this.mapMaxId; ++i) {
+            this.createControl({
+                leftTop: {
+                    x: 82 + (this.rectSelected.w - this.rect.w),
+                    y: 270 + i * (this.rectSelected.h * 1.1)
+                },
+                size: this.rect,
+                check: () => {
+                    return !this.hasLock(i);
+                },
+                callback: () => {
+                    this.roomInfo.mapId = i + 1;
+                }
+            })
+        }
+        
         //start game
         for (let i = 0; i < 5; ++i) {
             this.createControl({
@@ -207,10 +208,10 @@ export default class Mission extends Stage {
                     w: this.missionSize,
                     h: this.missionSize
                 },
+                check: () => {
+                    return this.roomInfo.mapId >= 1;
+                },
                 callback: () => {
-                    if (this.roomInfo.mapId < 1) {
-                        return;
-                    }
                     if (this.getStarCount(i + 1) === -1) {
                         Common.addMessage("请先解锁前面的关卡!", "#F00");
                         return;

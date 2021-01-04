@@ -1,0 +1,151 @@
+import Connect from "./connect.js";
+import Common from "./common.js";
+import Resource from "./resource.js";
+import Status from "./status.js";
+import ControlUnit from "../item/controlunit.js";
+
+/**
+ * @author 蒋文龙(Vin)
+ * @description 网络连接状态检测, 在netEngine中使用，每两秒检测一次
+ *              如果延迟高于3秒，则设成暂停状态
+ *              如果延迟高于15秒，则自动关闭连接
+ *
+ * @date 2021/1/3
+ */
+
+export default class ConnectStatus {
+    constructor(engine) {
+        this.engine = engine;
+
+        //发起请求的开始时间
+        this.requestTime = null;
+
+        //检测延迟，减少连接频率
+        this.checkTimeout = 0;
+
+        //暂停时候的状态缓存
+        this.statusCache = null;
+
+        this.addConnectCheckEvent();
+    }
+
+    addConnectCheckEvent() {
+        //运行间隔时间
+        const intervalFrames = 60;
+
+        const MAX_CONNECT_TIME_FOR_PAUSE = 3000;
+        const MAX_CONNECT_TIME_FOR_BREAK = 15000;
+
+        const callback = () => {
+            //已经断开连接
+            if (Connect.status() === false) {
+                this.disconnect();
+                return;
+            }
+
+            //正在连接中,还未获得响应
+            if (this.requestTime !== null) {
+                const responseTime = new Date().getTime();
+                const delay = responseTime - this.requestTime;
+                if (delay > MAX_CONNECT_TIME_FOR_BREAK) {
+                    this.disconnect();
+                } else if (delay > MAX_CONNECT_TIME_FOR_PAUSE) {
+                    this.pause();
+                    this.engine.addTimeEvent(intervalFrames, callback, true);
+                }
+                return;
+            }
+
+            //以下情况统一加下次检测事件
+            this.engine.addTimeEvent(intervalFrames, callback, true);
+
+            //还未连接,判断是否需要延迟
+            if (this.checkTimeout > 0) {
+                --this.checkTimeout;
+                return;
+            }
+
+            //开始连接
+            this.requestTime = new Date().getTime();
+            Common.getRequest("/multiplePlayers/ping", () => {
+                const responseTime = new Date().getTime();
+                const delay = responseTime - this.requestTime;
+                Resource.getRoot().netDelay = delay;
+
+                //清空requestTime,方便下次连接
+                this.requestTime = null;
+
+                //解除报警
+                if (delay < MAX_CONNECT_TIME_FOR_PAUSE) {
+                    this.backToNormal();
+                    //正常状态下设定下次连接延迟，减少检测频率
+                    this.checkTimeout = 1;
+                }
+            });
+        };
+        this.engine.addTimeEvent(intervalFrames, callback, true);
+    }
+
+    disconnect() {
+        //再关闭一次，排除一些情况
+        Connect.disconnect();
+        Status.setStatus(Status.statusPause());
+        this.createDisconnectItem();
+    }
+
+    pause() {
+        if (Status.getValue() === Status.statusPauseForNet()) {
+            return;
+        }
+        this.statusCache = Status.getValue();
+        Status.setStatus(Status.statusPauseForNet());
+    }
+
+    backToNormal() {
+        if (Status.getValue() !== Status.statusPauseForNet()) {
+            return;
+        }
+        Status.setStatus(this.statusCache);
+    }
+
+    createDisconnectItem() {
+        //显示蒙版和文字
+        this.engine.room.createItem({
+            draw: function (ctx) {
+                ctx.globalAlpha = 0.5;
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, Resource.width(), Resource.height());
+                ctx.globalAlpha = 1;
+
+                ctx.font = (100 * Resource.getScale()) + 'px gameFont';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#FFF';
+                ctx.fillText("与服务器连接断开", Resource.width() / 2, Resource.height() * .4);
+            }
+        });
+
+        //显示返回按钮
+        this.engine.room.createItem({
+            draw: function (ctx) {
+                ctx.displayCenter("button_home",
+                    960, 620,
+                    350, 120, 0, true);
+            },
+            controlUnit: new ControlUnit({
+                center: {
+                    x: 960,
+                    y: 620
+                },
+                size: {
+                    w: 350,
+                    h: 120
+                },
+                callback: () => {
+                    Resource.getRoot().gotoStage("menu");
+                },
+                needOffset: true
+            })
+        });
+    }
+}

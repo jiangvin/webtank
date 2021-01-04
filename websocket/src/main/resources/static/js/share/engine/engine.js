@@ -19,31 +19,42 @@ export default class Engine {
         });
     }
 
-    addTimeEvent(timeout, callback) {
+    /**
+     * 引擎类的事件
+     * @param timeout
+     * @param callback
+     * @param force 是否在游戏暂停时也更新
+     */
+    addTimeEvent(timeout, callback, force) {
         const event = {};
         event.callback = callback;
         event.timeout = timeout ? timeout : 100;
+        event.force = force;
         this.events.push(event);
     }
 
-    /**
-     * 暂停的时候不会更新任何事件
-     */
     update() {
         this.updateEvent();
+
+        if (!Status.isGaming()) {
+            return;
+        }
         this.updateCenter(this.room)
     }
 
     updateEvent() {
         for (let i = 0; i < this.events.length; ++i) {
             const event = this.events[i];
+            if (!Status.isGaming() && !event.force) {
+                continue;
+            }
+
             if (event.timeout > 0) {
                 --event.timeout;
             } else {
                 event.callback();
                 //删除事件
-                this.events.splice(i, 1);
-                --i;
+                this.events.splice(i--, 1);
             }
         }
     }
@@ -333,7 +344,7 @@ export default class Engine {
 
     addConnectTimeoutEvent(callback) {
         Status.setAck(false);
-        Common.addTimeEvent("connect_timeout", function () {
+        this.addTimeEvent(480, function () {
             if (Status.getAck()) {
                 return;
             }
@@ -342,7 +353,7 @@ export default class Engine {
             if (callback !== undefined) {
                 callback();
             }
-        }, 600);
+        }, true);
     };
 
     /**
