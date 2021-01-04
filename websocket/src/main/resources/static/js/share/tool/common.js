@@ -30,8 +30,8 @@ export default class Common {
         Resource.getRoot().gotoStage(id, options);
     }
 
-    static addTimeEvent(eventType, callback, timeout, ignoreLog) {
-        Resource.getRoot().addTimeEvent(eventType, callback, timeout, ignoreLog);
+    static addTimeEvent(eventType, callback, timeout) {
+        Resource.getRoot().addTimeEvent(eventType, callback, timeout);
     }
 
     static addMessageEvent(eventType, callback) {

@@ -13,7 +13,6 @@ export default class Resource {
         this.images = new Map();
         this.user = new User();
         this.itemId = 1;
-        this.scale = 1;
         this.host = "";
         this.debug = false;
         this.encrypt = new JSEncrypt();
@@ -329,7 +328,6 @@ export default class Resource {
         info.scaleForFormatToReal = info.scaleForFormatToDisplay * info.scaleForDisplayToReal;
 
         Resource.instance.windowInfo = info;
-        Resource.instance.scale = info.scaleForFormatToDisplay;
         Resource.instance.offset = {
             x: (info.formatW - formatWidth) / 2,
             y: (info.formatH - formatHeight) / 2
@@ -338,7 +336,7 @@ export default class Resource {
     }
 
     static getScale() {
-        return Resource.instance.scale;
+        return Resource.instance.windowInfo.scaleForFormatToDisplay;
     }
 
     static getOffset() {
@@ -352,7 +350,7 @@ export default class Resource {
         if (offset) {
             return 1920;
         } else {
-            return Resource.width() / Resource.getScale();
+            return Resource.instance.windowInfo.formatH;
         }
     }
 
@@ -363,7 +361,7 @@ export default class Resource {
         if (offset) {
             return 1080;
         } else {
-            return Resource.height() / Resource.getScale();
+            return Resource.instance.windowInfo.formatW;
         }
     }
 
