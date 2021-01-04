@@ -7,8 +7,8 @@ import ControlUnit from "../item/controlunit.js";
 /**
  * @author 蒋文龙(Vin)
  * @description 网络连接状态检测, 在netEngine中使用，每两秒检测一次
- *              如果延迟低于两秒，则在两秒后重复操作
- *              如果延迟高于两秒，警告2次后设成暂停状态
+ *              如果延迟高于3秒，则设成暂停状态
+ *              如果延迟高于15秒，则自动关闭连接
  *
  * @date 2021/1/3
  */
@@ -19,71 +19,89 @@ export default class ConnectStatus {
 
         //发起请求的开始时间
         this.requestTime = null;
-        //警告次数
-        this.warningTimes = 0;
 
+        //检测延迟，减少连接频率
+        this.checkTimeout = 0;
+
+        //暂停时候的状态缓存
         this.statusCache = null;
 
         this.addConnectCheckEvent();
     }
 
     addConnectCheckEvent() {
-        const MAX_CONNECT_TIME = 2000;
+        //运行间隔时间
+        const intervalFrames = 60;
+
+        const MAX_CONNECT_TIME_FOR_PAUSE = 3000;
+        const MAX_CONNECT_TIME_FOR_BREAK = 15000;
 
         const callback = () => {
             //已经断开连接
             if (Connect.status() === false) {
-                //再关闭一次，排除一些情况
-                Connect.disconnect();
-                Status.setStatus(Status.statusPause());
-                this.createDisconnectItem();
+                this.disconnect();
                 return;
             }
 
-            //每两秒运行一次
-            this.engine.addTimeEvent(120, callback, true);
-
-            if (this.requestTime === null) {
-                this.requestTime = new Date().getTime();
-                Common.getRequest("/multiplePlayers/ping", () => {
-                    const responseTime = new Date().getTime();
-                    const delay = responseTime - this.requestTime;
-                    Resource.getRoot().netDelay = delay;
-                    //清空requestTime,方便下次连接
-                    this.requestTime = null;
-                    //解除报警
-                    if (delay < MAX_CONNECT_TIME) {
-                        this.clearWarningTimes();
-                    }
-                });
+            //正在连接中,还未获得响应
+            if (this.requestTime !== null) {
+                const responseTime = new Date().getTime();
+                const delay = responseTime - this.requestTime;
+                if (delay > MAX_CONNECT_TIME_FOR_BREAK) {
+                    this.disconnect();
+                } else if (delay > MAX_CONNECT_TIME_FOR_PAUSE) {
+                    this.pause();
+                    this.engine.addTimeEvent(intervalFrames, callback, true);
+                }
                 return;
             }
 
-            const responseTime = new Date().getTime();
-            const delay = responseTime - this.requestTime;
-            if (delay >= MAX_CONNECT_TIME) {
-                this.addWarningTimes();
+            //以下情况统一加下次检测事件
+            this.engine.addTimeEvent(intervalFrames, callback, true);
+
+            //还未连接,判断是否需要延迟
+            if (this.checkTimeout > 0) {
+                --this.checkTimeout;
+                return;
             }
+
+            //开始连接
+            this.requestTime = new Date().getTime();
+            Common.getRequest("/multiplePlayers/ping", () => {
+                const responseTime = new Date().getTime();
+                const delay = responseTime - this.requestTime;
+                Resource.getRoot().netDelay = delay;
+
+                //清空requestTime,方便下次连接
+                this.requestTime = null;
+
+                //解除报警
+                if (delay < MAX_CONNECT_TIME_FOR_PAUSE) {
+                    this.backToNormal();
+                    //正常状态下设定下次连接延迟，减少检测频率
+                    this.checkTimeout = 1;
+                }
+            });
         };
-
-        console.log("connect status will be checked per 120 frames...");
-        this.engine.addTimeEvent(120, callback, true);
+        this.engine.addTimeEvent(intervalFrames, callback, true);
     }
 
-    addWarningTimes() {
-        const MAX_WARNING_TIMES = 1;
-        ++this.warningTimes;
+    disconnect() {
+        //再关闭一次，排除一些情况
+        Connect.disconnect();
+        Status.setStatus(Status.statusPause());
+        this.createDisconnectItem();
+    }
+
+    pause() {
         if (Status.getValue() === Status.statusPauseForNet()) {
             return;
         }
-        if (this.warningTimes > MAX_WARNING_TIMES) {
-            this.statusCache = Status.getValue();
-            Status.setStatus(Status.statusPauseForNet());
-        }
+        this.statusCache = Status.getValue();
+        Status.setStatus(Status.statusPauseForNet());
     }
 
-    clearWarningTimes() {
-        this.warningTimes = 0;
+    backToNormal() {
         if (Status.getValue() !== Status.statusPauseForNet()) {
             return;
         }
