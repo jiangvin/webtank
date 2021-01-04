@@ -33,6 +33,7 @@ export default class ConnectStatus {
         //运行间隔时间
         const intervalFrames = 60;
 
+        const MAX_CONNECT_TIME_FOR_BACK_TO_NORMAL = 1000;
         const MAX_CONNECT_TIME_FOR_PAUSE = 3000;
         const MAX_CONNECT_TIME_FOR_BREAK = 15000;
 
@@ -50,7 +51,7 @@ export default class ConnectStatus {
                 if (delay > MAX_CONNECT_TIME_FOR_BREAK) {
                     this.disconnect();
                 } else {
-                    if (delay > MAX_CONNECT_TIME_FOR_PAUSE){
+                    if (delay > MAX_CONNECT_TIME_FOR_PAUSE) {
                         this.pause();
                     }
                     this.engine.addTimeEvent(intervalFrames, callback, true);
@@ -78,7 +79,7 @@ export default class ConnectStatus {
                 this.requestTime = null;
 
                 //解除报警
-                if (delay < MAX_CONNECT_TIME_FOR_PAUSE) {
+                if (delay < MAX_CONNECT_TIME_FOR_BACK_TO_NORMAL) {
                     this.backToNormal();
                     //正常状态下设定下次连接延迟，减少检测频率
                     this.checkTimeout = 1;
