@@ -350,7 +350,7 @@ export default class Resource {
         if (offset) {
             return 1920;
         } else {
-            return Resource.instance.windowInfo.formatH;
+            return Resource.instance.windowInfo.formatW;
         }
     }
 
@@ -361,7 +361,7 @@ export default class Resource {
         if (offset) {
             return 1080;
         } else {
-            return Resource.instance.windowInfo.formatW;
+            return Resource.instance.windowInfo.formatH;
         }
     }
 
