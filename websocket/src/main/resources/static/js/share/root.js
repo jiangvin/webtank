@@ -6,7 +6,6 @@
 
 import Frame from './tool/frame.js'
 import Resource from './tool/resource.js'
-import Status from "./tool/status.js"
 import Common from "./tool/common.js"
 import NetEngine from "./engine/netEngine.js";
 import AiEngine from "./engine/aiEngine.js";
@@ -44,13 +43,11 @@ export default class Root {
         this.netDelay = 0;
     }
 
-    addTimeEvent(eventType, callback, timeout, ignoreLog) {
+    addTimeEvent(eventType, callback, timeout) {
         const event = {};
         event.eventType = eventType;
         event.callback = callback;
-        //默认100帧倒计时，不到1.5秒
         event.timeout = timeout ? timeout : 100;
-        event.ignoreLog = ignoreLog;
         this.timeEvents.push(event);
     };
 
@@ -134,9 +131,7 @@ export default class Root {
             if (event.timeout > 0) {
                 --event.timeout;
             } else {
-                if (event.ignoreLog !== true) {
-                    console.log("process time event:" + event.eventType);
-                }
+                console.log("process time event:" + event.eventType);
                 event.callback();
                 //删除事件
                 this.timeEvents.splice(i--, 1);
