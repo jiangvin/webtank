@@ -49,8 +49,10 @@ export default class ConnectStatus {
                 const delay = responseTime - this.requestTime;
                 if (delay > MAX_CONNECT_TIME_FOR_BREAK) {
                     this.disconnect();
-                } else if (delay > MAX_CONNECT_TIME_FOR_PAUSE) {
-                    this.pause();
+                } else {
+                    if (delay > MAX_CONNECT_TIME_FOR_PAUSE){
+                        this.pause();
+                    }
                     this.engine.addTimeEvent(intervalFrames, callback, true);
                 }
                 return;
