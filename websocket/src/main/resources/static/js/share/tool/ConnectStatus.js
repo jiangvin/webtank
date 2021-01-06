@@ -115,11 +115,7 @@ export default class ConnectStatus {
         //显示蒙版和文字
         this.engine.room.createItem({
             draw: function (ctx) {
-                ctx.globalAlpha = 0.5;
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(0, 0, Resource.width(), Resource.height());
-                ctx.globalAlpha = 1;
-
+                ctx.displayAlphaMask();
                 ctx.font = (100 * Resource.getScale()) + 'px gameFont';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';

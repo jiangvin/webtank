@@ -54,11 +54,7 @@ export default class Success {
 
         this.item = this.stage.createItem({
             draw: ctx => {
-                //黑色蒙蔽
-                ctx.globalAlpha = 0.6;
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, Resource.width(), Resource.height());
-                ctx.globalAlpha = 1;
+                ctx.displayAlphaMask();
 
                 Resource.setNeedOffset(true);
                 //light
