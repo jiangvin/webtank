@@ -97,7 +97,7 @@ export default class ConnectStatus {
             ++this.warningTimes;
         }
 
-        if (Status.getValue() === Status.statusPauseForNet()) {
+        if (!Status.isGaming()) {
             return;
         }
         this.statusCache = Status.getValue();
