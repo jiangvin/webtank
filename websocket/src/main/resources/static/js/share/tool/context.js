@@ -52,6 +52,13 @@ CanvasRenderingContext2D.prototype.displayFillRoundRect = function (x, y, w, h, 
     this.restore();
 };
 
+CanvasRenderingContext2D.prototype.displayAlphaMask = function () {
+    this.globalAlpha = 0.6;
+    this.fillStyle = '#000';
+    this.fillRect(0, 0, Resource.width(), Resource.height());
+    this.globalAlpha = 1;
+};
+
 CanvasRenderingContext2D.prototype.displayCenter = function (imageId, x, y, w, h, indexX, offset) {
     this.displayBase(imageId, x, y, w, h, "center", indexX, offset);
 };
