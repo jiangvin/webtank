@@ -40,13 +40,13 @@ export default class Shop extends Stage {
     }
 
     addEventListener() {
-        document.addEventListener('touchmove', this.moveEvent);
-        document.addEventListener('touchend', this.endEvent);
+        Control.addMoveEvent("shop_move", this.moveEvent);
+        Control.addUpEvent("shop_up", this.endEvent);
     }
 
     removeEventListener() {
-        document.removeEventListener('touchmove', this.moveEvent);
-        document.removeEventListener('touchend', this.endEvent);
+        Control.removeEvent("shop_move");
+        Control.removeEvent("shop_up");
     }
 
     drawBackground(ctx) {
@@ -196,15 +196,15 @@ export default class Shop extends Stage {
         });
 
         //滑动辅助
-        this.moveEvent = e => {
+        this.moveEvent = pointList => {
             if (!this.itemInfo.touchPoint) {
                 return;
             }
 
             let minDistance = Resource.formatWidth();
             let movePoint;
-            for (let i = 0; i < e.touches.length; ++i) {
-                const point = Control.getTouchPoint(e.touches[i]);
+            for (let i = 0; i < pointList.length; ++i) {
+                const point = pointList[i];
                 const distance = Common.distance(
                     point.x, point.y,
                     this.itemInfo.touchPoint.x,
