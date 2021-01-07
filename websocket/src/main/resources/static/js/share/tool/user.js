@@ -29,7 +29,8 @@ export default class User {
             return;
         }
 
-        this.setUserId(data.username);
+        this.userId = data.username;
+        this.originalUserId = data.username;
         this.coin = data.coin;
         this.redStarExpired = data.redStarExpired;
         this.ghostExpired = data.ghostExpired;
@@ -51,6 +52,13 @@ export default class User {
         if (!this.originalUserId) {
             this.originalUserId = userId;
         }
+    }
+
+    resetUserId() {
+        if (!this.originalUserId) {
+            return;
+        }
+        this.userId = this.originalUserId;
     }
 
     setDebug(debug) {
