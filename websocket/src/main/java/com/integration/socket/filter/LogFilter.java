@@ -88,9 +88,6 @@ public class LogFilter implements Filter {
         if (uri.endsWith(".js")) {
             return false;
         }
-        if (uri.endsWith("/ping")) {
-            return false;
-        }
         return true;
     }
 

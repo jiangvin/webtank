@@ -65,8 +65,9 @@ export default class ConnectStatus {
             }
 
             //开始连接
+            //注册回收事件
             this.requestTime = new Date().getTime();
-            Common.getRequest("/multiplePlayers/ping", () => {
+            Common.addMessageEvent("PING", () => {
                 const responseTime = new Date().getTime();
                 const delay = responseTime - this.requestTime;
                 Resource.getRoot().netDelay = delay;
@@ -79,6 +80,7 @@ export default class ConnectStatus {
                     this.backToNormal();
                 }
             });
+            Connect.send("PING");
         };
         this.engine.addTimeEvent(intervalFrames, callback, true);
     }

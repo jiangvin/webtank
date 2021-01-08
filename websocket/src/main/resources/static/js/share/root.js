@@ -119,10 +119,9 @@ export default class Root {
         if (!this.messageEvents.has(messageType)) {
             return;
         }
-
-        console.log("process message event:" + messageType);
-        this.messageEvents.get(messageType).callback();
+        const event = this.messageEvents.get(messageType);
         this.messageEvents.delete(messageType);
+        event.callback();
     }
 
     updateTimeEvents() {

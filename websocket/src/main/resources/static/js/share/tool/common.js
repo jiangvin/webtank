@@ -39,10 +39,10 @@ export default class Common {
     }
 
     static syncUserData() {
+        Resource.getUser().resetUserId();
         if (!Resource.getUser().deviceId) {
             return;
         }
-
         const oldCoins = Resource.getUser().coin;
         const oldStage = Resource.getUser().stage;
         Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
