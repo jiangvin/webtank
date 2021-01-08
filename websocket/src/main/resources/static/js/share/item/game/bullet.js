@@ -12,7 +12,6 @@ export default class Bullet extends MapItem {
         super(options);
 
         this.scale = 0.4;
-        this.z = Height.bullet();
 
         this.bulletType = 0;
         switch (this.teamId) {

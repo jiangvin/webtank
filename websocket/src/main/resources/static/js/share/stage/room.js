@@ -691,11 +691,13 @@ export default class Room extends Stage {
 
     boomTank(data) {
         const tank = this.itemBomb(data);
+        if (!tank) {
+            return;
+        }
         if (tank.id === Resource.getUser().userId) {
             Sound.boom();
             return;
         }
-
         if (this.view.center) {
             const center = this.view.center;
             const distance = Common.distance(tank.x, tank.y, center.x, center.y);
@@ -706,40 +708,41 @@ export default class Room extends Stage {
     }
 
     itemBomb(data, bombScale) {
-        if (bombScale === undefined) {
-            bombScale = 1;
-        }
-
         if (!this.items.has(data.id)) {
             return null;
         }
-
-        this.generalUpdateAttribute(data);
         const item = this.items.get(data.id);
-
-        //防止再做碰撞
-        item.typeId = -1;
-
-        item.action = 0;
-        item.orientation = 0;
-        item.scale = bombScale;
-        item.z = Height.bomb();
-        item.image = Resource.getOrCreateImage("bomb");
-        const thisRoom = this;
-        item.play = new Play(
-            6,
-            3,
-            function () {
-                item.orientation = 6 - this.frames;
-            }, function () {
-                thisRoom.items.delete(item.id);
-            });
 
         //remove center
         if (item === this.view.center) {
             this.view.center = null;
         }
 
+        //暂停状态下直接删除处理
+        if (!Status.isGaming()) {
+            this.items.delete(item.id);
+            return item;
+        }
+
+        if (bombScale === undefined) {
+            bombScale = 1;
+        }
+        this.generalUpdateAttribute(data);
+        //防止再做碰撞
+        item.typeId = -1;
+        item.action = 0;
+        item.orientation = 0;
+        item.scale = bombScale;
+        item.z = Height.bomb();
+        item.image = Resource.getOrCreateImage("bomb");
+        const thisRoom = this;
+        item.play = new Play(6, 3,
+            function () {
+                item.orientation = 6 - this.frames;
+            },
+            function () {
+                thisRoom.items.delete(item.id);
+            });
         return item;
     };
 

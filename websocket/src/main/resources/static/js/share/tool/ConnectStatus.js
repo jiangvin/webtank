@@ -23,6 +23,9 @@ export default class ConnectStatus {
         //检测延迟，减少连接频率
         this.checkTimeout = 0;
 
+        //警告次数
+        this.warningTimes = 0;
+
         //暂停时候的状态缓存
         this.statusCache = null;
 
@@ -33,8 +36,8 @@ export default class ConnectStatus {
         //运行间隔时间
         const intervalFrames = 60;
 
+        const MAX_CONNECT_TIME_FOR_BACK_TO_NORMAL = 1000;
         const MAX_CONNECT_TIME_FOR_PAUSE = 3000;
-        const MAX_CONNECT_TIME_FOR_BREAK = 15000;
 
         const callback = () => {
             //已经断开连接
@@ -43,21 +46,17 @@ export default class ConnectStatus {
                 return;
             }
 
+            this.engine.addTimeEvent(intervalFrames, callback, true);
+
             //正在连接中,还未获得响应
             if (this.requestTime !== null) {
                 const responseTime = new Date().getTime();
                 const delay = responseTime - this.requestTime;
-                if (delay > MAX_CONNECT_TIME_FOR_BREAK) {
-                    this.disconnect();
-                } else if (delay > MAX_CONNECT_TIME_FOR_PAUSE) {
+                if (delay > MAX_CONNECT_TIME_FOR_PAUSE) {
                     this.pause();
-                    this.engine.addTimeEvent(intervalFrames, callback, true);
                 }
                 return;
             }
-
-            //以下情况统一加下次检测事件
-            this.engine.addTimeEvent(intervalFrames, callback, true);
 
             //还未连接,判断是否需要延迟
             if (this.checkTimeout > 0) {
@@ -66,8 +65,9 @@ export default class ConnectStatus {
             }
 
             //开始连接
+            //注册回收事件
             this.requestTime = new Date().getTime();
-            Common.getRequest("/multiplePlayers/ping", () => {
+            Common.addMessageEvent("PING", () => {
                 const responseTime = new Date().getTime();
                 const delay = responseTime - this.requestTime;
                 Resource.getRoot().netDelay = delay;
@@ -76,12 +76,11 @@ export default class ConnectStatus {
                 this.requestTime = null;
 
                 //解除报警
-                if (delay < MAX_CONNECT_TIME_FOR_PAUSE) {
+                if (delay < MAX_CONNECT_TIME_FOR_BACK_TO_NORMAL) {
                     this.backToNormal();
-                    //正常状态下设定下次连接延迟，减少检测频率
-                    this.checkTimeout = 1;
                 }
             });
+            Connect.send("PING");
         };
         this.engine.addTimeEvent(intervalFrames, callback, true);
     }
@@ -94,7 +93,13 @@ export default class ConnectStatus {
     }
 
     pause() {
-        if (Status.getValue() === Status.statusPauseForNet()) {
+        if (this.warningTimes <= 0) {
+            this.warningTimes = 1;
+        } else {
+            ++this.warningTimes;
+        }
+
+        if (!Status.isGaming()) {
             return;
         }
         this.statusCache = Status.getValue();
@@ -102,6 +107,14 @@ export default class ConnectStatus {
     }
 
     backToNormal() {
+        --this.warningTimes;
+        if (this.warningTimes > 0) {
+            return;
+        }
+
+        //正常状态下设定下次连接延迟，减少检测频率
+        this.checkTimeout = 1;
+
         if (Status.getValue() !== Status.statusPauseForNet()) {
             return;
         }
@@ -112,11 +125,7 @@ export default class ConnectStatus {
         //显示蒙版和文字
         this.engine.room.createItem({
             draw: function (ctx) {
-                ctx.globalAlpha = 0.5;
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(0, 0, Resource.width(), Resource.height());
-                ctx.globalAlpha = 1;
-
+                ctx.displayAlphaMask();
                 ctx.font = (100 * Resource.getScale()) + 'px gameFont';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';

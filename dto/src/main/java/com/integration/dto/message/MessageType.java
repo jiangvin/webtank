@@ -13,6 +13,11 @@ public enum MessageType {
     USER_MESSAGE,
 
     /**
+     * 延迟测试
+     */
+    PING,
+
+    /**
      * 表情
      */
     FACE,

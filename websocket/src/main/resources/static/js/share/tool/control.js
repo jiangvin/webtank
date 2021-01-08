@@ -11,10 +11,11 @@ import Status from "./status.js";
 export default class Control {
 
     constructor() {
-        this.isTouchMode = null;
-
-        //默认横屏
+        this.isTouchMode = false;
         this.portrait = false;
+
+        //自定义事件
+        this.customEventMap = new Map();
     }
 
     static setControlMode(isTouch) {
@@ -36,7 +37,7 @@ export default class Control {
             });
         } else {
             Control.generateKeyModeInfo();
-            document.addEventListener('click', function (e) {
+            document.addEventListener('mousedown', function (e) {
                 const touchPoint = Control.getTouchPoint(e);
                 Resource.getRoot().processPointDownEvent(touchPoint);
             });
@@ -376,6 +377,62 @@ export default class Control {
 
     static setPortrait(isPorTrait) {
         Control.instance.portrait = isPorTrait;
+    }
+
+    static addMoveEvent(key, callback) {
+        let event = {
+            key: key
+        };
+
+        //generate event
+        if (Control.instance.isTouchMode) {
+            event.type = "touchmove";
+            event.action = function (e) {
+                const pointList = [];
+                for (let i = 0; i < e.touches.length; ++i) {
+                    pointList[pointList.length] = Control.getTouchPoint(e.touches[i]);
+                }
+                callback(pointList);
+            }
+        } else {
+            event.type = "mousemove";
+            event.action = function (e) {
+                const pointList = [];
+                pointList[0] = Control.getTouchPoint(e);
+                callback(pointList);
+            }
+        }
+        this.addEvent(event);
+    }
+
+    static addUpEvent(key, callback) {
+        let event = {
+            key: key,
+            action: callback
+        };
+
+        //generate event
+        if (Control.instance.isTouchMode) {
+            event.type = "touchend";
+        } else {
+            event.type = "mouseup";
+        }
+        this.addEvent(event);
+    }
+
+    static addEvent(event) {
+        this.removeEvent(event.key);
+        Control.instance.customEventMap.set(event.key, event);
+        document.addEventListener(event.type, event.action);
+    }
+
+    static removeEvent(key) {
+        const event = Control.instance.customEventMap.get(key);
+        if (!event) {
+            return;
+        }
+        Control.instance.customEventMap.delete(key);
+        document.removeEventListener(event.type, event.action);
     }
 }
 Control.instance = new Control();

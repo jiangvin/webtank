@@ -27,7 +27,7 @@ export default class Manager {
             },
             hasSound: false,
             check: function () {
-                return Status.isGaming();
+                return Status.isGaming() || Status.getValue() === Status.statusPauseForNet();
             },
             callback: function () {
                 new NewConfirm(
@@ -86,7 +86,7 @@ export default class Manager {
     }
 
     drawBackButton(ctx) {
-        if (!Status.isGaming()) {
+        if (!Status.isGaming() && Status.getValue() !== Status.statusPauseForNet()) {
             return;
         }
         ctx.displayTopLeft(
