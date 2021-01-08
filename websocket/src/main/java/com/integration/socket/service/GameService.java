@@ -74,11 +74,15 @@ public class GameService {
 
         log.debug("receive:{} from user:{}", CommonUtil.ignoreNull(messageDto.toString()), sendFrom);
         switch (messageDto.getMessageType()) {
+            case PING:
+                userBo.sendMessage(messageDto);
+                break;
             case CREATE_ROOM:
                 createRoom(messageDto, sendFrom);
                 break;
             case JOIN_ROOM:
                 joinRoom(messageDto, sendFrom);
+                break;
             default:
                 BaseStage stage = currentStage(userBo);
                 if (stage != null) {
