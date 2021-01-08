@@ -13,39 +13,35 @@ export default class Height {
         return 1;
     }
 
-    static bullet() {
+    static common() {
         return 2;
     }
 
-    static common() {
+    static ghostTank() {
         return 3;
     }
 
-    static ghostTank() {
+    static shield() {
         return 4;
     }
 
-    static shield() {
+    static tankId() {
         return 5;
     }
 
-    static tankId() {
+    static stopMark() {
         return 6;
     }
 
-    static stopMark() {
+    static bomb() {
         return 7;
     }
 
-    static bomb() {
+    static grass() {
         return 8;
     }
 
-    static grass() {
-        return 9;
-    }
-
     static tankFace() {
-        return 10;
+        return 9;
     }
 }
