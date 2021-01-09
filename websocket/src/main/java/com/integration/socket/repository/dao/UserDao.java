@@ -6,6 +6,7 @@ import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.jooq.tables.records.RankBoardRecord;
 import com.integration.socket.repository.jooq.tables.records.StarRecord;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
+import org.jooq.impl.DSL;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
@@ -47,6 +48,11 @@ public class UserDao extends BaseDao {
 
     public List<StarRecord> queryStarInfo(String userId) {
         return create.selectFrom(STAR).where(STAR.USER_ID.eq(userId)).fetch();
+    }
+
+    public int queryStarCount(String userId) {
+        return create.select(DSL.sum(STAR.STAR_)).from(STAR)
+               .where(STAR.USER_ID.eq(userId)).fetchOneInto(Integer.class);
     }
 
     public boolean saveStar(StarDto starDto) {

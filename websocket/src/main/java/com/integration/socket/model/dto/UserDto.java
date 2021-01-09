@@ -21,6 +21,7 @@ public class UserDto {
     private String userDevice;
     private int coin;
     private int stage;
+    private int star;
     private int hardStage;
     private Integer rank;
     private Integer score;
