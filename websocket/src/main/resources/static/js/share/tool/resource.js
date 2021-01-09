@@ -78,6 +78,11 @@ export default class Resource {
         this.loadImage("menu_bullet", "menu/bullet");
         this.loadImage("menu_head", "menu/head");
 
+        //load setting
+        this.loadImage("setting_bg", "menu/setting/bg");
+        this.loadImage("setting_check", "menu/setting/check");
+        this.loadImage("setting_select", "menu/setting/select");
+
         //load door
         for (let i = 0; i < 23; ++i) {
             this.loadImage("menu_door_" + i, "menu/door/" + (i + 1));

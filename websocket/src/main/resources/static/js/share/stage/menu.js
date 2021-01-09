@@ -11,6 +11,7 @@ import ControlUnit from "../item/controlunit.js";
 import RoomInfo from "../item/roominfo.js";
 import Connect from "../tool/connect.js";
 import Sound from "../tool/sound.js";
+import Setting from "../item/setting.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -111,6 +112,9 @@ export default class Menu extends Stage {
                 size: {
                     w: 100,
                     h: 100
+                },
+                callback: () => {
+                    new Setting(this);
                 }
             })
         });

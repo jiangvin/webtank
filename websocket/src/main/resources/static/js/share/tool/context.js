@@ -124,7 +124,7 @@ CanvasRenderingContext2D.prototype.displayBase = function (imageId, x, y, w, h, 
         if (!img.width || !img.height) {
             return;
         }
-        h = w * img.height / img.width;
+        h = w * (img.height / img.heightPics) / (img.width / img.widthPics);
     }
 
     if (offset === undefined) {

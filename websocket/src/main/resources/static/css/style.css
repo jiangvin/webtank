@@ -63,6 +63,18 @@ input.input-room-name {
     color: white;
 }
 
+input.setting-name {
+    left: 29.8%;
+    top: 52.3%;
+    width: 13%;
+    height: 30px;
+    text-align: left;
+    background: none;
+    border: none;
+    color: #7a5a31;
+    font-family: 'gameFont';
+}
+
 input.input-room-name::placeholder {
     color: #ffffff7a;
 }
