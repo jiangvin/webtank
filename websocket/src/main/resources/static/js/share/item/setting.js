@@ -25,10 +25,26 @@ export default class Setting {
         this.volumeSelect.length = this.volumeSelect.maxX - this.volumeSelect.minX;
         this.volumeSelect.x = this.volumeSelect.minX + this.volumeSelect.length * Sound.instance.volume;
 
+        this.tankColor = [
+            {
+                value: "green",
+                imageId: "tank01"
+            },
+            {
+                value: "red",
+                imageId: "red_tank01"
+            },
+            {
+                value: "blue",
+                imageId: "blue_tank01"
+            }
+        ];
+
         this.dataCache = {
             soundEnable: Sound.instance.soundEnable,
             musicEnable: Sound.instance.musicEnable,
-            volume: Sound.instance.volume
+            volume: Sound.instance.volume,
+            colorIndex: 0
         };
     }
 
@@ -58,7 +74,11 @@ export default class Setting {
                 ctx.displayCenter("setting_select", this.volumeSelect.x, 450, 70);
 
                 //tank
-                ctx.displayCenter("tank01", 1205, 530, 160, null, 3);
+                ctx.displayCenter(
+                    this.tankColor[this.dataCache.colorIndex].imageId,
+                    1205, 530,
+                    160, null,
+                    3);
             }
         })
     }
@@ -127,6 +147,38 @@ export default class Setting {
             }
         });
 
+        //change color
+        this.stage.createControl({
+            center: {
+                x: 1004,
+                y: 532
+            },
+            size: {
+                w: 70,
+                h: 70
+            },
+            callback: () => {
+                if (this.dataCache.colorIndex > 0) {
+                    --this.dataCache.colorIndex;
+                } else {
+                    this.dataCache.colorIndex = this.tankColor.length - 1;
+                }
+            }
+        });
+        this.stage.createControl({
+            center: {
+                x: 1408,
+                y: 532
+            },
+            size: {
+                w: 70,
+                h: 70
+            },
+            callback: () => {
+                this.dataCache.colorIndex = (this.dataCache.colorIndex + 1) % this.tankColor.length;
+            }
+        });
+
         //volume
         const volumeControl = this.stage.createControl({
             center: {
@@ -156,6 +208,7 @@ export default class Setting {
             if (!movePoint) {
                 return;
             }
+            movePoint.x -= Resource.getOffset().x;
             this.volumeSelect.x = Common.valueInBoundary(
                 movePoint.x,
                 this.volumeSelect.minX,
