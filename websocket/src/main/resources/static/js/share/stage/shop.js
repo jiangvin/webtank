@@ -63,9 +63,8 @@ export default class Shop extends Stage {
         ctx.displayCenter("gold", 905, 225, 90);
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.strokeStyle = '#000';
-        ctx.fillStyle = '#f7f3df';
-        ctx.displayStrokeText(coinCount, 960, 228, 50, true);
+        ctx.fillStyle = '#000';
+        ctx.displayText(coinCount, 960, 228, 48);
     }
 
     initShopItems() {
