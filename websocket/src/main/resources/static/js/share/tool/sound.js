@@ -43,6 +43,22 @@ export default class Sound {
         }
     }
 
+    static setSoundEnable(enable) {
+        Sound.instance.soundEnable = enable;
+    }
+
+    static setMusicEnable(enable) {
+        if (Sound.instance.musicEnable === enable) {
+            return;
+        }
+        Sound.instance.musicEnable = enable;
+        if (enable) {
+            Sound.menuBgm();
+        } else {
+            Sound.stopAll();
+        }
+    }
+
     static openDoor() {
         Sound.instance.playAudio("open_door");
     }

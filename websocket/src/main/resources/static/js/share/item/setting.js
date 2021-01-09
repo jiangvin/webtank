@@ -4,12 +4,21 @@
  * @date 2021/1/9
  */
 import Resource from "../tool/resource.js";
+import Sound from "../tool/sound.js";
 
 export default class Setting {
     constructor(stage) {
         this.stage = stage;
+        this.initDataCache();
         this.initImage();
         this.initControl();
+    }
+
+    initDataCache() {
+        this.dataCache = {
+            soundEnable: Sound.instance.soundEnable,
+            musicEnable: Sound.instance.musicEnable
+        };
     }
 
     initImage() {
@@ -27,8 +36,12 @@ export default class Setting {
                 ctx.displayCenterRate("setting_bg", 0.5, 0.5, 1);
 
                 //check
-                ctx.displayCenter("setting_check", 598, 322, 80);
-                ctx.displayCenter("setting_check", 802, 322, 80);
+                if (Sound.instance.musicEnable) {
+                    ctx.displayCenter("setting_check", 598, 322, 80);
+                }
+                if (Sound.instance.soundEnable) {
+                    ctx.displayCenter("setting_check", 802, 322, 80);
+                }
 
                 //select
                 ctx.displayCenter("setting_select", 590, 450, 70);
@@ -54,7 +67,7 @@ export default class Setting {
                 h: 55
             },
             callback: () => {
-                this.destroy();
+                this.cancel();
             }
         });
 
@@ -69,9 +82,47 @@ export default class Setting {
                 h: 54
             },
             callback: () => {
-                this.destroy();
+                this.cancel();
             }
         });
+
+        //music
+        this.stage.createControl({
+            leftTop: {
+                x: 570,
+                y: 290
+            },
+            size: {
+                w: 65,
+                h: 65
+            },
+            callback: () => {
+                Sound.setMusicEnable(!Sound.instance.musicEnable);
+            }
+        });
+
+        //sound
+        this.stage.createControl({
+            leftTop: {
+                x: 773,
+                y: 290
+            },
+            size: {
+                w: 65,
+                h: 65
+            },
+            callback: () => {
+                Sound.setSoundEnable(!Sound.instance.soundEnable);
+            }
+        });
+    }
+
+    cancel() {
+        //还原设定
+        Sound.setSoundEnable(this.dataCache.soundEnable);
+        Sound.setMusicEnable(this.dataCache.musicEnable);
+
+        this.destroy();
     }
 
     destroy() {
