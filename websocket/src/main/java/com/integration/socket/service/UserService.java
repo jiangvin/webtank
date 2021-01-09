@@ -50,6 +50,10 @@ public class UserService {
             userDto.setRank(record.getRank());
             userDto.setScore(record.getScore());
         }
+
+        //查询星数
+        userDto.setStar(userDao.queryStarCount(userId));
+
         return userDto;
     }
 

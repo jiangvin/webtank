@@ -70,6 +70,10 @@ export default class Common {
         Resource.instance.adapter.postRequest(url, body, callback);
     };
 
+    static saveAudio() {
+        Resource.instance.adapter.saveAudio();
+    }
+
     static generateHttpHost() {
         return Resource.getHost() === "" ? document.location.href.split("?")[0] : Resource.getHost();
     }
@@ -77,6 +81,37 @@ export default class Common {
     static distance(x1, y1, x2, y2) {
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     };
+
+    static getNearestPoint(sourceList, target) {
+        let minDistance = Resource.formatWidth();
+        let movePoint;
+        for (let i = 0; i < sourceList.length; ++i) {
+            const point = sourceList[i];
+            const distance = Common.distance(
+                point.x, point.y,
+                target.x,
+                target.y);
+            if (distance < minDistance) {
+                movePoint = point;
+                minDistance = distance;
+                break;
+            }
+        }
+        if (!movePoint) {
+            return null;
+        }
+        return movePoint;
+    }
+
+    static valueInBoundary(value, min, max) {
+        if (value < min) {
+            return min;
+        } else if (value > max) {
+            return max;
+        } else {
+            return value;
+        }
+    }
 
     static width() {
         return Resource.width();

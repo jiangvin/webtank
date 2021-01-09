@@ -71,13 +71,17 @@ export default class Resource {
     }
 
     loadMenuResource() {
-        this.loadImage(
-            "menu_background",
-            "menu/background",
-            "jpg"
-        );
+        this.loadImage("menu_background", "menu/background", "jpg");
+        this.loadImage("top_mask", "menu/top_mask");
+        this.loadImage("menu_setting", "menu/setting");
         this.loadImage("menu_wall", "menu/wall");
         this.loadImage("menu_bullet", "menu/bullet");
+        this.loadImage("menu_head", "menu/head");
+
+        //load setting
+        this.loadImage("setting_bg", "menu/setting/bg");
+        this.loadImage("setting_check", "menu/setting/check");
+        this.loadImage("setting_select", "menu/setting/select");
 
         //load door
         for (let i = 0; i < 23; ++i) {
