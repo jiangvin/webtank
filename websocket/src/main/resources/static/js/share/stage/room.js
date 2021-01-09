@@ -165,22 +165,12 @@ export default class Room extends Stage {
             y: this.view.center.y
         };
         if (!updateX) {
-            this.view.x = this.valueInBoundary(center.x - w / 2, 0, this.size.width - w);
+            this.view.x = Common.valueInBoundary(center.x - w / 2, 0, this.size.width - w);
         }
         if (!updateY) {
-            this.view.y = this.valueInBoundary(center.y - h / 2, 0, this.size.height - h);
+            this.view.y = Common.valueInBoundary(center.y - h / 2, 0, this.size.height - h);
         }
     };
-
-    valueInBoundary(value, min, max) {
-        if (value < min) {
-            return min;
-        } else if (value > max) {
-            return max;
-        } else {
-            return value;
-        }
-    }
 
     draw(ctx) {
         this.drawBackground(ctx);
@@ -251,11 +241,11 @@ export default class Room extends Stage {
         const viewStart = this.convertToScreenPoint({x: 0, y: 0});
         const getBottomRight = (topLeft) => {
             return {
-                x: this.valueInBoundary(
+                x: Common.valueInBoundary(
                     topLeft.x + imageWidthForServer,
                     topLeft.x,
                     this.size.width - this.view.x),
-                y: this.valueInBoundary(
+                y: Common.valueInBoundary(
                     topLeft.y + imageHeightForServer,
                     topLeft.y,
                     this.size.height - this.view.y)

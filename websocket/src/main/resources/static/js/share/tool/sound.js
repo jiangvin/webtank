@@ -18,6 +18,7 @@ export default class Sound {
         this.addSound({id: "bgm", src: 'audio/bgm.mp3', loop: true});
 
         this.currentLoopId = "";
+        this.volume = 1;
         this.soundEnable = true;
         this.musicEnable = true;
     }
@@ -40,6 +41,13 @@ export default class Sound {
         }
         if (audio.play) {
             audio.play();
+        }
+    }
+
+    static setVolume(volume) {
+        Sound.instance.volume = volume;
+        if (Sound.instance.setVolumeEngine) {
+            Sound.instance.setVolumeEngine(volume);
         }
     }
 

@@ -5,19 +5,30 @@
  */
 import Resource from "../tool/resource.js";
 import Sound from "../tool/sound.js";
+import Control from "../tool/control.js";
+import Common from "../tool/common.js";
 
 export default class Setting {
     constructor(stage) {
         this.stage = stage;
-        this.initDataCache();
+        this.initData();
         this.initImage();
         this.initControl();
     }
 
-    initDataCache() {
+    initData() {
+        this.volumeSelect = {
+            minX: 590,
+            maxX: 833,
+            downPoint: null,
+        };
+        this.volumeSelect.length = this.volumeSelect.maxX - this.volumeSelect.minX;
+        this.volumeSelect.x = this.volumeSelect.minX + this.volumeSelect.length * Sound.instance.volume;
+
         this.dataCache = {
             soundEnable: Sound.instance.soundEnable,
-            musicEnable: Sound.instance.musicEnable
+            musicEnable: Sound.instance.musicEnable,
+            volume: Sound.instance.volume
         };
     }
 
@@ -44,7 +55,7 @@ export default class Setting {
                 }
 
                 //select
-                ctx.displayCenter("setting_select", 590, 450, 70);
+                ctx.displayCenter("setting_select", this.volumeSelect.x, 450, 70);
 
                 //tank
                 ctx.displayCenter("tank01", 1205, 530, 160, null, 3);
@@ -115,18 +126,63 @@ export default class Setting {
                 Sound.setSoundEnable(!Sound.instance.soundEnable);
             }
         });
+
+        //volume
+        const volumeControl = this.stage.createControl({
+            center: {
+                x: this.volumeSelect.x,
+                y: 450
+            },
+            size: {
+                w: 70,
+                h: 70
+            },
+            callback: point => {
+                this.volumeSelect.downPoint = point;
+            },
+            hasSound: false
+        });
+        volumeControl.setCenterX = x => {
+            const leftX = x - volumeControl.size.w / 2;
+            const rightX = x + volumeControl.size.w / 2;
+            volumeControl.leftTop.x = leftX;
+            volumeControl.rightBottom.x = rightX;
+        };
+        Control.addMoveEvent("change_volume", pointList => {
+            if (!this.volumeSelect.downPoint) {
+                return;
+            }
+            const movePoint = Common.getNearestPoint(pointList, this.volumeSelect.downPoint);
+            if (!movePoint) {
+                return;
+            }
+            this.volumeSelect.x = Common.valueInBoundary(
+                movePoint.x,
+                this.volumeSelect.minX,
+                this.volumeSelect.maxX);
+            volumeControl.setCenterX(this.volumeSelect.x);
+
+            const newVolume = (this.volumeSelect.x - this.volumeSelect.minX) / this.volumeSelect.length;
+            Sound.setVolume(newVolume);
+        });
+        Control.addUpEvent("change_volume_up", () => {
+            this.volumeSelect.downPoint = null;
+        });
     }
 
     cancel() {
         //还原设定
         Sound.setSoundEnable(this.dataCache.soundEnable);
         Sound.setMusicEnable(this.dataCache.musicEnable);
+        Sound.setVolume(this.dataCache.volume);
 
         this.destroy();
     }
 
     destroy() {
         $("#main").empty();
+        Control.removeEvent("change_volume");
+        Control.removeEvent("change_volume_up");
         this.stage.removeItemFromId("setting");
         this.stage.controlUnits = this.cacheUnits;
     }

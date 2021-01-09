@@ -200,20 +200,7 @@ export default class Shop extends Stage {
                 return;
             }
 
-            let minDistance = Resource.formatWidth();
-            let movePoint;
-            for (let i = 0; i < pointList.length; ++i) {
-                const point = pointList[i];
-                const distance = Common.distance(
-                    point.x, point.y,
-                    this.itemInfo.touchPoint.x,
-                    this.itemInfo.touchPoint.y);
-                if (distance < minDistance) {
-                    movePoint = point;
-                    minDistance = distance;
-                    break;
-                }
-            }
+            const movePoint = Common.getNearestPoint(pointList, this.itemInfo.touchPoint);
             if (!movePoint) {
                 return;
             }
