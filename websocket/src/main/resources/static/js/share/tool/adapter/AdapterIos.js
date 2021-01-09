@@ -57,11 +57,18 @@ export default class AdapterIos extends Adapter {
             console.log("mock sound event:" + sound.id + " event:" + event);
             return;
         }
-
         window.webkit.messageHandlers.soundBridge.postMessage({
             src: sound.src,
             event: event,
             loop: !!sound.loop
+        });
+    }
+
+    saveAudio() {
+        window.webkit.messageHandlers.soundSaveBridge.postMessage({
+            volume: Sound.instance.volume,
+            musicEnable: Sound.instance.musicEnable,
+            soundEnable: Sound.instance.soundEnable
         });
     }
 

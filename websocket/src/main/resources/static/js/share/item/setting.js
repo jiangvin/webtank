@@ -117,6 +117,21 @@ export default class Setting {
             }
         });
 
+        //confirm
+        this.stage.createControl({
+            leftTop: {
+                x: 768,
+                y: 782
+            },
+            size: {
+                w: 165,
+                h: 54
+            },
+            callback: () => {
+                this.confirm();
+            }
+        });
+
         //music
         this.stage.createControl({
             leftTop: {
@@ -221,6 +236,14 @@ export default class Setting {
         Control.addUpEvent("change_volume_up", () => {
             this.volumeSelect.downPoint = null;
         });
+    }
+
+    confirm() {
+        Common.saveAudio();
+
+        //TODO SAVE NAME & TANK COLOR
+
+        this.destroy();
     }
 
     cancel() {

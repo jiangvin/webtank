@@ -70,6 +70,10 @@ export default class Common {
         Resource.instance.adapter.postRequest(url, body, callback);
     };
 
+    static saveAudio() {
+        Resource.instance.adapter.saveAudio();
+    }
+
     static generateHttpHost() {
         return Resource.getHost() === "" ? document.location.href.split("?")[0] : Resource.getHost();
     }

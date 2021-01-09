@@ -33,8 +33,12 @@ export default class Sound {
         }
 
         const audio = this.sounds.get(id);
-        if (audio.loop && !this.musicEnable) {
-            return;
+        if (audio.loop) {
+            if (this.musicEnable) {
+                Sound.instance.currentLoopId = id;
+            } else {
+                return;
+            }
         }
         if (!audio.loop && !this.soundEnable) {
             return;
@@ -76,7 +80,6 @@ export default class Sound {
             return;
         }
         Sound.stopAll();
-        Sound.instance.currentLoopId = "menu";
         Sound.instance.playAudio("menu");
     }
 
@@ -89,7 +92,6 @@ export default class Sound {
             return;
         }
         Sound.stopAll();
-        Sound.instance.currentLoopId = "bgm";
         Sound.instance.playAudio("bgm");
     }
 
