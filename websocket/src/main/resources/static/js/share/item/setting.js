@@ -239,7 +239,7 @@ export default class Setting {
     }
 
     confirm() {
-        Common.saveAudio();
+        Common.saveConf();
 
         //TODO SAVE NAME & TANK COLOR
 

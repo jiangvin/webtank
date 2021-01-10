@@ -70,8 +70,8 @@ export default class Common {
         Resource.instance.adapter.postRequest(url, body, callback);
     };
 
-    static saveAudio() {
-        Resource.instance.adapter.saveAudio();
+    static saveConf() {
+        Resource.instance.adapter.saveConf();
     }
 
     static generateHttpHost() {

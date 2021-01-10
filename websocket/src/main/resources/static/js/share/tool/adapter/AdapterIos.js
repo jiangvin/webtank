@@ -74,8 +74,8 @@ export default class AdapterIos extends Adapter {
         });
     }
 
-    saveAudio() {
-        window.webkit.messageHandlers.soundSaveBridge.postMessage({
+    saveConf() {
+        window.webkit.messageHandlers.saveBridge.postMessage({
             volume: Sound.instance.volume,
             musicEnable: Sound.instance.musicEnable,
             soundEnable: Sound.instance.soundEnable
