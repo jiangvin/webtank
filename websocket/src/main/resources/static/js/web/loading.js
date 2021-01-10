@@ -33,6 +33,7 @@ export default class Loading extends Stage {
             }
         });
 
+        //progress bar
         this.createItem({
             draw: function (ctx) {
                 const width = Resource.formatWidth() * .4;
@@ -71,9 +72,11 @@ export default class Loading extends Stage {
 
             }
         });
+
+        this.initEvent();
     }
 
-    init() {
+    initEvent() {
         const thisLoading = this;
         const total = Resource.instance.images.size + Sound.instance.sounds.size;
         let loaded = 0;
@@ -140,8 +143,11 @@ export default class Loading extends Stage {
                 }
             }
         }
-
         document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+
+    init() {
+        const thisLoading = this;
 
         //每5秒检测一次，若5秒进度条未更新则直接进入
         let lastPercent = thisLoading.percent;

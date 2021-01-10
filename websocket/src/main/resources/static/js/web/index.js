@@ -13,6 +13,7 @@ import Home from "./home.js";
 import Common from "../share/tool/common.js";
 import AdapterManager from "../share/tool/adapter/AdapterManager.js";
 import "../share/tool/context.js"
+import Sound from "../share/tool/sound.js";
 
 export default class Index {
     constructor() {
@@ -21,14 +22,28 @@ export default class Index {
 
         this.root = new Root();
         Resource.setRoot(this.root);
+        this.initGame();
+        this.initGlobalConfig();
+    }
 
+    initGlobalConfig() {
         const debug = AdapterManager.getQueryString("debug");
         if (debug) {
             Resource.setDebug(debug);
             this.initTouchDebug();
         }
-
-        this.initGame();
+        const volume = AdapterManager.getQueryString("volume");
+        if (volume) {
+            Sound.setVolume(parseFloat(volume));
+        }
+        const musicEnable = AdapterManager.getQueryString("musicEnable");
+        if (musicEnable) {
+            Sound.setMusicEnable(musicEnable === "true");
+        }
+        const soundEnable = AdapterManager.getQueryString("soundEnable");
+        if (soundEnable) {
+            Sound.setSoundEnable(soundEnable === "true");
+        }
     }
 
     initGame() {
