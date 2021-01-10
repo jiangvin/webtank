@@ -51,8 +51,9 @@ public class UserDao extends BaseDao {
     }
 
     public int queryStarCount(String userId) {
-        return create.select(DSL.sum(STAR.STAR_)).from(STAR)
-               .where(STAR.USER_ID.eq(userId)).fetchOneInto(Integer.class);
+        Integer starCount = create.select(DSL.sum(STAR.STAR_)).from(STAR)
+                            .where(STAR.USER_ID.eq(userId)).fetchOneInto(Integer.class);
+        return starCount == null ? 0 : starCount;
     }
 
     public boolean saveStar(StarDto starDto) {
