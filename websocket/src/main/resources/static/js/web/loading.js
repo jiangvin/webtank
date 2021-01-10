@@ -33,6 +33,7 @@ export default class Loading extends Stage {
             }
         });
 
+        //progress bar
         this.createItem({
             draw: function (ctx) {
                 const width = Resource.formatWidth() * .4;
@@ -71,9 +72,11 @@ export default class Loading extends Stage {
 
             }
         });
+
+        this.initEvent();
     }
 
-    init() {
+    initEvent() {
         const thisLoading = this;
         const total = Resource.instance.images.size + Sound.instance.sounds.size;
         let loaded = 0;
@@ -118,15 +121,19 @@ export default class Loading extends Stage {
             };
         });
 
+        //实现声音函数
+        Sound.instance.setVolumeEngine = function (volume) {
+            createjs.Sound.volume = volume;
+        };
+
         //切换至后台时静音
         function handleVisibilityChange() {
             if (document.hidden) {
                 //记录开始时间
                 thisLoading.startTime = new Date().getTime();
-
                 createjs.Sound.volume = 0;
             } else {
-                createjs.Sound.volume = 1;
+                createjs.Sound.volume = Sound.instance.volume;
 
                 //检测时间，如果超过5分钟则重启
                 //TODO - 在安卓中会失效，暂无解决方案
@@ -136,8 +143,11 @@ export default class Loading extends Stage {
                 }
             }
         }
-
         document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+
+    init() {
+        const thisLoading = this;
 
         //每5秒检测一次，若5秒进度条未更新则直接进入
         let lastPercent = thisLoading.percent;

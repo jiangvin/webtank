@@ -42,6 +42,10 @@ export default class AdapterIos extends Adapter {
     }
 
     initSound() {
+        Sound.instance.setVolumeEngine = volume => {
+            this.setVolume(volume);
+        };
+
         Sound.instance.sounds.forEach((sound) => {
             sound.play = () => {
                 this.soundEvent(sound, "play");
@@ -52,16 +56,28 @@ export default class AdapterIos extends Adapter {
         });
     }
 
+    setVolume(volume) {
+        window.webkit.messageHandlers.volumeBridge.postMessage({
+            volume: volume
+        });
+    }
+
     soundEvent(sound, event) {
         if (this.mock) {
             console.log("mock sound event:" + sound.id + " event:" + event);
             return;
         }
-
         window.webkit.messageHandlers.soundBridge.postMessage({
             src: sound.src,
             event: event,
             loop: !!sound.loop
+        });
+    }
+
+    saveConf() {
+        window.webkit.messageHandlers.saveBridge.postMessage({
+            musicEnable: Sound.instance.musicEnable,
+            soundEnable: Sound.instance.soundEnable
         });
     }
 

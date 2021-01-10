@@ -66,4 +66,11 @@ export default class Adapter {
             Common.addMessage(e, "#ff0000");
         }
     }
+
+    /**
+     * 网页模式不能存文件
+     */
+    saveConf() {
+        console.log("mock save configuration");
+    }
 }

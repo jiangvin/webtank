@@ -11,6 +11,7 @@ import ControlUnit from "../item/controlunit.js";
 import RoomInfo from "../item/roominfo.js";
 import Connect from "../tool/connect.js";
 import Sound from "../tool/sound.js";
+import Setting from "../item/setting.js";
 
 export default class Menu extends Stage {
     constructor() {
@@ -20,29 +21,103 @@ export default class Menu extends Stage {
         this.createBullet();
         this.createDoor();
         this.createFullScreenItem("menu_wall");
-
-        //信息
-        this.createItem({
-            draw: function (ctx) {
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#FFF';
-                const pos = {
-                    x: 344,
-                    y: 72
-                };
-                //姓名
-                ctx.displayText(Resource.getUser().userId, pos.x, pos.y, 26, true);
-                //金币
-                ctx.displayText(Resource.getUser().coin, pos.x + 400, pos.y, 26, true);
-                //排名
-                ctx.displayText(Resource.getUser().rank, pos.x + 844, pos.y, 26, true);
-                //积分
-                ctx.displayText(Resource.getUser().score, pos.x + 1266, pos.y, 26, true);
-            }
-        });
+        this.createTopInfo();
 
         this.initButton();
+    }
+
+    createTopInfo() {
+        const iconInfo = [
+            {
+                id: "menu_head",
+                scale: 1,
+                info: function () {
+                    return Resource.getUser().userId;
+                }
+            },
+            {
+                id: "star",
+                scale: 0.92,
+                offsetY: -5,
+                info: function () {
+                    return Resource.getUser().star;
+                }
+            },
+            {
+                id: "gold",
+                scale: 1.15,
+                info: function () {
+                    return Resource.getUser().coin;
+                }
+            }
+        ];
+        const info = {
+            rectW: 280,
+            rectH: 60,
+            interval: 60,
+            iconSize: 80
+        };
+
+        //generate start pos
+        info.startY = 15;
+        info.startX = Resource.formatWidth() / 2;
+        if (iconInfo.length % 2 === 0) {
+            info.startX += info.interval / 2;
+        } else {
+            info.startX -= info.rectW / 2;
+        }
+        info.startX -= (Math.floor(iconInfo.length / 2) * (info.rectW + info.interval));
+
+        this.createItem({
+            draw: function (ctx) {
+                ctx.displayTopLeft("top_mask", 0, 0, Resource.formatWidth());
+                ctx.displayCenter("menu_setting", 1827, 60, 100);
+
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                for (let i = 0; i < iconInfo.length; ++i) {
+                    const x = info.startX + (i * (info.rectW + info.interval));
+
+                    //rect
+                    ctx.fillStyle = '#000';
+                    ctx.globalAlpha = 0.3;
+                    ctx.displayFillRoundRect(
+                        x, info.startY,
+                        info.rectW, info.rectH,
+                        info.rectH / 2);
+                    ctx.globalAlpha = 1;
+
+                    //icon
+                    const icon = iconInfo[i];
+                    ctx.displayCenter(
+                        icon.id,
+                        x,
+                        info.startY + info.iconSize * .4 + (icon.offsetY ? icon.offsetY : 0),
+                        info.iconSize * icon.scale);
+
+                    //text
+                    ctx.fillStyle = '#FFF';
+                    ctx.displayGameText(
+                        icon.info(),
+                        x + info.rectW * .5,
+                        info.startY + info.rectH / 2,
+                        30);
+                }
+            },
+            controlUnit: new ControlUnit({
+                center: {
+                    x: 1827,
+                    y: 60
+                },
+                size: {
+                    w: 100,
+                    h: 100
+                },
+                callback: () => {
+                    new Setting(this);
+                }
+            })
+        });
     }
 
     initButton() {

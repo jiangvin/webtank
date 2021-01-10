@@ -9,6 +9,7 @@ export default class User {
         this.userId = "";
         this.coin = 0;
         this.score = 0;
+        this.star = 0;
         this.originalUserId = null;
         this.deviceId = null;
         this.deviceName = null;
@@ -32,6 +33,7 @@ export default class User {
         this.userId = data.username;
         this.originalUserId = data.username;
         this.coin = data.coin;
+        this.star = data.star;
         this.redStarExpired = data.redStarExpired;
         this.ghostExpired = data.ghostExpired;
         this.clockExpired = data.clockExpired;
