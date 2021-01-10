@@ -76,7 +76,6 @@ export default class AdapterIos extends Adapter {
 
     saveConf() {
         window.webkit.messageHandlers.saveBridge.postMessage({
-            volume: Sound.instance.volume,
             musicEnable: Sound.instance.musicEnable,
             soundEnable: Sound.instance.soundEnable
         });
