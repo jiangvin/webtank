@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class User extends TableImpl<UserRecord> {
 
-    private static final long serialVersionUID = 1259230238;
+    private static final long serialVersionUID = 275154131;
 
     /**
      * The reference instance of <code>user</code>
@@ -105,6 +105,11 @@ public class User extends TableImpl<UserRecord> {
      * The column <code>user.tank_type</code>.
      */
     public final TableField<UserRecord, String> TANK_TYPE = createField("tank_type", org.jooq.impl.SQLDataType.VARCHAR(32).nullable(false).defaultValue(org.jooq.impl.DSL.inline("tank01", org.jooq.impl.SQLDataType.VARCHAR)), this, "");
+
+    /**
+     * The column <code>user.skin_type</code>.
+     */
+    public final TableField<UserRecord, String> SKIN_TYPE = createField("skin_type", org.jooq.impl.SQLDataType.VARCHAR(32).nullable(false).defaultValue(org.jooq.impl.DSL.inline("default", org.jooq.impl.SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>user.tank_type_expired</code>.

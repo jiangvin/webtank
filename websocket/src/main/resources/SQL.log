@@ -20,3 +20,7 @@ CREATE TABLE star (
   `create_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` TIMESTAMP NULL,
    PRIMARY KEY (`user_id`, `map_id`, `sub_id`, `hard_mode`));
+
+#2.2.0
+ALTER TABLE user
+ADD COLUMN `skin_type` VARCHAR(32) NOT NULL DEFAULT 'default' AFTER `tank_type`;
