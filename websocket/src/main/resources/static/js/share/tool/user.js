@@ -8,7 +8,6 @@ export default class User {
     constructor() {
         this.userId = "";
         this.coin = 0;
-        this.score = 0;
         this.star = 0;
         this.originalUserId = null;
         this.deviceId = null;
@@ -22,7 +21,6 @@ export default class User {
 
         this.stage = 1;
         this.hardStage = 0;
-        this.rank = 0;
     }
 
     setData(data) {
@@ -41,12 +39,6 @@ export default class User {
         this.tankTypeExpired = data.tankTypeExpired;
         this.stage = data.stage;
         this.hardStage = data.hardStage;
-
-        //更新排名和积分
-        if (data.rank) {
-            this.rank = data.rank;
-            this.score = data.score;
-        }
     }
 
     setUserId(userId) {

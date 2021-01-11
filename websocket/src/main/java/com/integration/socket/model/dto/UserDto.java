@@ -23,8 +23,6 @@ public class UserDto {
     private int stage;
     private int star;
     private int hardStage;
-    private Integer rank;
-    private Integer score;
     private String tankType;
     private Timestamp tankTypeExpired;
     private Timestamp redStarExpired;
