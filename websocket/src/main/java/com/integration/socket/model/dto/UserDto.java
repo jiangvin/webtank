@@ -24,6 +24,7 @@ public class UserDto {
     private int star;
     private int hardStage;
     private String tankType;
+    private String skinType;
     private Timestamp tankTypeExpired;
     private Timestamp redStarExpired;
     private Timestamp ghostExpired;

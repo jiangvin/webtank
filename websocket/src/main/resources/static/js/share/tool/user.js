@@ -19,6 +19,8 @@ export default class User {
         this.tankType = "tank01";
         this.tankTypeExpired = null;
 
+        this.skinType = "default";
+
         this.stage = 1;
         this.hardStage = 0;
     }
@@ -28,17 +30,11 @@ export default class User {
             return;
         }
 
+        for (let key in data) {
+            this[key] = data[key];
+        }
         this.userId = data.username;
         this.originalUserId = data.username;
-        this.coin = data.coin;
-        this.star = data.star;
-        this.redStarExpired = data.redStarExpired;
-        this.ghostExpired = data.ghostExpired;
-        this.clockExpired = data.clockExpired;
-        this.tankType = data.tankType;
-        this.tankTypeExpired = data.tankTypeExpired;
-        this.stage = data.stage;
-        this.hardStage = data.hardStage;
     }
 
     setUserId(userId) {

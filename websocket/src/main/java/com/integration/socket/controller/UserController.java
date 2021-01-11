@@ -52,6 +52,11 @@ public class UserController {
         return userService.getStarInfo(userId);
     }
 
+    @PostMapping("/updateUser")
+    public UserDto updateUser(@RequestBody UserDto userDto) {
+        return userService.updateUser(userDto);
+    }
+
     @PostMapping("/saveUser")
     public boolean saveUser(@RequestBody UserDto userDto) {
         userService.saveUser(userDto);

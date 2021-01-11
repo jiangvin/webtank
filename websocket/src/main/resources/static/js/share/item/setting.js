@@ -7,6 +7,7 @@ import Resource from "../tool/resource.js";
 import Sound from "../tool/sound.js";
 import Control from "../tool/control.js";
 import Common from "../tool/common.js";
+import Tip from "./tip.js";
 
 export default class Setting {
     constructor(stage) {
@@ -55,6 +56,7 @@ export default class Setting {
         input.val(Resource.getUser().userId);
         input.addClass("setting-name");
         $("#main").append(input);
+        this.input = input;
 
         this.stage.createItem({
             id: "setting",
@@ -239,11 +241,29 @@ export default class Setting {
     }
 
     confirm() {
+        const username = this.input.val();
+        if (username === "") {
+            Common.addMessage("名字不能为空!", "#F00");
+            return;
+        }
+        const user = Resource.getUser();
+        user.userId = username;
+        user.originalUserId = username;
+        user.skinType = this.tankColor[this.dataCache.colorIndex].value;
+        if (user.deviceId) {
+            Common.postRequest("/user/updateUser", {
+                userId: user.deviceId,
+                username: user.userId,
+                skinType: user.skinType
+            }, data => {
+                Resource.getUser().setData(data);
+            });
+        }
+
+
         Common.saveConf();
-
-        //TODO SAVE NAME & TANK COLOR
-
         this.destroy();
+        new Tip(this.stage, "修改成功!", 60);
     }
 
     cancel() {

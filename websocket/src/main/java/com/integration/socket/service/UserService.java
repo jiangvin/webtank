@@ -50,6 +50,23 @@ public class UserService {
         return userDto;
     }
 
+    public UserDto updateUser(UserDto userDto) {
+        UserRecord userRecord = userDao.queryUser(userDto.getUserId());
+        if (userRecord == null) {
+            return null;
+        }
+
+        //only allow update username and skin
+        if (StringUtils.hasText(userDto.getUsername())) {
+            userRecord.setUsername(userDto.getUsername());
+        }
+        if (!StringUtils.isEmpty(userDto.getSkinType())) {
+            userRecord.setSkinType(userDto.getSkinType());
+        }
+        userRecord.update();
+        return UserDto.convert(userRecord);
+    }
+
     public void saveUser(UserDto userDto) {
         userDao.saveUser(userDto);
     }

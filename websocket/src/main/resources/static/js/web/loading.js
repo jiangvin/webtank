@@ -149,6 +149,11 @@ export default class Loading extends Stage {
         //每5秒检测一次，若5秒进度条未更新则直接进入
         let lastPercent = this.percent;
         const checkPercent = () => {
+            //防止跳转后再跳转
+            if (this.percent >= 100) {
+                return;
+            }
+
             if (this.percent > lastPercent) {
                 //进度条已更新
                 lastPercent = this.percent;
