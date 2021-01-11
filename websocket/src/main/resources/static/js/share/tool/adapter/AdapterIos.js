@@ -42,6 +42,10 @@ export default class AdapterIos extends Adapter {
     }
 
     initSound() {
+        Sound.instance.setVolumeEngine = volume => {
+            this.setVolume(volume);
+        };
+
         Sound.instance.sounds.forEach((sound) => {
             sound.play = () => {
                 this.soundEvent(sound, "play");
@@ -49,6 +53,12 @@ export default class AdapterIos extends Adapter {
             sound.stop = () => {
                 this.soundEvent(sound, "stop");
             };
+        });
+    }
+
+    setVolume(volume) {
+        window.webkit.messageHandlers.volumeBridge.postMessage({
+            volume: volume
         });
     }
 
@@ -64,9 +74,8 @@ export default class AdapterIos extends Adapter {
         });
     }
 
-    saveAudio() {
-        window.webkit.messageHandlers.soundSaveBridge.postMessage({
-            volume: Sound.instance.volume,
+    saveConf() {
+        window.webkit.messageHandlers.saveBridge.postMessage({
             musicEnable: Sound.instance.musicEnable,
             soundEnable: Sound.instance.soundEnable
         });

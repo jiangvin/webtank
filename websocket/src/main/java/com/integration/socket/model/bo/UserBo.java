@@ -83,6 +83,13 @@ public class UserBo {
         return userRecord.getClockExpired().after(TimeUtil.now());
     }
 
+    public String getSkin() {
+        if (userRecord == null) {
+            return null;
+        }
+        return userRecord.getSkinType();
+    }
+
     /**
      * 发送消息, 仅仅只是记录日志
      * @param messageDto

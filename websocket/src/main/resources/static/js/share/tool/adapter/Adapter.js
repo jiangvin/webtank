@@ -70,7 +70,7 @@ export default class Adapter {
     /**
      * 网页模式不能存文件
      */
-    saveAudio() {
-        console.log("mock save audio");
+    saveConf() {
+        console.log("mock save configuration");
     }
 }

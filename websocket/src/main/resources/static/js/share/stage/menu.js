@@ -115,6 +115,9 @@ export default class Menu extends Stage {
                 },
                 callback: () => {
                     new Setting(this);
+                },
+                check: () => {
+                    return !this.doorStatus.enterDoor1 && !this.doorStatus.enterDoor2;
                 }
             })
         });
