@@ -300,6 +300,7 @@ class EventManager {
                 tankBo.setTankId(tankId);
                 tankBo.setUserId(user.getUsername());
                 tankBo.setTeamType(user.getTeamType());
+                tankBo.setSkin(user.getSkin());
                 setStartPoint(tankBo);
                 if (!tankBo.isBot()) {
                     tankBo.setShieldTimeout(DEFAULT_SHIELD_TIME_FOR_NEW_TANK);
