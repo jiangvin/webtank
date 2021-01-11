@@ -26,4 +26,5 @@ public class ItemDto {
 
     private Boolean hasShield;
     private Boolean hasGhost;
+    private String skin;
 }

@@ -778,7 +778,7 @@ export default class AiEngine extends Engine {
         }
     }
 
-    createTank(startPosList, id, typeId, teamId, hasShield) {
+    createTank(startPosList, id, typeId, teamId, hasShield, skin) {
         const thisEngine = this;
         const startPos = startPosList[Math.floor(Math.random() * startPosList.length)];
         const point = Common.getPositionFromId(startPos);
@@ -801,7 +801,8 @@ export default class AiEngine extends Engine {
                 y: point.y,
                 orientation: Math.floor(Math.random() * 4),
                 action: 0,
-                speed: thisEngine.tankTypes[typeId].speed
+                speed: thisEngine.tankTypes[typeId].speed,
+                skin: skin
             }]
         });
         thisEngine.tanks.get(id).item = thisEngine.room.items.get(id);
@@ -820,10 +821,8 @@ export default class AiEngine extends Engine {
         this.addTimeEvent(Math.random() * 60 * 3 + 60, () => {
             --this.room.roomInfo.playerLife;
             this.createTank(this.mapInfo.playerStartPos,
-                id,
-                tankType,
-                1,
-                true);
+                id, tankType, 1, true,
+                Resource.getUser().skinType);
 
             //复制并恢复玩家保存的类型
             if (this.playerTankStatus) {
@@ -852,8 +851,7 @@ export default class AiEngine extends Engine {
             --thisEngine.room.roomInfo.computerLife;
             thisEngine.createTank(thisEngine.mapInfo.computerStartPos,
                 Resource.generateClientId(),
-                typeId,
-                2, false);
+                typeId, 2, false);
         });
     }
 

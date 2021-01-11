@@ -31,6 +31,7 @@ public class TankBo {
     private int maxBulletCount;
     private int shieldTimeout = 0;
     private boolean hasGhost = false;
+    private String skin;
 
     public ItemDto toDto() {
         ItemDto tankDto = new ItemDto();
@@ -45,6 +46,7 @@ public class TankBo {
         tankDto.setReloadTime(getReloadTime());
         tankDto.setUserId(getUserId());
         tankDto.setHasGhost(isHasGhost());
+        tankDto.setSkin(getSkin());
 
         if (getTeamType() != null) {
             tankDto.setTeamId(getTeamType().getValue());
@@ -125,7 +127,7 @@ public class TankBo {
     }
 
     private Point getBulletPos() {
-        Point point = new Point((int)x, (int)y);
+        Point point = new Point((int) x, (int) y);
         int half = CommonUtil.UNIT_SIZE / 2;
         switch (orientationType) {
             case UP:
