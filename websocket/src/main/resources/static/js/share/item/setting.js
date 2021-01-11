@@ -26,6 +26,16 @@ export default class Setting {
         this.volumeSelect.length = this.volumeSelect.maxX - this.volumeSelect.minX;
         this.volumeSelect.x = this.volumeSelect.minX + this.volumeSelect.length * Sound.instance.volume;
 
+        this.dataCache = {
+            soundEnable: Sound.instance.soundEnable,
+            musicEnable: Sound.instance.musicEnable,
+            volume: Sound.instance.volume,
+        };
+
+        this.initTankColor();
+    }
+
+    initTankColor() {
         this.tankColor = [
             {
                 value: "green",
@@ -41,12 +51,18 @@ export default class Setting {
             }
         ];
 
-        this.dataCache = {
-            soundEnable: Sound.instance.soundEnable,
-            musicEnable: Sound.instance.musicEnable,
-            volume: Sound.instance.volume,
-            colorIndex: 0
+        const getColorIndex = () => {
+            const user = Resource.getUser();
+            switch (user.skinType) {
+                case "red":
+                    return 1;
+                case "blue":
+                    return 2;
+                default:
+                    return 0;
+            }
         };
+        this.dataCache.colorIndex = getColorIndex();
     }
 
     initImage() {
@@ -174,6 +190,9 @@ export default class Setting {
                 w: 70,
                 h: 70
             },
+            check: () => {
+                return Resource.getUser().deviceId;
+            },
             callback: () => {
                 if (this.dataCache.colorIndex > 0) {
                     --this.dataCache.colorIndex;
@@ -190,6 +209,9 @@ export default class Setting {
             size: {
                 w: 70,
                 h: 70
+            },
+            check: () => {
+                return Resource.getUser().deviceId;
             },
             callback: () => {
                 this.dataCache.colorIndex = (this.dataCache.colorIndex + 1) % this.tankColor.length;
@@ -249,8 +271,8 @@ export default class Setting {
         const user = Resource.getUser();
         user.userId = username;
         user.originalUserId = username;
-        user.skinType = this.tankColor[this.dataCache.colorIndex].value;
         if (user.deviceId) {
+            user.skinType = this.tankColor[this.dataCache.colorIndex].value;
             Common.postRequest("/user/updateUser", {
                 userId: user.deviceId,
                 username: user.userId,
@@ -259,7 +281,6 @@ export default class Setting {
                 Resource.getUser().setData(data);
             });
         }
-
 
         Common.saveConf();
         this.destroy();
