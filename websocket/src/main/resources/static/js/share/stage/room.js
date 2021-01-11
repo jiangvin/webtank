@@ -621,15 +621,26 @@ export default class Room extends Stage {
         tankItem.speed = tankData.speed;
         tankItem.hasShield = tankData.hasShield;
         tankItem.hasGhost = tankData.hasGhost;
-        tankItem.image = this.getTankImageFromTankData(tankData);
+        tankItem.image = Resource.getImage(this.getTankImagePrefix(tankData) + tankData.typeId);
     };
 
-    getTankImageFromTankData(data) {
+    /**
+     * @param data {{teamId,skin}}
+     */
+    getTankImagePrefix(data) {
         if (this.showTeam()) {
-            const team = data.teamId === 1 ? "red_" : "blue_";
-            return Resource.getImage(team + data.typeId);
-        } else {
-            return Resource.getImage(data.typeId);
+            return data.teamId === 1 ? "red_" : "blue_";
+        }
+        if (!data.skin) {
+            return "";
+        }
+        switch (data.skin) {
+            case "red":
+                return "red_";
+            case "blue":
+                return "blue_";
+            default:
+                return "";
         }
     }
 

@@ -23,4 +23,4 @@ CREATE TABLE star (
 
 #2.2.0
 ALTER TABLE user
-ADD COLUMN `skin_type` VARCHAR(32) NOT NULL DEFAULT 'default' AFTER `tank_type`;
+ADD COLUMN `skin_type` VARCHAR(32) NULL AFTER `tank_type`;
