@@ -47,7 +47,7 @@ public class ShopService {
                     throw new CustomException("金币不足!");
                 }
                 userRecord.setCoin(userRecord.getCoin() - RED_STAR_PRICE);
-                userRecord.setRedStarExpired(TimeUtil.tomorrow());
+                userRecord.setRedStarExpired(TimeUtil.after(3));
                 userRecord.update();
                 return UserDto.convert(userRecord);
             case GHOST:
@@ -55,7 +55,7 @@ public class ShopService {
                     throw new CustomException("金币不足!");
                 }
                 userRecord.setCoin(userRecord.getCoin() - GHOST_PRICE);
-                userRecord.setGhostExpired(TimeUtil.tomorrow());
+                userRecord.setGhostExpired(TimeUtil.after(3));
                 userRecord.update();
                 return UserDto.convert(userRecord);
             case CLOCK:
@@ -63,7 +63,7 @@ public class ShopService {
                     throw new CustomException("金币不足!");
                 }
                 userRecord.setCoin(userRecord.getCoin() - CLOCK_PRICE);
-                userRecord.setClockExpired(TimeUtil.tomorrow());
+                userRecord.setClockExpired(TimeUtil.after(3));
                 userRecord.update();
                 return UserDto.convert(userRecord);
             case TANK02:
@@ -72,7 +72,7 @@ public class ShopService {
                 }
                 userRecord.setCoin(userRecord.getCoin() - TANK02_PRICE);
                 userRecord.setTankType("tank02");
-                userRecord.setTankTypeExpired(TimeUtil.tomorrow());
+                userRecord.setTankTypeExpired(TimeUtil.after(3));
                 userRecord.update();
                 return UserDto.convert(userRecord);
             case TANK03:
@@ -81,7 +81,7 @@ public class ShopService {
                 }
                 userRecord.setCoin(userRecord.getCoin() - TANK03_PRICE);
                 userRecord.setTankType("tank03");
-                userRecord.setTankTypeExpired(TimeUtil.tomorrow());
+                userRecord.setTankTypeExpired(TimeUtil.after(3));
                 userRecord.update();
                 return UserDto.convert(userRecord);
             case AGAIN_FOR_SINGLE:

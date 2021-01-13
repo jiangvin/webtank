@@ -134,6 +134,17 @@ export default class Common {
         const size = Resource.getUnitSize();
         return Math.floor(pos.x / size) + "_" + Math.floor(pos.y / size);
     }
+
+    static generateStartX(length, width, interval) {
+        let x = Resource.formatWidth() / 2;
+        if (length % 2 === 0) {
+            x += interval / 2;
+        } else {
+            x -= width / 2;
+        }
+        x -= (Math.floor(length / 2) * (width + interval));
+        return x;
+    }
 }
 
 Date.prototype.format = function (fmt) {

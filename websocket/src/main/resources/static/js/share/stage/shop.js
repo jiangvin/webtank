@@ -81,7 +81,7 @@ export default class Shop extends Stage {
                     "游戏中会随机出现幽灵道具",
                     "效果：使你的坦克变成半透明",
                     "且移动时无视一切障碍物",
-                    "（限时一天）"
+                    "（持续三天）"
                 ]
             },
             {
@@ -96,7 +96,7 @@ export default class Shop extends Stage {
                     "游戏中会随机出现定时器道具",
                     "效果：使敌方所有坦克15秒内",
                     "不能移动",
-                    "（限时一天）"
+                    "（持续三天）"
                 ]
             },
             {
@@ -111,7 +111,7 @@ export default class Shop extends Stage {
                     "游戏中会随机出现红星道具",
                     "效果：使你的坦克直接升至四",
                     "星坦克",
-                    "（限时一天）"
+                    "（持续三天）"
                 ]
             },
             {
@@ -126,7 +126,7 @@ export default class Shop extends Stage {
                 text: [
                     "效果：使你的坦克初始状态为",
                     "二星坦克",
-                    "（限时一天）"
+                    "（持续三天）"
                 ]
             },
             {
@@ -141,7 +141,7 @@ export default class Shop extends Stage {
                 text: [
                     "效果：使你的坦克初始状态为",
                     "三星坦克",
-                    "（限时一天）"
+                    "（持续三天）"
                 ]
             }
         ];

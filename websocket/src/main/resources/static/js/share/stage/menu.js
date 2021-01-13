@@ -60,13 +60,7 @@ export default class Menu extends Stage {
 
         //generate start pos
         info.startY = 15;
-        info.startX = Resource.formatWidth() / 2;
-        if (iconInfo.length % 2 === 0) {
-            info.startX += info.interval / 2;
-        } else {
-            info.startX -= info.rectW / 2;
-        }
-        info.startX -= (Math.floor(iconInfo.length / 2) * (info.rectW + info.interval));
+        info.startX = Common.generateStartX(iconInfo.length, info.rectW, info.interval);
 
         this.createItem({
             draw: function (ctx) {
