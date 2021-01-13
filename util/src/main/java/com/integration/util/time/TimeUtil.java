@@ -8,8 +8,12 @@ import java.sql.Timestamp;
  * @date 2020/6/22
  */
 public class TimeUtil {
+    public static Timestamp after(int days) {
+        return new Timestamp(System.currentTimeMillis() + (24 * 60 * 60 * 1000) * days);
+    }
+
     public static Timestamp tomorrow() {
-        return new Timestamp(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
+        return after(1);
     }
 
     public static Timestamp now() {
