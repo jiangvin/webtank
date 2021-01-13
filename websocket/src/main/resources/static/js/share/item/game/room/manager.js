@@ -1,6 +1,7 @@
 import Resource from "../../../tool/resource.js";
 import Status from "../../../tool/status.js";
 import NewConfirm from "../../newconfirm.js";
+import Common from "../../../tool/common.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -43,43 +44,52 @@ export default class Manager {
         })
     }
 
-    drawRoomInfo(ctx) {
-        const interval = 320;
-
+    generateInfoUnits() {
         const roomInfo = this.room.roomInfo;
+        return [
+            {
+                icon: "room_stage",
+                info: roomInfo.mapId + "-" + roomInfo.subId
+            },
+            {
+                icon: "player_life",
+                info: "x" + roomInfo.playerLife
+            },
+            {
+                icon: "enemy_life",
+                info: "x" + roomInfo.computerLife
+            }
+        ];
+    }
 
-        const icons = [
-            "room_stage",
-            "player_life",
-            "enemy_life",
-            "gold",
-            "room"
-        ];
-        const infos = [
-            roomInfo.mapId + "-" + roomInfo.subId,
-            "x" + roomInfo.playerLife,
-            "x" + roomInfo.computerLife,
-            Resource.getUser().coin,
-            roomInfo.roomId
-        ];
+    drawRoomInfo(ctx) {
+        const infoUnits = this.generateInfoUnits();
+        const style = {
+            rectW: 277,
+            iconW: 100,
+            interval: 43
+        };
+        style.startX = Common.generateStartX(infoUnits.length, style.rectW, style.interval);
+        style.startY = 20;
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#FFF';
-
-        for (let i = 0; i < 5; ++i) {
+        for (let i = 0; i < infoUnits.length; ++i) {
+            const x = style.startX + i * (style.rectW + style.interval);
             ctx.displayTopLeft(
                 "room_rect",
-                100 + i * interval, 50,
-                277);
+                style.startX + i * (style.rectW + style.interval), style.startY,
+                style.rectW);
 
-            const icon = icons[i];
             ctx.displayTopLeft(
-                icon,
-                100 + i * interval, 30,
-                100, 100);
+                infoUnits[i].icon,
+                style.startX + i * (style.rectW + style.interval), style.startY - 20,
+                style.iconW, style.iconW);
 
-            ctx.displayGameText(infos[i], 272 + i * interval, 82, 36);
+            ctx.displayGameText(infoUnits[i].info,
+                x + style.rectW * .6, style.startY + 32,
+                36);
         }
 
         this.drawBackButton(ctx);

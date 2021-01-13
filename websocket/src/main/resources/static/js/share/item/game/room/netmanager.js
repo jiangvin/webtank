@@ -22,6 +22,16 @@ export default class NetManager extends Manager {
         }
     }
 
+    generateInfoUnits() {
+        const units = super.generateInfoUnits();
+        //新增房间信息
+        units[units.length] = {
+            icon: "room",
+            info: this.room.roomInfo.roomId
+        };
+        return units;
+    }
+
     drawRoomInfo(ctx) {
         super.drawRoomInfo(ctx);
         this.drawFaceButton(ctx);
