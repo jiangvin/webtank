@@ -43,14 +43,9 @@ export default class Common {
         if (!Resource.getUser().deviceId) {
             return;
         }
-        const oldCoins = Resource.getUser().coin;
         const oldStage = Resource.getUser().stage;
         Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, function (data) {
             Resource.setUser(data);
-            const newCoins = Resource.getUser().coin;
-            if (newCoins > oldCoins) {
-                Common.addMessage("获得金币数量: " + (newCoins - oldCoins));
-            }
             const newStage = Resource.getUser().stage;
             if (newStage > oldStage) {
                 Common.addMessage("解锁新的任务关卡!");
