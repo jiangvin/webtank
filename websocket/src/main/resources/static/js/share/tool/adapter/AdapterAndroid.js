@@ -18,9 +18,9 @@ export default class AdapterAndroid extends Adapter {
             super.saveConf();
             return;
         }
-        androidInterface.save({
-            musicEnable: Sound.instance.musicEnable,
-            soundEnable: Sound.instance.soundEnable
-        });
+
+        document.location = "js://save?musicEnable=" + Sound.instance.musicEnable +
+            "&soundEnable=" + Sound.instance.soundEnable +
+            "&volume=" + Sound.instance.volume
     }
 }
