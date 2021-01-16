@@ -115,6 +115,7 @@ export default class Loading extends Stage {
         });
 
         //实现声音函数
+        createjs.Sound.volume = Sound.instance.volume;
         Sound.instance.setVolumeEngine = function (volume) {
             createjs.Sound.volume = volume;
         };

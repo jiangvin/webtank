@@ -651,19 +651,26 @@ export default class AiEngine extends Engine {
         tank.bulletCount += newType.ammoMaxCount - oldType.ammoMaxCount;
         tank.maxBulletCount += newType.ammoMaxCount - oldType.ammoMaxCount;
         tank.typeId = typeId;
+        tank.item.speed = newType.speed;
 
+        this.sendTankSocketMessage(tank);
+    }
+
+    sendTankSocketMessage(tank) {
         Resource.getRoot().processSocketMessage({
             messageType: "TANKS",
             message: [{
                 id: tank.id,
                 typeId: tank.typeId,
+                teamId: tank.item.teamId,
                 hasShield: tank.item.hasShield,
                 hasGhost: tank.item.hasGhost,
                 x: tank.item.x,
                 y: tank.item.y,
                 orientation: tank.item.orientation,
                 action: tank.item.action,
-                speed: newType.speed
+                speed: tank.item.speed,
+                skin: tank.skin
             }]
         });
     }
@@ -779,33 +786,30 @@ export default class AiEngine extends Engine {
     }
 
     createTank(startPosList, id, typeId, teamId, hasShield, skin) {
-        const thisEngine = this;
         const startPos = startPosList[Math.floor(Math.random() * startPosList.length)];
         const point = Common.getPositionFromId(startPos);
-        thisEngine.tanks.set(id, {
+        const tank = {
             id: id,
             shieldTimeout: hasShield ? 60 * 3 : 0,
             typeId: typeId,
-            maxBulletCount: thisEngine.tankTypes[typeId].ammoMaxCount,
-            bulletCount: thisEngine.tankTypes[typeId].ammoMaxCount,
-            bulletReloadTime: thisEngine.tankTypes[typeId].ammoReloadTime
-        });
-        Resource.getRoot().processSocketMessage({
-            messageType: "TANKS",
-            message: [{
-                id: id,
-                typeId: typeId,
+            maxBulletCount: this.tankTypes[typeId].ammoMaxCount,
+            bulletCount: this.tankTypes[typeId].ammoMaxCount,
+            bulletReloadTime: this.tankTypes[typeId].ammoReloadTime,
+            skin: skin,
+            item: {
                 teamId: teamId,
                 hasShield: hasShield,
+                hasGhost: false,
                 x: point.x,
                 y: point.y,
                 orientation: Math.floor(Math.random() * 4),
                 action: 0,
-                speed: thisEngine.tankTypes[typeId].speed,
-                skin: skin
-            }]
-        });
-        thisEngine.tanks.get(id).item = thisEngine.room.items.get(id);
+                speed: this.tankTypes[typeId].speed,
+            }
+        };
+        this.tanks.set(tank.id, tank);
+        this.sendTankSocketMessage(tank);
+        tank.item = this.room.items.get(id);
     }
 
     createPlayerTank() {

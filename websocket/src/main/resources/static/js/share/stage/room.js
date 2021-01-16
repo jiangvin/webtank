@@ -33,7 +33,6 @@ export default class Room extends Stage {
 
         this.mask = true;
         this.maskStartTime = 0;
-        this.minMaskTime = 3000;
 
         this.control = {
             orientation: 0,
@@ -106,13 +105,10 @@ export default class Room extends Stage {
             return;
         }
 
-        let frames = (this.minMaskTime - (new Date().getTime() - this.maskStartTime)) / 1000 * 60;
-        if (frames < 0) {
-            frames = 0;
-        }
-        if (frames > 180) {
-            frames = 180;
-        }
+        let frames = Common.valueInBoundary(
+            (3000 - (new Date().getTime() - this.maskStartTime)) / 1000 * 60,
+            0,
+            180);
         Common.addTimeEvent("hide_mask", () => {
             this.mask = false;
         }, frames);

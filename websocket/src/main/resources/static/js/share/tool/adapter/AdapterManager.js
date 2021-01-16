@@ -8,6 +8,7 @@ import Resource from "../resource.js";
 import WxInput from "../../../wx/wxinput.js";
 import Adapter from "./Adapter.js";
 import AdapterIos from "./AdapterIos.js";
+import AdapterAndroid from "./AdapterAndroid.js";
 
 export default class AdapterManager {
 
@@ -53,6 +54,8 @@ export default class AdapterManager {
         switch (AdapterManager.getPlatform()) {
             case "ios":
                 return new AdapterIos(this.getQueryString("mock"));
+            case "android":
+                return new AdapterAndroid(this.getQueryString("mock"));
             default:
                 return new Adapter();
         }
