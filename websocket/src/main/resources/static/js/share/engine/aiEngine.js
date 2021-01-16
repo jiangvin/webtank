@@ -670,7 +670,7 @@ export default class AiEngine extends Engine {
                 orientation: tank.item.orientation,
                 action: tank.item.action,
                 speed: tank.item.speed,
-                skin: tank.item.skin
+                skin: tank.skin
             }]
         });
     }
@@ -795,6 +795,7 @@ export default class AiEngine extends Engine {
             maxBulletCount: this.tankTypes[typeId].ammoMaxCount,
             bulletCount: this.tankTypes[typeId].ammoMaxCount,
             bulletReloadTime: this.tankTypes[typeId].ammoReloadTime,
+            skin: skin,
             item: {
                 teamId: teamId,
                 hasShield: hasShield,
@@ -804,7 +805,6 @@ export default class AiEngine extends Engine {
                 orientation: Math.floor(Math.random() * 4),
                 action: 0,
                 speed: this.tankTypes[typeId].speed,
-                skin: skin
             }
         };
         this.tanks.set(tank.id, tank);
