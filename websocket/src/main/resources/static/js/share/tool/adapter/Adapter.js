@@ -10,6 +10,24 @@ import Common from "../common.js";
 export default class Adapter {
     constructor() {
 
+        //在手机上禁用滑动
+        this.lockTouchMoveEvent = function (e) {
+            // 判断默认行为是否可以被禁用
+            if (e.cancelable) {
+                // 判断默认行为是否已经被禁用
+                if (!e.defaultPrevented) {
+                    e.preventDefault();
+                }
+            }
+        }
+    }
+
+    lockTouchMove() {
+        document.body.addEventListener('touchmove', this.lockTouchMoveEvent, {passive: false});
+    }
+
+    unlockTouchMove() {
+        document.body.removeEventListener('touchmove', this.lockTouchMoveEvent);
     }
 
     getRequest(url, callback) {

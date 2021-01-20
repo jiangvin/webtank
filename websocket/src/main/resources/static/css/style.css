@@ -20,6 +20,20 @@ div.rect-16to9 {
     height: 1080px;
 }
 
+div.policy-rect {
+    position: absolute;
+    width: 1400px;
+    height: 860px;
+    left: 260px;
+    top: 110px;
+    background: white;
+    border: 2px solid #5E6C77;
+    border-radius: 20px;
+    font-size: 30px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
 input {
     border: 1px solid #33C6E9;
     font-size: 2em;
@@ -107,4 +121,12 @@ button.connect {
     height: 3.5em;
     position: absolute;
     left: 28.5%;
+}
+
+button.close-policy {
+    width: 400px;
+    font-size: 40px;
+    left: 300px;
+    display: block;
+    margin: 0 auto;
 }

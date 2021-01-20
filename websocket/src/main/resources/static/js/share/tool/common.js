@@ -69,6 +69,14 @@ export default class Common {
         Resource.instance.adapter.saveConf();
     }
 
+    static lockTouchMove() {
+        Resource.instance.adapter.lockTouchMove();
+    }
+
+    static unlockTouchMove() {
+        Resource.instance.adapter.unlockTouchMove();
+    }
+
     static generateHttpHost() {
         return Resource.getHost() === "" ? document.location.href.split("?")[0] : Resource.getHost();
     }
