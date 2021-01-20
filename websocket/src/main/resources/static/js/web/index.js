@@ -17,12 +17,12 @@ import Sound from "../share/tool/sound.js";
 
 export default class Index {
     constructor() {
-        this.initEvent();
         this.generateCanvas();
 
         this.root = new Root();
         Resource.setRoot(this.root);
         this.initGame();
+        this.initEvent();
         this.initGlobalConfig();
     }
 
@@ -100,16 +100,8 @@ export default class Index {
     }
 
     initEvent() {
-        //在手机上禁用滑动
-        document.body.addEventListener('touchmove', function (e) {
-            // 判断默认行为是否可以被禁用
-            if (e.cancelable) {
-                // 判断默认行为是否已经被禁用
-                if (!e.defaultPrevented) {
-                    e.preventDefault();
-                }
-            }
-        }, {passive: false});
+        Common.lockTouchMove();
+
         document.addEventListener('touchstart', function (e) {
             if (e.touches.length > 1) {
                 // 判断默认行为是否可以被禁用
