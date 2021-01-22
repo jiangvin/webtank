@@ -37,6 +37,10 @@ public class UserDao extends BaseDao {
     }
 
     public void saveUser(UserDto userDto) {
+        if (queryUser(userDto.getUserId()) != null) {
+            return;
+        }
+
         UserRecord userRecord = create.newRecord(USER);
         userRecord.setUserId(userDto.getUserId());
         userRecord.setUsername(userDto.getUsername());
