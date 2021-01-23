@@ -54,7 +54,7 @@ export default class AppHome extends Stage {
                         userDevice: Resource.getUser().deviceName
                     }, () => {
                         this.mainRect.empty();
-                        Common.nextStage();
+                        Common.gotoStage("menu");
                     });
                 }
             })

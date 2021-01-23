@@ -180,6 +180,10 @@ export default class Root {
     }
 
     gotoStage(id, options) {
+        if (this.currentStage().getId() === id) {
+            return;
+        }
+
         for (let i = 0; i < this.stages.length; ++i) {
             if (this.stages[i].getId() === id) {
                 this.preStageIndex = this.stageIndex;
