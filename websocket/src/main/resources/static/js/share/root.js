@@ -203,7 +203,7 @@ export default class Root {
         let height = 160;
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'bottom';
-        this.messages.forEach(function (message) {
+        this.messages.forEach(message => {
             this.ctx.globalAlpha = (message.lifetime / 300);
             this.ctx.fillStyle = message.color;
             this.ctx.displayText("[" + message.date.format("hh:mm:ss") + "] " + message.context,
