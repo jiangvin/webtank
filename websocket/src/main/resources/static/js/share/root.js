@@ -16,9 +16,13 @@ import Mission from "./stage/mission.js";
 import NetList from "./stage/netlist.js";
 import NetCreate from "./stage/netcreate.js";
 import Shop from "./stage/shop.js";
+import Context from "./tool/context.js";
 
 export default class Root {
-    constructor() {
+    constructor(ctx) {
+        Context.contextExtension(ctx);
+        this.ctx = ctx;
+
         this.frame = new Frame();
 
         this.stages = [];
@@ -41,6 +45,16 @@ export default class Root {
          * 网络延迟测试
          */
         this.netDelay = 0;
+
+        this.initFont();
+    }
+
+    initFont() {
+        //加载字体
+        const myFont = new FontFace('gameFont', 'url(font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
+        myFont.load().then(font => {
+            document.fonts.add(font)
+        });
     }
 
     addTimeEvent(eventType, callback, timeout) {
@@ -138,11 +152,12 @@ export default class Root {
         }
     }
 
-    draw(ctx) {
+    draw() {
+        this.ctx.clearRect(0, 0, Resource.width(), Resource.height());
         this.frame.calculate();
-        this.currentStage().draw(ctx);
-        this.drawMessage(ctx);
-        this.drawTips(ctx);
+        this.currentStage().draw(this.ctx);
+        this.drawMessage();
+        this.drawTips();
     }
 
     currentStage() {
@@ -194,18 +209,18 @@ export default class Root {
         }
     }
 
-    drawMessage(ctx) {
+    drawMessage() {
         let height = 160;
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'bottom';
+        this.ctx.textAlign = 'left';
+        this.ctx.textBaseline = 'bottom';
         this.messages.forEach(function (message) {
-            ctx.globalAlpha = (message.lifetime / 300);
-            ctx.fillStyle = message.color;
-            ctx.displayText("[" + message.date.format("hh:mm:ss") + "] " + message.context,
+            this.ctx.globalAlpha = (message.lifetime / 300);
+            this.ctx.fillStyle = message.color;
+            this.ctx.displayText("[" + message.date.format("hh:mm:ss") + "] " + message.context,
                 160, height, 30);
             height += 35;
         });
-        ctx.globalAlpha = 1;
+        this.ctx.globalAlpha = 1;
     }
 
     updateMessage() {
@@ -220,14 +235,14 @@ export default class Root {
         }
     }
 
-    drawTips(ctx) {
+    drawTips() {
         if (!Resource.isDebug()) {
             return;
         }
 
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'bottom';
-        ctx.fillStyle = '#ffffff';
+        this.ctx.textAlign = 'left';
+        this.ctx.textBaseline = 'bottom';
+        this.ctx.fillStyle = '#ffffff';
 
         //帧率信息
         let text = "分辨率:" + Resource.width() + "x" + Resource.height();
@@ -238,7 +253,7 @@ export default class Root {
         if (this.users) {
             text += ' / 房间人数:' + this.users.length;
         }
-        ctx.displayText(text, 10, -5, 35, null, false);
+        this.ctx.displayText(text, 10, -5, 35, null, false);
     }
 
     processPointDownEvent(point) {
