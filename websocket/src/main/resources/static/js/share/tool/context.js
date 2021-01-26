@@ -163,7 +163,7 @@ export default class Context {
         };
 
         ctx.displayGameText = function (text, x, y, size, bold, offset) {
-            this.displayText(text, x, y, size, bold, offset, "gameFont");
+            this.displayText(text, x, y, size, bold, offset, "ZhenyanGB");
         };
 
         ctx.displayText = function (text, x, y, size, bold, offset, font) {

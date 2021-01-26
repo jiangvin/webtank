@@ -21,7 +21,6 @@ export default class NetList extends Stage {
         this.nextLoadInterval = 200;
         this.isLoading = false;
 
-        this.mainWindow = $("#main");
         this.input = null;
         this.search = null;
     }
@@ -82,7 +81,7 @@ export default class NetList extends Stage {
         input.attr("type", "text");
         input.attr("placeholder", "输入房间号或ID");
         input.addClass("input-room-name");
-        this.mainWindow.append(input);
+        $("#main").append(input);
         this.input = input;
         this.search = null;
 
@@ -91,7 +90,7 @@ export default class NetList extends Stage {
     }
 
     destroy() {
-        this.mainWindow.empty();
+        $("#main").empty();
     }
 
     update() {

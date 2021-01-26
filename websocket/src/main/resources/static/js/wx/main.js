@@ -10,6 +10,9 @@ import Sound from "../share/tool/sound.js";
  */
 export default class Main {
     constructor() {
+        //加载字体
+        wx.loadFont("font/RuiZiZhenYanTiMianFeiShangYong-2.ttf");
+
         const thisMain = this;
         thisMain.initSound();
         //获取微信用户信息

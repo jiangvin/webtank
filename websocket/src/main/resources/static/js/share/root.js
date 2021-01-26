@@ -45,16 +45,6 @@ export default class Root {
          * 网络延迟测试
          */
         this.netDelay = 0;
-
-        this.initFont();
-    }
-
-    initFont() {
-        //加载字体
-        const myFont = new FontFace('gameFont', 'url(font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
-        myFont.load().then(font => {
-            document.fonts.add(font)
-        });
     }
 
     addTimeEvent(eventType, callback, timeout) {

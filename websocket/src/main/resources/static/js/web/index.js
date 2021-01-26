@@ -16,6 +16,12 @@ import Sound from "../share/tool/sound.js";
 
 export default class Index {
     constructor() {
+        //加载字体
+        const myFont = new FontFace('ZhenyanGB', 'url(font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
+        myFont.load().then(font => {
+            document.fonts.add(font)
+        });
+
         this.generateCanvas();
 
         this.root = new Root(this.ctx);
