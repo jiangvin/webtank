@@ -111,7 +111,22 @@ public class UserService {
         return UserDto.convert(userRecord);
     }
 
+    public void saveUserGameTimes(String userId, boolean isNet) {
+        UserRecord record = userDao.queryUser(userId);
+        if (record == null) {
+            return;
+        }
+        if (isNet) {
+            record.setNetGameTimes(record.getNetGameTimes() + 1);
+        } else {
+            record.setSingleGameTimes(record.getSingleGameTimes() + 1);
+        }
+        record.update();
+    }
+
     public void saveRankForSinglePlayer(RankDto rankDto) {
+        saveUserGameTimes(rankDto.getUserId(), false);
+
         if (StringUtils.isEmpty(rankDto.getUsername()) || rankDto.getScore() == null || rankDto.getScore() <= 0) {
             return;
         }
