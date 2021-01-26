@@ -147,10 +147,12 @@ class RoomTypeManager {
     private void saveGameTimes() {
         for (Map.Entry<String, UserBo> kv : room.userMap.entrySet()) {
             UserBo user = kv.getValue();
-            if (StringUtils.isEmpty(user.getUserId())) {
+            UserRecord record = user.getUserRecord();
+            if (record == null) {
                 continue;
             }
-            room.userService.saveUserGameTimes(user.getUserId(), true);
+            record.setNetGameTimes(record.getNetGameTimes() + 1);
+            record.update();
         }
     }
 

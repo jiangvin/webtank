@@ -1,19 +1,18 @@
 import '../share/libs/jsencrypt.min.js'
 import Resource from '../share/tool/resource'
 import Control from "../share/tool/control";
-import AdapterManager from "../share/tool/adapter/adapterManager.js";
+import AdapterManager from "../share/tool/adapter/AdapterManager.js";
 import Root from "../share/root.js";
 import Sound from "../share/tool/sound.js";
-
-Resource.setCanvas(canvas);
-let ctx = canvas.getContext('2d');
-
 
 /**
  * 游戏主函数，微信端入口
  */
 export default class Main {
     constructor() {
+        //加载字体
+        wx.loadFont("font/RuiZiZhenYanTiMianFeiShangYong-2.ttf");
+
         const thisMain = this;
         thisMain.initSound();
         //获取微信用户信息
@@ -34,25 +33,20 @@ export default class Main {
 
     restart() {
         Resource.setHost("https://xiwen100.com/tank");
+        Resource.setCanvas(canvas);
 
         //设置缩放比例
-        let width;
-        let height;
-        if (canvas.width > canvas.height) {
-            width = canvas.width;
-            height = canvas.height;
-        } else {
-            width = canvas.height;
-            height = canvas.width;
-        }
-        const scale = Resource.calculateScale(width, height);
-        canvas.width = width / scale;
-        canvas.height = height / scale;
+        const info = Resource.calculateWindowInfo(
+            canvas.width,
+            canvas.height
+        );
+        canvas.width = info.displayW;
+        canvas.height = info.displayH;
 
         AdapterManager.setPlatform(1);
         Control.setControlMode(true);
 
-        this.root = new Root();
+        this.root = new Root(canvas.getContext('2d'));
         Resource.setRoot(this.root);
 
         //因为小程序是读取本地文件和使用微信账户，所以不需要资源加载页面和登录页面
@@ -74,10 +68,8 @@ export default class Main {
      * 每一帧重新绘制所有的需要展示的元素
      */
     render() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        //计算层和绘图层在一起
         this.root.update();
-        this.root.draw(ctx);
+        this.root.draw();
     }
 
     // 实现游戏帧循环

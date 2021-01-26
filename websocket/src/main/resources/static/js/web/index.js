@@ -12,14 +12,19 @@ import AppHome from "../app/apphome.js";
 import Home from "./home.js";
 import Common from "../share/tool/common.js";
 import AdapterManager from "../share/tool/adapter/AdapterManager.js";
-import "../share/tool/context.js"
 import Sound from "../share/tool/sound.js";
 
 export default class Index {
     constructor() {
+        //加载字体
+        const myFont = new FontFace('ZhenyanGB', 'url(font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
+        myFont.load().then(font => {
+            document.fonts.add(font)
+        });
+
         this.generateCanvas();
 
-        this.root = new Root();
+        this.root = new Root(this.ctx);
         Resource.setRoot(this.root);
         this.initGame();
         this.initEvent();
@@ -139,16 +144,13 @@ export default class Index {
     }
 
     start() {
-        const index = this;
         const root = this.root;
         root.currentStage().init();
 
         //运算&绘制
         const draw = function () {
             root.update();
-
-            index.ctx.clearRect(0, 0, Resource.width(), Resource.height());
-            root.draw(index.ctx);
+            root.draw();
             root.drawHandler = requestAnimationFrame(draw);
         };
         root.drawHandler = requestAnimationFrame(draw);
