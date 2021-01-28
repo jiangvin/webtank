@@ -123,7 +123,9 @@ export default class Sound {
             if (!sound.loop) {
                 return;
             }
-            sound.stop();
+            if (sound.stop) {
+                sound.stop();
+            }
         })
     }
 }

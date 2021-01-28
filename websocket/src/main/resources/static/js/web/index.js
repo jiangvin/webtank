@@ -23,9 +23,10 @@ export default class Index {
 
         this.root = new Root(this.ctx);
         Resource.setRoot(this.root);
+
+        this.initGlobalConfig();
         this.initGame();
         this.initEvent();
-        this.initGlobalConfig();
     }
 
     initGlobalConfig() {

@@ -73,6 +73,11 @@ export default class AdapterIos extends Adapter {
                 this.soundEvent(sound, "stop");
             };
         });
+
+        //因为IOS的页面为预加载，所以音乐的播放时机由APP决定
+        if (Sound.instance.musicEnable) {
+            Sound.instance.currentLoopId = "menu";
+        }
     }
 
     setVolume(volume) {
