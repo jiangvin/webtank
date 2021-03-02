@@ -80,10 +80,15 @@ export default class Home extends Stage {
             mainWindow.empty();
             Common.nextStage();
         };
+
         keyboardMode.bind('click', buttonEvent);
         touchMode.bind('click', buttonEvent);
         downloadApp.bind('click', function () {
-            window.open("app/app-release.apk");
+            if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)) {
+                window.location.href = "https://apps.apple.com/cn/app/id1550052147";
+            } else {
+                window.open("app/app-release.apk");
+            }
         });
     }
 }
