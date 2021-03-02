@@ -17,6 +17,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  */
 @ControllerAdvice("com")
 public class ResponseAdvice implements ResponseBodyAdvice<Object> {
+
+    static private final String PATH_FOR_RAW_BODY = "/raw";
+
     @Override
     public boolean supports(@NonNull MethodParameter returnType,
                             @NonNull Class<? extends HttpMessageConverter<?>> converterType) {
@@ -31,6 +34,9 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
                                   @NonNull ServerHttpRequest request,
                                   @NonNull ServerHttpResponse response) {
         //可以用request.getURI().getPath().startsWith来进行例外过滤
+        if (request.getURI().getPath().endsWith(PATH_FOR_RAW_BODY)) {
+            return body;
+        }
         if (body instanceof ResultDto) {
             return body;
         }
