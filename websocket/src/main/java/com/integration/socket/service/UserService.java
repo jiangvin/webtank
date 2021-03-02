@@ -111,7 +111,18 @@ public class UserService {
         return UserDto.convert(userRecord);
     }
 
+    private void saveSingleUserGameTimes(String userId) {
+        UserRecord record = userDao.queryUser(userId);
+        if (record == null) {
+            return;
+        }
+        record.setSingleGameTimes(record.getSingleGameTimes() + 1);
+        record.update();
+    }
+
     public void saveRankForSinglePlayer(RankDto rankDto) {
+        saveSingleUserGameTimes(rankDto.getUserId());
+
         if (StringUtils.isEmpty(rankDto.getUsername()) || rankDto.getScore() == null || rankDto.getScore() <= 0) {
             return;
         }

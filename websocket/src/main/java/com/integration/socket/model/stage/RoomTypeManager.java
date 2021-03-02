@@ -127,6 +127,7 @@ class RoomTypeManager {
             if (!room.mapManger.loadNextMapPve(saveLife, newMapId, newSubId)) {
                 room.gameStatus.setType(GameStatusType.WIN);
                 room.userService.saveRankForMultiplePlayers(room.creator, room.gameStatus);
+                saveGameTimes();
             } else {
                 room.gameStatus.setType(GameStatusType.END);
             }
@@ -136,10 +137,23 @@ class RoomTypeManager {
             room.gameStatus.setRank(room.userService.getRank(room.scoreBo.getTotalScore()));
             room.gameStatus.setType(GameStatusType.LOSE);
             room.userService.saveRankForMultiplePlayers(room.creator, room.gameStatus);
+            saveGameTimes();
         }
         room.sendMessageToRoom(room.gameStatus, MessageType.GAME_STATUS);
 
         return room.gameStatus.getType() == GameStatusType.END;
+    }
+
+    private void saveGameTimes() {
+        for (Map.Entry<String, UserBo> kv : room.userMap.entrySet()) {
+            UserBo user = kv.getValue();
+            UserRecord record = user.getUserRecord();
+            if (record == null) {
+                continue;
+            }
+            record.setNetGameTimes(record.getNetGameTimes() + 1);
+            record.update();
+        }
     }
 
     private void saveStar() {

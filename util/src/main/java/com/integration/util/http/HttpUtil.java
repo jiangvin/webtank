@@ -12,6 +12,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -68,14 +69,7 @@ public class HttpUtil {
     public static <T> T postJsonRequest(String url, Class<T> type, Object object) {
         try {
             HttpEntity<String> request = new HttpEntity<>(httpUtils.objectMapper.writeValueAsString(object), httpUtils.jsonHeaders);
-            log.info("Send post request:{} to url:{}", request.toString(), url);
-            ResponseEntity<String> responseStr = httpUtils.restTemplate.postForEntity(url, request, String.class);
-            log.info("Receive response:{}, try to convert to {}", responseStr.getBody(), type.getName());
-            if (type == String.class) {
-                return type.cast(responseStr.getBody());
-            } else {
-                return httpUtils.objectMapper.readValue(responseStr.getBody(), type);
-            }
+            return sendPost(url, type, request);
         } catch (HttpClientErrorException e) {
             throw new CustomException(e.getStatusCode().toString());
         } catch (Exception e) {
@@ -84,18 +78,26 @@ public class HttpUtil {
         }
     }
 
-    <T> T postFormRequest(String url, Class<T> type, Map<String, String> params) {
+    public static <T> T postFormRequest(String url, Class<T> type, Map<String, String> params) {
         try {
             HttpEntity<MultiValueMap<String, String>> request = generateRequest(params);
-            log.info("Send post request:{} to url:{}", request.toString(), url);
-            ResponseEntity<String> responseStr = restTemplate.postForEntity(url, request, String.class);
-            log.info("Receive response:{}, try to convert to {}", responseStr.getBody(), type.getName());
-            return objectMapper.readValue(responseStr.getBody(), type);
+            return sendPost(url, type, request);
         } catch (HttpClientErrorException e) {
             throw new CustomException(e.getStatusCode().toString());
         } catch (Exception e) {
             log.error("Catch http error:", e);
             throw new CustomException(e.getMessage());
+        }
+    }
+
+    private static <T> T sendPost(String url, Class<T> type, HttpEntity request) throws IOException {
+        log.info("Send post request:{} to url:{}", request.toString(), url);
+        ResponseEntity<String> responseStr = httpUtils.restTemplate.postForEntity(url, request, String.class);
+        log.info("Receive response:{}, try to convert to {}", responseStr.getBody(), type.getName());
+        if (type == String.class) {
+            return type.cast(responseStr.getBody());
+        } else {
+            return httpUtils.objectMapper.readValue(responseStr.getBody(), type);
         }
     }
 
@@ -111,10 +113,10 @@ public class HttpUtil {
         return url;
     }
 
-    private HttpEntity<MultiValueMap<String, String>> generateRequest(Map<String, String> params) {
+    private static HttpEntity<MultiValueMap<String, String>> generateRequest(Map<String, String> params) {
         MultiValueMap<String, String> pushMap = new LinkedMultiValueMap<>(16);
         params.forEach(pushMap::add);
-        return new HttpEntity<>(pushMap, formHeaders);
+        return new HttpEntity<>(pushMap, httpUtils.formHeaders);
     }
 
     private static String getUrlMatching(String url) {

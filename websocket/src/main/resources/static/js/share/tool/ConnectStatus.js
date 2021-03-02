@@ -126,7 +126,7 @@ export default class ConnectStatus {
         this.engine.room.createItem({
             draw: function (ctx) {
                 ctx.displayAlphaMask();
-                ctx.font = (100 * Resource.getScale()) + 'px gameFont';
+                ctx.font = (100 * Resource.getScale()) + 'px ZhenyanGB';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#FFF';

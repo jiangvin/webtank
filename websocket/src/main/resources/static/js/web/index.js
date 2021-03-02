@@ -7,23 +7,26 @@
 import Resource from "../share/tool/resource.js";
 import Control from "../share/tool/control.js";
 import Root from "../share/root.js";
-import Loading from "./loading.js";
-import AppHome from "../app/apphome.js";
-import Home from "./home.js";
 import Common from "../share/tool/common.js";
 import AdapterManager from "../share/tool/adapter/AdapterManager.js";
-import "../share/tool/context.js"
 import Sound from "../share/tool/sound.js";
 
 export default class Index {
     constructor() {
+        //加载字体
+        const myFont = new FontFace('ZhenyanGB', 'url(font/RuiZiZhenYanTiMianFeiShangYong-2.ttf)');
+        myFont.load().then(font => {
+            document.fonts.add(font)
+        });
+
         this.generateCanvas();
 
-        this.root = new Root();
+        this.root = new Root(this.ctx);
         Resource.setRoot(this.root);
+
+        this.initGlobalConfig();
         this.initGame();
         this.initEvent();
-        this.initGlobalConfig();
     }
 
     initGlobalConfig() {
@@ -48,46 +51,9 @@ export default class Index {
 
     initGame() {
         AdapterManager.checkPlatform();
-        switch (AdapterManager.getPlatform()) {
-            case "android":
-                Control.setControlMode(true);
-                Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
-                    if (data) {
-                        //旧用户
-                        Resource.setUser(data);
-                        Resource.getRoot().addStage(new Loading());
-                        Resource.getRoot().addGameStage();
-                    } else {
-                        //新用户
-                        Resource.getRoot().addStage(new Loading());
-                        Resource.getRoot().addStage(new AppHome());
-                        Resource.getRoot().addGameStage();
-                    }
-                    this.start();
-                });
-                break;
-            case "ios":
-                Control.setControlMode(true);
-                Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
-                    if (data) {
-                        //旧用户
-                        Resource.setUser(data);
-                        Resource.getRoot().addGameStage();
-                    } else {
-                        //新用户
-                        Resource.getRoot().addStage(new AppHome());
-                        Resource.getRoot().addGameStage();
-                    }
-                    this.start();
-                });
-                break;
-            default:
-                Resource.getRoot().addStage(new Home());
-                Resource.getRoot().addStage(new Loading());
-                Resource.getRoot().addGameStage();
-                this.start();
-                break;
-        }
+        Common.initGame(() => {
+            this.start();
+        });
     }
 
     initTouchDebug() {
@@ -139,16 +105,13 @@ export default class Index {
     }
 
     start() {
-        const index = this;
         const root = this.root;
         root.currentStage().init();
 
         //运算&绘制
         const draw = function () {
             root.update();
-
-            index.ctx.clearRect(0, 0, Resource.width(), Resource.height());
-            root.draw(index.ctx);
+            root.draw();
             root.drawHandler = requestAnimationFrame(draw);
         };
         root.drawHandler = requestAnimationFrame(draw);

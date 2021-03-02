@@ -1,5 +1,7 @@
 import Resource from "../resource.js";
 import Common from "../common.js";
+import Home from "../../../web/home.js";
+import Loading from "../../../web/loading.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -20,6 +22,13 @@ export default class Adapter {
                 }
             }
         }
+    }
+
+    initGame(callback) {
+        Resource.getRoot().addStage(new Home());
+        Resource.getRoot().addStage(new Loading());
+        Resource.getRoot().addGameStage();
+        callback();
     }
 
     lockTouchMove() {

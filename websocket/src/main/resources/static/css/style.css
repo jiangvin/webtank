@@ -86,7 +86,7 @@ input.setting-name {
     background: none;
     border: none;
     color: #7a5a31;
-    font-family: 'gameFont';
+    font-family: 'ZhenyanGB';
 }
 
 input.input-room-name::placeholder {
