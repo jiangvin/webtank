@@ -7,9 +7,6 @@
 import Resource from "../share/tool/resource.js";
 import Control from "../share/tool/control.js";
 import Root from "../share/root.js";
-import Loading from "./loading.js";
-import AppHome from "../app/apphome.js";
-import Home from "./home.js";
 import Common from "../share/tool/common.js";
 import AdapterManager from "../share/tool/adapter/AdapterManager.js";
 import Sound from "../share/tool/sound.js";
@@ -26,9 +23,10 @@ export default class Index {
 
         this.root = new Root(this.ctx);
         Resource.setRoot(this.root);
+
+        this.initGlobalConfig();
         this.initGame();
         this.initEvent();
-        this.initGlobalConfig();
     }
 
     initGlobalConfig() {
@@ -53,46 +51,9 @@ export default class Index {
 
     initGame() {
         AdapterManager.checkPlatform();
-        switch (AdapterManager.getPlatform()) {
-            case "android":
-                Control.setControlMode(true);
-                Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
-                    if (data) {
-                        //旧用户
-                        Resource.setUser(data);
-                        Resource.getRoot().addStage(new Loading());
-                        Resource.getRoot().addGameStage();
-                    } else {
-                        //新用户
-                        Resource.getRoot().addStage(new Loading());
-                        Resource.getRoot().addStage(new AppHome());
-                        Resource.getRoot().addGameStage();
-                    }
-                    this.start();
-                });
-                break;
-            case "ios":
-                Control.setControlMode(true);
-                Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
-                    if (data) {
-                        //旧用户
-                        Resource.setUser(data);
-                        Resource.getRoot().addGameStage();
-                    } else {
-                        //新用户
-                        Resource.getRoot().addStage(new AppHome());
-                        Resource.getRoot().addGameStage();
-                    }
-                    this.start();
-                });
-                break;
-            default:
-                Resource.getRoot().addStage(new Home());
-                Resource.getRoot().addStage(new Loading());
-                Resource.getRoot().addGameStage();
-                this.start();
-                break;
-        }
+        Common.initGame(() => {
+            this.start();
+        });
     }
 
     initTouchDebug() {

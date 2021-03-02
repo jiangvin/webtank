@@ -6,6 +6,9 @@
 import Adapter from "./Adapter.js";
 import Resource from "../resource.js";
 import Sound from "../sound.js";
+import Control from "../control.js";
+import Common from "../common.js";
+import AppHome from "../../../app/apphome.js";
 
 export default class AdapterIos extends Adapter {
     constructor(mock) {
@@ -28,6 +31,22 @@ export default class AdapterIos extends Adapter {
 
         this.initSound();
         this.initInputEvent();
+    }
+
+    initGame(callback) {
+        Control.setControlMode(true);
+        Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
+            if (data) {
+                //旧用户
+                Resource.setUser(data);
+                Resource.getRoot().addGameStage();
+            } else {
+                //新用户
+                Resource.getRoot().addStage(new AppHome());
+                Resource.getRoot().addGameStage();
+            }
+            callback();
+        });
     }
 
     /**
@@ -54,6 +73,11 @@ export default class AdapterIos extends Adapter {
                 this.soundEvent(sound, "stop");
             };
         });
+
+        //因为IOS的页面为预加载，所以音乐的播放时机由APP决定
+        if (Sound.instance.musicEnable) {
+            Sound.instance.currentLoopId = "menu";
+        }
     }
 
     setVolume(volume) {

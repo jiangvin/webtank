@@ -69,6 +69,10 @@ export default class Common {
         Resource.instance.adapter.saveConf();
     }
 
+    static initGame(callback) {
+        Resource.instance.adapter.initGame(callback);
+    }
+
     static lockTouchMove() {
         Resource.instance.adapter.lockTouchMove();
     }

@@ -37,7 +37,7 @@ export default class AdapterManager {
 
         Resource.getUser().deviceId = deviceId;
         Resource.getUser().deviceName = deviceName;
-        if (platform) {
+        if (platform && platform === "ios") {
             //ios
             AdapterManager.setPlatform(3);
         } else {
