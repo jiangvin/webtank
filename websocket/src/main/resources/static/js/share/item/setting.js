@@ -66,14 +66,6 @@ export default class Setting {
     }
 
     initImage() {
-        const input = $("<input/>");
-        input.attr("type", "text");
-        input.attr("placeholder", "请输入称号");
-        input.val(Resource.getUser().userId);
-        input.addClass("setting-name");
-        $("#main").append(input);
-        this.input = input;
-
         this.stage.createItem({
             id: "setting",
             draw: ctx => {
@@ -98,7 +90,9 @@ export default class Setting {
                     160, null,
                     3);
             }
-        })
+        });
+
+        this.input = Resource.instance.adapter.inputSettingName(this.stage);
     }
 
     initControl() {
@@ -263,10 +257,13 @@ export default class Setting {
     }
 
     confirm() {
-        const username = this.input.val();
-        if (username === "") {
-            Common.addMessage("名字不能为空!", "#F00");
-            return;
+        let username = Resource.getUser().userId;
+        if (this.input) {
+            username = this.input.val();
+            if (username === "") {
+                Common.addMessage("名字不能为空!", "#F00");
+                return;
+            }
         }
         const user = Resource.getUser();
         user.userId = username;
@@ -297,7 +294,7 @@ export default class Setting {
     }
 
     destroy() {
-        $("#main").empty();
+        Resource.instance.adapter.inputDestroy(this.stage);
         Control.removeEvent("change_volume");
         Control.removeEvent("change_volume_up");
         this.stage.removeItemFromId("setting");

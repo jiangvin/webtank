@@ -16,6 +16,9 @@ export default class AdapterWx extends Adapter {
 
         Resource.setHost("https://xiwen100.com/tank");
         Resource.setResourceHost("https://xiwen100.com/tank/");
+
+        //模拟输入框
+        this.inputIds = [];
     }
 
     initGame(callback) {
@@ -56,9 +59,6 @@ export default class AdapterWx extends Adapter {
                 sound.instance.pause();
                 sound.instance.currentTime = 0;
             };
-            sound.setVolume = function (volume) {
-                sound.instance.volume = volume;
-            };
 
             if (sound.instance.readyState === 4) {
                 event();
@@ -68,6 +68,31 @@ export default class AdapterWx extends Adapter {
                 }, false);
                 sound.instance.load();
             }
-        })
+        });
+
+        Sound.instance.setVolumeEngine = function (volume) {
+            Sound.instance.sounds.forEach(function (sound) {
+                sound.instance.volume = volume;
+            });
+        };
+    }
+
+    inputSettingName(stage) {
+        const item = stage.createItem({
+            draw: function (ctx) {
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#7a5a31';
+                ctx.displayGameText(Resource.getUser().userId, 594, 586, 30);
+            }
+        });
+        this.inputIds[this.inputIds.length] = item.id;
+    }
+
+    inputDestroy(stage) {
+        this.inputIds.forEach(id => {
+            stage.removeItemFromId(id);
+        });
+        this.inputIds = [];
     }
 }

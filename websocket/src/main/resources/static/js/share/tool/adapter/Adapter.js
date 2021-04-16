@@ -159,4 +159,18 @@ export default class Adapter {
     saveConf() {
         console.log("mock save configuration");
     }
+
+    inputSettingName() {
+        const input = $("<input/>");
+        input.attr("type", "text");
+        input.attr("placeholder", "请输入称号");
+        input.val(Resource.getUser().userId);
+        input.addClass("setting-name");
+        $("#main").append(input);
+        return input;
+    }
+
+    inputDestroy() {
+        $("#main").empty();
+    }
 }
