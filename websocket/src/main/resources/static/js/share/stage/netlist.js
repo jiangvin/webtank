@@ -3,6 +3,7 @@ import Common from "../tool/common.js";
 import ControlUnit from "../item/controlunit.js";
 import RoomInfo from "../item/roominfo.js";
 import TeamSelector from "../item/teamselector.js";
+import Resource from "../tool/resource.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -77,20 +78,14 @@ export default class NetList extends Stage {
     }
 
     init() {
-        const input = $("<input/>");
-        input.attr("type", "text");
-        input.attr("placeholder", "输入房间号或ID");
-        input.addClass("input-room-name");
-        $("#main").append(input);
-        this.input = input;
-        this.search = null;
+        Resource.instance.adapter.inputRoomId();
 
         this.clear();
         this.loadRoomList();
     }
 
     destroy() {
-        $("#main").empty();
+        Resource.instance.adapter.inputDestroy();
     }
 
     update() {

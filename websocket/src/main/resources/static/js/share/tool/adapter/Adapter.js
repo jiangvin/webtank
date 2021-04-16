@@ -170,6 +170,16 @@ export default class Adapter {
         return input;
     }
 
+    inputRoomId() {
+        const input = $("<input/>");
+        input.attr("type", "text");
+        input.attr("placeholder", "输入房间号或ID");
+        input.addClass("input-room-name");
+        $("#main").append(input);
+        this.input = input;
+        this.search = null;
+    }
+
     inputDestroy() {
         $("#main").empty();
     }

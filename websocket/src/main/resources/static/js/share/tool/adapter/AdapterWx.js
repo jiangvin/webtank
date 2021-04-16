@@ -89,6 +89,10 @@ export default class AdapterWx extends Adapter {
         this.inputIds[this.inputIds.length] = item.id;
     }
 
+    inputRoomId() {
+
+    }
+
     inputDestroy(stage) {
         this.inputIds.forEach(id => {
             stage.removeItemFromId(id);
