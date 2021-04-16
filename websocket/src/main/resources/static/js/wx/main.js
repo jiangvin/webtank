@@ -40,13 +40,25 @@ export default class Main {
             canvas.width,
             canvas.height
         );
-        canvas.width = info.displayW;
-        canvas.height = info.displayH;
+        canvas.width = info.displayH;
+        canvas.height = info.displayW;
 
+        //胶囊问题，竖屏旋转绘制
+        Resource.width = function() {
+            return canvas.height;
+        };
+        Resource.height = function() {
+            return canvas.width;
+        };
         AdapterManager.setPlatform(1);
         Control.setControlMode(true);
+        Control.setPortrait(true);
+        Control.generateTouchModeInfo();
+        const ctx = canvas.getContext('2d');
+        ctx.translate(info.displayH, 0);
+        ctx.rotate(Math.PI / 2);
 
-        this.root = new Root(canvas.getContext('2d'));
+        this.root = new Root(ctx);
         Resource.setRoot(this.root);
 
         //因为小程序是读取本地文件和使用微信账户，所以不需要资源加载页面和登录页面

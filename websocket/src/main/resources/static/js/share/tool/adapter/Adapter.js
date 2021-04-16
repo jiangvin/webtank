@@ -11,7 +11,6 @@ import Loading from "../../../web/loading.js";
 
 export default class Adapter {
     constructor() {
-
         //在手机上禁用滑动
         this.lockTouchMoveEvent = function (e) {
             // 判断默认行为是否可以被禁用
