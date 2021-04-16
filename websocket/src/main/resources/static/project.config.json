@@ -25,6 +25,18 @@
 	"libVersion": "1.9.94",
 	"appid": "wx6ac3f5090a6b99c5",
 	"projectname": "tankworld",
+	"packOptions":{
+		"ignore": [
+			{
+				"type": "folder",
+				"value": "image"
+			},
+			{
+				"type": "folder",
+				"value": "audio"
+			}
+		]
+	},
 	"isGameTourist": true,
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},

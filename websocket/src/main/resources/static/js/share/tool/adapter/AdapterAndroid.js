@@ -3,7 +3,7 @@ import Sound from "../sound.js";
 import Control from "../control.js";
 import Common from "../common.js";
 import Resource from "../resource.js";
-import Loading from "../../../web/loading.js";
+import Loading from "../../stage/loading.js";
 import AppHome from "../../../app/apphome.js";
 
 /**
@@ -19,6 +19,7 @@ export default class AdapterAndroid extends Adapter {
     }
 
     initGame(callback) {
+        this.initResource();
         Control.setControlMode(true);
         Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
             if (data) {

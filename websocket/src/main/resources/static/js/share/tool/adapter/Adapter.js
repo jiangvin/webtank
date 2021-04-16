@@ -1,7 +1,8 @@
 import Resource from "../resource.js";
 import Common from "../common.js";
 import Home from "../../../web/home.js";
-import Loading from "../../../web/loading.js";
+import Loading from "../../stage/loading.js";
+import Sound from "../sound.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -24,10 +25,69 @@ export default class Adapter {
     }
 
     initGame(callback) {
+        this.initResource();
         Resource.getRoot().addStage(new Home());
         Resource.getRoot().addStage(new Loading());
         Resource.getRoot().addGameStage();
         callback();
+    }
+
+    initResource() {
+        //load image
+        Resource.instance.initImage();
+
+        //load sound
+        this.initSound();
+    }
+
+    initSound() {
+        Sound.instance.loadedCount = 0;
+        const event = function () {
+            ++Sound.instance.loadedCount;
+            if (Sound.instance.loadCallback) {
+                Sound.instance.loadCallback(Sound.instance.loadedCount);
+            }
+        };
+        createjs.Sound.alternateExtensions = ["mp3", "wav"];
+        createjs.Sound.on("fileload", event, this);
+        Sound.instance.sounds.forEach(function (sound) {
+            createjs.Sound.registerSound(sound.src, sound.id);
+            sound.play = function () {
+                if (sound.loop) {
+                    createjs.Sound.play(sound.id, {loop: -1});
+                } else {
+                    createjs.Sound.play(sound.id);
+                }
+            };
+            sound.stop = function () {
+                createjs.Sound.stop(sound.id);
+            };
+        });
+
+        //实现声音函数
+        createjs.Sound.volume = Sound.instance.volume;
+        Sound.instance.setVolumeEngine = function (volume) {
+            createjs.Sound.volume = volume;
+        };
+
+        //切换至后台时静音
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                //记录开始时间
+                this.startTime = new Date().getTime();
+                createjs.Sound.volume = 0;
+            } else {
+                createjs.Sound.volume = Sound.instance.volume;
+
+                //检测时间，如果超过5分钟则重启
+                //TODO - PC web有效，在安卓中会失效，暂无解决方案
+                const currentTime = new Date().getTime();
+                if (currentTime - this.startTime >= 5 * 60 * 1000) {
+                    document.location.reload();
+                }
+            }
+        };
+        document.addEventListener("visibilitychange", handleVisibilityChange);
     }
 
     lockTouchMove() {
@@ -94,7 +154,7 @@ export default class Adapter {
     }
 
     /**
-     * 网页模式不能存文件
+     * 网页模式不存缓存文件
      */
     saveConf() {
         console.log("mock save configuration");

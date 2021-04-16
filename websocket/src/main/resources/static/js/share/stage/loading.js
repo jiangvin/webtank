@@ -3,9 +3,9 @@
  * @description 资源加载的缓冲页面
  * @date 2020/7/3
  */
-import Stage from "../share/stage/stage.js";
-import Resource from "../share/tool/resource.js";
-import Sound from "../share/tool/sound.js";
+import Stage from "./stage.js";
+import Resource from "../tool/resource.js";
+import Sound from "../tool/sound.js";
 
 export default class Loading extends Stage {
     constructor() {
@@ -78,8 +78,15 @@ export default class Loading extends Stage {
         const total = Resource.instance.images.size + Sound.instance.sounds.size;
         let loaded = 0;
 
-        const event = () => {
-            ++loaded;
+        const event = (count) => {
+            //防呆处理
+            if (loaded >= total) {
+                return;
+            }
+            if (count === undefined) {
+                count = 1;
+            }
+            loaded += count;
             this.percent = Math.floor(loaded * 100 / total);
             if (this.percent >= 100 && this.isInit) {
                 Resource.getRoot().nextStage();
@@ -97,47 +104,11 @@ export default class Loading extends Stage {
             }
         });
 
-        //加载音频
-        createjs.Sound.alternateExtensions = ["mp3", "wav"];
-        createjs.Sound.on("fileload", event, this);
-        Sound.instance.sounds.forEach(function (sound) {
-            createjs.Sound.registerSound(sound.src, sound.id);
-            sound.play = function () {
-                if (sound.loop) {
-                    createjs.Sound.play(sound.id, {loop: -1});
-                } else {
-                    createjs.Sound.play(sound.id);
-                }
-            };
-            sound.stop = function () {
-                createjs.Sound.stop(sound.id);
-            };
-        });
-
-        //实现声音函数
-        createjs.Sound.volume = Sound.instance.volume;
-        Sound.instance.setVolumeEngine = function (volume) {
-            createjs.Sound.volume = volume;
+        //加载声音
+        event(Sound.instance.loadedCount);
+        Sound.instance.loadCallback = function (soundCount) {
+            event();
         };
-
-        //切换至后台时静音
-        const handleVisibilityChange = () => {
-            if (document.hidden) {
-                //记录开始时间
-                this.startTime = new Date().getTime();
-                createjs.Sound.volume = 0;
-            } else {
-                createjs.Sound.volume = Sound.instance.volume;
-
-                //检测时间，如果超过5分钟则重启
-                //TODO - 在安卓中会失效，暂无解决方案
-                const currentTime = new Date().getTime();
-                if (currentTime - this.startTime >= 5 * 60 * 1000) {
-                    document.location.reload();
-                }
-            }
-        };
-        document.addEventListener("visibilitychange", handleVisibilityChange);
     }
 
     init() {

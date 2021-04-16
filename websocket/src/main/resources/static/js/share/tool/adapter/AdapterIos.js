@@ -29,11 +29,11 @@ export default class AdapterIos extends Adapter {
             Resource.setHost("https://xiwen100.com/tank/");
         }
 
-        this.initSound();
         this.initInputEvent();
     }
 
     initGame(callback) {
+        this.initResource();
         Control.setControlMode(true);
         Common.getRequest("/user/getUser?userId=" + Resource.getUser().deviceId, data => {
             if (data) {
