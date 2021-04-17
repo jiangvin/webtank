@@ -46,6 +46,9 @@ export default class Login extends Stage {
                 height: buttonW
             }
         });
+        this.button = button;
+
+        button.hide();
         button.onTap((userRes) => {
             button.destroy();
             wx.login({
@@ -66,5 +69,9 @@ export default class Login extends Stage {
                 }
             });
         });
+    }
+
+    init() {
+        this.button.show();
     }
 }

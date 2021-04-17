@@ -26,9 +26,9 @@ export default class AdapterWx extends Adapter {
         this.initResource();
         Control.setControlMode(true);
         Control.setPortrait(true);
+        Resource.getRoot().addStage(new Loading());
         //因为小程序需要额外页面来做微信登录
         Resource.getRoot().addStage(new Login());
-        Resource.getRoot().addStage(new Loading());
         Resource.getRoot().addGameStage();
         callback();
     }
