@@ -35,7 +35,7 @@ export default class Connect {
         if (Resource.getUser().deviceId) {
             queryString += "&id=" + Resource.getUser().deviceId;
         }
-        Connect.instance.socketClient = new WebSocket(Connect.generateSocketHost() + '/ws' + queryString);
+        Connect.instance.socketClient = new WebSocket(encodeURI(Connect.generateSocketHost() + '/ws' + queryString));
 
         Connect.instance.socketClient.onopen = function () {
             if (Resource.isDebug()) {
