@@ -50,6 +50,8 @@ public class WxUserService {
             UserDto userDto = UserDto.convert(userRecord);
             //查询星数
             userDto.setStar(userDao.queryStarCount(userId));
+            //微信要额外加上userId
+            userDto.setUserId(userId);
             return userDto;
         }
 

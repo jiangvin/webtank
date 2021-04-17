@@ -1,8 +1,6 @@
 import Stage from "../share/stage/stage.js";
 import Resource from "../share/tool/resource.js";
 import Common from "../share/tool/common.js";
-import Loading from "../share/stage/loading.js";
-import AppHome from "../app/apphome.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -42,13 +40,14 @@ export default class Login extends Stage {
             type: 'image',
             image: 'https://xiwen100.com/static/wx_start.png',
             style: {
-                left: h * 0.3,
+                left: h * 0.32,
                 top: (w - buttonW) / 2,
                 width: buttonH,
                 height: buttonW
             }
         });
         button.onTap((userRes) => {
+            button.destroy();
             wx.login({
                 success: function (res) {
                     const wxUser = {
@@ -61,7 +60,6 @@ export default class Login extends Stage {
                         if (data) {
                             Resource.getUser().deviceId = data.userId;
                             Resource.setUser(data);
-                            button.destroy();
                             Common.nextStage();
                         }
                     });
