@@ -11,22 +11,7 @@ export default class Main {
     constructor() {
         //加载字体
         wx.loadFont("font/RuiZiZhenYanTiMianFeiShangYong-2.ttf");
-
-        const thisMain = this;
-        //获取微信用户信息
-        wx.login({
-            success: function (res) {
-                console.log(res);
-                wx.getUserInfo({
-                    success: function (res) {
-                        console.log(res);
-                        Resource.setUserId(res.userInfo.nickName);
-                        thisMain.aniId = 0;
-                        thisMain.restart();
-                    }
-                })
-            }
-        });
+        this.restart();
     }
 
     restart() {

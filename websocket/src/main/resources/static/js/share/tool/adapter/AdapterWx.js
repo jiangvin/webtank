@@ -9,6 +9,7 @@ import Resource from "../resource.js";
 import Control from "../control.js";
 import Sound from "../sound.js";
 import Loading from "../../stage/loading.js";
+import Login from "../../../wx/login.js";
 
 export default class AdapterWx extends Adapter {
     constructor() {
@@ -25,7 +26,8 @@ export default class AdapterWx extends Adapter {
         this.initResource();
         Control.setControlMode(true);
         Control.setPortrait(true);
-        //因为小程序是使用微信账户，所以不需要登录页面
+        //因为小程序需要额外页面来做微信登录
+        Resource.getRoot().addStage(new Login());
         Resource.getRoot().addStage(new Loading());
         Resource.getRoot().addGameStage();
         callback();

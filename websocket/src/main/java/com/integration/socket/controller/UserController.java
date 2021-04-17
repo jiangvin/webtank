@@ -3,9 +3,11 @@ package com.integration.socket.controller;
 import com.integration.socket.model.dto.RankDto;
 import com.integration.socket.model.dto.StarDto;
 import com.integration.socket.model.dto.UserDto;
+import com.integration.socket.model.dto.WxUserDto;
 import com.integration.socket.service.OnlineUserService;
 import com.integration.socket.service.TokenService;
 import com.integration.socket.service.UserService;
+import com.integration.socket.service.WxUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +37,9 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private WxUserService wxUserService;
+
+    @Autowired
     private TokenService tokenService;
 
     @GetMapping("/getUsers")
@@ -50,6 +55,11 @@ public class UserController {
     @GetMapping("/getStarInfo")
     public List<StarDto> getStarInfo(@RequestParam("userId") String userId) {
         return userService.getStarInfo(userId);
+    }
+
+    @PostMapping("/wxLogin")
+    public UserDto wxLogin(@RequestBody WxUserDto wxUserDto) {
+        return wxUserService.wxLogin(wxUserDto);
     }
 
     @PostMapping("/updateUser")
