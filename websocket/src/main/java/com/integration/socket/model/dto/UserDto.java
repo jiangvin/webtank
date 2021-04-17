@@ -20,7 +20,7 @@ public class UserDto {
     private String username;
     private String userDevice;
     private int coin;
-    private int stage;
+    private int stage = 1;
     private int star;
     private int hardStage;
     private String tankType;
