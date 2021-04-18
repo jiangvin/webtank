@@ -71,7 +71,7 @@ export default class Loading extends Stage {
                 ctx.textBaseline = 'bottom';
                 ctx.displayText("抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。" +
                     "适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。",
-                    Resource.formatWidth() / 2, Resource.formatHeight() -70, 30);
+                    Resource.formatWidth() / 2, Resource.formatHeight() - 70, 30);
 
                 //logo
                 ctx.displayCenterRate("logo", .5, .45, .55);
@@ -135,11 +135,15 @@ export default class Loading extends Stage {
                 //进度条已更新
                 lastPercent = this.percent;
                 setTimeout(checkPercent, 5000);
-            } else {
+            } else if (this.isInit) {
                 //进度条未更新,直接进入
                 Resource.getRoot().nextStage();
             }
         };
         setTimeout(checkPercent, 5000);
+    }
+
+    destroy() {
+        this.isInit = false;
     }
 }

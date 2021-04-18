@@ -1,5 +1,4 @@
 import MapItem from "./mapitem.js";
-import Height from "./height.js";
 
 /**
  * @author 蒋文龙(Vin)
