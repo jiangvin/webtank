@@ -1,6 +1,7 @@
 import Stage from "../share/stage/stage.js";
 import Resource from "../share/tool/resource.js";
 import Common from "../share/tool/common.js";
+import Loading from "../share/stage/loading.js";
 
 /**
  * @author 蒋文龙(Vin)
@@ -12,24 +13,9 @@ export default class Login extends Stage {
     constructor() {
         super();
 
-        //background
-        this.createItem({
-            draw: function (ctx) {
-                ctx.fillStyle = '#01A7EC';
-                ctx.fillRect(0, 0, Resource.width(), Resource.height());
-            }
-        });
+        Loading.createBaseBackground(this);
 
-        //logo
-        this.createItem({
-            draw: function (ctx) {
-                ctx.displayCenterRate("logo",
-                    .5,
-                    .45,
-                    .55);
-            }
-        });
-
+        //button
         const w = Resource.instance.windowInfo.realW;
         const h = Resource.instance.windowInfo.realH;
 

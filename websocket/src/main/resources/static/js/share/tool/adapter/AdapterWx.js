@@ -42,7 +42,7 @@ export default class AdapterWx extends Adapter {
             }
             ++Sound.instance.loadedCount;
             if (Sound.instance.loadCallback) {
-                Sound.instance.loadCallback(Sound.instance.loadedCount);
+                Sound.instance.loadCallback();
             }
         };
 

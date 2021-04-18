@@ -45,7 +45,7 @@ export default class Adapter {
         const event = function () {
             ++Sound.instance.loadedCount;
             if (Sound.instance.loadCallback) {
-                Sound.instance.loadCallback(Sound.instance.loadedCount);
+                Sound.instance.loadCallback();
             }
         };
         createjs.Sound.alternateExtensions = ["mp3", "wav"];

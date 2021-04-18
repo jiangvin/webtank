@@ -14,23 +14,7 @@ export default class Loading extends Stage {
         this.percent = 0;
         this.isInit = false;
 
-        //background
-        this.createItem({
-            draw: function (ctx) {
-                ctx.fillStyle = '#01A7EC';
-                ctx.fillRect(0, 0, Resource.width(), Resource.height());
-            }
-        });
-
-        //logo
-        this.createItem({
-            draw: function (ctx) {
-                ctx.displayCenterRate("logo",
-                    .5,
-                    .45,
-                    .55);
-            }
-        });
+        Loading.createBaseBackground(this);
 
         //progress bar
         this.createItem({
@@ -74,6 +58,27 @@ export default class Loading extends Stage {
         this.initEvent();
     }
 
+    static createBaseBackground(stage) {
+        stage.createItem({
+            draw: function (ctx) {
+                //background
+                ctx.fillStyle = '#01A7EC';
+                ctx.fillRect(0, 0, Resource.width(), Resource.height());
+
+                //tips
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.displayText("抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。" +
+                    "适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。",
+                    Resource.formatWidth() / 2, Resource.formatHeight() -70, 30);
+
+                //logo
+                ctx.displayCenterRate("logo", .5, .45, .55);
+            }
+        });
+    }
+
     initEvent() {
         const total = Resource.instance.images.size + Sound.instance.sounds.size;
         let loaded = 0;
@@ -106,7 +111,7 @@ export default class Loading extends Stage {
 
         //加载声音
         event(Sound.instance.loadedCount);
-        Sound.instance.loadCallback = function (soundCount) {
+        Sound.instance.loadCallback = function () {
             event();
         };
     }
