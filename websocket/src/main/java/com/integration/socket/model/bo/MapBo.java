@@ -119,8 +119,8 @@ public class MapBo {
         return mapDetailDto;
     }
 
-    public int getComputerLifeCount() {
-        return getCount(getComputerLife());
+    public int getPlayerLifeCount() {
+        return getCount(getPlayerLife());
     }
 
     private void copyLifeCountProperties(MapDto mapDto) {
