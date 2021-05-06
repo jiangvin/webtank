@@ -238,6 +238,13 @@ class EventManager {
         eventList.add(new BaseEvent(timeout) {
             @Override
             void process() {
+                //检测初始数量
+                int lifeCount = room.getMapBo().getPlayerLifeCount();
+                int userCount = room.userMap.size();
+                if (userCount > lifeCount) {
+                    room.getMapBo().addPlayerLife(userCount - lifeCount);
+                }
+
                 room.sendMessageToRoom(room.getMapBo().toDto(), MessageType.MAP);
                 room.gameStatus.setType(GameStatusType.NORMAL);
                 room.sendMessageToRoom(room.gameStatus, MessageType.GAME_STATUS);
@@ -343,7 +350,7 @@ class EventManager {
         MapBo map = room.getMapBo();
         String posStr;
         if (tankBo.getTeamType() == TeamType.RED) {
-            posStr = map.getPlayerStartPoints().get(random.nextInt(map.getPlayerStartPoints().size()));
+            posStr = map.getRandomPlayerStartPoint();
         } else {
             posStr = map.getComputerStartPoints().get(random.nextInt(map.getComputerStartPoints().size()));
         }

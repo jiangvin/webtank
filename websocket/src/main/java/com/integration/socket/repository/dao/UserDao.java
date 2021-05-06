@@ -6,6 +6,7 @@ import com.integration.socket.model.dto.UserDto;
 import com.integration.socket.repository.jooq.tables.records.RankBoardRecord;
 import com.integration.socket.repository.jooq.tables.records.StarRecord;
 import com.integration.socket.repository.jooq.tables.records.UserRecord;
+import com.integration.util.time.TimeUtil;
 import org.jooq.impl.DSL;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -47,6 +48,15 @@ public class UserDao extends BaseDao {
         userRecord.setUserDevice(userDto.getUserDevice());
         userRecord.setCreateTime(new Timestamp(System.currentTimeMillis()));
         userRecord.setLastLoginTime(userRecord.getCreateTime());
+
+        //新用户道具奖励
+        userRecord.setGhostExpired(TimeUtil.after(3));
+        userRecord.setRedStarExpired(TimeUtil.after(3));
+        userRecord.setClockExpired(TimeUtil.after(3));
+        userDto.setGhostExpired(TimeUtil.after(3));
+        userDto.setRedStarExpired(TimeUtil.after(3));
+        userDto.setClockExpired(TimeUtil.after(3));
+
         userRecord.insert();
     }
 

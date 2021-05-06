@@ -101,19 +101,21 @@ public class TankTypeDto {
         TankTypeDto com = comCopyType(
                               "tank05",
                               "tank01",
-                              null,
-                              60,
+                              1.0,
+                              120,
                               "tank06",
                               null);
+        com.setAmmoSpeed(4.0);
         tankTypeMap.put(com.getTypeId(), com);
 
         com = comCopyType(
                   "tank06",
                   "tank02",
-                  null,
-                  40,
+                  1.5,
+                  60,
                   "tank08",
                   null);
+        com.setAmmoSpeed(5.0);
         tankTypeMap.put(com.getTypeId(), com);
 
         com = comCopyType(

@@ -3,9 +3,9 @@
  * @description 资源加载的缓冲页面
  * @date 2020/7/3
  */
-import Stage from "../share/stage/stage.js";
-import Resource from "../share/tool/resource.js";
-import Sound from "../share/tool/sound.js";
+import Stage from "./stage.js";
+import Resource from "../tool/resource.js";
+import Sound from "../tool/sound.js";
 
 export default class Loading extends Stage {
     constructor() {
@@ -14,23 +14,7 @@ export default class Loading extends Stage {
         this.percent = 0;
         this.isInit = false;
 
-        //background
-        this.createItem({
-            draw: function (ctx) {
-                ctx.fillStyle = '#01A7EC';
-                ctx.fillRect(0, 0, Resource.width(), Resource.height());
-            }
-        });
-
-        //logo
-        this.createItem({
-            draw: function (ctx) {
-                ctx.displayCenterRate("logo",
-                    .5,
-                    .45,
-                    .55);
-            }
-        });
+        Loading.createBaseBackground(this);
 
         //progress bar
         this.createItem({
@@ -74,12 +58,40 @@ export default class Loading extends Stage {
         this.initEvent();
     }
 
+    static createBaseBackground(stage) {
+        stage.createItem({
+            draw: function (ctx) {
+                //background
+                ctx.fillStyle = '#01A7EC';
+                ctx.fillRect(0, 0, Resource.width(), Resource.height());
+
+                //tips
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.displayText("抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。" +
+                    "适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。",
+                    Resource.formatWidth() / 2, Resource.formatHeight() - 70, 30);
+
+                //logo
+                ctx.displayCenterRate("logo", .5, .45, .55);
+            }
+        });
+    }
+
     initEvent() {
         const total = Resource.instance.images.size + Sound.instance.sounds.size;
         let loaded = 0;
 
-        const event = () => {
-            ++loaded;
+        const event = (count) => {
+            //防呆处理
+            if (loaded >= total) {
+                return;
+            }
+            if (count === undefined) {
+                count = 1;
+            }
+            loaded += count;
             this.percent = Math.floor(loaded * 100 / total);
             if (this.percent >= 100 && this.isInit) {
                 Resource.getRoot().nextStage();
@@ -97,47 +109,11 @@ export default class Loading extends Stage {
             }
         });
 
-        //加载音频
-        createjs.Sound.alternateExtensions = ["mp3", "wav"];
-        createjs.Sound.on("fileload", event, this);
-        Sound.instance.sounds.forEach(function (sound) {
-            createjs.Sound.registerSound(sound.src, sound.id);
-            sound.play = function () {
-                if (sound.loop) {
-                    createjs.Sound.play(sound.id, {loop: -1});
-                } else {
-                    createjs.Sound.play(sound.id);
-                }
-            };
-            sound.stop = function () {
-                createjs.Sound.stop(sound.id);
-            };
-        });
-
-        //实现声音函数
-        createjs.Sound.volume = Sound.instance.volume;
-        Sound.instance.setVolumeEngine = function (volume) {
-            createjs.Sound.volume = volume;
+        //加载声音
+        event(Sound.instance.loadedCount);
+        Sound.instance.loadCallback = function () {
+            event();
         };
-
-        //切换至后台时静音
-        const handleVisibilityChange = () => {
-            if (document.hidden) {
-                //记录开始时间
-                this.startTime = new Date().getTime();
-                createjs.Sound.volume = 0;
-            } else {
-                createjs.Sound.volume = Sound.instance.volume;
-
-                //检测时间，如果超过5分钟则重启
-                //TODO - 在安卓中会失效，暂无解决方案
-                const currentTime = new Date().getTime();
-                if (currentTime - this.startTime >= 5 * 60 * 1000) {
-                    document.location.reload();
-                }
-            }
-        };
-        document.addEventListener("visibilitychange", handleVisibilityChange);
     }
 
     init() {
@@ -159,11 +135,15 @@ export default class Loading extends Stage {
                 //进度条已更新
                 lastPercent = this.percent;
                 setTimeout(checkPercent, 5000);
-            } else {
+            } else if (this.isInit) {
                 //进度条未更新,直接进入
                 Resource.getRoot().nextStage();
             }
         };
         setTimeout(checkPercent, 5000);
+    }
+
+    destroy() {
+        this.isInit = false;
     }
 }

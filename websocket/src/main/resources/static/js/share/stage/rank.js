@@ -50,7 +50,8 @@ export default class Rank extends Stage {
                     buttonSize.h);
 
                 // 镜像处理还原坐标变换
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(-1, 1);
+                ctx.translate(-Resource.width(), 0);
             },
             controlUnit: new ControlUnit({
                 leftTop: {

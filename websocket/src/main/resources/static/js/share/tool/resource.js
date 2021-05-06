@@ -14,11 +14,11 @@ export default class Resource {
         this.user = new User();
         this.itemId = 1;
         this.host = "";
+        this.resourceHost = "";
         this.debug = false;
         this.encrypt = new JSEncrypt();
         this.needOffset = true;
         this.encrypt.setPublicKey('MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCGLK2SvOA8W84X/w9IDld7MiO+eEFCCiCeK0czeB+yS2dsQ7FAfReeZrNznJCzJvMwr2RWir/0+xngvyZOcPCM3P1SSYZHUQXzrEGSXTcaqKGvRHEnbWnpsGacccidomfsvHYHHoeCqkprk/rWWoRiAR7HI6riwHQNb0FE/MwukwIDAQAB');
-        this.initImage();
     }
 
     initImage() {
@@ -225,7 +225,7 @@ export default class Resource {
         }
 
         const img = document.createElement('img');
-        img.src = 'image/' + path + '.' + type;
+        img.src = this.resourceHost + 'image/' + path + '.' + type;
         img.widthPics = widthPics;
         img.heightPics = heightPics;
         img.displayWidth = img.width / img.widthPics;
@@ -264,6 +264,10 @@ export default class Resource {
 
     static setHost(host) {
         Resource.instance.host = host;
+    }
+
+    static setResourceHost(resourceHost) {
+        Resource.instance.resourceHost = resourceHost;
     }
 
     static getHost() {
