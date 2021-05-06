@@ -350,7 +350,7 @@ class EventManager {
         MapBo map = room.getMapBo();
         String posStr;
         if (tankBo.getTeamType() == TeamType.RED) {
-            posStr = map.getPlayerStartPoints().get(random.nextInt(map.getPlayerStartPoints().size()));
+            posStr = map.getRandomPlayerStartPoint();
         } else {
             posStr = map.getComputerStartPoints().get(random.nextInt(map.getComputerStartPoints().size()));
         }

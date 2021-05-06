@@ -11,6 +11,7 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -46,6 +47,10 @@ public class MapBo {
     private List<String> playerStartPoints = new ArrayList<>();
 
     private List<String> computerStartPoints = new ArrayList<>();
+
+    private List<String> currentPlayerStartPoints = new ArrayList<>();
+
+    private Random random = new Random();
 
     public MapDto toDto() {
         MapDto mapDto = new MapDto();
@@ -194,5 +199,16 @@ public class MapBo {
             playerLife.add(new StringCountDto("tank01", 0));
         }
         playerLife.get(0).addValue(lifeCount);
+    }
+
+    public String getRandomPlayerStartPoint() {
+        if (currentPlayerStartPoints.isEmpty()) {
+            currentPlayerStartPoints = new ArrayList<>(playerStartPoints);
+        }
+
+        int index = random.nextInt(currentPlayerStartPoints.size());
+        String point = currentPlayerStartPoints.get(index);
+        currentPlayerStartPoints.remove(index);
+        return point;
     }
 }
