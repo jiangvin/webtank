@@ -1,6 +1,7 @@
 package com.integration.util.advice;
 
 import com.integration.util.model.ResultDto;
+import com.integration.util.object.ObjectUtil;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -39,6 +40,9 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
         }
         if (body instanceof ResultDto) {
             return body;
+        }
+        if (body instanceof String) {
+            return ObjectUtil.writeValue(new ResultDto(body));
         }
         return new ResultDto(body);
     }
