@@ -24,6 +24,9 @@ public class ObjectUtil {
 
     public static String writeValue(Object object) {
         try {
+            if (object instanceof String) {
+                return (String) object;
+            }
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             log.error("write class:{} to json error:{}", object.getClass().getName(), e.getMessage());
