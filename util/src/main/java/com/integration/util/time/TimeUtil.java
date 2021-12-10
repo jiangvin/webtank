@@ -16,6 +16,10 @@ public class TimeUtil {
         return after(1);
     }
 
+    public static Timestamp yesterday() {
+        return after(-1);
+    }
+
     public static Timestamp now() {
         return new Timestamp(System.currentTimeMillis());
     }

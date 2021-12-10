@@ -17,7 +17,7 @@ public class ResultDto {
     public ResultDto(Object data) {
         this.data = data;
         this.success = true;
-        this.message = "操作成功";
+        this.message = "";
     }
 
     public ResultDto(String errorMessage) {
