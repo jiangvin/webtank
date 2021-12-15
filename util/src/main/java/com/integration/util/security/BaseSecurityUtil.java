@@ -26,7 +26,7 @@ public abstract class BaseSecurityUtil {
      */
     Cipher decryptCipher = null;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     BaseSecurityUtil(String keyStr) {
         try {
@@ -79,6 +79,7 @@ public abstract class BaseSecurityUtil {
         try {
             return new String(decryptCipher.doFinal(Base64.decodeBase64(strIn)));
         } catch (Exception e) {
+            log.error("decrypt in: {}", strIn);
             log.error("decrypt error:", e);
         }
         return strIn;
