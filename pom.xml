@@ -71,18 +71,4 @@
         </dependencies>
     </dependencyManagement>
 
-    <!--for deploy-->
-    <distributionManagement>
-        <repository>
-            <id>nexus-releases</id>
-            <name>NexusReleases</name>
-            <url>http://39.108.122.28:8888/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>nexus-snapshots</id>
-            <name>NexusSnapshots</name>
-            <url>http://39.108.122.28:8888/nexus/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
 </project>
