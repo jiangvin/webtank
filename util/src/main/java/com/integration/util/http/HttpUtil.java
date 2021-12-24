@@ -24,12 +24,12 @@ import java.util.Map;
 @Slf4j
 public class HttpUtil {
     private static final String KEY_OF_PARAM = "?";
-    private static HttpUtil httpUtils = new HttpUtil();
+    private static final HttpUtil httpUtils = new HttpUtil();
 
-    private RestTemplate restTemplate = new RestTemplate();
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private HttpHeaders formHeaders;
-    private HttpHeaders jsonHeaders;
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HttpHeaders formHeaders;
+    private final HttpHeaders jsonHeaders;
 
     private HttpUtil() {
         formHeaders = new HttpHeaders();
