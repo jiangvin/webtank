@@ -23,6 +23,9 @@ public class ObjectUtil {
     }
 
     public static String writeValue(Object object) {
+        if (object == null) {
+            return null;
+        }
         try {
             if (object instanceof String) {
                 return (String) object;
