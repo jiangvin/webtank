@@ -1,9 +1,11 @@
 package com.integration.util.object;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Map;
@@ -20,6 +22,9 @@ public class ObjectUtil {
     static {
         //忽略未知字段
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        //不写空字段
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
     }
 
     public static String writeValue(Object object) {
@@ -38,6 +43,9 @@ public class ObjectUtil {
     }
 
     public static <T> T readValue(String json, Class<T> valueType) {
+        if (StringUtils.isEmpty(json)) {
+            return null;
+        }
         try {
             return objectMapper.readValue(json, valueType);
         } catch (IOException e) {
