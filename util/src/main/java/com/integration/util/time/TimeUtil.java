@@ -10,7 +10,7 @@ import java.util.Calendar;
  */
 public class TimeUtil {
     public static Timestamp after(int days) {
-        return new Timestamp(System.currentTimeMillis() + (24 * 60 * 60 * 1000) * days);
+        return new Timestamp(System.currentTimeMillis() + (24L * 60L * 60L * 1000L) * days);
     }
 
     public static Timestamp tomorrow() {
