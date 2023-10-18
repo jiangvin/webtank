@@ -78,6 +78,23 @@ public class HttpUtil {
         }
     }
 
+    public static <T> T postJsonRequestWithHeader(String url, Class<T> type, Object object, Map<String, String> headerParams) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            for (Map.Entry<String, String> kv : headerParams.entrySet()) {
+                headers.add(kv.getKey(), kv.getValue());
+            }
+            HttpEntity<String> request = new HttpEntity<>(httpUtils.objectMapper.writeValueAsString(object), headers);
+            return sendPost(url, type, request);
+        } catch (HttpClientErrorException e) {
+            throw new CustomException(e.getStatusCode().toString());
+        } catch (Exception e) {
+            log.error("Catch http error:", e);
+            throw new CustomException(e.getMessage());
+        }
+    }
+
     public static <T> T postFormRequest(String url, Class<T> type, Map<String, String> params) {
         try {
             HttpEntity<MultiValueMap<String, String>> request = generateRequest(params);
