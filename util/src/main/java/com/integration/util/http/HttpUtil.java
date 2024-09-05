@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
@@ -26,12 +27,18 @@ public class HttpUtil {
     private static final String KEY_OF_PARAM = "?";
     private static final HttpUtil httpUtils = new HttpUtil();
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpHeaders formHeaders;
     private final HttpHeaders jsonHeaders;
 
     private HttpUtil() {
+        //设置连接超时和读取超时时间
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(30000);
+        requestFactory.setReadTimeout(30000);
+        restTemplate = new RestTemplate(requestFactory);
+
         formHeaders = new HttpHeaders();
         formHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
