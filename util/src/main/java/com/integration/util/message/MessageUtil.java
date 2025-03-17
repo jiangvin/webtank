@@ -5,6 +5,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
+
 /**
  * @author 蒋文龙(Vin)
  * @description
@@ -29,6 +31,15 @@ public class MessageUtil {
     public static String get(String msgKey, Object... objects) {
         try {
             return ms.getMessage(msgKey, objects, LocaleContextHolder.getLocale());
+        } catch (Exception e) {
+            log.error("Translation error:", e);
+            return msgKey;
+        }
+    }
+
+    public static String get(Locale locale, String msgKey, Object... objects) {
+        try {
+            return ms.getMessage(msgKey, objects, locale);
         } catch (Exception e) {
             log.error("Translation error:", e);
             return msgKey;
