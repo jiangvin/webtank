@@ -1,5 +1,6 @@
 package com.integration.util.object;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,9 @@ public class ObjectUtil {
     static {
         //忽略未知字段
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        //启用允许尾随逗号的特性
+        objectMapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
     }
 
     public static String writeValue(Object object) {

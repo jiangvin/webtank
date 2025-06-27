@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>util</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <name>util</name>
     <description>Demo project for Spring Boot</description>
 
