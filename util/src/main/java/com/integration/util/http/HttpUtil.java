@@ -5,6 +5,7 @@ import com.integration.util.model.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -55,6 +56,34 @@ public class HttpUtil {
             url = generateUrlWithParams(url, params);
             log.info("Send get request to url:{}", url);
             ResponseEntity<String> responseStr = httpUtils.restTemplate.getForEntity(url, String.class);
+            String receiveStr = responseStr.getBody();
+            if (receiveStr != null && receiveStr.length() > 128) {
+                receiveStr = receiveStr.substring(0, 128).replace("\n", " ") + "...";
+            }
+            log.info("Receive response:{}, try to convert to {}", receiveStr, type.getName());
+            if (type == String.class) {
+                return type.cast(responseStr.getBody());
+            } else {
+                return httpUtils.objectMapper.readValue(responseStr.getBody(), type);
+            }
+        } catch (HttpClientErrorException e) {
+            throw new CustomException(e.getStatusCode().toString());
+        } catch (Exception e) {
+            log.error("Catch http error:", e);
+            throw new CustomException(e.getMessage());
+        }
+    }
+
+    public static <T> T getRequestWithHeader(String url, Class<T> type, Map<String, String> queryParams, Map<String, String> headerParams) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            for (Map.Entry<String, String> kv : headerParams.entrySet()) {
+                headers.add(kv.getKey(), kv.getValue());
+            }
+            url = generateUrlWithParams(url, queryParams);
+            log.info("Send get request to url:{}", url);
+            ResponseEntity<String> responseStr = httpUtils.restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
             String receiveStr = responseStr.getBody();
             if (receiveStr != null && receiveStr.length() > 128) {
                 receiveStr = receiveStr.substring(0, 128).replace("\n", " ") + "...";
