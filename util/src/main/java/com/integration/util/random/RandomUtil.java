@@ -14,4 +14,8 @@ public class RandomUtil {
         int offset = max - min + 1;
         return RANDOM.nextInt(offset) + min;
     }
+
+    public static int randomInt(int bound) {
+        return RANDOM.nextInt(bound);
+    }
 }
