@@ -1,7 +1,7 @@
 package com.integration.util.http;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.integration.util.model.CustomException;
+import com.integration.util.object.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -29,7 +29,6 @@ public class HttpUtil {
     private static final HttpUtil httpUtils = new HttpUtil();
 
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpHeaders formHeaders;
     private final HttpHeaders jsonHeaders;
 
@@ -64,7 +63,7 @@ public class HttpUtil {
             if (type == String.class) {
                 return type.cast(responseStr.getBody());
             } else {
-                return httpUtils.objectMapper.readValue(responseStr.getBody(), type);
+                return ObjectUtil.readValue(responseStr.getBody(), type);
             }
         } catch (HttpClientErrorException e) {
             throw new CustomException(e.getStatusCode().toString());
@@ -91,7 +90,7 @@ public class HttpUtil {
             if (type == String.class) {
                 return type.cast(responseStr.getBody());
             } else {
-                return httpUtils.objectMapper.readValue(responseStr.getBody(), type);
+                return ObjectUtil.readValue(responseStr.getBody(), type);
             }
         } catch (Exception e) {
             log.error("Catch http error:", e);
@@ -101,7 +100,7 @@ public class HttpUtil {
 
     public static <T> T postJsonRequest(String url, Class<T> type, Object object) {
         try {
-            HttpEntity<String> request = new HttpEntity<>(httpUtils.objectMapper.writeValueAsString(object), httpUtils.jsonHeaders);
+            HttpEntity<String> request = new HttpEntity<>(ObjectUtil.writeValue(object), httpUtils.jsonHeaders);
             return sendPost(url, type, request);
         } catch (HttpClientErrorException e) {
             throw new CustomException(e.getStatusCode().toString());
@@ -118,7 +117,7 @@ public class HttpUtil {
             for (Map.Entry<String, String> kv : headerParams.entrySet()) {
                 headers.add(kv.getKey(), kv.getValue());
             }
-            HttpEntity<String> request = new HttpEntity<>(httpUtils.objectMapper.writeValueAsString(object), headers);
+            HttpEntity<String> request = new HttpEntity<>(ObjectUtil.writeValue(object), headers);
             return sendPost(url, type, request);
         } catch (HttpClientErrorException e) {
             throw new CustomException(e.getStatusCode().toString());
@@ -134,7 +133,7 @@ public class HttpUtil {
             for (Map.Entry<String, String> kv : headerParams.entrySet()) {
                 headers.add(kv.getKey(), kv.getValue());
             }
-            HttpEntity<String> request = new HttpEntity<>(httpUtils.objectMapper.writeValueAsString(object), headers);
+            HttpEntity<String> request = new HttpEntity<>(ObjectUtil.writeValue(object), headers);
             return sendPost(url, type, request);
         } catch (HttpClientErrorException e) {
             throw new CustomException(e.getStatusCode().toString());
@@ -163,7 +162,7 @@ public class HttpUtil {
         if (type == String.class) {
             return type.cast(responseStr.getBody());
         } else {
-            return httpUtils.objectMapper.readValue(responseStr.getBody(), type);
+            return ObjectUtil.readValue(responseStr.getBody(), type);
         }
     }
 
